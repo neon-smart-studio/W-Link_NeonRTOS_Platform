@@ -3,58 +3,77 @@
 
 #include "soc.h"
 
-#ifdef STM32L4
-#if defined(DAC1_BASE) || defined(DAC_BASE)
+#if defined(STM32L0) || defined(STM32L1) || defined(STM32L4) || defined(STM32L5)
+#if defined(DAC_BASE) || defined(DAC1_BASE)
 
 #include "DAC/DAC.h"
 #include "DAC_STM32.h"
+
+#if defined(STM32L4) || defined(STM32L5)
 #include "GPIO/Device/GPIO_STM32.h"
+#endif
 
 DAC_HandleTypeDef g_dac[hwDAC_Instance_MAX];
 
 static uint32_t DAC_Channel_To_HAL(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 {
-    switch (inst)
-    {
-#if defined(DAC1_BASE) || defined(DAC_BASE)
-        case hwDAC_Instance_1:
-            if (ch == hwDAC_Channel_Index_0) return DAC_CHANNEL_1;
+    if (inst != hwDAC_Instance_1)
+        return 0;
+
+#if defined(DAC_CHANNEL_1)
+    if (ch == hwDAC_Channel_Index_0)
+        return DAC_CHANNEL_1;
+#endif
 
 #if defined(DAC_CHANNEL_2)
-            if (ch == hwDAC_Channel_Index_1) return DAC_CHANNEL_2;
+    if (ch == hwDAC_Channel_Index_1)
+        return DAC_CHANNEL_2;
 #endif
-            break;
-#endif
-
-        default:
-            break;
-    }
 
     return 0;
 }
 
+static void DAC_EnableClock(void)
+{
+#if defined(__HAL_RCC_DAC1_CLK_ENABLE)
+    __HAL_RCC_DAC1_CLK_ENABLE();
+#elif defined(__HAL_RCC_DAC_CLK_ENABLE)
+    __HAL_RCC_DAC_CLK_ENABLE();
+#endif
+}
+
+static void DAC_DisableClock(void)
+{
+#if defined(__HAL_RCC_DAC1_CLK_DISABLE)
+    __HAL_RCC_DAC1_CLK_DISABLE();
+#elif defined(__HAL_RCC_DAC_CLK_DISABLE)
+    __HAL_RCC_DAC_CLK_DISABLE();
+#endif
+}
+
+static DAC_TypeDef * DAC_GetInstance(void)
+{
+#if defined(DAC1_BASE)
+    return DAC1;
+#elif defined(DAC_BASE)
+    return DAC;
+#else
+    return NULL;
+#endif
+}
+
 hwDAC_OpStatus DAC_Instance_Init(hwDAC_Instance inst)
 {
-    if (inst >= hwDAC_Instance_MAX)
+    if (inst != hwDAC_Instance_1)
         return hwDAC_InvalidParameter;
 
-    switch (inst)
-    {
-#if defined(DAC1_BASE)
-        case hwDAC_Instance_1:
-            __HAL_RCC_DAC1_CLK_ENABLE();
-            g_dac[inst].Instance = DAC1;
-            break;
-#elif defined(DAC_BASE)
-        case hwDAC_Instance_1:
-            __HAL_RCC_DAC_CLK_ENABLE();
-            g_dac[inst].Instance = DAC;
-            break;
-#endif
+    DAC_TypeDef *instance = DAC_GetInstance();
+    if (instance == NULL)
+        return hwDAC_HwError;
 
-        default:
-            return hwDAC_InvalidParameter;
-    }
+    DAC_EnableClock();
+
+    g_dac[inst].Instance = instance;
 
     if (HAL_DAC_Init(&g_dac[inst]) != HAL_OK)
         return hwDAC_HwError;
@@ -64,33 +83,20 @@ hwDAC_OpStatus DAC_Instance_Init(hwDAC_Instance inst)
 
 hwDAC_OpStatus DAC_Instance_DeInit(hwDAC_Instance inst)
 {
-    if (inst >= hwDAC_Instance_MAX)
+    if (inst != hwDAC_Instance_1)
         return hwDAC_InvalidParameter;
 
-    HAL_DAC_DeInit(&g_dac[inst]);
+    if (HAL_DAC_DeInit(&g_dac[inst]) != HAL_OK)
+        return hwDAC_HwError;
 
-    switch (inst)
-    {
-#if defined(DAC1_BASE)
-        case hwDAC_Instance_1:
-            __HAL_RCC_DAC1_CLK_DISABLE();
-            break;
-#elif defined(DAC_BASE)
-        case hwDAC_Instance_1:
-            __HAL_RCC_DAC_CLK_DISABLE();
-            break;
-#endif
-
-        default:
-            return hwDAC_InvalidParameter;
-    }
+    DAC_DisableClock();
 
     return hwDAC_OK;
 }
 
 hwDAC_OpStatus DAC_ConfigChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 {
-    if (inst >= hwDAC_Instance_MAX || ch >= hwDAC_Channel_Index_MAX)
+    if (inst != hwDAC_Instance_1 || ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;
 
     uint32_t hal_ch = DAC_Channel_To_HAL(inst, ch);
@@ -118,7 +124,7 @@ hwDAC_OpStatus DAC_ConfigChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 
 hwDAC_OpStatus DAC_StartChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 {
-    if (inst >= hwDAC_Instance_MAX || ch >= hwDAC_Channel_Index_MAX)
+    if (inst != hwDAC_Instance_1 || ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;
 
     uint32_t hal_ch = DAC_Channel_To_HAL(inst, ch);
@@ -133,7 +139,7 @@ hwDAC_OpStatus DAC_StartChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 
 hwDAC_OpStatus DAC_StopChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 {
-    if (inst >= hwDAC_Instance_MAX || ch >= hwDAC_Channel_Index_MAX)
+    if (inst != hwDAC_Instance_1 || ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;
 
     uint32_t hal_ch = DAC_Channel_To_HAL(inst, ch);
@@ -148,7 +154,7 @@ hwDAC_OpStatus DAC_StopChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 
 hwDAC_OpStatus DAC_WriteRaw(hwDAC_Instance inst, hwDAC_Channel_Index ch, uint32_t raw)
 {
-    if (inst >= hwDAC_Instance_MAX || ch >= hwDAC_Channel_Index_MAX)
+    if (inst != hwDAC_Instance_1 || ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;
 
     uint32_t hal_ch = DAC_Channel_To_HAL(inst, ch);
@@ -162,4 +168,4 @@ hwDAC_OpStatus DAC_WriteRaw(hwDAC_Instance inst, hwDAC_Channel_Index ch, uint32_
 }
 
 #endif
-#endif // STM32L4
+#endif

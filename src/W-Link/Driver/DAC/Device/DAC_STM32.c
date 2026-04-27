@@ -5,12 +5,13 @@
 #include "soc.h"
 
 #include "GPIO/GPIO.h"
-#include "GPIO/Device/GPIO_STM32.h"
 
 #include "DAC/DAC.h"
 #include "DAC/DAC_Pin.h"
 
 #ifdef DEVICE_STM32
+
+#include "GPIO/Device/GPIO_STM32.h"
 
 #if defined(DAC_BASE) || defined(DAC1_BASE) || defined(DAC2_BASE) || defined(DAC3_BASE) || defined(DAC4_BASE)
 

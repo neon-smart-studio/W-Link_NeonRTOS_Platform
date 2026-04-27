@@ -5,7 +5,11 @@
 
 #include "soc.h"
 #include "NeonRTOS.h"
+
 #include "RTC/RTC.h"
+
+#ifdef DEVICE_STM32
+
 #include "RTC_STM32.h"
 
 static bool RTC_HW_Init_Status[hwRTC_Index_MAX] = {false};
@@ -212,3 +216,5 @@ hwRTC_OpResult RTC_Timer_Clear_Alarm(
 
     return result;
 }
+
+#endif // DEVICE_STM32

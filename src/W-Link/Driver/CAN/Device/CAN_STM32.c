@@ -8,12 +8,13 @@
 #include "NeonRTOS.h"
 
 #include "GPIO/GPIO.h"
-#include "GPIO/Device/GPIO_STM32.h"
 
 #include "CAN/CAN.h"
 #include "CAN/CAN_Pin.h"
 
 #ifdef DEVICE_STM32
+
+#include "GPIO/Device/GPIO_STM32.h"
 
 #if defined(CAN1_BASE) || defined(CAN2_BASE) || defined(CAN3_BASE)
 

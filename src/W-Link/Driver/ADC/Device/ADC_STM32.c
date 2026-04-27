@@ -5,17 +5,16 @@
 #include "NeonRTOS.h"
 
 #include "GPIO/GPIO.h"
-#include "GPIO/Device/GPIO_STM32.h"
 
 #include "ADC/ADC.h"
 
 #include "ADC/ADC_Pin.h"
 
-#include "ADC_STM32.h"
-
 #ifdef DEVICE_STM32
 
-#include "ADC/Device/ADC_STM32.h"
+#include "ADC_STM32.h"
+
+#include "GPIO/Device/GPIO_STM32.h"
 
 bool ADC_NVIC_Init_Status = false;
 bool ADC_Instance_Init_Status[hwADC_Instance_MAX] = {false};

@@ -200,7 +200,7 @@ void TIM19_IRQHandler(void) { Timer_HAL_IRQHandler(hwTimer_Index_18); }
 void TIM20_UP_IRQHandler(void) { Timer_HAL_IRQHandler(hwTimer_Index_19); }
 #endif
 
-void Timer_Enable_Clock(hwTimer_Index index)
+static void Timer_Enable_Clock(hwTimer_Index index)
 {
         switch (index)
         {

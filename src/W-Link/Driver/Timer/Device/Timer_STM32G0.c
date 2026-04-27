@@ -126,7 +126,7 @@ void TIM17_IRQHandler(void)
 #endif
 #endif
 
-void Timer_Enable_Clock(hwTimer_Index index)
+static void Timer_Enable_Clock(hwTimer_Index index)
 {
     switch (index)
     {
@@ -165,7 +165,7 @@ void Timer_Enable_Clock(hwTimer_Index index)
     }
 }
 
-void Timer_Disable_Clock(hwTimer_Index index)
+static void Timer_Disable_Clock(hwTimer_Index index)
 {
     switch (index)
     {

@@ -80,7 +80,7 @@ void TIM14_IRQHandler(void)
 }
 #endif
 
-void Timer_Enable_Clock(hwTimer_Index index)
+static void Timer_Enable_Clock(hwTimer_Index index)
 {
     switch (index)
     {
@@ -99,7 +99,7 @@ void Timer_Enable_Clock(hwTimer_Index index)
     }
 }
 
-void Timer_Disable_Clock(hwTimer_Index index)
+static void Timer_Disable_Clock(hwTimer_Index index)
 {
     switch (index)
     {

@@ -171,7 +171,7 @@ void TIM8_BRK_TIM12_IRQHandler(void)     { Timer_HAL_IRQHandler(hwTimer_Index_11
 void TIM8_TRG_COM_TIM14_IRQHandler(void) { Timer_HAL_IRQHandler(hwTimer_Index_13); }
 #endif
 
-void Timer_Enable_Clock(hwTimer_Index index)
+static void Timer_Enable_Clock(hwTimer_Index index)
 {
         switch (index)
         {
@@ -248,7 +248,7 @@ void Timer_Enable_Clock(hwTimer_Index index)
         }
 }
 
-void Timer_Disable_Clock(hwTimer_Index index)
+static void Timer_Disable_Clock(hwTimer_Index index)
 {
         switch (index)
         {

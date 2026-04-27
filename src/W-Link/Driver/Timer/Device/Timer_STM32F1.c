@@ -89,7 +89,7 @@ void TIM3_IRQHandler(void)               { Timer_HAL_IRQHandler(hwTimer_Index_2)
 void TIM4_IRQHandler(void)               { Timer_HAL_IRQHandler(hwTimer_Index_3); }
 #endif
 
-void Timer_Enable_Clock(hwTimer_Index index)
+static void Timer_Enable_Clock(hwTimer_Index index)
 {
         switch (index)
         {

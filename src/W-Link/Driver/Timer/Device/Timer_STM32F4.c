@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -6,31 +5,12 @@
 #include <time.h>
 
 #include "soc.h"
-
 #include "NeonRTOS.h"
-
 #include "Timer/Timer.h"
 
 #ifdef STM32F4
 
-#define TIMER_MUTEX_ACCESS_TIMEOUT     500
-
-#define TIMER_IRQ_NVIC_PRIORITY 5
-#define TIMER_IRQ_NVIC_SUB_PRIORITY 0
-
-static bool Timer_Init_Status[hwTimer_Index_MAX] = {false};
-static bool Timer_IsPeriodic[hwTimer_Index_MAX] = {false};
-static onTimerEventHandler Timer_Expired_Handler[hwTimer_Index_MAX] = {NULL};
-
-TIM_HandleTypeDef g_timer[hwTimer_Index_MAX];
-
-static hwTimer_Index Timer_IndexFromHandle(TIM_HandleTypeDef *htimer)
-{
-    for(int i=0;i<hwTimer_Index_MAX;i++){
-        if(&g_timer[i] == htimer) return (hwTimer_Index)i;
-    }
-    return hwTimer_Index_MAX;
-}
+#include "Timer_STM32.h"
 
 TIM_TypeDef * Timer_Map_Soc_Base(hwTimer_Index index)
 {
@@ -129,33 +109,12 @@ static uint32_t Timer_GetInputClock(hwTimer_Index index)
     }
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    for (int i = 0; i < hwTimer_Index_MAX; i++)
-    {
-        if (&g_timer[i] == htim)
-        {
-                // 👈 這裡才是 index 與 Instance 的對應點
-                if(Timer_Expired_Handler[i]!=NULL)
-                {
-                        Timer_Expired_Handler[i]((hwTimer_Index)i);
-                }
-                
-                /* One-shot 要自動停 */
-                if (!Timer_IsPeriodic[i])
-                {
-                        HAL_TIM_Base_Stop_IT(htim);
-                }
-                break;
-        }
-    }
-}
-
-// TIM IRQ 統一入口
 static void Timer_HAL_IRQHandler(hwTimer_Index index)
 {
         HAL_TIM_IRQHandler(&g_timer[index]);
 }
+
+/* ================= IRQ Handlers ================= */
 
 #if defined(TIM1_BASE) || defined(TIM10_BASE)
 void TIM1_UP_TIM10_IRQHandler(void)
@@ -251,24 +210,8 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
 }
 #endif
 
-hwTimer_OpResult Timer_Init(hwTimer_Index index)
+static void Timer_Enable_Clock(hwTimer_Index index)
 {
-        if (index >= hwTimer_Index_MAX)
-        {
-                return hwTimer_InvalidParameter;
-        }
-
-        if (Timer_Init_Status[index])
-        {
-                return hwTimer_OK;
-        }
-        
-        TIM_TypeDef * timer_soc_base = Timer_Map_Soc_Base(index);
-        if(timer_soc_base==NULL)
-        {
-                return hwTimer_InvalidParameter;
-        }
-
         switch (index)
         {
 #if defined(TIM1_BASE)
@@ -343,7 +286,130 @@ hwTimer_OpResult Timer_Init(hwTimer_Index index)
                         break;
 #endif
         }
+}
 
+static void Timer_Disable_Clock(hwTimer_Index index)
+{
+        switch (index)
+        {
+#if defined(TIM1_BASE)
+                case hwTimer_Index_0:
+                        __HAL_RCC_TIM1_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM2_BASE)
+                case hwTimer_Index_1:
+                        __HAL_RCC_TIM2_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM3_BASE)
+                case hwTimer_Index_2:
+                        __HAL_RCC_TIM3_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM4_BASE)
+                case hwTimer_Index_3:
+                        __HAL_RCC_TIM4_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM5_BASE)
+                case hwTimer_Index_4:
+                        __HAL_RCC_TIM5_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM8_BASE)
+                case hwTimer_Index_7:
+                        __HAL_RCC_TIM8_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM9_BASE)
+                case hwTimer_Index_8:
+                        __HAL_RCC_TIM9_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM10_BASE)
+                case hwTimer_Index_9:
+                        __HAL_RCC_TIM10_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM11_BASE)
+                case hwTimer_Index_10:
+                        __HAL_RCC_TIM11_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM12_BASE)
+                case hwTimer_Index_11:
+                        __HAL_RCC_TIM12_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM13_BASE)
+                case hwTimer_Index_12:
+                        __HAL_RCC_TIM13_CLK_DISABLE();
+                        break;
+#endif
+
+#if defined(TIM14_BASE)
+                case hwTimer_Index_13:
+                        __HAL_RCC_TIM14_CLK_DISABLE();
+                        break;
+#endif
+        }
+}
+
+hwTimer_OpResult Timer_Instance_Init(hwTimer_Index index)
+{
+        if (index >= hwTimer_Index_MAX) {
+                return hwTimer_InvalidParameter;
+        }
+
+        TIM_TypeDef *timer_soc_base = Timer_Map_Soc_Base(index);
+        if (timer_soc_base == NULL) {
+                return hwTimer_InvalidParameter;
+        }
+
+        Timer_Enable_Clock(index);
+
+        g_timer[index].Instance = timer_soc_base;
+        g_timer[index].Init.Prescaler = (Timer_GetInputClock(index) / 1000000) - 1; // 1 MHz = 1us
+        g_timer[index].Init.CounterMode = TIM_COUNTERMODE_UP;
+        g_timer[index].Init.Period = 1000 - 1; // 預設 1ms
+        g_timer[index].Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+        g_timer[index].Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+
+        if (HAL_TIM_Base_Init(&g_timer[index]) != HAL_OK) {
+                return hwTimer_HwError;
+        }
+
+        return hwTimer_OK;
+}
+
+hwTimer_OpResult Timer_Instance_DeInit(hwTimer_Index index)
+{
+        if (index >= hwTimer_Index_MAX)
+        {
+                return hwTimer_InvalidParameter;
+        }
+
+        HAL_TIM_Base_Stop_IT(&g_timer[index]);
+        HAL_TIM_Base_DeInit(&g_timer[index]);
+
+        Timer_Disable_Clock(index);
+
+        return hwTimer_OK;
+}
+
+void Timer_NVIC_Enable(hwTimer_Index index)
+{
         switch (index)
         {
 #if defined(TIM1_BASE) || defined(TIM10_BASE)
@@ -495,37 +561,10 @@ hwTimer_OpResult Timer_Init(hwTimer_Index index)
                         break;
         }
 
-        g_timer[index].Instance = timer_soc_base;
-        g_timer[index].Init.Prescaler = (Timer_GetInputClock(index) / 1000000) - 1; // 1 MHz = 1us
-        g_timer[index].Init.CounterMode = TIM_COUNTERMODE_UP;
-        g_timer[index].Init.Period = 1000 - 1; // 預設 1ms
-        g_timer[index].Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-        g_timer[index].Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
-
-        HAL_TIM_Base_Init(&g_timer[index]);
-        
-        Timer_Init_Status[index] = true;
-
-        return hwTimer_OK;
 }
 
-hwTimer_OpResult Timer_DeInit(hwTimer_Index index)
+void Timer_NVIC_Disable(hwTimer_Index index)
 {
-        if(index>=hwTimer_Index_MAX)
-        {
-                return hwTimer_InvalidParameter;
-        }
-        
-        if(Timer_Init_Status[index]==false)
-        {
-                return hwTimer_OK;
-        }
-
-        Timer_Init_Status[index] = false;
-
-        HAL_TIM_Base_Stop_IT(&g_timer[index]);
-        HAL_TIM_Base_DeInit(&g_timer[index]);
-
         switch (index)
         {
 #if defined(TIM1_BASE) || defined(TIM10_BASE)
@@ -619,243 +658,6 @@ hwTimer_OpResult Timer_DeInit(hwTimer_Index index)
                 default:
                         break;
         }
-
-        switch (index)
-        {
-#if defined(TIM1_BASE)
-                case hwTimer_Index_0:
-                        __HAL_RCC_TIM1_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM2_BASE)
-                case hwTimer_Index_1:
-                        __HAL_RCC_TIM2_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM3_BASE)
-                case hwTimer_Index_2:
-                        __HAL_RCC_TIM3_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM4_BASE)
-                case hwTimer_Index_3:
-                        __HAL_RCC_TIM4_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM5_BASE)
-                case hwTimer_Index_4:
-                        __HAL_RCC_TIM5_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM8_BASE)
-                case hwTimer_Index_7:
-                        __HAL_RCC_TIM8_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM9_BASE)
-                case hwTimer_Index_8:
-                        __HAL_RCC_TIM9_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM10_BASE)
-                case hwTimer_Index_9:
-                        __HAL_RCC_TIM10_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM11_BASE)
-                case hwTimer_Index_10:
-                        __HAL_RCC_TIM11_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM12_BASE)
-                case hwTimer_Index_11:
-                        __HAL_RCC_TIM12_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM13_BASE)
-                case hwTimer_Index_12:
-                        __HAL_RCC_TIM13_CLK_DISABLE();
-                        break;
-#endif
-
-#if defined(TIM14_BASE)
-                case hwTimer_Index_13:
-                        __HAL_RCC_TIM14_CLK_DISABLE();
-                        break;
-#endif
-        }
-
-        return hwTimer_OK;
 }
 
-hwTimer_OpResult Timer_Start_OneShout(hwTimer_Index index, uint32_t duration_us, onTimerEventHandler timer_exp_cb)
-{
-        if(index>=hwTimer_Index_MAX)
-        {
-                return hwTimer_InvalidParameter;
-        }
-        
-        if(Timer_Init_Status[index]==false)
-        {
-                return hwTimer_NotInit;
-        }
-
-        if (duration_us == 0)
-        {
-                return hwTimer_InvalidParameter;
-        }
-
-        /* 設定 callback 與模式 */
-        Timer_Expired_Handler[index] = timer_exp_cb;
-        Timer_IsPeriodic[index] = false;
-
-        /* 停止再設定，避免 race */
-        HAL_TIM_Base_Stop_IT(&g_timer[index]);
-
-        /* 1 tick = 1 us，所以 ARR = us - 1 */
-        g_timer[index].Init.Period = duration_us - 1;
-        HAL_TIM_Base_Init(&g_timer[index]);
-
-        /* 重新開始 */
-        HAL_TIM_Base_Start_IT(&g_timer[index]);
-
-        return hwTimer_OK;
-}
-
-hwTimer_OpResult Timer_Start_Period(hwTimer_Index index, uint32_t duration_us, onTimerEventHandler timer_exp_cb)
-{
-        if(index>=hwTimer_Index_MAX)
-        {
-                return hwTimer_InvalidParameter;
-        }
-        
-        if(Timer_Init_Status[index]==false)
-        {
-                return hwTimer_NotInit;
-        }
-
-        if (duration_us == 0)
-        {
-                return hwTimer_InvalidParameter;
-        }
-
-        Timer_Expired_Handler[index] = timer_exp_cb;
-        Timer_IsPeriodic[index] = true;
-
-        HAL_TIM_Base_Stop_IT(&g_timer[index]);
-
-        g_timer[index].Init.Period = duration_us - 1;
-        HAL_TIM_Base_Init(&g_timer[index]);
-
-        HAL_TIM_Base_Start_IT(&g_timer[index]);
-
-        return hwTimer_OK;
-}
-
-hwTimer_OpResult Timer_Reload(hwTimer_Index index, uint32_t duration_us)
-{
-        if(index>=hwTimer_Index_MAX)
-        {
-                return hwTimer_InvalidParameter;
-        }
-        
-        if(Timer_Init_Status[index]==false)
-        {
-                return hwTimer_NotInit;
-        }
-
-        if (duration_us == 0)
-        {
-                return hwTimer_InvalidParameter;
-        }
-
-        HAL_TIM_Base_Stop_IT(&g_timer[index]);
-
-        g_timer[index].Init.Period = duration_us - 1;
-        HAL_TIM_Base_Init(&g_timer[index]);
-
-        HAL_TIM_Base_Start_IT(&g_timer[index]);
-
-        return hwTimer_OK;
-}
-
-hwTimer_OpResult Timer_Stop(hwTimer_Index index)
-{
-        if(index>=hwTimer_Index_MAX)
-        {
-                return hwTimer_InvalidParameter;
-        }
-        
-        if(Timer_Init_Status[index]==false)
-        {
-                return hwTimer_NotInit;
-        }
-
-        HAL_TIM_Base_Stop_IT(&g_timer[index]);
-
-        return hwTimer_OK;
-}
-
-hwTimer_OpResult Timer_Read_Ticks(hwTimer_Index index, uint32_t* ticks)
-{
-        if(index>=hwTimer_Index_MAX)
-        {
-                return hwTimer_InvalidParameter;
-        }
-        
-        if(ticks==NULL)
-        {
-                return hwTimer_InvalidParameter;
-        }
-        
-        if(Timer_Init_Status[index]==false)
-        {
-                return hwTimer_NotInit;
-        }
-
-        *ticks = __HAL_TIM_GET_COUNTER(&g_timer[index]);
-
-        return hwTimer_OK;
-}
-
-hwTimer_OpResult Timer_Read_uSec(hwTimer_Index index, uint32_t* uSec)
-{
-        if(index>=hwTimer_Index_MAX)
-        {
-                return hwTimer_InvalidParameter;
-        }
-        
-        if(uSec==NULL)
-        {
-                return hwTimer_InvalidParameter;
-        }
-        
-        if(Timer_Init_Status[index]==false)
-        {
-                return hwTimer_NotInit;
-        }
-
-        return Timer_Read_Ticks(index, uSec);
-}
-
-bool Timer_is_Init(hwTimer_Index hw_index)
-{
-    if(hw_index>=hwTimer_Index_MAX)
-    {
-      return false;
-    }
-    
-    return Timer_Init_Status[hw_index];
-}
-
-#endif //STM32F4
+#endif // STM32F4

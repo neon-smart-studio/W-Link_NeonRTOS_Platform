@@ -70,6 +70,7 @@ hwRTC_Index RTC_IndexFromHandle(RTC_HandleTypeDef *hrtc)
     return hwRTC_Index_MAX;
 }
 
+#if defined(RTC_ALARM_A)
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
 	hwRTC_Index index = RTC_IndexFromHandle(hrtc);
@@ -79,7 +80,9 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
         Alarm_Event_Callback[hwRTC_Alarm_Channel_Index_0](index, hwRTC_Alarm_Channel_Index_0);
 	}
 }
+#endif
 
+#if defined(RTC_ALARM_B)
 void HAL_RTC_AlarmBEventCallback(RTC_HandleTypeDef *hrtc)
 {
 	hwRTC_Index index = RTC_IndexFromHandle(hrtc);
@@ -89,6 +92,7 @@ void HAL_RTC_AlarmBEventCallback(RTC_HandleTypeDef *hrtc)
         Alarm_Event_Callback[hwRTC_Alarm_Channel_Index_1](index, hwRTC_Alarm_Channel_Index_1);
 	}
 }
+#endif
 
 hwRTC_OpResult RTC_Timer_Init(hwRTC_Index index)
 {

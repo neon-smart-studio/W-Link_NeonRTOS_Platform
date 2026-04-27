@@ -10,9 +10,8 @@
 #define UART_IRQ_NVIC_PRIORITY      5
 #define UART_IRQ_NVIC_SUB_PRIORITY  0
 
-extern bool UART_Init_Status[hwUART_Index_MAX];
-
 extern UART_HandleTypeDef g_uart[hwUART_Index_MAX];
+extern bool UART_Init_Status[hwUART_Index_MAX];
 
 USART_TypeDef *UART_Map_Soc_Base(hwUART_Index index);
 

@@ -10,6 +10,7 @@
 
 #ifdef DEVICE_STM32
 
+#include "SPI_Master_STM32.h"
 #include "SPI/SPI_Pin.h"
 #include "GPIO/Device/GPIO_STM32.h"
 
@@ -24,10 +25,9 @@ NeonRTOS_SyncObj_t Spi_Master_Recv_SyncHandle[hwSPI_Index_MAX];
 #define SPI_MASTER_MUTEX_LOCK(a, b)  if (NeonRTOS_LockObjLock(&Spi_Master_Access_Mutex[a], b) != NeonRTOS_OK) { return hwSPI_MutexTimeout; }
 #define SPI_MASTER_MUTEX_UNLOCK(a)   NeonRTOS_LockObjUnlock(&Spi_Master_Access_Mutex[a])
 
-static bool Spi_Master_Init_Status[hwSPI_Index_MAX] = {false};
-static bool Spi_Master_Use_CS[hwSPI_Index_MAX] = {false};
+bool Spi_Master_Init_Status[hwSPI_Index_MAX] = {false};
 
-static SPI_HandleTypeDef g_spi[hwSPI_Index_MAX];
+static bool Spi_Master_Use_CS[hwSPI_Index_MAX] = {false};
 
 static const uint32_t Spi_Master_Baudrate_Prescaler_Table[] = {
     SPI_BAUDRATEPRESCALER_2,
@@ -52,14 +52,6 @@ uint32_t STM32_SPI_GetAF(hwSPI_Index spi, hwGPIO_Pin pin)
     return 0;
 }
 #endif
-
-static hwSPI_Index SPI_IndexFromHandle(SPI_HandleTypeDef *hspi)
-{
-    for (int i = 0; i < hwSPI_Index_MAX; i++) {
-        if (&g_spi[i] == hspi) return (hwSPI_Index)i;
-    }
-    return hwSPI_Index_MAX;
-}
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 {
@@ -152,12 +144,6 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         }
     }
 #endif
-
-    SPI_TypeDef *spi_soc_base = SPI_Map_Soc_Base(index);
-    if (spi_soc_base == NULL)
-    {
-        return hwSPI_InvalidParameter;
-    }
 
     if (NeonRTOS_SyncObjCreate(&Spi_Master_Send_SyncHandle[index]) != NeonRTOS_OK)
     {

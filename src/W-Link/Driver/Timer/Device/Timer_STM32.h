@@ -18,6 +18,9 @@ TIM_TypeDef *Timer_Map_Soc_Base(hwTimer_Index index);
 
 extern TIM_HandleTypeDef g_timer[hwTimer_Index_MAX];
 
+void Timer_Enable_Clock(hwTimer_Index index);
+void Timer_Disable_Clock(hwTimer_Index index);
+
 hwTimer_OpResult Timer_Instance_Init(hwTimer_Index index);
 hwTimer_OpResult Timer_Instance_DeInit(hwTimer_Index index);
 

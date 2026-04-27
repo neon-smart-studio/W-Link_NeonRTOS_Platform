@@ -210,7 +210,7 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void)
 }
 #endif
 
-static void Timer_Enable_Clock(hwTimer_Index index)
+void Timer_Enable_Clock(hwTimer_Index index)
 {
         switch (index)
         {

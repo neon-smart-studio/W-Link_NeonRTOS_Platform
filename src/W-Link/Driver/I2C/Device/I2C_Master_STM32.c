@@ -365,6 +365,16 @@ uint32_t STM32_I2C_GetAF(hwI2C_Index i2c, hwGPIO_Pin pin)
 }
 #endif
 
+hwI2C_Index I2C_IndexFromHandle(I2C_HandleTypeDef *hI2C)
+{
+    for (int i = 0; i < hwI2C_Index_MAX; i++) {
+        if (&g_i2c[i] == hI2C) {
+            return (hwI2C_Index)i;
+        }
+    }
+    return hwI2C_Index_MAX;
+}
+
 void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c_cb)
 {
     hwI2C_Index index = I2C_IndexFromHandle(hi2c_cb);

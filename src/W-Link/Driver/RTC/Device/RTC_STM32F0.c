@@ -10,16 +10,6 @@
 
 RTC_HandleTypeDef g_rtc[hwRTC_Index_MAX];
 
-hwRTC_Index RTC_IndexFromHandle(RTC_HandleTypeDef *hrtc)
-{
-    for (hwRTC_Index i = 0; i < hwRTC_Index_MAX; i++)
-    {
-        if (&g_rtc[i] == hrtc)
-            return i;
-    }
-    return hwRTC_Index_MAX;
-}
-
 void RTC_Enable_Clock_Source(void)
 {
     __HAL_RCC_RTC_ENABLE();

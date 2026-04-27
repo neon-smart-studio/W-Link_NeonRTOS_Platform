@@ -90,16 +90,6 @@ static void SPI_DisableClock(hwSPI_Index index)
     }
 }
 
-hwSPI_Index SPI_IndexFromHandle(SPI_HandleTypeDef *hspi)
-{
-    for (int i = 0; i < hwSPI_Index_MAX; i++)
-    {
-        if (&g_spi[i] == hspi)
-            return (hwSPI_Index)i;
-    }
-    return hwSPI_Index_MAX;
-}
-
 int SPI_Master_Get_Clock_Freq(hwSPI_Index index)
 {
     switch (index)

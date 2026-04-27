@@ -53,6 +53,16 @@ uint32_t STM32_SPI_GetAF(hwSPI_Index spi, hwGPIO_Pin pin)
 }
 #endif
 
+hwSPI_Index SPI_IndexFromHandle(SPI_HandleTypeDef *hspi)
+{
+    for(int i=0;i<hwSPI_Index_MAX;i++)
+    {
+        if(&g_spi[i] == hspi)
+            return (hwSPI_Index)i;
+    }
+    return hwSPI_Index_MAX;
+}
+
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 {
     hwSPI_Index idx = SPI_IndexFromHandle(hspi);

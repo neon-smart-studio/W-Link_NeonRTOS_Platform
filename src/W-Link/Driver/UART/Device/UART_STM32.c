@@ -39,6 +39,17 @@ uint32_t STM32_UART_GetAF(hwUART_Index uart, hwGPIO_Pin pin)
 }
 #endif
 
+hwUART_Index UART_IndexFromHandle(UART_HandleTypeDef *huart)
+{
+    for (hwUART_Index i = 0; i < hwUART_Index_MAX; i++)
+    {
+        if (&g_uart[i] == huart)
+            return i;
+    }
+
+    return hwUART_Index_MAX;
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     hwUART_Index idx = UART_IndexFromHandle(huart);

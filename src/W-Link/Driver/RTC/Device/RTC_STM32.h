@@ -12,8 +12,6 @@
 
 extern RTC_HandleTypeDef g_rtc[hwRTC_Index_MAX];
 
-extern onAlarmEventCallback Alarm_Event_Callback[hwRTC_Alarm_Channel_Index_MAX];
-
 void RTC_Enable_Clock_Source(void);
 
 hwRTC_OpResult RTC_Instance_Init(hwRTC_Index index);

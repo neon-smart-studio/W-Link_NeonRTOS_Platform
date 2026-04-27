@@ -58,14 +58,6 @@ static const uint32_t Spi_Master_Baudrate_Prescaler_Table[] =  {SPI_BAUDRATEPRES
                                                                 SPI_BAUDRATEPRESCALER_256
                                                                 };
 
-static hwSPI_Index SPI_IndexFromHandle(SPI_HandleTypeDef *hspi)
-{
-    for(int i=0;i<hwSPI_Index_MAX;i++){
-        if(&g_spi[i] == hspi) return (hwSPI_Index)i;
-    }
-    return hwSPI_Index_MAX;
-}
-
 SPI_TypeDef * SPI_Map_Soc_Base(hwSPI_Index index)
 {
     switch(index)
@@ -79,32 +71,6 @@ SPI_TypeDef * SPI_Map_Soc_Base(hwSPI_Index index)
         default: break;
     }
     return NULL;
-}
-
-void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
-{
-    hwSPI_Index idx = SPI_IndexFromHandle(hspi);
-    if(idx >= hwSPI_Index_MAX) return;
-    
-    NeonRTOS_SyncObjSignalFromISR(&Spi_Master_Recv_SyncHandle[idx]);
-}
-
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
-{
-    hwSPI_Index idx = SPI_IndexFromHandle(hspi);
-    if(idx >= hwSPI_Index_MAX) return;
-    
-    NeonRTOS_SyncObjSignalFromISR(&Spi_Master_Send_SyncHandle[idx]);
-}
-
-void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
-{
-    hwSPI_Index idx = SPI_IndexFromHandle(hspi);
-    if(idx >= hwSPI_Index_MAX) return;
-
-    // 你原本在等兩個，那就兩個都放行
-    NeonRTOS_SyncObjSignalFromISR(&Spi_Master_Send_SyncHandle[idx]);
-    NeonRTOS_SyncObjSignalFromISR(&Spi_Master_Recv_SyncHandle[idx]);
 }
 
 // UART IRQ 統一入口

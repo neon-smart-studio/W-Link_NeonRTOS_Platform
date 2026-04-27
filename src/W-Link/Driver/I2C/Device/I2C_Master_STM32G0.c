@@ -96,16 +96,6 @@ uint32_t I2C_Get_PCLK(hwI2C_Index index)
     return pclk;
 }
 
-hwI2C_Index I2C_IndexFromHandle(I2C_HandleTypeDef *hI2C)
-{
-    for (int i = 0; i < hwI2C_Index_MAX; i++) {
-        if (&g_i2c[i] == hI2C) {
-            return (hwI2C_Index)i;
-        }
-    }
-    return hwI2C_Index_MAX;
-}
-
 I2C_TypeDef *I2C_Map_Soc_Base(hwI2C_Index index)
 {
     switch (index)

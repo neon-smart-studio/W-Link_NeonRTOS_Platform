@@ -63,17 +63,6 @@ static uint32_t CAN_CalcPrescaler(uint32_t can_clk, uint32_t bitrate)
     return prescaler;
 }
 
-hwCAN_Index CAN_IndexFromHandle(CAN_HandleTypeDef *hcan)
-{
-    for (hwCAN_Index i = 0; i < hwCAN_Index_MAX; i++)
-    {
-        if (&g_can[i] == hcan)
-            return i;
-    }
-
-    return hwCAN_Index_MAX;
-}
-
 CAN_TypeDef *CAN_Map_Soc_Base(hwCAN_Index index)
 {
     switch (index)

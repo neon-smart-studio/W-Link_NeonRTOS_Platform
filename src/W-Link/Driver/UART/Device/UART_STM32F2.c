@@ -11,17 +11,6 @@
 
 UART_HandleTypeDef g_uart[hwUART_Index_MAX];
 
-hwUART_Index UART_IndexFromHandle(UART_HandleTypeDef *huart)
-{
-    for (hwUART_Index i = 0; i < hwUART_Index_MAX; i++)
-    {
-        if (&g_uart[i] == huart)
-            return i;
-    }
-
-    return hwUART_Index_MAX;
-}
-
 USART_TypeDef *UART_Map_Soc_Base(hwUART_Index index)
 {
     switch (index)

@@ -37,14 +37,44 @@ SPI_TypeDef *SPI_Map_Soc_Base(hwSPI_Index index)
     }
 }
 
-hwSPI_Index SPI_IndexFromHandle(SPI_HandleTypeDef *hspi)
+static void SPI_EnableClock(hwSPI_Index index)
 {
-    for(int i=0;i<hwSPI_Index_MAX;i++)
+    switch (index)
     {
-        if(&g_spi[i] == hspi)
-            return (hwSPI_Index)i;
+#if defined(SPI1_BASE)
+        case hwSPI_Index_0:
+            __HAL_RCC_SPI1_CLK_ENABLE();
+            break;
+#endif
+#if defined(SPI2_BASE)
+        case hwSPI_Index_1:
+            __HAL_RCC_SPI2_CLK_ENABLE();
+            break;
+#endif
+
+        default:
+            break;
     }
-    return hwSPI_Index_MAX;
+}
+
+static void SPI_DisableClock(hwSPI_Index index)
+{
+    switch (index)
+    {
+#if defined(SPI1_BASE)
+        case hwSPI_Index_0:
+            __HAL_RCC_SPI1_CLK_DISABLE();
+            break;
+#endif
+#if defined(SPI2_BASE)
+        case hwSPI_Index_1:
+            __HAL_RCC_SPI2_CLK_DISABLE();
+            break;
+#endif
+
+        default:
+            break;
+    }
 }
 
 int SPI_Master_Get_Clock_Freq(hwSPI_Index index)

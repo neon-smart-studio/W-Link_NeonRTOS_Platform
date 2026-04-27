@@ -40,6 +40,17 @@ uint32_t CAN_GetAF(hwCAN_Index can, hwGPIO_Pin pin)
 }
 #endif
 
+hwCAN_Index CAN_IndexFromHandle(CAN_HandleTypeDef *hcan)
+{
+    for (hwCAN_Index i = 0; i < hwCAN_Index_MAX; i++)
+    {
+        if (&g_can[i] == hcan)
+            return i;
+    }
+
+    return hwCAN_Index_MAX;
+}
+
 void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)
 {
     hwCAN_Index index = CAN_IndexFromHandle(hcan);

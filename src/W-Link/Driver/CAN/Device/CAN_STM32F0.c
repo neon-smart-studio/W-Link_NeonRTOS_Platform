@@ -45,17 +45,6 @@ uint32_t CAN_GetClock(hwCAN_Index index)
     return HAL_RCC_GetPCLK1Freq();
 }
 
-hwCAN_Index CAN_IndexFromHandle(CAN_HandleTypeDef *hcan)
-{
-    for (hwCAN_Index i = 0; i < hwCAN_Index_MAX; i++)
-    {
-        if (&g_can[i] == hcan)
-            return i;
-    }
-
-    return hwCAN_Index_MAX;
-}
-
 static void CAN_HAL_IRQHandler(hwCAN_Index index)
 {
     HAL_CAN_IRQHandler(&g_can[index]);

@@ -297,7 +297,7 @@ void I2C_NVIC_Init(hwI2C_Index index)
             HAL_NVIC_EnableIRQ(I2C2_EV_IRQn);
             HAL_NVIC_SetPriority(I2C2_ER_IRQn, I2C_IRQ_NVIC_PRIORITY, I2C_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(I2C2_ER_IRQn);
-            break
+            break;
 #endif
 #if defined(I2C3_BASE)
         case hwI2C_Index_2:
@@ -305,7 +305,7 @@ void I2C_NVIC_Init(hwI2C_Index index)
             HAL_NVIC_EnableIRQ(I2C3_EV_IRQn);
             HAL_NVIC_SetPriority(I2C3_ER_IRQn, I2C_IRQ_NVIC_PRIORITY, I2C_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(I2C3_ER_IRQn);
-            break
+            break;
 #endif
 #if defined(I2C4_BASE)
         case hwI2C_Index_3:

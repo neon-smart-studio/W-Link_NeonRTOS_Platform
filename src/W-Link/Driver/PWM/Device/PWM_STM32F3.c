@@ -323,7 +323,7 @@ void PWM_Clock_Disable(hwPWM_Channel channel_index)
                         }
                         break;
 #endif
-#if defined(TIM15_BASE)
+#if defined(TIM16_BASE)
                 case hwTimer_Index_15:
                         all_off = true;
                         if(PWM_Channel_Init_Status[hwPWM_Channel_35])

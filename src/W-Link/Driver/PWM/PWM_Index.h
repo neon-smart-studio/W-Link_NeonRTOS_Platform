@@ -77,6 +77,14 @@ typedef enum
 	hwPWM_Channel_39,
 	hwPWM_Channel_40,
 #endif
+#if defined(TIM21_BASE)
+	hwPWM_Channel_41,
+	hwPWM_Channel_42,
+#endif
+#if defined(TIM22_BASE)
+	hwPWM_Channel_43,
+	hwPWM_Channel_44,
+#endif
 	hwPWM_Channel_MAX
 }hwPWM_Channel;
 #endif //DEVICE_STM32

@@ -11,9 +11,6 @@
 #define I2C_IRQ_NVIC_PRIORITY      5
 #define I2C_IRQ_NVIC_SUB_PRIORITY  0
 
-#define I2C_MASTER_STANDARD_MODE_CLK_FREQUENCY 100000
-#define I2C_MASTER_FAST_MODE_CLK_FREQUENCY     400000
-
 extern I2C_HandleTypeDef g_i2c[hwI2C_Index_MAX];
 extern bool I2C_Master_Init_Status[];
 

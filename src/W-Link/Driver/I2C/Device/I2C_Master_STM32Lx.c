@@ -141,16 +141,6 @@ static void I2C_DisableClock(hwI2C_Index index)
     }
 }
 
-static uint32_t I2C_Get_ClockSpeed(hwI2C_Speed_Mode speed_mode)
-{
-    switch (speed_mode)
-    {
-        case hwI2C_Standard_Mode: return I2C_MASTER_STANDARD_MODE_CLK_FREQUENCY;
-        case hwI2C_Fast_Mode:     return I2C_MASTER_FAST_MODE_CLK_FREQUENCY;
-        default:                   return 100000;
-    }
-}
-
 static void I2C_HAL_EV_IRQHandler(hwI2C_Index index)
 {
     HAL_I2C_EV_IRQHandler(&g_i2c[index]);

@@ -38,6 +38,22 @@
 #include "Pin/SPI_Pin_STM32G4.h"
 #endif //STM32G4
 
+#ifdef STM32L0
+#include "Pin/SPI_Pin_STM32L0.h"
+#endif // STM32L0
+
+#ifdef STM32L1
+#include "Pin/SPI_Pin_STM32L1.h"
+#endif // STM32L1
+
+#ifdef STM32L4
+#include "Pin/SPI_Pin_STM32L4.h"
+#endif // STM32L4
+
+#ifdef STM32L5
+#include "Pin/SPI_Pin_STM32L5.h"
+#endif // STM32L5
+
 #ifdef STM32H7
 #include "Pin/SPI_Pin_STM32H7.h"
 #endif //STM32H7

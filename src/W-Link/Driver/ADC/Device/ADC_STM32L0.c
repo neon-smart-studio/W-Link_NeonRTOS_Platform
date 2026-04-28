@@ -75,13 +75,13 @@ static uint32_t ADC_Channel_To_HAL(hwADC_Channel_Index ch)
     }
 }
 
-#if defined(ADC1_COMP_IRQn)
-void ADC1_COMP_IRQHandler(void)
+#if defined (STM32L010x4) || defined (STM32L010x6) || defined (STM32L010x8) || defined (STM32L010xB)
+void ADC1_IRQHandler(void)
 {
     HAL_ADC_IRQHandler(&g_adc[hwADC_Instance_1]);
 }
-#elif defined(ADC1_IRQn)
-void ADC1_IRQHandler(void)
+#else
+void ADC1_COMP_IRQHandler(void)
 {
     HAL_ADC_IRQHandler(&g_adc[hwADC_Instance_1]);
 }
@@ -122,13 +122,8 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
     if (HAL_ADC_Init(&g_adc[inst]) != HAL_OK)
         return hwADC_HwError;
 
-#if defined(ADC_SINGLE_ENDED)
     if (HAL_ADCEx_Calibration_Start(&g_adc[inst], ADC_SINGLE_ENDED) != HAL_OK)
         return hwADC_HwError;
-#else
-    if (HAL_ADCEx_Calibration_Start(&g_adc[inst]) != HAL_OK)
-        return hwADC_HwError;
-#endif
 
     return hwADC_OK;
 }
@@ -156,21 +151,21 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
 
 void ADC_NVIC_Init(void)
 {
-#if defined(ADC1_COMP_IRQn)
-    HAL_NVIC_SetPriority(ADC1_COMP_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
-    HAL_NVIC_EnableIRQ(ADC1_COMP_IRQn);
-#elif defined(ADC1_IRQn)
+#if defined (STM32L010x4) || defined (STM32L010x6) || defined (STM32L010x8) || defined (STM32L010xB)
     HAL_NVIC_SetPriority(ADC1_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
     HAL_NVIC_EnableIRQ(ADC1_IRQn);
+#else
+    HAL_NVIC_SetPriority(ADC1_COMP_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
+    HAL_NVIC_EnableIRQ(ADC1_COMP_IRQn);
 #endif
 }
 
 void ADC_NVIC_DeInit(void)
 {
-#if defined(ADC1_COMP_IRQn)
-    HAL_NVIC_DisableIRQ(ADC1_COMP_IRQn);
-#elif defined(ADC1_IRQn)
+#if defined (STM32L010x4) || defined (STM32L010x6) || defined (STM32L010x8) || defined (STM32L010xB)
     HAL_NVIC_DisableIRQ(ADC1_IRQn);
+#else
+    HAL_NVIC_DisableIRQ(ADC1_COMP_IRQn);
 #endif
 }
 

@@ -75,7 +75,9 @@ static uint32_t ADC_Channel_To_HAL(hwADC_Channel_Index ch)
     }
 }
 
-#if defined(ADC1_2_IRQn)
+#if defined (STM32L412xx) || defined (STM32L422xx) || \
+    defined (STM32L471xx) || defined (STM32L475xx) || defined (STM32L476xx) || defined (STM32L485xx) || !defined (STM32L486xx) || \
+    defined (STM32L496xx)
 void ADC1_2_IRQHandler(void)
 {
 #if defined(ADC1_BASE)
@@ -85,7 +87,7 @@ void ADC1_2_IRQHandler(void)
     HAL_ADC_IRQHandler(&g_adc[hwADC_Instance_2]);
 #endif
 }
-#elif defined(ADC1_IRQn)
+#else
 void ADC1_IRQHandler(void)
 {
     HAL_ADC_IRQHandler(&g_adc[hwADC_Instance_1]);
@@ -94,20 +96,12 @@ void ADC1_IRQHandler(void)
 
 static void ADC_EnableClock(void)
 {
-#if defined(__HAL_RCC_ADC_CLK_ENABLE)
     __HAL_RCC_ADC_CLK_ENABLE();
-#elif defined(__HAL_RCC_ADC12_CLK_ENABLE)
-    __HAL_RCC_ADC12_CLK_ENABLE();
-#endif
 }
 
 static void ADC_DisableClock(void)
 {
-#if defined(__HAL_RCC_ADC_CLK_DISABLE)
     __HAL_RCC_ADC_CLK_DISABLE();
-#elif defined(__HAL_RCC_ADC12_CLK_DISABLE)
-    __HAL_RCC_ADC12_CLK_DISABLE();
-#endif
 }
 
 hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
@@ -184,10 +178,12 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
 
 void ADC_NVIC_Init(void)
 {
-#if defined(ADC1_2_IRQn)
+#if defined (STM32L412xx) || defined (STM32L422xx) || \
+    defined (STM32L471xx) || defined (STM32L475xx) || defined (STM32L476xx) || defined (STM32L485xx) || !defined (STM32L486xx) || \
+    defined (STM32L496xx)
     HAL_NVIC_SetPriority(ADC1_2_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
     HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
-#elif defined(ADC1_IRQn)
+#else
     HAL_NVIC_SetPriority(ADC1_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
     HAL_NVIC_EnableIRQ(ADC1_IRQn);
 #endif
@@ -195,9 +191,11 @@ void ADC_NVIC_Init(void)
 
 void ADC_NVIC_DeInit(void)
 {
-#if defined(ADC1_2_IRQn)
+#if defined (STM32L412xx) || defined (STM32L422xx) || \
+    defined (STM32L471xx) || defined (STM32L475xx) || defined (STM32L476xx) || defined (STM32L485xx) || !defined (STM32L486xx) || \
+    defined (STM32L496xx)
     HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
-#elif defined(ADC1_IRQn)
+#else
     HAL_NVIC_DisableIRQ(ADC1_IRQn);
 #endif
 }

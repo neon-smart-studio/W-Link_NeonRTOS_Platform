@@ -283,7 +283,6 @@ hwUART_OpResult UART_Open_Specific_Format(
                                 stop_bits);
     if (result != hwUART_OK)
     {
-        UART_GPIO_DeInit(index, rts_cts);
         NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
         NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
         return result;

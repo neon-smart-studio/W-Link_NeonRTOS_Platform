@@ -31,20 +31,12 @@ static uint32_t DAC_Channel_To_HAL(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 
 static void DAC_EnableClock(void)
 {
-#if defined(__HAL_RCC_DAC1_CLK_ENABLE)
     __HAL_RCC_DAC1_CLK_ENABLE();
-#elif defined(__HAL_RCC_DAC_CLK_ENABLE)
-    __HAL_RCC_DAC_CLK_ENABLE();
-#endif
 }
 
 static void DAC_DisableClock(void)
 {
-#if defined(__HAL_RCC_DAC1_CLK_DISABLE)
     __HAL_RCC_DAC1_CLK_DISABLE();
-#elif defined(__HAL_RCC_DAC_CLK_DISABLE)
-    __HAL_RCC_DAC_CLK_DISABLE();
-#endif
 }
 
 static DAC_TypeDef * DAC_GetInstance(void)

@@ -1,0 +1,40 @@
+{
+  "build": {
+    "core": "stm32",
+    "cpu": "cortex-m0plus",
+    "extra_flags": "-DSTM32U0 -DSTM32U0xx -DSTM32U031xx -DUSE_HAL_DRIVER",
+    "f_cpu": "48000000L",
+    "mcu": "stm32u031r8t6",
+    "product_line": "STM32U031xx",
+    "variant": "STM32U0xx"
+  },
+  "connectivity": [],
+  "debug": {
+    "default_tools": [
+      "stlink"
+    ],
+    "jlink_device": "STM32U031R8",
+    "onboard_tools": [
+      "stlink"
+    ],
+    "openocd_target": "stm32u0x",
+    "svd_path": "STM32U031.svd"
+  },
+  "frameworks": [
+    "cmsis",
+    "stm32cube"
+  ],
+  "name": "ST Nucleo U031R8",
+  "upload": {
+    "maximum_ram_size": 12288,
+    "maximum_size": 65536,
+    "protocol": "stlink",
+    "protocols": [
+      "cmsis-dap",
+      "jlink",
+      "stlink"
+    ]
+  },
+  "url": "https://www.st.com/en/evaluation-tools/nucleo-u031r8.html",
+  "vendor": "ST"
+}

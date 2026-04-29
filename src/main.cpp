@@ -11,6 +11,11 @@
 
 #include "NeonRTOS.h"
 
+void HardFault_Handler()
+{
+    while (1);
+}
+
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
     // 堆疊溢出處理
     while (1);

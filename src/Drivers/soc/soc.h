@@ -223,12 +223,12 @@
 #include "stm32l1xx_hal_dac.h"
 #endif
 
-#if defined (STM32L412xx) || defined (STM32L422xx) && \
+#if defined (STM32L412xx) || defined (STM32L422xx) || \
     defined (STM32L431xx) || defined (STM32L432xx) || defined (STM32L433xx) || defined (STM32L442xx) || defined (STM32L443xx) || \
     defined (STM32L451xx) || defined (STM32L452xx) || defined (STM32L462xx) || \
     defined (STM32L471xx) || defined (STM32L475xx) || defined (STM32L476xx) || defined (STM32L485xx) || defined (STM32L486xx) || \
-    defined (STM32L496xx) || defined (STM32L4A6xx) && \
-    defined (STM32L4P5xx) || defined (STM32L4Q5xx) && \
+    defined (STM32L496xx) || defined (STM32L4A6xx) || \
+    defined (STM32L4P5xx) || defined (STM32L4Q5xx) || \
     defined (STM32L4R5xx) || defined (STM32L4R7xx) || defined (STM32L4R9xx) || defined (STM32L4S5xx) || defined (STM32L4S7xx) || defined (STM32L4S9xx)
 #include "stm32l4xx.h"
 #include "stm32l4xx_hal_gpio.h"
@@ -254,6 +254,37 @@
 #include "stm32l5xx_hal_rtc.h"
 #include "stm32l5xx_hal_adc.h"
 #include "stm32l5xx_hal_dac.h"
+#endif
+
+#if defined (STM32U073xx) || defined (STM32U083xx) || defined (STM32U031xx)
+#include "stm32u0xx.h"
+#include "stm32u0xx_hal_gpio.h"
+#include "stm32u0xx_hal_exti.h"
+#include "stm32u0xx_hal_uart.h"
+#include "stm32u0xx_hal_spi.h"
+#include "stm32u0xx_hal_i2c.h"
+#include "stm32u0xx_hal_dma.h"
+#include "stm32u0xx_hal_rtc.h"
+#include "stm32u0xx_hal_adc.h"
+#include "stm32u0xx_hal_dac.h"
+#endif
+
+#if defined (STM32U575xx) || defined (STM32U585xx) || \
+    defined (STM32U595xx) || defined (STM32U599xx) || \
+    defined (STM32U5A5xx) || defined (STM32U5A9xx) || \
+    defined (STM32U5F7xx) || defined (STM32U5G7xx) || \
+    defined (STM32U5F9xx) || defined (STM32U5G9xx) || \
+    defined (STM32U535xx) || defined (STM32U545xx)
+#include "stm32u5xx.h"
+#include "stm32u5xx_hal_gpio.h"
+#include "stm32u5xx_hal_exti.h"
+#include "stm32u5xx_hal_uart.h"
+#include "stm32u5xx_hal_spi.h"
+#include "stm32u5xx_hal_i2c.h"
+#include "stm32u5xx_hal_dma.h"
+#include "stm32u5xx_hal_rtc.h"
+#include "stm32u5xx_hal_adc.h"
+#include "stm32u5xx_hal_dac.h"
 #endif
 
 #if defined (STM32H743xx) || defined (STM32H753xx)  || defined (STM32H750xx) || defined (STM32H742xx)  || \

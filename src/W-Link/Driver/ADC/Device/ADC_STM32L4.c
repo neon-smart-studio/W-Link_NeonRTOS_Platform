@@ -14,63 +14,25 @@ ADC_HandleTypeDef g_adc[hwADC_Instance_MAX];
 static uint32_t ADC_Channel_To_HAL(hwADC_Channel_Index ch)
 {
     switch (ch) {
-#if defined(ADC_CHANNEL_0)
         case hwADC_Channel_Index_0:  return ADC_CHANNEL_0;
-#endif
-#if defined(ADC_CHANNEL_1)
         case hwADC_Channel_Index_1:  return ADC_CHANNEL_1;
-#endif
-#if defined(ADC_CHANNEL_2)
         case hwADC_Channel_Index_2:  return ADC_CHANNEL_2;
-#endif
-#if defined(ADC_CHANNEL_3)
         case hwADC_Channel_Index_3:  return ADC_CHANNEL_3;
-#endif
-#if defined(ADC_CHANNEL_4)
         case hwADC_Channel_Index_4:  return ADC_CHANNEL_4;
-#endif
-#if defined(ADC_CHANNEL_5)
         case hwADC_Channel_Index_5:  return ADC_CHANNEL_5;
-#endif
-#if defined(ADC_CHANNEL_6)
         case hwADC_Channel_Index_6:  return ADC_CHANNEL_6;
-#endif
-#if defined(ADC_CHANNEL_7)
         case hwADC_Channel_Index_7:  return ADC_CHANNEL_7;
-#endif
-#if defined(ADC_CHANNEL_8)
         case hwADC_Channel_Index_8:  return ADC_CHANNEL_8;
-#endif
-#if defined(ADC_CHANNEL_9)
         case hwADC_Channel_Index_9:  return ADC_CHANNEL_9;
-#endif
-#if defined(ADC_CHANNEL_10)
         case hwADC_Channel_Index_10: return ADC_CHANNEL_10;
-#endif
-#if defined(ADC_CHANNEL_11)
         case hwADC_Channel_Index_11: return ADC_CHANNEL_11;
-#endif
-#if defined(ADC_CHANNEL_12)
         case hwADC_Channel_Index_12: return ADC_CHANNEL_12;
-#endif
-#if defined(ADC_CHANNEL_13)
         case hwADC_Channel_Index_13: return ADC_CHANNEL_13;
-#endif
-#if defined(ADC_CHANNEL_14)
         case hwADC_Channel_Index_14: return ADC_CHANNEL_14;
-#endif
-#if defined(ADC_CHANNEL_15)
         case hwADC_Channel_Index_15: return ADC_CHANNEL_15;
-#endif
-#if defined(ADC_CHANNEL_16)
         case hwADC_Channel_Index_16: return ADC_CHANNEL_16;
-#endif
-#if defined(ADC_CHANNEL_17)
         case hwADC_Channel_Index_17: return ADC_CHANNEL_17;
-#endif
-#if defined(ADC_CHANNEL_18)
         case hwADC_Channel_Index_18: return ADC_CHANNEL_18;
-#endif
         default: return 0;
     }
 }

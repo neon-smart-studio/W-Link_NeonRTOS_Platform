@@ -304,9 +304,9 @@ void NeonRTOS_TaskResume(NeonRTOS_TaskHandle* pTaskHandle)
 	vTaskResume((TaskHandle_t)*pTaskHandle);
 }
 
-NeonRTOS_Time_t NeonRTOS_TaskGetTickCount()
+NeonRTOS_Time_t NeonRTOS_Millis(void)
 {
-	return xTaskGetTickCount();
+    return (NeonRTOS_Time_t)(xTaskGetTickCount() * portTICK_PERIOD_MS);
 }
 
 NeonRTOS_ReturnVal_e NeonRTOS_LockObjDelete(NeonRTOS_LockObj_t* pLockObj)

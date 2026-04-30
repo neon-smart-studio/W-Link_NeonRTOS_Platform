@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "soc.h"  
+
 #include "UART_Def.h"
 
 #include "UART_Index.h"

@@ -2,6 +2,11 @@
 #ifndef CAN_H
 #define CAN_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "soc.h"  
+
 #include "CAN_Def.h"
 
 #include "CAN_Index.h"

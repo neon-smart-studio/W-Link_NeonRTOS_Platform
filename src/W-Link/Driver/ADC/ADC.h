@@ -2,6 +2,8 @@
 #ifndef ADC_H
 #define ADC_H
 
+#include "soc.h"  
+
 #include "ADC_Def.h"
 
 #include "ADC_Channel.h"

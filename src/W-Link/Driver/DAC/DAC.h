@@ -2,6 +2,8 @@
 #ifndef DAC_H
 #define DAC_H
 
+#include "soc.h"  
+
 #include "DAC_Def.h"
 
 #include "DAC_Channel.h"

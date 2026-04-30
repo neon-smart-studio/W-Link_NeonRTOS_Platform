@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "soc.h"  
+
 #include "Timer_Def.h"
 
 #include "Timer_Index.h"

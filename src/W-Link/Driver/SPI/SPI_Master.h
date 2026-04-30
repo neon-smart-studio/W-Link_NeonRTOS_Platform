@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 
+#include "soc.h"  
+
 #include "SPI_Def.h"
 
 #include "SPI_Index.h"

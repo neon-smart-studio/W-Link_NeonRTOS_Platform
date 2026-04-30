@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "soc.h"  
+
 #include "PWM_Def.h"
 
 #include "PWM_Index.h"

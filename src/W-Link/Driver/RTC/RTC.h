@@ -4,6 +4,8 @@
 
 #include <time.h>
 
+#include "soc.h"  
+
 #include "RTC_Def.h"
 
 #include "RTC_Index.h"

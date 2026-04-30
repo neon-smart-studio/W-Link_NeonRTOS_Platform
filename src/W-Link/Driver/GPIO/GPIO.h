@@ -2,6 +2,8 @@
 #ifndef GPIO_H
 #define GPIO_H
 
+#include <stdbool.h>
+
 #include "soc.h"
 
 #include "Pin/GPIO_Pin.h"

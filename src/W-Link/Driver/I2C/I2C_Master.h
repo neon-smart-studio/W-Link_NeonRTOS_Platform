@@ -2,6 +2,11 @@
 #ifndef I2C_MASTER_H
 #define I2C_MASTER_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "soc.h"  
+
 #include "I2C_Def.h"
 
 #include "I2C_Index.h"

@@ -219,8 +219,13 @@ hwUART_OpResult UART_Open_Specific_Format(
 
     GPIO_InitTypeDef g_uart_tx = {0};
     g_uart_tx.Pin       = tx_soc_pin;
+#ifdef STM32F1
+    g_uart_tx.Mode      = GPIO_MODE_AF_PP;
+    g_uart_tx.Pull      = GPIO_PULLUP;   // 或 GPIO_NOPULL
+#else
     g_uart_tx.Mode      = GPIO_MODE_AF_PP;
     g_uart_tx.Pull      = GPIO_NOPULL;
+#endif
 #ifdef GPIO_SPEED_FREQ_VERY_HIGH
     g_uart_tx.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
 #else
@@ -233,8 +238,13 @@ hwUART_OpResult UART_Open_Specific_Format(
 
     GPIO_InitTypeDef g_uart_rx = {0};
     g_uart_rx.Pin       = rx_soc_pin;
+#ifdef STM32F1
+    g_uart_rx.Mode      = GPIO_MODE_AF_INPUT;
+    g_uart_rx.Pull      = GPIO_PULLUP;   // 或 GPIO_NOPULL
+#else
     g_uart_rx.Mode      = GPIO_MODE_AF_PP;
     g_uart_rx.Pull      = GPIO_NOPULL;
+#endif
 #ifdef GPIO_SPEED_FREQ_VERY_HIGH
     g_uart_rx.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
 #else

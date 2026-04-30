@@ -151,7 +151,7 @@ hwUART_OpResult UART_Instance_Init(
     memset(huart, 0, sizeof(*huart));
 
     huart->Instance = base;
-    huart->Init.BaudRate = baudrate * 3;
+    huart->Init.BaudRate = baudrate;
 
     switch (data_bits)
     {

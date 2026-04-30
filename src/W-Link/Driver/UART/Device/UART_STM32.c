@@ -221,7 +221,7 @@ hwUART_OpResult UART_Open_Specific_Format(
     g_uart_tx.Pin       = tx_soc_pin;
 #ifdef STM32F1
     g_uart_tx.Mode      = GPIO_MODE_AF_PP;
-    g_uart_tx.Pull      = GPIO_PULLUP;   // 或 GPIO_NOPULL
+    g_uart_tx.Pull      = GPIO_NOPULL;   // 或 GPIO_NOPULL
 #else
     g_uart_tx.Mode      = GPIO_MODE_AF_PP;
     g_uart_tx.Pull      = GPIO_NOPULL;
@@ -284,6 +284,112 @@ hwUART_OpResult UART_Open_Specific_Format(
 #endif
         HAL_GPIO_Init(cts_soc_base, &g_uart_cts);
     }
+
+#ifdef STM32F1
+    __HAL_RCC_AFIO_CLK_ENABLE();
+
+    hwGPIO_Pin default_tx_pin = UART_Pin_Def_Table[index][0].tx_pin;
+    hwGPIO_Pin default_rx_pin = UART_Pin_Def_Table[index][0].rx_pin;
+    hwGPIO_Pin default_rts_pin = UART_Pin_Def_Table[index][0].rts_pin;
+    hwGPIO_Pin default_cts_pin = UART_Pin_Def_Table[index][0].cts_pin;
+
+    hwGPIO_Pin remap_tx_pin = UART_Pin_Def_Table[index][1].tx_pin;
+    hwGPIO_Pin remap_rx_pin = UART_Pin_Def_Table[index][1].rx_pin;
+    hwGPIO_Pin remap_rts_pin = UART_Pin_Def_Table[index][1].rts_pin;
+    hwGPIO_Pin remap_cts_pin = UART_Pin_Def_Table[index][10].cts_pin;
+
+    hwGPIO_Pin partial_tx_pin = UART_Pin_Def_Table[index][2].tx_pin;
+    hwGPIO_Pin partial_rx_pin = UART_Pin_Def_Table[index][2].rx_pin;
+    hwGPIO_Pin partial_rts_pin = UART_Pin_Def_Table[index][2].rts_pin;
+    hwGPIO_Pin partial_cts_pin = UART_Pin_Def_Table[index][2].cts_pin;
+
+    if (index == hwUART_Index_0) { // USART1
+        bool is_default =
+            tx_pin == default_tx_pin &&
+            rx_pin == default_rx_pin &&
+            (!rts_cts ||
+                (rts_pin == default_rts_pin &&
+                cts_pin == default_cts_pin));
+
+        bool is_remap =
+            tx_pin == remap_tx_pin &&
+            rx_pin == remap_rx_pin &&
+            (!rts_cts ||
+                (rts_pin == hwGPIO_Pin_NC &&
+                cts_pin == hwGPIO_Pin_NC)); // USART1 remap 通常只 remap TX/RX
+
+        if (is_remap) {
+            __HAL_AFIO_REMAP_USART1_ENABLE();
+        } else if (is_default) {
+            __HAL_AFIO_REMAP_USART1_DISABLE();
+        } else {
+            NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
+            NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+            return hwGPIO_InvalidParameter;
+        }
+    }
+
+    if (index == hwUART_Index_1) { // USART2
+        bool is_default =
+            tx_pin == default_tx_pin &&
+            rx_pin == default_rx_pin &&
+            (!rts_cts ||
+                (rts_pin == default_rts_pin &&
+                cts_pin == default_cts_pin));
+
+        bool is_remap =
+            tx_pin == remap_tx_pin &&
+            rx_pin == remap_rx_pin &&
+            (!rts_cts ||
+                (rts_pin == remap_rts_pin &&
+                cts_pin == remap_cts_pin));
+
+        if (is_remap) {
+            __HAL_AFIO_REMAP_USART2_ENABLE();
+        } else if (is_default) {
+            __HAL_AFIO_REMAP_USART2_DISABLE();
+        } else {
+            NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
+            NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+            return hwGPIO_InvalidParameter;
+        }
+    }
+
+    if (index == hwUART_Index_2) { // USART3
+        bool is_default =
+            tx_pin == default_tx_pin &&
+            rx_pin == default_rx_pin &&
+            (!rts_cts ||
+                (rts_pin == default_rts_pin &&
+                cts_pin == default_cts_pin));
+
+        bool is_partial =
+            tx_pin == remap_tx_pin &&
+            rx_pin == remap_rx_pin &&
+            (!rts_cts ||
+                (rts_pin == remap_rts_pin &&
+                cts_pin == remap_cts_pin));
+
+        bool is_full =
+            tx_pin == partial_tx_pin &&
+            rx_pin == partial_rx_pin &&
+            (!rts_cts ||
+                (rts_pin == partial_rts_pin &&
+                cts_pin == partial_cts_pin));
+
+        if (is_partial) {
+            __HAL_AFIO_REMAP_USART3_PARTIAL();
+        } else if (is_full) {
+            __HAL_AFIO_REMAP_USART3_ENABLE();
+        } else if (is_default) {
+            __HAL_AFIO_REMAP_USART3_DISABLE();
+        } else {
+            NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
+            NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+            return hwGPIO_InvalidParameter;
+        }
+    }
+#endif
 
     hwUART_OpResult result = UART_Instance_Init(index,
                                 baudrate,
@@ -355,6 +461,17 @@ hwUART_OpResult UART_Close(hwUART_Index index)
     hwUART_OpResult result = UART_Instance_DeInit(index);
     if (result != hwUART_OK)
         return result;
+
+#ifdef STM32F1
+    switch(index)
+    {
+        case hwUART_Index_0: __HAL_AFIO_REMAP_USART1_DISABLE(); break;
+        case hwUART_Index_1: __HAL_AFIO_REMAP_USART2_DISABLE(); break;
+        case hwUART_Index_2: __HAL_AFIO_REMAP_USART3_DISABLE(); break;
+    }
+
+    __HAL_RCC_AFIO_CLK_DISABLE();
+#endif
 
     HAL_GPIO_DeInit(tx_soc_base, tx_soc_pin);
     HAL_GPIO_DeInit(rx_soc_base, rx_soc_pin);

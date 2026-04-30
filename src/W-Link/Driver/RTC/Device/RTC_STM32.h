@@ -10,6 +10,10 @@
 #define RTC_IRQ_NVIC_PRIORITY        5
 #define RTC_IRQ_NVIC_SUB_PRIORITY    0
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 extern RTC_HandleTypeDef g_rtc[hwRTC_Index_MAX];
 
 void RTC_Enable_Clock_Source(void);
@@ -21,5 +25,9 @@ void RTC_NVIC_Init(void);
 void RTC_NVIC_DeInit(void);
 
 hwRTC_Index RTC_IndexFromHandle(RTC_HandleTypeDef *hrtc);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif

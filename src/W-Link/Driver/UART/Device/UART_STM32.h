@@ -10,6 +10,10 @@
 #define UART_IRQ_NVIC_PRIORITY      5
 #define UART_IRQ_NVIC_SUB_PRIORITY  0
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 extern UART_HandleTypeDef g_uart[hwUART_Index_MAX];
 extern bool UART_Init_Status[hwUART_Index_MAX];
 
@@ -27,5 +31,9 @@ hwUART_OpResult UART_Instance_DeInit(hwUART_Index index);
 
 void UART_NVIC_Init(hwUART_Index index);
 void UART_NVIC_DeInit(hwUART_Index index);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif

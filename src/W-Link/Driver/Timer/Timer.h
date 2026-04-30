@@ -11,6 +11,10 @@
 
 #include "Timer_Index.h"
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 typedef void(* onTimerEventHandler)(hwTimer_Index index);
 
 bool Timer_is_Init(hwTimer_Index hw_index);
@@ -22,5 +26,9 @@ hwTimer_OpResult Timer_Reload(hwTimer_Index hw_index, uint32_t duration_us);
 hwTimer_OpResult Timer_Stop(hwTimer_Index hw_index);
 hwTimer_OpResult Timer_Read_Ticks(hwTimer_Index hw_index, uint32_t* ticks);
 hwTimer_OpResult Timer_Read_uSec(hwTimer_Index hw_index, uint32_t* uSec);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif //TIMER_H

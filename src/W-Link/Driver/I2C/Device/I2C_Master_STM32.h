@@ -14,6 +14,10 @@
 #define I2C_IRQ_NVIC_PRIORITY      5
 #define I2C_IRQ_NVIC_SUB_PRIORITY  0
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 extern I2C_HandleTypeDef g_i2c[hwI2C_Index_MAX];
 extern bool I2C_Master_Init_Status[];
 
@@ -31,5 +35,9 @@ void I2C_NVIC_Init(hwI2C_Index index);
 void I2C_NVIC_DeInit(hwI2C_Index index);
 
 uint32_t I2C_Master_Get_Timing(hwI2C_Index index, hwI2C_Speed_Mode speed_mode);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif //I2C_MASTER_STM32_H

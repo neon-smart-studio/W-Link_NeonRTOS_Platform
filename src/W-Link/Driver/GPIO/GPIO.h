@@ -10,6 +10,10 @@
 
 #include "GPIO_Def.h"
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 bool GPIO_Pin_is_Init(hwGPIO_Pin pin);
 hwGPIO_OpStatus GPIO_Pin_Init(hwGPIO_Pin pin, hwGPIO_Direction dir, hwGPIO_Pull_Mode pull_mode);
 hwGPIO_OpStatus GPIO_Pin_DeInit(hwGPIO_Pin pin);
@@ -32,5 +36,9 @@ bool GPIO_Interrupt_Is_Enabled(hwGPIO_Int_Pin irq_pin);
 hwGPIO_OpStatus GPIO_Interrupt_Enable(hwGPIO_Int_Pin pin);
 hwGPIO_OpStatus GPIO_Interrupt_Disable(hwGPIO_Int_Pin pin);
 hwGPIO_OpStatus GPIO_Interrupt_Pin_Read(hwGPIO_Int_Pin pin, bool* level);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif //GPIO_H

@@ -10,6 +10,10 @@
 
 #include "SPI_Index.h"
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 hwSPI_OpResult SPI_Master_DummyByte(hwSPI_Index index);
 hwSPI_OpResult SPI_Master_WriteByte(hwSPI_Index index, uint8_t dat);
 hwSPI_OpResult SPI_Master_ReadByte(hwSPI_Index index, uint8_t* dat);
@@ -18,5 +22,9 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
 hwSPI_OpResult SPI_Master_DeInit(hwSPI_Index index);
 hwSPI_OpResult SPI_Change_Frequency(hwSPI_Index index, uint32_t clock_rate_hz);
 hwSPI_OpResult SPI_Change_Mode(hwSPI_Index index, hwSPI_OpMode opMode);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif //SPI_MASTER_H

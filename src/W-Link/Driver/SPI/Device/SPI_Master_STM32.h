@@ -10,6 +10,10 @@
 #define SPI_IRQ_NVIC_PRIORITY      5
 #define SPI_IRQ_NVIC_SUB_PRIORITY  0
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 extern SPI_HandleTypeDef g_spi[hwSPI_Index_MAX];
 extern bool Spi_Master_Init_Status[];
 
@@ -26,5 +30,9 @@ hwSPI_OpResult SPI_Instance_DeInit(hwSPI_Index index);
 
 void SPI_NVIC_Init(hwSPI_Index index);
 void SPI_NVIC_DeInit(hwSPI_Index index);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif

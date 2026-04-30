@@ -12,7 +12,7 @@
 
 #include "PWM/PWM.h"
 
-#ifdef STM32G4
+#ifdef DEVICE_STM32
 
 #include "PWM/PWM_Pin.h"
 
@@ -591,4 +591,4 @@ bool PWM_is_Init(hwPWM_Channel channel_index)
     return PWM_Channel_Init_Status[channel_index];
 }
 
-#endif //STM32G4
+#endif // DEVICE_STM32

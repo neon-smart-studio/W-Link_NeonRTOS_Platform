@@ -413,10 +413,14 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
         return hwI2C_InvalidParameter;
     }
 
-    GPIO_TypeDef *sda_soc_base = GPIO_Map_Soc_Base(I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].sda_pin);
-    GPIO_TypeDef *scl_soc_base = GPIO_Map_Soc_Base(I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].scl_pin);
-    uint16_t sda_soc_pin = GPIO_Map_Soc_Pin(I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].sda_pin);
-    uint16_t scl_soc_pin = GPIO_Map_Soc_Pin(I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].scl_pin);
+    hwGPIO_Pin sda_pin = I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].sda_pin;
+    hwGPIO_Pin scl_pin = I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].scl_pin;
+
+    GPIO_TypeDef *sda_soc_base = GPIO_Map_Soc_Base(sda_pin);
+    GPIO_TypeDef *scl_soc_base = GPIO_Map_Soc_Base(scl_pin);
+    
+    uint16_t sda_soc_pin = GPIO_Map_Soc_Pin(sda_pin);
+    uint16_t scl_soc_pin = GPIO_Map_Soc_Pin(scl_pin);
 
     if (sda_soc_pin == 0 || sda_soc_base == NULL ||
         scl_soc_pin == 0 || scl_soc_base == NULL) {
@@ -424,8 +428,8 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
     }
 
 #ifndef STM32F1
-    uint32_t sda_af = STM32_I2C_GetAF(index, I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].sda_pin);
-    uint32_t scl_af = STM32_I2C_GetAF(index, I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].scl_pin);
+    uint32_t sda_af = STM32_I2C_GetAF(index, sda_pin);
+    uint32_t scl_af = STM32_I2C_GetAF(index, scl_pin);
 
     if (sda_af == 0 || scl_af == 0) {
         return hwI2C_InvalidParameter;
@@ -467,7 +471,22 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
 #endif
     HAL_GPIO_Init(scl_soc_base, &g_i2c_scl);
 
-    hwI2C_OpResult result = I2C_Instance_Init(index, speed_mode);
+    hwI2C_OpResult result;
+
+#ifdef STM32F1
+    result = I2C_ApplyRemap(
+        index,
+        scl_pin,
+        sda_pin
+    );
+
+    if (result != hwI2C_OK) {
+        NeonRTOS_SyncObjDelete(&I2C_Master_Done_SyncHandle[index]);
+        return result;
+    }
+#endif
+
+    result = I2C_Instance_Init(index, speed_mode);
     if(result != hwI2C_OK) {
         NeonRTOS_SyncObjDelete(&I2C_Master_Done_SyncHandle[index]);
         return result;
@@ -475,8 +494,8 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
 
     I2C_NVIC_Init(index);
 
-    gpio_pin_init_status[I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].sda_pin] = true;
-    gpio_pin_init_status[I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].scl_pin] = true;
+    gpio_pin_init_status[sda_pin] = true;
+    gpio_pin_init_status[scl_pin] = true;
 
     I2C_Clock_Speed_Mode[index] = speed_mode;
     I2C_Master_Init_Status[index] = true;
@@ -494,14 +513,14 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index)
         return hwI2C_OK;
     }
 
-    GPIO_TypeDef *sda_soc_base =
-        GPIO_Map_Soc_Base(I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].sda_pin);
-    GPIO_TypeDef *scl_soc_base =
-        GPIO_Map_Soc_Base(I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].scl_pin);
-    uint16_t sda_soc_pin =
-        GPIO_Map_Soc_Pin(I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].sda_pin);
-    uint16_t scl_soc_pin =
-        GPIO_Map_Soc_Pin(I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].scl_pin);
+    hwGPIO_Pin sda_pin = I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].sda_pin;
+    hwGPIO_Pin scl_pin = I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].scl_pin;
+
+    GPIO_TypeDef *sda_soc_base = GPIO_Map_Soc_Base(sda_pin);
+    GPIO_TypeDef *scl_soc_base = GPIO_Map_Soc_Base(scl_pin);
+    
+    uint16_t sda_soc_pin = GPIO_Map_Soc_Pin(sda_pin);
+    uint16_t scl_soc_pin = GPIO_Map_Soc_Pin(scl_pin);
 
     if (sda_soc_pin == 0 || sda_soc_base == NULL ||
         scl_soc_pin == 0 || scl_soc_base == NULL) {
@@ -514,13 +533,17 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index)
 
     I2C_Instance_DeInit(index);
 
+#ifdef STM32F1
+    I2C_RestoreRemap(index);
+#endif
+
     NeonRTOS_SyncObjDelete(&I2C_Master_Done_SyncHandle[index]);
 
     HAL_GPIO_DeInit(sda_soc_base, sda_soc_pin);
     HAL_GPIO_DeInit(scl_soc_base, scl_soc_pin);
 
-    gpio_pin_init_status[I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].sda_pin] = false;
-    gpio_pin_init_status[I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]].scl_pin] = false;
+    gpio_pin_init_status[sda_pin] = false;
+    gpio_pin_init_status[scl_pin] = false;
 
     return hwI2C_OK;
 }

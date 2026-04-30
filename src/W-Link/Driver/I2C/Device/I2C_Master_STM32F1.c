@@ -9,6 +9,7 @@
 #ifdef STM32F1
 
 #include "I2C/I2C_Master.h"
+#include "I2C/I2C_Pin.h"
 #include "I2C_Master_STM32.h"
 #include "GPIO/Device/GPIO_STM32.h"
 
@@ -191,6 +192,104 @@ void I2C_NVIC_DeInit(hwI2C_Index index)
         default:
             break;
     }
+}
+
+hwI2C_OpResult I2C_ApplyRemap(
+    hwI2C_Index index,
+    hwGPIO_Pin scl_pin,
+    hwGPIO_Pin sda_pin
+)
+{
+    __HAL_RCC_AFIO_CLK_ENABLE();
+
+    hwGPIO_Pin default_scl_pin = I2C_Pin_Def_Table[index][I2C_Pinset_DEFAULT].scl_pin;
+    hwGPIO_Pin default_sda_pin = I2C_Pin_Def_Table[index][I2C_Pinset_DEFAULT].sda_pin;
+
+    hwGPIO_Pin alt_scl_pin = I2C_Pin_Def_Table[index][I2C_Pinset_ALT].scl_pin;
+    hwGPIO_Pin alt_sda_pin = I2C_Pin_Def_Table[index][I2C_Pinset_ALT].sda_pin;
+
+    bool is_default =
+        scl_pin == default_scl_pin &&
+        sda_pin == default_sda_pin;
+
+    bool is_alt =
+        scl_pin == alt_scl_pin &&
+        sda_pin == alt_sda_pin;
+
+    switch (index)
+    {
+#if defined(I2C1_BASE)
+        case hwI2C_Index_0:
+            if (is_default) {
+#if defined(__HAL_AFIO_REMAP_I2C1_DISABLE)
+                __HAL_AFIO_REMAP_I2C1_DISABLE();
+#endif
+                return hwI2C_OK;
+            }
+
+            if (is_alt) {
+#if defined(__HAL_AFIO_REMAP_I2C1_ENABLE)
+                __HAL_AFIO_REMAP_I2C1_ENABLE();
+                return hwI2C_OK;
+#else
+                return hwI2C_InvalidParameter;
+#endif
+            }
+
+            return hwI2C_InvalidParameter;
+#endif
+
+#if defined(I2C2_BASE)
+        case hwI2C_Index_1:
+            if (is_default) {
+                return hwI2C_OK;
+            }
+
+            /*
+             * STM32F1 I2C2 通常沒有 AFIO remap。
+             */
+            if (is_alt) {
+#if defined(__HAL_AFIO_REMAP_I2C2_ENABLE)
+                __HAL_AFIO_REMAP_I2C2_ENABLE();
+                return hwI2C_OK;
+#else
+                return hwI2C_InvalidParameter;
+#endif
+            }
+
+            return hwI2C_InvalidParameter;
+#endif
+
+        default:
+            return hwI2C_OK;
+    }
+}
+
+void I2C_RestoreRemap(hwI2C_Index index)
+{
+    switch (index)
+    {
+#if defined(I2C1_BASE)
+        case hwI2C_Index_0:
+#if defined(__HAL_AFIO_REMAP_I2C1_DISABLE)
+            __HAL_AFIO_REMAP_I2C1_DISABLE();
+#endif
+            break;
+#endif
+
+#if defined(I2C2_BASE)
+        case hwI2C_Index_1:
+#if defined(__HAL_AFIO_REMAP_I2C2_DISABLE)
+            __HAL_AFIO_REMAP_I2C2_DISABLE();
+#endif
+            break;
+#endif
+
+        default:
+            break;
+    }
+
+    __HAL_RCC_AFIO_CLK_DISABLE();
 }
 
 #endif // STM32F1

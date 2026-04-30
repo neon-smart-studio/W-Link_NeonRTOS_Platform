@@ -105,13 +105,18 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         return hwSPI_OK;
     }
 
-    GPIO_TypeDef *miso_soc_base = GPIO_Map_Soc_Base(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].miso_pin);
-    GPIO_TypeDef *mosi_soc_base = GPIO_Map_Soc_Base(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].mosi_pin);
-    GPIO_TypeDef *sclk_soc_base = GPIO_Map_Soc_Base(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].sclk_pin);
+    hwGPIO_Pin miso_pin = SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].miso_pin;
+    hwGPIO_Pin mosi_pin = SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].mosi_pin;
+    hwGPIO_Pin sclk_pin = SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].sclk_pin;
+    hwGPIO_Pin cs_pin = SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin;
 
-    uint16_t miso_soc_pin = GPIO_Map_Soc_Pin(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].miso_pin);
-    uint16_t mosi_soc_pin = GPIO_Map_Soc_Pin(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].mosi_pin);
-    uint16_t sclk_soc_pin = GPIO_Map_Soc_Pin(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].sclk_pin);
+    GPIO_TypeDef *miso_soc_base = GPIO_Map_Soc_Base(miso_pin);
+    GPIO_TypeDef *mosi_soc_base = GPIO_Map_Soc_Base(mosi_pin);
+    GPIO_TypeDef *sclk_soc_base = GPIO_Map_Soc_Base(sclk_pin);
+
+    uint16_t miso_soc_pin = GPIO_Map_Soc_Pin(miso_pin);
+    uint16_t mosi_soc_pin = GPIO_Map_Soc_Pin(mosi_pin);
+    uint16_t sclk_soc_pin = GPIO_Map_Soc_Pin(sclk_pin);
 
     GPIO_TypeDef *cs_soc_base = NULL;
     uint16_t cs_soc_pin = 0;
@@ -123,10 +128,10 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         return hwSPI_InvalidParameter;
     }
 
-    if (SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC)
     {
-        cs_soc_base = GPIO_Map_Soc_Base(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin);
-        cs_soc_pin  = GPIO_Map_Soc_Pin(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin);
+        cs_soc_base = GPIO_Map_Soc_Base(cs_pin);
+        cs_soc_pin  = GPIO_Map_Soc_Pin(cs_pin);
 
         if (cs_soc_pin == 0 || cs_soc_base == NULL)
         {
@@ -135,9 +140,9 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     }
 
 #ifndef STM32F1
-    uint32_t mosi_af = STM32_SPI_GetAF(index, SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].mosi_pin);
-    uint32_t miso_af = STM32_SPI_GetAF(index, SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].miso_pin);
-    uint32_t sclk_af = STM32_SPI_GetAF(index, SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].sclk_pin);
+    uint32_t mosi_af = STM32_SPI_GetAF(index, mosi_pin);
+    uint32_t miso_af = STM32_SPI_GetAF(index, miso_pin);
+    uint32_t sclk_af = STM32_SPI_GetAF(index, sclk_pin);
     uint32_t cs_af   = 0;
 
     if (mosi_af == 0 || miso_af == 0 || sclk_af == 0)
@@ -145,9 +150,9 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         return hwSPI_InvalidParameter;
     }
 
-    if (SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC)
     {
-        cs_af = STM32_SPI_GetAF(index, SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin);
+        cs_af = STM32_SPI_GetAF(index, cs_pin);
         if (cs_af == 0)
         {
             return hwSPI_InvalidParameter;
@@ -179,7 +184,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     GPIO_Enable_RCC_Clock(mosi_soc_base);
     GPIO_Enable_RCC_Clock(sclk_soc_base);
 
-    if (SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC)
     {
         GPIO_Enable_RCC_Clock(cs_soc_base);
     }
@@ -225,9 +230,13 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     g_spi_sclk.Alternate = sclk_af;
 #endif
     HAL_GPIO_Init(sclk_soc_base, &g_spi_sclk);
+    
+    bool hw_cs = false;
 
-    if (SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC)
     {
+        hw_cs = true;
+
         GPIO_InitTypeDef g_spi_cs = {0};
         g_spi_cs.Pin       = cs_soc_pin;
         g_spi_cs.Mode      = GPIO_MODE_AF_PP;
@@ -243,7 +252,27 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         HAL_GPIO_Init(cs_soc_base, &g_spi_cs);
     }
 
-    hwSPI_OpResult result = SPI_Instance_Init(index, clock_rate_hz, opMode);
+    hwSPI_OpResult result;
+
+#ifdef STM32F1
+    result = SPI_ApplyRemap(
+        index,
+        mosi_pin,
+        miso_pin,
+        sclk_pin,
+        cs_pin,
+        hw_cs
+    );
+
+    if (result != hwSPI_OK) {
+        NeonRTOS_LockObjDelete(&Spi_Master_Access_Mutex[index]);
+        NeonRTOS_SyncObjDelete(&Spi_Master_Send_SyncHandle[index]);
+        NeonRTOS_SyncObjDelete(&Spi_Master_Recv_SyncHandle[index]);
+        return result;
+    }
+#endif
+
+    result = SPI_Instance_Init(index, clock_rate_hz, opMode);
     if (result != hwSPI_OK)
     {
         NeonRTOS_LockObjDelete(&Spi_Master_Access_Mutex[index]);
@@ -254,13 +283,13 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
 
     SPI_NVIC_Init(index);
 
-    gpio_pin_init_status[SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].miso_pin] = true;
-    gpio_pin_init_status[SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].mosi_pin] = true;
-    gpio_pin_init_status[SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].sclk_pin] = true;
+    gpio_pin_init_status[miso_pin] = true;
+    gpio_pin_init_status[mosi_pin] = true;
+    gpio_pin_init_status[sclk_pin] = true;
 
-    if (SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC)
     {
-        gpio_pin_init_status[SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin] = true;
+        gpio_pin_init_status[cs_pin] = true;
         Spi_Master_Use_CS[index] = true;
     }
 
@@ -281,13 +310,18 @@ hwSPI_OpResult SPI_Master_DeInit(hwSPI_Index index)
         return hwSPI_OK;
     }
 
-    GPIO_TypeDef *miso_soc_base = GPIO_Map_Soc_Base(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].miso_pin);
-    GPIO_TypeDef *mosi_soc_base = GPIO_Map_Soc_Base(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].mosi_pin);
-    GPIO_TypeDef *sclk_soc_base = GPIO_Map_Soc_Base(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].sclk_pin);
+    hwGPIO_Pin miso_pin = SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].miso_pin;
+    hwGPIO_Pin mosi_pin = SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].mosi_pin;
+    hwGPIO_Pin sclk_pin = SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].sclk_pin;
+    hwGPIO_Pin cs_pin = SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin;
 
-    uint16_t miso_soc_pin = GPIO_Map_Soc_Pin(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].miso_pin);
-    uint16_t mosi_soc_pin = GPIO_Map_Soc_Pin(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].mosi_pin);
-    uint16_t sclk_soc_pin = GPIO_Map_Soc_Pin(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].sclk_pin);
+    GPIO_TypeDef *miso_soc_base = GPIO_Map_Soc_Base(miso_pin);
+    GPIO_TypeDef *mosi_soc_base = GPIO_Map_Soc_Base(mosi_pin);
+    GPIO_TypeDef *sclk_soc_base = GPIO_Map_Soc_Base(sclk_pin);
+
+    uint16_t miso_soc_pin = GPIO_Map_Soc_Pin(miso_pin);
+    uint16_t mosi_soc_pin = GPIO_Map_Soc_Pin(mosi_pin);
+    uint16_t sclk_soc_pin = GPIO_Map_Soc_Pin(sclk_pin);
 
     GPIO_TypeDef *cs_soc_base = NULL;
     uint16_t cs_soc_pin = 0;
@@ -301,8 +335,8 @@ hwSPI_OpResult SPI_Master_DeInit(hwSPI_Index index)
 
     if (Spi_Master_Use_CS[index] == true)
     {
-        cs_soc_base = GPIO_Map_Soc_Base(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin);
-        cs_soc_pin  = GPIO_Map_Soc_Pin(SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin);
+        cs_soc_base = GPIO_Map_Soc_Base(cs_pin);
+        cs_soc_pin  = GPIO_Map_Soc_Pin(cs_pin);
 
         if (cs_soc_pin == 0 || cs_soc_base == NULL)
         {
@@ -315,6 +349,10 @@ hwSPI_OpResult SPI_Master_DeInit(hwSPI_Index index)
     SPI_NVIC_DeInit(index);
 
     SPI_Instance_DeInit(index);
+
+#ifdef STM32F1
+    SPI_RestoreRemap(index);
+#endif
 
     HAL_GPIO_DeInit(miso_soc_base, miso_soc_pin);
     HAL_GPIO_DeInit(mosi_soc_base, mosi_soc_pin);
@@ -329,13 +367,13 @@ hwSPI_OpResult SPI_Master_DeInit(hwSPI_Index index)
     NeonRTOS_SyncObjDelete(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjDelete(&Spi_Master_Recv_SyncHandle[index]);
 
-    gpio_pin_init_status[SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].miso_pin] = false;
-    gpio_pin_init_status[SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].mosi_pin] = false;
-    gpio_pin_init_status[SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].sclk_pin] = false;
+    gpio_pin_init_status[miso_pin] = false;
+    gpio_pin_init_status[mosi_pin] = false;
+    gpio_pin_init_status[sclk_pin] = false;
 
     if (Spi_Master_Use_CS[index] == true)
     {
-        gpio_pin_init_status[SPI_Pin_Def_Table[index][SPI_Index_Map_Alt[index]].cs_pin] = false;
+        gpio_pin_init_status[cs_pin] = false;
         Spi_Master_Use_CS[index] = false;
     }
 

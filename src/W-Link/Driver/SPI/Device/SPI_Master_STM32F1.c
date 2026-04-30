@@ -7,7 +7,10 @@
 #ifdef STM32F1
 
 #include "SPI/SPI_Master.h"
+#include "SPI/SPI_Pin.h"
+
 #include "SPI_Master_STM32.h"
+
 #include "GPIO/Device/GPIO_STM32.h"
 
 SPI_HandleTypeDef g_spi[hwSPI_Index_MAX];
@@ -215,6 +218,118 @@ void SPI_NVIC_DeInit(hwSPI_Index index)
         case hwSPI_Index_1: HAL_NVIC_DisableIRQ(SPI2_IRQn); break;
 #endif
     }
+}
+
+hwSPI_OpResult SPI_ApplyRemap(
+    hwSPI_Index index,
+    hwGPIO_Pin mosi_pin,
+    hwGPIO_Pin miso_pin,
+    hwGPIO_Pin sck_pin,
+    hwGPIO_Pin nss_pin,
+    bool use_hw_nss
+)
+{
+    __HAL_RCC_AFIO_CLK_ENABLE();
+
+    hwGPIO_Pin default_mosi_pin = SPI_Pin_Def_Table[index][0].mosi_pin;
+    hwGPIO_Pin default_miso_pin = SPI_Pin_Def_Table[index][0].miso_pin;
+    hwGPIO_Pin default_sck_pin  = SPI_Pin_Def_Table[index][0].sclk_pin;
+    hwGPIO_Pin default_nss_pin  = SPI_Pin_Def_Table[index][0].cs_pin;
+
+    hwGPIO_Pin alt_mosi_pin = SPI_Pin_Def_Table[index][1].mosi_pin;
+    hwGPIO_Pin alt_miso_pin = SPI_Pin_Def_Table[index][1].miso_pin;
+    hwGPIO_Pin alt_sck_pin  = SPI_Pin_Def_Table[index][1].sclk_pin;
+    hwGPIO_Pin alt_nss_pin  = SPI_Pin_Def_Table[index][1].cs_pin;
+
+    bool is_default =
+        mosi_pin == default_mosi_pin &&
+        miso_pin == default_miso_pin &&
+        sck_pin  == default_sck_pin &&
+        (!use_hw_nss || nss_pin == default_nss_pin);
+
+    bool is_alt =
+        mosi_pin == alt_mosi_pin &&
+        miso_pin == alt_miso_pin &&
+        sck_pin  == alt_sck_pin &&
+        (!use_hw_nss || nss_pin == alt_nss_pin);
+
+    switch (index)
+    {
+#if defined(SPI1_BASE)
+        case hwSPI_Index_0:
+            if (is_default) {
+#if defined(__HAL_AFIO_REMAP_SPI1_DISABLE)
+                __HAL_AFIO_REMAP_SPI1_DISABLE();
+#else
+                __HAL_AFIO_REMAP_SPI1_DISABLE();
+#endif
+                return hwSPI_OK;
+            }
+
+            if (is_alt) {
+#if defined(__HAL_AFIO_REMAP_SPI1_ENABLE)
+                __HAL_AFIO_REMAP_SPI1_ENABLE();
+#else
+                __HAL_AFIO_REMAP_SPI1_ENABLE();
+#endif
+                return hwSPI_OK;
+            }
+
+            return hwSPI_InvalidParameter;
+#endif
+
+#if defined(SPI2_BASE)
+        case hwSPI_Index_1:
+            if (is_default) {
+                return hwSPI_OK;
+            }
+
+            /*
+             * STM32F1 SPI2 通常沒有 AFIO SPI2 remap。
+             * 你 pin table 裡的 PC3/PC2/PB10/PB9 不建議直接當 ALT 用。
+             */
+            if (is_alt) {
+#if defined(__HAL_AFIO_REMAP_SPI2_ENABLE)
+                __HAL_AFIO_REMAP_SPI2_ENABLE();
+                return hwSPI_OK;
+#else
+                return hwSPI_InvalidParameter;
+#endif
+            }
+
+            return hwSPI_InvalidParameter;
+#endif
+
+        default:
+            return hwSPI_OK;
+    }
+}
+
+void SPI_RestoreRemap(hwSPI_Index index)
+{
+    switch (index)
+    {
+#if defined(SPI1_BASE)
+        case hwSPI_Index_0:
+#if defined(__HAL_AFIO_REMAP_SPI1_DISABLE)
+            __HAL_AFIO_REMAP_SPI1_DISABLE();
+#endif
+            break;
+#endif
+
+#if defined(SPI2_BASE)
+        case hwSPI_Index_1:
+#if defined(__HAL_AFIO_REMAP_SPI2_DISABLE)
+            __HAL_AFIO_REMAP_SPI2_DISABLE();
+#endif
+            break;
+#endif
+
+        default:
+            break;
+    }
+
+    __HAL_RCC_AFIO_CLK_DISABLE();
 }
 
 #endif // STM32F1

@@ -354,7 +354,6 @@ void UART_NVIC_DeInit(hwUART_Index index)
     }
 }
 
-
 hwUART_OpResult UART_ApplyRemap(
     hwUART_Index index,
     hwGPIO_Pin tx_pin,

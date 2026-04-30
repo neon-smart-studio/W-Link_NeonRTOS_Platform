@@ -4,9 +4,8 @@
 
 #include "soc.h"
 
-#include "I2C/I2C_Def.h"
-
-#include "I2C/I2C_Index.h"
+#include "I2C/I2C_Master.h"
+#include "GPIO/GPIO.h"
 
 #define I2C_MASTER_STANDARD_MODE_CLK_FREQUENCY   100000
 #define I2C_MASTER_FAST_MODE_CLK_FREQUENCY       400000
@@ -35,6 +34,14 @@ void I2C_NVIC_Init(hwI2C_Index index);
 void I2C_NVIC_DeInit(hwI2C_Index index);
 
 uint32_t I2C_Master_Get_Timing(hwI2C_Index index, hwI2C_Speed_Mode speed_mode);
+
+#ifdef STM32F1
+hwI2C_OpResult I2C_ApplyRemap(
+    hwI2C_Index index,
+    hwGPIO_Pin scl_pin,
+    hwGPIO_Pin sda_pin);
+void I2C_RestoreRemap(hwI2C_Index index);
+#endif
 
 #ifdef  __cplusplus
 }

@@ -24,95 +24,65 @@ typedef enum GPIO_EXTI_IRQn{
 
 static bool gpio_exti_enable_status[GPIO_EXTI_IRQn_MAX] = {false};
 
-void GPIO_Enable_RCC_Clock(GPIO_TypeDef * base)
+void GPIO_Enable_RCC_Clock(GPIO_TypeDef *base)
 {
-  if(base==GPIOA)
-  {
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-  }
-  else if(base==GPIOB)
-  {
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-  }
-  else if(base==GPIOC)
-  {
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-  }
+#if defined(GPIOA)
+  if (base == GPIOA) { __HAL_RCC_GPIOA_CLK_ENABLE(); }
+#endif
+#if defined(GPIOB)
+  else if (base == GPIOB) { __HAL_RCC_GPIOB_CLK_ENABLE(); }
+#endif
+#if defined(GPIOC)
+  else if (base == GPIOC) { __HAL_RCC_GPIOC_CLK_ENABLE(); }
+#endif
 #if defined(GPIOD)
-  else if(base==GPIOD)
-  {
-    __HAL_RCC_GPIOD_CLK_ENABLE();
-  }
+  else if (base == GPIOD) { __HAL_RCC_GPIOD_CLK_ENABLE(); }
 #endif
 #if defined(GPIOE)
-  else if(base==GPIOE)
-  {
-    __HAL_RCC_GPIOE_CLK_ENABLE();
-  }
+  else if (base == GPIOE) { __HAL_RCC_GPIOE_CLK_ENABLE(); }
 #endif
 #if defined(GPIOF)
-  else if(base==GPIOF)
-  {
-    __HAL_RCC_GPIOF_CLK_ENABLE();
-  }
+  else if (base == GPIOF) { __HAL_RCC_GPIOF_CLK_ENABLE(); }
 #endif
 #if defined(GPIOG)
-  else if(base==GPIOG)
-  {
-    __HAL_RCC_GPIOG_CLK_ENABLE();
-  }
+  else if (base == GPIOG) { __HAL_RCC_GPIOG_CLK_ENABLE(); }
 #endif
 #if defined(GPIOH)
-  else if(base==GPIOH)
-  {
-    __HAL_RCC_GPIOH_CLK_ENABLE();
-  }
+  else if (base == GPIOH) { __HAL_RCC_GPIOH_CLK_ENABLE(); }
+#endif
+#if defined(GPIOI)
+  else if (base == GPIOI) { __HAL_RCC_GPIOI_CLK_ENABLE(); }
 #endif
 }
 
-void GPIO_Disable_RCC_Clock(GPIO_TypeDef * base)
+void GPIO_Disable_RCC_Clock(GPIO_TypeDef *base)
 {
-  if(base==GPIOA)
-  {
-    __HAL_RCC_GPIOA_CLK_DISABLE();
-  }
-  else if(base==GPIOB)
-  {
-    __HAL_RCC_GPIOB_CLK_DISABLE();
-  }
-  else if(base==GPIOC)
-  {
-    __HAL_RCC_GPIOC_CLK_DISABLE();
-  }
+#if defined(GPIOA)
+  if (base == GPIOA) { __HAL_RCC_GPIOA_CLK_DISABLE(); }
+#endif
+#if defined(GPIOB)
+  else if (base == GPIOB) { __HAL_RCC_GPIOB_CLK_DISABLE(); }
+#endif
+#if defined(GPIOC)
+  else if (base == GPIOC) { __HAL_RCC_GPIOC_CLK_DISABLE(); }
+#endif
 #if defined(GPIOD)
-  else if(base==GPIOD)
-  {
-    __HAL_RCC_GPIOD_CLK_DISABLE();
-  }
+  else if (base == GPIOD) { __HAL_RCC_GPIOD_CLK_DISABLE(); }
 #endif
 #if defined(GPIOE)
-  else if(base==GPIOE)
-  {
-    __HAL_RCC_GPIOE_CLK_DISABLE();
-  }
+  else if (base == GPIOE) { __HAL_RCC_GPIOE_CLK_DISABLE(); }
 #endif
 #if defined(GPIOF)
-  else if(base==GPIOF)
-  {
-    __HAL_RCC_GPIOF_CLK_DISABLE();
-  }
+  else if (base == GPIOF) { __HAL_RCC_GPIOF_CLK_DISABLE(); }
 #endif
 #if defined(GPIOG)
-  else if(base==GPIOG)
-  {
-    __HAL_RCC_GPIOG_CLK_DISABLE();
-  }
+  else if (base == GPIOG) { __HAL_RCC_GPIOG_CLK_DISABLE(); }
 #endif
 #if defined(GPIOH)
-  else if(base==GPIOH)
-  {
-    __HAL_RCC_GPIOH_CLK_DISABLE();
-  }
+  else if (base == GPIOH) { __HAL_RCC_GPIOH_CLK_DISABLE(); }
+#endif
+#if defined(GPIOI)
+  else if (base == GPIOI) { __HAL_RCC_GPIOI_CLK_DISABLE(); }
 #endif
 }
 

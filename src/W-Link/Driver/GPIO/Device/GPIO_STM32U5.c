@@ -8,7 +8,7 @@
 #include "NeonRTOS.h"
 #include "GPIO/GPIO.h"
 
-#ifdef STM32L5
+#ifdef STM32U5
 
 #include "GPIO/Device/GPIO_STM32.h"
 
@@ -374,4 +374,4 @@ void GPIO_EXTI_NVIC_DeInit(GPIO_EXTI_Line exti_line_idx, GPIO_EXTI_Desc *gpio_ex
   }
 }
 
-#endif // STM32L5
+#endif // STM32U5

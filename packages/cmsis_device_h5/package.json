@@ -1,0 +1,16 @@
+{
+  "name": "framework-cmsis-stm32h5",
+  "version": "1.4.0",
+  "title": "CMSIS",
+  "description": "CMSIS component for the STMicroelectronics STM32H5 series",
+  "keywords": [
+    "framework",
+    "stmicroelectronics",
+    "stm32"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/STMicroelectronics/cmsis_device_h5"
+  }
+}

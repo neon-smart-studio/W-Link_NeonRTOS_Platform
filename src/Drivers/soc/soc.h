@@ -169,6 +169,21 @@
 #include "stm32g4xx_hal_dac.h"
 #endif
 
+#if defined (STM32H573xx) || defined (STM32H563xx) || \
+    defined (STM32H562xx) || defined (STM32H503xx) || \
+    defined (STM32H533xx) || defined (STM32H523xx)
+#include "stm32h5xx.h"
+#include "stm32h5xx_hal_gpio.h"
+#include "stm32h5xx_hal_exti.h"
+#include "stm32h5xx_hal_uart.h"
+#include "stm32h5xx_hal_spi.h"
+#include "stm32h5xx_hal_i2c.h"
+#include "stm32h5xx_hal_dma.h"
+#include "stm32h5xx_hal_rtc.h"
+#include "stm32h5xx_hal_adc.h"
+#include "stm32h5xx_hal_dac.h"
+#endif
+
 #if defined (STM32L010x4) || defined (STM32L010x6) || defined (STM32L010x8) || defined (STM32L010xB) || \
     defined (STM32L011xx) || defined (STM32L021xx) || \
     defined (STM32L031xx) || defined (STM32L041xx) || \

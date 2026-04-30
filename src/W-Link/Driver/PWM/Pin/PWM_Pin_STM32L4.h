@@ -37,7 +37,7 @@ typedef enum {
 #define CONFIG_PWM17_PINSET PWM_Pinset_DEFAULT
 #endif
 
-const PWM_Pinset_t PWM_Index_Map_Alt[hwPWM_Base_MAX] = {
+static const PWM_Pinset_t PWM_Index_Map_Alt[hwPWM_Base_MAX] = {
 #if defined(TIM1_BASE)
     CONFIG_PWM1_PINSET,
 #endif
@@ -67,7 +67,7 @@ const PWM_Pinset_t PWM_Index_Map_Alt[hwPWM_Base_MAX] = {
 #endif
 };
 
-const PWM_Pin_Def PWM_Pin_Def_Table[hwPWM_Base_MAX][PWM_Pinset_MAX][4] =
+static const PWM_Pin_Def PWM_Pin_Def_Table[hwPWM_Base_MAX][PWM_Pinset_MAX][4] =
 {
 #if defined(TIM1_BASE)
     {
@@ -223,7 +223,7 @@ const PWM_Pin_Def PWM_Pin_Def_Table[hwPWM_Base_MAX][PWM_Pinset_MAX][4] =
 #endif
 };
 
-const PWM_AF_Map PWM_Pin_AF_Map[] =
+static const PWM_AF_Map PWM_Pin_AF_Map[] =
 {
 #if defined(TIM1_BASE) && defined(GPIO_AF1_TIM1)
     { hwTimer_Index_0, hwGPIO_Pin_A8,  GPIO_AF1_TIM1 },

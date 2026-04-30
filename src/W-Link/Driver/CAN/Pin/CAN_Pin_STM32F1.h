@@ -19,7 +19,7 @@ typedef enum {
 #define CONFIG_CAN1_PINSET CAN_Pinset_DEFAULT
 #endif //CONFIG_CAN1_PINSET
 
-const CAN_Pinset_t CAN_Index_Map_Alt[hwCAN_Index_MAX] = {
+static const CAN_Pinset_t CAN_Index_Map_Alt[hwCAN_Index_MAX] = {
 #if defined (CAN1_BASE)
     CONFIG_CAN0_PINSET,
 #endif
@@ -28,7 +28,7 @@ const CAN_Pinset_t CAN_Index_Map_Alt[hwCAN_Index_MAX] = {
 #endif
 };
 
-const CAN_Pin_Def CAN_Pin_Def_Table[hwCAN_Index_MAX][CAN_Pinset_MAX] =
+static const CAN_Pin_Def CAN_Pin_Def_Table[hwCAN_Index_MAX][CAN_Pinset_MAX] =
 {
 #if defined (CAN1_BASE)
     /* ================= CAN1 (CAN0) ================= */

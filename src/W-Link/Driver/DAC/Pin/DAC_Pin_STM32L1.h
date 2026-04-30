@@ -3,7 +3,7 @@
 
 #include "DAC_Pin_STM32.h"
 
-const DAC_Channel_Def DAC_Channel_Def_Table[hwDAC_Channel_Index_MAX] = {
+static const DAC_Channel_Def DAC_Channel_Def_Table[hwDAC_Channel_Index_MAX] = {
 #if defined(DAC_CHANNEL_1)
     /* ===== DAC / DAC1 ===== */
     { hwGPIO_Pin_A4, hwDAC_Instance_1 },   // DAC_OUT1 / DAC1_OUT1

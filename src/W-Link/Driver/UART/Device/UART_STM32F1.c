@@ -8,6 +8,8 @@
 #ifdef STM32F1
 
 #include "UART/UART.h"
+#include "UART/UART_Pin.h"
+
 #include "UART_STM32.h"
 
 UART_HandleTypeDef g_uart[hwUART_Index_MAX];
@@ -350,6 +352,123 @@ void UART_NVIC_DeInit(hwUART_Index index)
         default:
             break;
     }
+}
+
+
+hwUART_OpResult UART_ApplyRemap(
+    hwUART_Index index,
+    hwGPIO_Pin tx_pin,
+    hwGPIO_Pin rx_pin,
+    hwGPIO_Pin rts_pin,
+    hwGPIO_Pin cts_pin,
+    bool rts_cts
+)
+{
+    __HAL_RCC_AFIO_CLK_ENABLE();
+
+    hwGPIO_Pin default_tx_pin = UART_Pin_Def_Table[index][UART_Pinset_DEFAULT].tx_pin;
+    hwGPIO_Pin default_rx_pin = UART_Pin_Def_Table[index][UART_Pinset_DEFAULT].rx_pin;
+    hwGPIO_Pin default_rts_pin = UART_Pin_Def_Table[index][UART_Pinset_DEFAULT].rts_pin;
+    hwGPIO_Pin default_cts_pin = UART_Pin_Def_Table[index][UART_Pinset_DEFAULT].cts_pin;
+
+    hwGPIO_Pin alt1_tx_pin = UART_Pin_Def_Table[index][UART_Pinset_ALT1].tx_pin;
+    hwGPIO_Pin alt1_rx_pin = UART_Pin_Def_Table[index][UART_Pinset_ALT1].rx_pin;
+    hwGPIO_Pin alt1_rts_pin = UART_Pin_Def_Table[index][UART_Pinset_ALT1].rts_pin;
+    hwGPIO_Pin alt1_cts_pin = UART_Pin_Def_Table[index][UART_Pinset_ALT1].cts_pin;
+
+    hwGPIO_Pin alt2_tx_pin = UART_Pin_Def_Table[index][UART_Pinset_ALT2].tx_pin;
+    hwGPIO_Pin alt2_rx_pin = UART_Pin_Def_Table[index][UART_Pinset_ALT2].rx_pin;
+    hwGPIO_Pin alt2_rts_pin = UART_Pin_Def_Table[index][UART_Pinset_ALT2].rts_pin;
+    hwGPIO_Pin alt2_cts_pin = UART_Pin_Def_Table[index][UART_Pinset_ALT2].cts_pin;
+
+    bool is_default =
+        tx_pin == default_tx_pin &&
+        rx_pin == default_rx_pin &&
+        (!rts_cts ||
+            (rts_pin == default_rts_pin &&
+             cts_pin == default_cts_pin));
+
+    bool is_alt1 =
+        tx_pin == alt1_tx_pin &&
+        rx_pin == alt1_rx_pin &&
+        (!rts_cts ||
+            (rts_pin == alt1_rts_pin &&
+             cts_pin == alt1_cts_pin));
+
+    bool is_alt2 =
+        tx_pin == alt2_tx_pin &&
+        rx_pin == alt2_rx_pin &&
+        (!rts_cts ||
+            (rts_pin == alt2_rts_pin &&
+             cts_pin == alt2_cts_pin));
+
+    switch (index)
+    {
+#if defined(USART1_BASE) || defined(UART1_BASE)
+        case hwUART_Index_0:
+            if (is_default) {
+                __HAL_AFIO_REMAP_USART1_DISABLE();
+                return hwUART_OK;
+            }
+
+            if (is_alt1) {
+                __HAL_AFIO_REMAP_USART1_ENABLE();
+                return hwUART_OK;
+            }
+
+            return hwUART_InvalidParameter;
+#endif
+
+#if defined(USART2_BASE) || defined(UART2_BASE)
+        case hwUART_Index_1:
+            if (is_default) {
+                __HAL_AFIO_REMAP_USART2_DISABLE();
+                return hwUART_OK;
+            }
+
+            if (is_alt1) {
+                __HAL_AFIO_REMAP_USART2_ENABLE();
+                return hwUART_OK;
+            }
+
+            return hwUART_InvalidParameter;
+#endif
+
+#if defined(USART3_BASE) || defined(UART3_BASE)
+        case hwUART_Index_2:
+            if (is_default) {
+                __HAL_AFIO_REMAP_USART3_DISABLE();
+                return hwUART_OK;
+            }
+
+            if (is_alt1) {
+                __HAL_AFIO_REMAP_USART3_PARTIAL();
+                return hwUART_OK;
+            }
+
+            if (is_alt2) {
+                __HAL_AFIO_REMAP_USART3_ENABLE();
+                return hwUART_OK;
+            }
+
+            return hwUART_InvalidParameter;
+#endif
+
+        default:
+            return hwUART_OK;
+    }
+}
+
+void UART_RestoreRemap(hwUART_Index index)
+{
+    switch(index)
+    {
+        case hwUART_Index_0: __HAL_AFIO_REMAP_USART1_DISABLE(); break;
+        case hwUART_Index_1: __HAL_AFIO_REMAP_USART2_DISABLE(); break;
+        case hwUART_Index_2: __HAL_AFIO_REMAP_USART3_DISABLE(); break;
+    }
+
+    __HAL_RCC_AFIO_CLK_DISABLE();
 }
 
 #endif // STM32F1

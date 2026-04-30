@@ -6,6 +6,7 @@
 
 #include "soc.h"
 #include "UART/UART.h"
+#include "GPIO/GPIO.h"
 
 #define UART_IRQ_NVIC_PRIORITY      5
 #define UART_IRQ_NVIC_SUB_PRIORITY  0
@@ -31,6 +32,18 @@ hwUART_OpResult UART_Instance_DeInit(hwUART_Index index);
 
 void UART_NVIC_Init(hwUART_Index index);
 void UART_NVIC_DeInit(hwUART_Index index);
+
+#ifdef STM32F1
+hwUART_OpResult UART_ApplyRemap(
+    hwUART_Index index,
+    hwGPIO_Pin tx_pin,
+    hwGPIO_Pin rx_pin,
+    hwGPIO_Pin rts_pin,
+    hwGPIO_Pin cts_pin,
+    bool rts_cts
+);
+void UART_RestoreRemap(hwUART_Index index);
+#endif
 
 #ifdef  __cplusplus
 }

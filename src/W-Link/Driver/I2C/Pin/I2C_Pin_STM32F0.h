@@ -17,7 +17,7 @@ typedef enum {
 #define CONFIG_I2C1_PINSET I2C_Pinset_DEFAULT
 #endif // CONFIG_I2C1_PINSET
 
-const I2C_Pinset_t I2C_Index_Map_Alt[hwI2C_Index_MAX] = {
+static const I2C_Pinset_t I2C_Index_Map_Alt[hwI2C_Index_MAX] = {
 #if defined(I2C1_BASE)
     CONFIG_I2C0_PINSET,
 #endif
@@ -26,7 +26,7 @@ const I2C_Pinset_t I2C_Index_Map_Alt[hwI2C_Index_MAX] = {
 #endif
 };
 
-const I2C_Pin_Def I2C_Pin_Def_Table[hwI2C_Index_MAX][I2C_Pinset_MAX] =
+static const I2C_Pin_Def I2C_Pin_Def_Table[hwI2C_Index_MAX][I2C_Pinset_MAX] =
 {
 #if defined(I2C1_BASE)
     /* ================= I2C1 (I2C0) ================= */
@@ -51,7 +51,7 @@ const I2C_Pin_Def I2C_Pin_Def_Table[hwI2C_Index_MAX][I2C_Pinset_MAX] =
 #endif
 };
 
-const I2C_AF_Map I2C_Pin_AF_Map[] =
+static const I2C_AF_Map I2C_Pin_AF_Map[] =
 {
 #if defined(I2C1_BASE)
     /* I2C1 */

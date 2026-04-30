@@ -4,7 +4,7 @@
 
 #include "DAC_Pin_STM32.h"
 
-const DAC_Channel_Def DAC_Channel_Def_Table[hwDAC_Channel_Index_MAX] = {
+static const DAC_Channel_Def DAC_Channel_Def_Table[hwDAC_Channel_Index_MAX] = {
 #if defined(DAC1_BASE)
 #if defined(DAC_CHANNEL_1)
     /* ===== DAC / DAC1 ===== */

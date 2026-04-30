@@ -18,7 +18,7 @@ typedef enum {
 #define CONFIG_SPI1_PINSET SPI_Pinset_DEFAULT
 #endif //CONFIG_SPI1_PINSET
 
-const SPI_Pinset_t SPI_Index_Map_Alt[hwSPI_Index_MAX] = {
+static const SPI_Pinset_t SPI_Index_Map_Alt[hwSPI_Index_MAX] = {
 #if defined(SPI1_BASE)
     CONFIG_SPI0_PINSET,
 #endif
@@ -27,7 +27,7 @@ const SPI_Pinset_t SPI_Index_Map_Alt[hwSPI_Index_MAX] = {
 #endif
 };
 
-const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX][SPI_Pinset_MAX] =
+static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX][SPI_Pinset_MAX] =
 {
 #if defined(SPI1_BASE)
     /* ================= SPI1 (SPI0) ================= */

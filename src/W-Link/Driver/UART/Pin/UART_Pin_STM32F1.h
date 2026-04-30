@@ -31,7 +31,7 @@ typedef enum {
 #define CONFIG_UART4_PINSET UART_Pinset_DEFAULT
 #endif //CONFIG_UART4_PINSET
 
-const UART_Pinset_t UART_Index_Map_Alt[hwUART_Index_MAX] = {
+static const UART_Pinset_t UART_Index_Map_Alt[hwUART_Index_MAX] = {
 #if defined(UART1_BASE) || defined(USART1_BASE)
     CONFIG_UART0_PINSET,
 #endif
@@ -49,7 +49,7 @@ const UART_Pinset_t UART_Index_Map_Alt[hwUART_Index_MAX] = {
 #endif
 };
 
-const UART_Pin_Def UART_Pin_Def_Table[hwUART_Index_MAX][UART_Pinset_MAX] =
+static const UART_Pin_Def UART_Pin_Def_Table[hwUART_Index_MAX][UART_Pinset_MAX] =
 {
 #if defined(UART1_BASE) || defined(USART1_BASE)
     /* ================= USART1 (UART0) ================= */

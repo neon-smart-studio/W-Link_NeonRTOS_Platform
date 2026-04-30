@@ -35,6 +35,12 @@ typedef enum hwUART_Index_t
 #if defined(UART10_BASE) || defined(USART10_BASE)
   hwUART_Index_9,
 #endif
+#if defined(UART11_BASE) || defined(USART11_BASE)
+  hwUART_Index_10,
+#endif
+#if defined(UART12_BASE) || defined(USART12_BASE)
+  hwUART_Index_11,
+#endif
 #if defined(LPUART1_BASE) || defined(LPUSART1_BASE)
   hwUART_Index_L1,
 #endif

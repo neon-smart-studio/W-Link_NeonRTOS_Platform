@@ -38,6 +38,18 @@
 #include "Pin/PWM_Pin_STM32G4.h"
 #endif //STM32G4
 
+#ifdef STM32H5
+#include "Pin/PWM_Pin_STM32H5.h"
+#endif //STM32H5
+
+#ifdef STM32H7
+#include "Pin/PWM_Pin_STM32H7.h"
+#endif //STM32H7
+
+#ifdef STM32H7RS
+#include "Pin/PWM_Pin_STM32H7RS.h"
+#endif //STM32H7RS
+
 #ifdef STM32L0
 #include "Pin/PWM_Pin_STM32L0.h"
 #endif //STM32L0

@@ -4,7 +4,7 @@
 
 #include "soc.h"
 
-#ifdef STM32L4
+#ifdef STM32H5
 
 #include "SPI/SPI_Master.h"
 #include "SPI_Master_STM32.h"
@@ -36,6 +36,15 @@ SPI_TypeDef *SPI_Map_Soc_Base(hwSPI_Index index)
 #if defined(SPI3_BASE)
         case hwSPI_Index_2: return SPI3;
 #endif
+#if defined(SPI4_BASE)
+        case hwSPI_Index_3: return SPI4;
+#endif
+#if defined(SPI5_BASE)
+        case hwSPI_Index_4: return SPI5;
+#endif
+#if defined(SPI6_BASE)
+        case hwSPI_Index_5: return SPI6;
+#endif
         default: break;
     }
 
@@ -59,6 +68,21 @@ static void SPI_EnableClock(hwSPI_Index index)
 #if defined(SPI3_BASE)
         case hwSPI_Index_2:
             __HAL_RCC_SPI3_CLK_ENABLE();
+            break;
+#endif
+#if defined(SPI4_BASE)
+        case hwSPI_Index_3:
+            __HAL_RCC_SPI4_CLK_ENABLE();
+            break;
+#endif
+#if defined(SPI5_BASE)
+        case hwSPI_Index_4:
+            __HAL_RCC_SPI5_CLK_ENABLE();
+            break;
+#endif
+#if defined(SPI6_BASE)
+        case hwSPI_Index_5:
+            __HAL_RCC_SPI6_CLK_ENABLE();
             break;
 #endif
         default:
@@ -85,6 +109,21 @@ static void SPI_DisableClock(hwSPI_Index index)
             __HAL_RCC_SPI3_CLK_DISABLE();
             break;
 #endif
+#if defined(SPI4_BASE)
+        case hwSPI_Index_3:
+            __HAL_RCC_SPI4_CLK_DISABLE();
+            break;
+#endif
+#if defined(SPI5_BASE)
+        case hwSPI_Index_4:
+            __HAL_RCC_SPI5_CLK_DISABLE();
+            break;
+#endif
+#if defined(SPI6_BASE)
+        case hwSPI_Index_5:
+            __HAL_RCC_SPI6_CLK_DISABLE();
+            break;
+#endif
         default:
             break;
     }
@@ -92,26 +131,30 @@ static void SPI_DisableClock(hwSPI_Index index)
 
 int SPI_Master_Get_Clock_Freq(hwSPI_Index index)
 {
-    switch (index)
+#if defined(__HAL_RCC_GET_SPI1_SOURCE)
+    if (index == hwSPI_Index_0)
     {
-#if defined(SPI1_BASE)
-        case hwSPI_Index_0:
-            return HAL_RCC_GetPCLK2Freq();
-#endif
+        uint32_t src = __HAL_RCC_GET_SPI1_SOURCE();
 
-#if defined(SPI2_BASE)
-        case hwSPI_Index_1:
-            return HAL_RCC_GetPCLK1Freq();
+        switch (src)
+        {
+#if defined(RCC_SPI1CLKSOURCE_SYSCLK)
+            case RCC_SPI1CLKSOURCE_SYSCLK:
+                return HAL_RCC_GetSysClockFreq();
 #endif
-
-#if defined(SPI3_BASE)
-        case hwSPI_Index_2:
-            return HAL_RCC_GetPCLK1Freq();
+#if defined(RCC_SPI1CLKSOURCE_PCLK2)
+            case RCC_SPI1CLKSOURCE_PCLK2:
+                return HAL_RCC_GetPCLK2Freq();
 #endif
-
-        default:
-            return 0;
+#if defined(RCC_SPI1CLKSOURCE_PLL1)
+            case RCC_SPI1CLKSOURCE_PLL1:
+                return HAL_RCC_GetSysClockFreq(); // 或 PLL 計算
+#endif
+        }
     }
+#endif
+
+    return HAL_RCC_GetPCLK1Freq();
 }
 
 hwSPI_OpResult SPI_Instance_Init(
@@ -238,6 +281,27 @@ void SPI3_IRQHandler(void)
 }
 #endif
 
+#if defined(SPI4_BASE)
+void SPI4_IRQHandler(void)
+{
+    SPI_HAL_IRQHandler(hwSPI_Index_3);
+}
+#endif
+
+#if defined(SPI5_BASE)
+void SPI5_IRQHandler(void)
+{
+    SPI_HAL_IRQHandler(hwSPI_Index_4);
+}
+#endif
+
+#if defined(SPI6_BASE)
+void SPI6_IRQHandler(void)
+{
+    SPI_HAL_IRQHandler(hwSPI_Index_5);
+}
+#endif
+
 void SPI_NVIC_Init(hwSPI_Index index)
 {
     switch (index)
@@ -260,6 +324,27 @@ void SPI_NVIC_Init(hwSPI_Index index)
         case hwSPI_Index_2:
             HAL_NVIC_SetPriority(SPI3_IRQn, SPI_IRQ_NVIC_PRIORITY, SPI_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(SPI3_IRQn);
+            break;
+#endif
+
+#if defined(SPI4_BASE)
+        case hwSPI_Index_3:
+            HAL_NVIC_SetPriority(SPI4_IRQn, SPI_IRQ_NVIC_PRIORITY, SPI_IRQ_NVIC_SUB_PRIORITY);
+            HAL_NVIC_EnableIRQ(SPI4_IRQn);
+            break;
+#endif
+
+#if defined(SPI5_BASE)
+        case hwSPI_Index_4:
+            HAL_NVIC_SetPriority(SPI5_IRQn, SPI_IRQ_NVIC_PRIORITY, SPI_IRQ_NVIC_SUB_PRIORITY);
+            HAL_NVIC_EnableIRQ(SPI5_IRQn);
+            break;
+#endif
+
+#if defined(SPI6_BASE)
+        case hwSPI_Index_5:
+            HAL_NVIC_SetPriority(SPI6_IRQn, SPI_IRQ_NVIC_PRIORITY, SPI_IRQ_NVIC_SUB_PRIORITY);
+            HAL_NVIC_EnableIRQ(SPI6_IRQn);
             break;
 #endif
 
@@ -290,9 +375,27 @@ void SPI_NVIC_DeInit(hwSPI_Index index)
             break;
 #endif
 
+#if defined(SPI4_BASE)
+        case hwSPI_Index_3:
+            HAL_NVIC_DisableIRQ(SPI4_IRQn);
+            break;
+#endif
+
+#if defined(SPI5_BASE)
+        case hwSPI_Index_4:
+            HAL_NVIC_DisableIRQ(SPI5_IRQn);
+            break;
+#endif
+
+#if defined(SPI6_BASE)
+        case hwSPI_Index_5:
+            HAL_NVIC_DisableIRQ(SPI6_IRQn);
+            break;
+#endif
+
         default:
             break;
     }
 }
 
-#endif // STM32L4
+#endif // STM32H5

@@ -273,7 +273,7 @@ const PWM_Pin_Def PWM_Pin_Def_Table[hwPWM_Base_MAX][PWM_Pinset_MAX][4] =
         { hwPWM_Channel_MAX, hwTimer_Index_14, hwGPIO_Pin_NC, 0, 0 },
     },
     {
-        { hwPWM_Channel_33, hwTimer_Index_14, hwGPIO_Pin_G10, TIM_CHANNEL_1, 0 },
+        { hwPWM_Channel_34, hwTimer_Index_14, hwGPIO_Pin_G10, TIM_CHANNEL_1, 0 },
         { hwPWM_Channel_MAX, hwTimer_Index_14, hwGPIO_Pin_NC, 0, 0 },
         { hwPWM_Channel_MAX, hwTimer_Index_14, hwGPIO_Pin_NC, 0, 0 },
         { hwPWM_Channel_MAX, hwTimer_Index_14, hwGPIO_Pin_NC, 0, 0 },

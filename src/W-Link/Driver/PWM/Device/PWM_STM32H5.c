@@ -8,7 +8,7 @@
 #include "Timer/Timer.h"
 #include "PWM/PWM.h"
 
-#ifdef STM32U5
+#ifdef STM32H5
 
 #include "PWM/Pin/PWM_Pin_STM32.h"
 #include "PWM_STM32.h"
@@ -210,7 +210,7 @@ void PWM_Clock_Disable(hwPWM_Channel ch)
                 }
                 if(all_off)
                 {
-                        __HAL_RCC_TIM3_CLK_DISABLE();
+                        __HAL_RCC_TIM8_CLK_DISABLE();
                 }
                 break;
 #endif
@@ -262,4 +262,4 @@ void PWM_Clock_Disable(hwPWM_Channel ch)
     }
 }
 
-#endif // STM32U5
+#endif // STM32H5

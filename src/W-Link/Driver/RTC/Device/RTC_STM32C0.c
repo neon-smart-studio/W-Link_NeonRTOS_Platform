@@ -56,14 +56,8 @@ hwRTC_OpResult RTC_Instance_Init(hwRTC_Index index)
     g_rtc[index].Init.SynchPrediv  = 249;
 
     g_rtc[index].Init.OutPut = RTC_OUTPUT_DISABLE;
-
-#if defined(RTC_OUTPUT_POLARITY_HIGH)
     g_rtc[index].Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
-#endif
-
-#if defined(RTC_OUTPUT_TYPE_OPENDRAIN)
     g_rtc[index].Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
-#endif
 
     if (HAL_RTC_Init(&g_rtc[index]) != HAL_OK)
         return hwRTC_HwError;

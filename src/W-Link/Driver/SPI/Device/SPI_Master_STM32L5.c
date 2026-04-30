@@ -4,7 +4,7 @@
 
 #include "soc.h"
 
-#if STM32L5
+#ifdef STM32L5
 
 #include "SPI/SPI_Master.h"
 #include "SPI_Master_STM32.h"

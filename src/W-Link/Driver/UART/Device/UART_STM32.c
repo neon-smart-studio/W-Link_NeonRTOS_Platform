@@ -519,7 +519,7 @@ void UART_Printf(const char *format, ...)
         return;
     }
 
-    char buffer[256];
+    char buffer[128];
     va_list args;
 
     va_start(args, format);
@@ -530,20 +530,11 @@ void UART_Printf(const char *format, ...)
         return;
     }
 
-    if (len > (int)sizeof(buffer)) {
-        len = sizeof(buffer);
+    if (len >= (int)sizeof(buffer)) {
+        len = sizeof(buffer) - 1;
     }
 
-    UART_HandleTypeDef *huart = &g_uart[LOG_UART_INDEX];
-
-    NeonRTOS_EnterCritical();
-
-    for (int i = 0; i < len; i++) {
-        while (HAL_UART_Transmit(huart, (uint8_t *)&buffer[i], 1, 10) == HAL_BUSY) {
-        }
-    }
-
-    NeonRTOS_ExitCritical(0);
+    UART_Write(LOG_UART_INDEX, (uint8_t *)buffer, len, 1000);
 }
 
 bool UART_is_Init(hwUART_Index index)

@@ -89,9 +89,7 @@ hwRTC_OpResult RTC_Device_SetAlarm(
     alarm.AlarmMask = RTC_ALARMMASK_DATEWEEKDAY;
     alarm.Alarm     = RTC_ALARM_A;
 
-#if defined(RTC_ALARMSUBSECONDMASK_ALL)
     alarm.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_ALL;
-#endif
 
     if (HAL_RTC_SetAlarm_IT(&g_rtc[index], &alarm, RTC_FORMAT_BIN) != HAL_OK)
         return hwRTC_HwError;

@@ -26,6 +26,7 @@
   },
   "frameworks": [
     "cmsis",
+    "stm32cube",
     "arduino",
     "mbed"
   ],

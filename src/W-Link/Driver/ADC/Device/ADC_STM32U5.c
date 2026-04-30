@@ -42,11 +42,27 @@ static uint32_t ADC_Channel_To_HAL(hwADC_Channel_Index ch)
     }
 }
 
+#if defined (STM32U5A5xx) || defined (STM32U5A9xx) || \
+    defined (STM32U5F7xx) || defined (STM32U5G7xx) || \
+    defined (STM32U5F9xx) || defined (STM32U5G9xx)
+#if defined(ADC1_BASE) || defined(ADC2_BASE)
+void ADC1_2_IRQHandler(void)
+{
+#if defined(ADC1_BASE)
+    HAL_ADC_IRQHandler(&g_adc[hwADC_Instance_1]);
+#endif
+#if defined(ADC2_BASE)
+    HAL_ADC_IRQHandler(&g_adc[hwADC_Instance_2]);
+#endif
+}
+#endif
+#else
 #if defined(ADC1_BASE)
 void ADC1_IRQHandler(void)
 {
     HAL_ADC_IRQHandler(&g_adc[hwADC_Instance_1]);
 }
+#endif
 #endif
 
 #if defined(ADC4_BASE)
@@ -80,6 +96,12 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
 #if defined(ADC1_BASE)
         case hwADC_Instance_1:
             g_adc[inst].Instance = ADC1;
+            break;
+#endif
+
+#if defined(ADC2_BASE)
+        case hwADC_Instance_2:
+            g_adc[inst].Instance = ADC2;
             break;
 #endif
 
@@ -128,10 +150,8 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
     if (HAL_ADC_Init(&g_adc[inst]) != HAL_OK)
         return hwADC_HwError;
 
-#if defined(HAL_ADCEx_Calibration_Start)
     if (HAL_ADCEx_Calibration_Start(&g_adc[inst], ADC_CALIB_OFFSET, ADC_SINGLE_ENDED) != HAL_OK)
         return hwADC_HwError;
-#endif
 
     return hwADC_OK;
 }
@@ -154,9 +174,18 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
 
 void ADC_NVIC_Init(void)
 {
+#if defined (STM32U5A5xx) || defined (STM32U5A9xx) || \
+    defined (STM32U5F7xx) || defined (STM32U5G7xx) || \
+    defined (STM32U5F9xx) || defined (STM32U5G9xx)
+#if defined(ADC1_BASE) || defined(ADC2_BASE)
+    HAL_NVIC_SetPriority(ADC1_2_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
+    HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
+#endif
+#else
 #if defined(ADC1_BASE)
     HAL_NVIC_SetPriority(ADC1_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
     HAL_NVIC_EnableIRQ(ADC1_IRQn);
+#endif
 #endif
 
 #if defined(ADC4_BASE)
@@ -167,8 +196,16 @@ void ADC_NVIC_Init(void)
 
 void ADC_NVIC_DeInit(void)
 {
+#if defined (STM32U5A5xx) || defined (STM32U5A9xx) || \
+    defined (STM32U5F7xx) || defined (STM32U5G7xx) || \
+    defined (STM32U5F9xx) || defined (STM32U5G9xx)
+#if defined(ADC1_BASE) || defined(ADC2_BASE)
+    HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
+#endif
+#else
 #if defined(ADC1_BASE)
     HAL_NVIC_DisableIRQ(ADC1_IRQn);
+#endif
 #endif
 
 #if defined(ADC4_BASE)

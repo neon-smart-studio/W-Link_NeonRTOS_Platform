@@ -27,17 +27,11 @@ hwRTC_OpResult RTC_Instance_Init(hwRTC_Index index)
     __HAL_RCC_PWR_CLK_ENABLE();
     HAL_PWR_EnableBkUpAccess();
 
-#if defined(__HAL_RCC_LSI_ENABLE)
     __HAL_RCC_LSI_ENABLE();
-#endif
 
-#if defined(__HAL_RCC_RTC_CONFIG)
     __HAL_RCC_RTC_CONFIG(RCC_RTCCLKSOURCE_LSI);
-#endif
 
-#if defined(__HAL_RCC_RTC_ENABLE)
     __HAL_RCC_RTC_ENABLE();
-#endif
 
     g_rtc[index].Instance = RTC;
 
@@ -45,21 +39,15 @@ hwRTC_OpResult RTC_Instance_Init(hwRTC_Index index)
     g_rtc[index].Init.AsynchPrediv = 127;
     g_rtc[index].Init.SynchPrediv  = 255;
 
-#if defined(RTC_OUTPUT_DISABLE)
     g_rtc[index].Init.OutPut = RTC_OUTPUT_DISABLE;
-#endif
 
-#if defined(RTC_OUTPUT_POLARITY_HIGH)
     g_rtc[index].Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
-#endif
 
-#if defined(RTC_OUTPUT_TYPE_OPENDRAIN)
     g_rtc[index].Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
-#endif
 
-#if defined(RTC_OUTPUT_REMAP_NONE)
     g_rtc[index].Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
-#endif
+
+    g_rtc[index].Init.OutPutPullUp = RTC_OUTPUT_PULLUP_NONE;
 
     if (HAL_RTC_Init(&g_rtc[index]) != HAL_OK)
         return hwRTC_HwError;
@@ -72,20 +60,14 @@ hwRTC_OpResult RTC_Instance_DeInit(hwRTC_Index index)
     if (index >= hwRTC_Index_MAX)
         return hwRTC_InvalidParameter;
 
-#if defined(RTC_ALARM_A)
     HAL_RTC_DeactivateAlarm(&g_rtc[index], RTC_ALARM_A);
-#endif
 
-#if defined(RTC_ALARM_B)
     HAL_RTC_DeactivateAlarm(&g_rtc[index], RTC_ALARM_B);
-#endif
 
     if (HAL_RTC_DeInit(&g_rtc[index]) != HAL_OK)
         return hwRTC_HwError;
 
-#if defined(__HAL_RCC_RTC_DISABLE)
     __HAL_RCC_RTC_DISABLE();
-#endif
 
     return hwRTC_OK;
 }
@@ -123,9 +105,7 @@ hwRTC_OpResult RTC_Device_SetAlarm(
     alarm.AlarmTime = *time;
     alarm.AlarmMask = RTC_ALARMMASK_DATEWEEKDAY;
 
-#if defined(RTC_ALARMSUBSECONDMASK_ALL)
     alarm.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_ALL;
-#endif
 
     switch (alarm_ch)
     {

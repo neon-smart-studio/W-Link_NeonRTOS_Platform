@@ -43,21 +43,15 @@ hwRTC_OpResult RTC_Instance_Init(hwRTC_Index index)
     g_rtc[index].Init.AsynchPrediv = 127;
     g_rtc[index].Init.SynchPrediv  = 255;
 
-#if defined(RTC_OUTPUT_DISABLE)
     g_rtc[index].Init.OutPut = RTC_OUTPUT_DISABLE;
-#endif
 
-#if defined(RTC_OUTPUT_POLARITY_HIGH)
     g_rtc[index].Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
-#endif
 
-#if defined(RTC_OUTPUT_TYPE_OPENDRAIN)
     g_rtc[index].Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
-#endif
 
-#if defined(RTC_OUTPUT_REMAP_NONE)
     g_rtc[index].Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
-#endif
+
+    g_rtc[index].Init.OutPutPullUp = RTC_OUTPUT_PULLUP_NONE;
 
     if (HAL_RTC_Init(&g_rtc[index]) != HAL_OK)
         return hwRTC_HwError;
@@ -115,9 +109,7 @@ hwRTC_OpResult RTC_Device_SetAlarm(
     alarm.AlarmTime = *time;
     alarm.AlarmMask = RTC_ALARMMASK_DATEWEEKDAY;
 
-#if defined(RTC_ALARMSUBSECONDMASK_ALL)
     alarm.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_ALL;
-#endif
 
     switch (alarm_ch)
     {

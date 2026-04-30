@@ -121,10 +121,6 @@ const UART_AF_Map UART_Pin_AF_Map[] = {
     { hwUART_Index_3, hwGPIO_Pin_A1,  GPIO_AF8_UART4 },
     { hwUART_Index_3, hwGPIO_Pin_C10, GPIO_AF8_UART4 },
     { hwUART_Index_3, hwGPIO_Pin_C11, GPIO_AF8_UART4 },
-    { hwUART_Index_3, hwGPIO_Pin_A0,  GPIO_AF5_UART4 },
-    { hwUART_Index_3, hwGPIO_Pin_A1,  GPIO_AF5_UART4 },
-    { hwUART_Index_3, hwGPIO_Pin_C10, GPIO_AF5_UART4 },
-    { hwUART_Index_3, hwGPIO_Pin_C11, GPIO_AF5_UART4 },
 #endif
 
 #if defined(USART5_BASE) || defined(UART5_BASE)
@@ -132,10 +128,6 @@ const UART_AF_Map UART_Pin_AF_Map[] = {
     { hwUART_Index_4, hwGPIO_Pin_D2,  GPIO_AF8_UART5 },
     { hwUART_Index_4, hwGPIO_Pin_B3,  GPIO_AF8_UART5 },
     { hwUART_Index_4, hwGPIO_Pin_B4,  GPIO_AF8_UART5 },
-    { hwUART_Index_4, hwGPIO_Pin_C12, GPIO_AF5_UART5 },
-    { hwUART_Index_4, hwGPIO_Pin_D2,  GPIO_AF5_UART5 },
-    { hwUART_Index_4, hwGPIO_Pin_B3,  GPIO_AF5_UART5 },
-    { hwUART_Index_4, hwGPIO_Pin_B4,  GPIO_AF5_UART5 },
 #endif
 
 #if defined(LPUART1_BASE)

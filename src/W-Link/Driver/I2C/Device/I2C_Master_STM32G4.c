@@ -22,23 +22,23 @@ uint32_t I2C_Get_PCLK(hwI2C_Index index)
     if (index == hwI2C_Index_0) {
         uint32_t clocksource = __HAL_RCC_GET_I2C1_SOURCE();
 
-        #if defined(RCC_I2C1CLKSOURCE_PCLK1)
+#if defined(RCC_I2C1CLKSOURCE_PCLK1)
         if (clocksource == RCC_I2C1CLKSOURCE_PCLK1) {
             return HAL_RCC_GetPCLK1Freq();
         }
-        #endif
+#endif
 
-        #if defined(RCC_I2C1CLKSOURCE_SYSCLK)
+#if defined(RCC_I2C1CLKSOURCE_SYSCLK)
         if (clocksource == RCC_I2C1CLKSOURCE_SYSCLK) {
             return HAL_RCC_GetSysClockFreq();
         }
-        #endif
+#endif
 
-        #if defined(RCC_I2C1CLKSOURCE_HSI)
+#if defined(RCC_I2C1CLKSOURCE_HSI)
         if (clocksource == RCC_I2C1CLKSOURCE_HSI) {
             return HSI_VALUE;
         }
-        #endif
+#endif
 
         return HAL_RCC_GetPCLK1Freq();
     }
@@ -48,23 +48,23 @@ uint32_t I2C_Get_PCLK(hwI2C_Index index)
     if (index == hwI2C_Index_1) {
         uint32_t clocksource = __HAL_RCC_GET_I2C2_SOURCE();
 
-        #if defined(RCC_I2C2CLKSOURCE_PCLK1)
+#if defined(RCC_I2C2CLKSOURCE_PCLK1)
         if (clocksource == RCC_I2C2CLKSOURCE_PCLK1) {
             return HAL_RCC_GetPCLK1Freq();
         }
-        #endif
+#endif
 
-        #if defined(RCC_I2C2CLKSOURCE_SYSCLK)
+#if defined(RCC_I2C2CLKSOURCE_SYSCLK)
         if (clocksource == RCC_I2C2CLKSOURCE_SYSCLK) {
             return HAL_RCC_GetSysClockFreq();
         }
-        #endif
+#endif
 
-        #if defined(RCC_I2C2CLKSOURCE_HSI)
+#if defined(RCC_I2C2CLKSOURCE_HSI)
         if (clocksource == RCC_I2C2CLKSOURCE_HSI) {
             return HSI_VALUE;
         }
-        #endif
+#endif
 
         return HAL_RCC_GetPCLK1Freq();
     }

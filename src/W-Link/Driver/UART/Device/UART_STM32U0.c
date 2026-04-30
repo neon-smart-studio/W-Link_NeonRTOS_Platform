@@ -42,20 +42,14 @@ USART_TypeDef *UART_Map_Soc_Base(hwUART_Index index)
 
 #if defined(LPUART1_BASE)
         case hwUART_Index_L1: return LPUART1;
-#elif defined(LPUSART1_BASE)
-        case hwUART_Index_L1: return LPUSART1;
 #endif
 
 #if defined(LPUART2_BASE)
         case hwUART_Index_L2: return LPUART2;
-#elif defined(LPUSART2_BASE)
-        case hwUART_Index_L2: return LPUSART2;
 #endif
 
 #if defined(LPUART3_BASE)
         case hwUART_Index_L3: return LPUART3;
-#elif defined(LPUSART3_BASE)
-        case hwUART_Index_L3: return LPUSART3;
 #endif
 
         default:
@@ -95,20 +89,14 @@ static void UART_EnableClock(hwUART_Index index)
 
 #if defined(LPUART1_BASE)
         case hwUART_Index_L1: __HAL_RCC_LPUART1_CLK_ENABLE(); break;
-#elif defined(LPUSART1_BASE)
-        case hwUART_Index_L1: __HAL_RCC_LPUSART1_CLK_ENABLE(); break;
 #endif
 
 #if defined(LPUART2_BASE)
         case hwUART_Index_L2: __HAL_RCC_LPUART2_CLK_ENABLE(); break;
-#elif defined(LPUSART2_BASE)
-        case hwUART_Index_L2: __HAL_RCC_LPUSART2_CLK_ENABLE(); break;
 #endif
 
 #if defined(LPUART3_BASE)
         case hwUART_Index_L3: __HAL_RCC_LPUART3_CLK_ENABLE(); break;
-#elif defined(LPUSART3_BASE)
-        case hwUART_Index_L3: __HAL_RCC_LPUSART3_CLK_ENABLE(); break;
 #endif
 
         default:
@@ -146,20 +134,14 @@ static void UART_DisableClock(hwUART_Index index)
 
 #if defined(LPUART1_BASE)
         case hwUART_Index_L1: __HAL_RCC_LPUART1_CLK_DISABLE(); break;
-#elif defined(LPUSART1_BASE)
-        case hwUART_Index_L1: __HAL_RCC_LPUSART1_CLK_DISABLE(); break;
 #endif
 
 #if defined(LPUART2_BASE)
         case hwUART_Index_L2: __HAL_RCC_LPUART2_CLK_DISABLE(); break;
-#elif defined(LPUSART2_BASE)
-        case hwUART_Index_L2: __HAL_RCC_LPUSART2_CLK_DISABLE(); break;
 #endif
 
 #if defined(LPUART3_BASE)
         case hwUART_Index_L3: __HAL_RCC_LPUART3_CLK_DISABLE(); break;
-#elif defined(LPUSART3_BASE)
-        case hwUART_Index_L3: __HAL_RCC_LPUSART3_CLK_DISABLE(); break;
 #endif
 
         default:

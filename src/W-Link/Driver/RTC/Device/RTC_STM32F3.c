@@ -85,9 +85,7 @@ hwRTC_OpResult RTC_Device_SetAlarm(
     alarm.AlarmTime = *time;
     alarm.AlarmMask = RTC_ALARMMASK_DATEWEEKDAY;
 
-#if defined(RTC_ALARMSUBSECONDMASK_ALL)
     alarm.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_ALL;
-#endif
 
     switch (alarm_ch)
     {

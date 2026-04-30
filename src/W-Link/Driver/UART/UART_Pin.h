@@ -58,6 +58,10 @@
 #include "Pin/UART_Pin_STM32U0.h"
 #endif //STM32U0
 
+#ifdef STM32U5
+#include "Pin/UART_Pin_STM32U5.h"
+#endif //STM32U5
+
 #ifdef STM32H7
 #include "Pin/UART_Pin_STM32H7.h"
 #endif //STM32H7

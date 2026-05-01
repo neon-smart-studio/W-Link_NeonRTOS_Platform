@@ -85,9 +85,6 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
             g_adc[inst].Instance = ADC3;
             break;
 #endif
-
-        default:
-            return hwADC_InvalidParameter;
     }
 
     g_adc[inst].Init.ClockPrescaler        = ADC_CLOCK_ASYNC_DIV4;
@@ -130,7 +127,12 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
 #if defined(ADC2_BASE)
         case hwADC_Instance_2:
 #endif
-            __HAL_RCC_ADC12_CLK_DISABLE();
+#if defined(ADC1_BASE) && defined(ADC2_BASE)
+            if(!ADC_Instance_Init_Status[hwADC_Instance_1] && !ADC_Instance_Init_Status[hwADC_Instance_2])
+#endif
+            {
+                __HAL_RCC_ADC12_CLK_DISABLE();
+            }
             break;
 #endif
 
@@ -139,10 +141,30 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
             __HAL_RCC_ADC3_CLK_DISABLE();
             break;
 #endif
-
-        default:
-            break;
     }
+
+    return hwADC_OK;
+}
+
+hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
+{
+    if (inst >= hwADC_Instance_MAX || ch >= hwADC_Channel_Index_MAX)
+        return hwADC_InvalidParameter;
+
+    ADC_ChannelConfTypeDef cfg = {0};
+
+    cfg.Channel = ADC_Channel_To_HAL(ch);
+    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
+        return hwADC_InvalidParameter;
+
+    cfg.Rank         = ADC_REGULAR_RANK_1;
+    cfg.SamplingTime = ADC_SAMPLETIME_810CYCLES_5;
+    cfg.SingleDiff = ADC_SINGLE_ENDED;
+    cfg.OffsetNumber = ADC_OFFSET_NONE;
+    cfg.Offset = 0;
+
+    if (HAL_ADC_ConfigChannel(&g_adc[inst], &cfg) != HAL_OK)
+        return hwADC_HwError;
 
     return hwADC_OK;
 }
@@ -169,29 +191,6 @@ void ADC_NVIC_DeInit(void)
 #if defined(ADC3_BASE)
     HAL_NVIC_DisableIRQ(ADC3_IRQn);
 #endif
-}
-
-hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
-{
-    if (inst >= hwADC_Instance_MAX || ch >= hwADC_Channel_Index_MAX)
-        return hwADC_InvalidParameter;
-
-    ADC_ChannelConfTypeDef cfg = {0};
-
-    cfg.Channel = ADC_Channel_To_HAL(ch);
-    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
-        return hwADC_InvalidParameter;
-
-    cfg.Rank         = ADC_REGULAR_RANK_1;
-    cfg.SamplingTime = ADC_SAMPLETIME_810CYCLES_5;
-    cfg.SingleDiff = ADC_SINGLE_ENDED;
-    cfg.OffsetNumber = ADC_OFFSET_NONE;
-    cfg.Offset = 0;
-
-    if (HAL_ADC_ConfigChannel(&g_adc[inst], &cfg) != HAL_OK)
-        return hwADC_HwError;
-
-    return hwADC_OK;
 }
 
 #endif // STM32H7

@@ -74,4 +74,16 @@
 #include "Pin/ADC_Pin_STM32U5.h"
 #endif //STM32U5
 
+#ifdef STM32WB
+#include "Pin/ADC_Pin_STM32WB.h"
+#endif //STM32WB
+
+#ifdef STM32WBA
+#include "Pin/ADC_Pin_STM32WBA.h"
+#endif //STM32WBA
+
+#ifdef STM32WL
+#include "Pin/ADC_Pin_STM32WL.h"
+#endif //STM32WL
+
 #endif //ADC_PIN_H

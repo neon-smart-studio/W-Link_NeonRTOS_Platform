@@ -85,9 +85,6 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
             g_adc[inst].Instance = ADC3;
             break;
 #endif
-
-        default:
-            return hwADC_InvalidParameter;
     }
 
     g_adc[inst].Init.ClockPrescaler        = ADC_CLOCK_SYNC_PCLK_DIV4;
@@ -140,36 +137,9 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
             __HAL_RCC_ADC34_CLK_DISABLE();
             break;
 #endif
-
-        default:
-            return hwADC_InvalidParameter;
     }
 
     return hwADC_OK;
-}
-
-void ADC_NVIC_Init(void)
-{
-#if defined(ADC1_BASE) || defined(ADC2_BASE)
-    HAL_NVIC_SetPriority(ADC1_2_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
-    HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
-#endif
-
-#if defined(ADC3_BASE)
-    HAL_NVIC_SetPriority(ADC3_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
-    HAL_NVIC_EnableIRQ(ADC3_IRQn);
-#endif
-}
-
-void ADC_NVIC_DeInit(void)
-{
-#if defined(ADC1_BASE) || defined(ADC2_BASE)
-    HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
-#endif
-
-#if defined(ADC3_BASE)
-    HAL_NVIC_DisableIRQ(ADC3_IRQn);
-#endif
 }
 
 hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
@@ -210,6 +180,30 @@ hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
         return hwADC_HwError;
 
     return hwADC_OK;
+}
+
+void ADC_NVIC_Init(void)
+{
+#if defined(ADC1_BASE) || defined(ADC2_BASE)
+    HAL_NVIC_SetPriority(ADC1_2_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
+    HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
+#endif
+
+#if defined(ADC3_BASE)
+    HAL_NVIC_SetPriority(ADC3_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
+    HAL_NVIC_EnableIRQ(ADC3_IRQn);
+#endif
+}
+
+void ADC_NVIC_DeInit(void)
+{
+#if defined(ADC1_BASE) || defined(ADC2_BASE)
+    HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
+#endif
+
+#if defined(ADC3_BASE)
+    HAL_NVIC_DisableIRQ(ADC3_IRQn);
+#endif
 }
 
 #endif // STM32F3

@@ -47,16 +47,6 @@ void ADC1_2_IRQHandler(void)
 #endif
 }
 
-static void ADC_EnableClock(void)
-{
-    __HAL_RCC_ADC_CLK_ENABLE();
-}
-
-static void ADC_DisableClock(void)
-{
-    __HAL_RCC_ADC_CLK_DISABLE();
-}
-
 hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
 {
     if (inst >= hwADC_Instance_MAX)
@@ -66,18 +56,16 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
     {
 #if defined(ADC1_BASE)
         case hwADC_Instance_1:
-            ADC_EnableClock();
+            __HAL_RCC_ADC_CLK_ENABLE();
             g_adc[inst].Instance = ADC1;
             break;
 #endif
 #if defined(ADC2_BASE)
         case hwADC_Instance_2:
-            ADC_EnableClock();
+            __HAL_RCC_ADC_CLK_ENABLE();
             g_adc[inst].Instance = ADC2;
             break;
 #endif
-        default:
-            return hwADC_InvalidParameter;
     }
 
     g_adc[inst].Init.ClockPrescaler        = ADC_CLOCK_SYNC_PCLK_DIV4;
@@ -113,31 +101,24 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
 
     switch (inst)
     {
+#if defined(ADC1_BASE) || defined(ADC2_BASE)
 #if defined(ADC1_BASE)
         case hwADC_Instance_1:
 #endif
 #if defined(ADC2_BASE)
         case hwADC_Instance_2:
 #endif
-            ADC_DisableClock();
+#if defined(ADC1_BASE) && defined(ADC2_BASE)
+            if(!ADC_Instance_Init_Status[hwADC_Instance_1] && !ADC_Instance_Init_Status[hwADC_Instance_2])
+#endif
+            {
+                __HAL_RCC_ADC_CLK_DISABLE();
+            }
             break;
-
-        default:
-            return hwADC_InvalidParameter;
+#endif
     }
 
     return hwADC_OK;
-}
-
-void ADC_NVIC_Init(void)
-{
-    HAL_NVIC_SetPriority(ADC1_2_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
-    HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
-}
-
-void ADC_NVIC_DeInit(void)
-{
-    HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
 }
 
 hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
@@ -161,6 +142,17 @@ hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
         return hwADC_HwError;
 
     return hwADC_OK;
+}
+
+void ADC_NVIC_Init(void)
+{
+    HAL_NVIC_SetPriority(ADC1_2_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
+    HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
+}
+
+void ADC_NVIC_DeInit(void)
+{
+    HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
 }
 
 #endif // STM32L5

@@ -64,8 +64,6 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
             g_adc[inst].Instance = ADC1;
             break;
 #endif
-        default:
-            return hwADC_InvalidParameter;
     }
 
     g_adc[inst].Init.ClockPrescaler        = ADC_CLOCK_SYNC_PCLK_DIV4;
@@ -106,9 +104,26 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
             __HAL_RCC_ADC1_CLK_DISABLE();
             break;
 #endif
-        default:
-            return hwADC_InvalidParameter;
     }
+
+    return hwADC_OK;
+}
+
+hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
+{
+    if (inst >= hwADC_Instance_MAX || ch >= hwADC_Channel_Index_MAX)
+        return hwADC_InvalidParameter;
+
+    ADC_ChannelConfTypeDef cfg = {0};
+    cfg.Channel = ADC_Channel_To_HAL(ch);
+
+    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
+        return hwADC_InvalidParameter;
+
+    cfg.Rank = ADC_RANK_CHANNEL_NUMBER;
+
+    if (HAL_ADC_ConfigChannel(&g_adc[inst], &cfg) != HAL_OK)
+        return hwADC_HwError;
 
     return hwADC_OK;
 }
@@ -131,25 +146,6 @@ void ADC_NVIC_DeInit(void)
 #else
     HAL_NVIC_DisableIRQ(ADC1_COMP_IRQn);
 #endif
-}
-
-hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
-{
-    if (inst >= hwADC_Instance_MAX || ch >= hwADC_Channel_Index_MAX)
-        return hwADC_InvalidParameter;
-
-    ADC_ChannelConfTypeDef cfg = {0};
-    cfg.Channel = ADC_Channel_To_HAL(ch);
-
-    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
-        return hwADC_InvalidParameter;
-
-    cfg.Rank = ADC_RANK_CHANNEL_NUMBER;
-
-    if (HAL_ADC_ConfigChannel(&g_adc[inst], &cfg) != HAL_OK)
-        return hwADC_HwError;
-
-    return hwADC_OK;
 }
 
 #endif // STM32L0

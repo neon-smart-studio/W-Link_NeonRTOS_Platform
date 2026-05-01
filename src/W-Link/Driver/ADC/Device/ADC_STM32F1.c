@@ -67,9 +67,6 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
             g_adc[inst].Instance = ADC2;
             break;
 #endif
-
-        default:
-            return hwADC_InvalidParameter;
     }
 
     g_adc[inst].Init.ScanConvMode          = DISABLE;
@@ -108,30 +105,9 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
             __HAL_RCC_ADC2_CLK_DISABLE();
             break;
 #endif
-
-        default:
-            return hwADC_InvalidParameter;
     }
 
     return hwADC_OK;
-}
-
-void ADC_NVIC_Init(void)
-{
-#if defined(ADC1_2_IRQn)
-    HAL_NVIC_SetPriority(ADC1_2_IRQn,
-                         ADC_IRQ_NVIC_PRIORITY,
-                         ADC_IRQ_NVIC_SUB_PRIORITY);
-
-    HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
-#endif
-}
-
-void ADC_NVIC_DeInit(void)
-{
-#if defined(ADC1_2_IRQn)
-    HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
-#endif
 }
 
 hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
@@ -160,6 +136,24 @@ hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
         return hwADC_HwError;
 
     return hwADC_OK;
+}
+
+void ADC_NVIC_Init(void)
+{
+#if defined(ADC1_2_IRQn)
+    HAL_NVIC_SetPriority(ADC1_2_IRQn,
+                         ADC_IRQ_NVIC_PRIORITY,
+                         ADC_IRQ_NVIC_SUB_PRIORITY);
+
+    HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
+#endif
+}
+
+void ADC_NVIC_DeInit(void)
+{
+#if defined(ADC1_2_IRQn)
+    HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
+#endif
 }
 
 #endif // STM32F1

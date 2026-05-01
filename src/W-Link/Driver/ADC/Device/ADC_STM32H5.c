@@ -52,16 +52,6 @@ void ADC2_IRQHandler(void)
 }
 #endif
 
-static void ADC_EnableClock(void)
-{
-    __HAL_RCC_ADC_CLK_ENABLE();
-}
-
-static void ADC_DisableClock(void)
-{
-    __HAL_RCC_ADC_CLK_DISABLE();
-}
-
 hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
 {
     if (inst >= hwADC_Instance_MAX)
@@ -82,9 +72,6 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
             g_adc[inst].Instance = ADC2;
             break;
 #endif
-
-        default:
-            return hwADC_InvalidParameter;
     }
 
     g_adc[inst].Init.ClockPrescaler        = ADC_CLOCK_ASYNC_DIV4;
@@ -117,7 +104,47 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
 
     HAL_ADC_DeInit(&g_adc[inst]);
 
-    ADC_DisableClock();
+    switch (inst)
+    {
+#if defined(ADC1_BASE) || defined(ADC2_BASE)
+#if defined(ADC1_BASE)
+        case hwADC_Instance_1:
+#endif
+#if defined(ADC2_BASE)
+        case hwADC_Instance_2:
+#endif
+#if defined(ADC1_BASE) && defined(ADC2_BASE)
+            if(!ADC_Instance_Init_Status[hwADC_Instance_1] && !ADC_Instance_Init_Status[hwADC_Instance_2])
+#endif
+            {
+                __HAL_RCC_ADC12_CLK_DISABLE();
+            }
+            break;
+#endif
+    }
+
+    return hwADC_OK;
+}
+
+hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
+{
+    if (inst >= hwADC_Instance_MAX || ch >= hwADC_Channel_Index_MAX)
+        return hwADC_InvalidParameter;
+
+    ADC_ChannelConfTypeDef cfg = {0};
+
+    cfg.Channel = ADC_Channel_To_HAL(ch);
+    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
+        return hwADC_InvalidParameter;
+
+    cfg.Rank = ADC_REGULAR_RANK_1;
+    cfg.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
+    cfg.SingleDiff = ADC_SINGLE_ENDED;
+    cfg.OffsetNumber = ADC_OFFSET_NONE;
+    cfg.Offset = 0;
+
+    if (HAL_ADC_ConfigChannel(&g_adc[inst], &cfg) != HAL_OK)
+        return hwADC_HwError;
 
     return hwADC_OK;
 }
@@ -144,29 +171,6 @@ void ADC_NVIC_DeInit(void)
 #if defined(ADC2_BASE)
     HAL_NVIC_DisableIRQ(ADC2_IRQn);
 #endif
-}
-
-hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
-{
-    if (inst >= hwADC_Instance_MAX || ch >= hwADC_Channel_Index_MAX)
-        return hwADC_InvalidParameter;
-
-    ADC_ChannelConfTypeDef cfg = {0};
-
-    cfg.Channel = ADC_Channel_To_HAL(ch);
-    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
-        return hwADC_InvalidParameter;
-
-    cfg.Rank = ADC_REGULAR_RANK_1;
-    cfg.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
-    cfg.SingleDiff = ADC_SINGLE_ENDED;
-    cfg.OffsetNumber = ADC_OFFSET_NONE;
-    cfg.Offset = 0;
-
-    if (HAL_ADC_ConfigChannel(&g_adc[inst], &cfg) != HAL_OK)
-        return hwADC_HwError;
-
-    return hwADC_OK;
 }
 
 #endif // STM32H5

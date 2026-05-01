@@ -72,18 +72,6 @@ void ADC4_IRQHandler(void)
 }
 #endif
 
-static void ADC_EnableClock(void)
-{
-    __HAL_RCC_ADC12_CLK_ENABLE();
-    __HAL_RCC_ADC4_CLK_ENABLE();
-}
-
-static void ADC_DisableClock(void)
-{
-    __HAL_RCC_ADC12_CLK_DISABLE();
-    __HAL_RCC_ADC4_CLK_DISABLE();
-}
-
 hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
 {
     if (inst >= hwADC_Instance_MAX)
@@ -95,18 +83,21 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
     {
 #if defined(ADC1_BASE)
         case hwADC_Instance_1:
+            __HAL_RCC_ADC12_CLK_ENABLE();
             g_adc[inst].Instance = ADC1;
             break;
 #endif
 
 #if defined(ADC2_BASE)
         case hwADC_Instance_2:
+            __HAL_RCC_ADC12_CLK_ENABLE();
             g_adc[inst].Instance = ADC2;
             break;
 #endif
 
 #if defined(ADC4_BASE)
         case hwADC_Instance_4:
+            __HAL_RCC_ADC4_CLK_ENABLE();
             g_adc[inst].Instance = ADC4;
             break;
 #endif
@@ -157,11 +148,68 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
 
     HAL_ADC_DeInit(&g_adc[inst]);
 
-    /*
-     * 簡化版：目前不做 reference count。
-     * 若 ADC1 / ADC2 同時使用，DeInit 任一個會關 ADC12 clock。
-     */
-    ADC_DisableClock();
+    switch (inst)
+    {
+#if defined(ADC1_BASE) || defined(ADC2_BASE)
+#if defined(ADC1_BASE)
+        case hwADC_Instance_1:
+#endif
+#if defined(ADC2_BASE)
+        case hwADC_Instance_2:
+#endif
+#if defined(ADC1_BASE) && defined(ADC2_BASE)
+            if(!ADC_Instance_Init_Status[hwADC_Instance_1] && !ADC_Instance_Init_Status[hwADC_Instance_2])
+#endif
+            {
+                __HAL_RCC_ADC12_CLK_DISABLE();
+            }
+            break;
+#endif
+
+#if defined(ADC4_BASE)
+        case hwADC_Instance_4:
+            __HAL_RCC_ADC4_CLK_ENABLE();
+            g_adc[inst].Instance = ADC4;
+            break;
+#endif
+    }
+
+    return hwADC_OK;
+}
+
+hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
+{
+    if (inst >= hwADC_Instance_MAX || ch >= hwADC_Channel_Index_MAX)
+        return hwADC_InvalidParameter;
+
+    ADC_ChannelConfTypeDef cfg = {0};
+
+    cfg.Channel = ADC_Channel_To_HAL(ch);
+    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
+        return hwADC_InvalidParameter;
+
+    cfg.Rank = ADC_REGULAR_RANK_1;
+
+    cfg.SamplingTime = ADC_SAMPLETIME_814CYCLES;
+
+#if defined(ADC_SINGLE_ENDED)
+    cfg.SingleDiff = ADC_SINGLE_ENDED;
+#endif
+
+#if defined(ADC_OFFSET_NONE)
+    cfg.OffsetNumber = ADC_OFFSET_NONE;
+#endif
+
+#if defined(ADC_OFFSET_SIGN_NONE)
+    cfg.OffsetSign = ADC_OFFSET_SIGN_NONE;
+#endif
+
+#if defined(ADC_OFFSET_NONE)
+    cfg.Offset = 0;
+#endif
+
+    if (HAL_ADC_ConfigChannel(&g_adc[inst], &cfg) != HAL_OK)
+        return hwADC_HwError;
 
     return hwADC_OK;
 }
@@ -205,43 +253,6 @@ void ADC_NVIC_DeInit(void)
 #if defined(ADC4_BASE)
     HAL_NVIC_DisableIRQ(ADC4_IRQn);
 #endif
-}
-
-hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
-{
-    if (inst >= hwADC_Instance_MAX || ch >= hwADC_Channel_Index_MAX)
-        return hwADC_InvalidParameter;
-
-    ADC_ChannelConfTypeDef cfg = {0};
-
-    cfg.Channel = ADC_Channel_To_HAL(ch);
-    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
-        return hwADC_InvalidParameter;
-
-    cfg.Rank = ADC_REGULAR_RANK_1;
-
-    cfg.SamplingTime = ADC_SAMPLETIME_814CYCLES;
-
-#if defined(ADC_SINGLE_ENDED)
-    cfg.SingleDiff = ADC_SINGLE_ENDED;
-#endif
-
-#if defined(ADC_OFFSET_NONE)
-    cfg.OffsetNumber = ADC_OFFSET_NONE;
-#endif
-
-#if defined(ADC_OFFSET_SIGN_NONE)
-    cfg.OffsetSign = ADC_OFFSET_SIGN_NONE;
-#endif
-
-#if defined(ADC_OFFSET_NONE)
-    cfg.Offset = 0;
-#endif
-
-    if (HAL_ADC_ConfigChannel(&g_adc[inst], &cfg) != HAL_OK)
-        return hwADC_HwError;
-
-    return hwADC_OK;
 }
 
 #endif // STM32U5

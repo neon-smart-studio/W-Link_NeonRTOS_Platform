@@ -318,6 +318,19 @@
 #include "stm32h7xx_hal_dac.h"
 #endif //STM32H7
 
+#if defined (STM32WL55xx) || defined (STM32WL54xx) || defined (STM32WLE5xx) || defined (STM32WLE4xx) || defined(STM32WL5Mxx)
+#include "stm32wlxx.h"
+#include "stm32wlxx_hal_gpio.h"
+#include "stm32wlxx_hal_exti.h"
+#include "stm32wlxx_hal_uart.h"
+#include "stm32wlxx_hal_spi.h"
+#include "stm32wlxx_hal_i2c.h"
+#include "stm32wlxx_hal_dma.h"
+#include "stm32wlxx_hal_rtc.h"
+#include "stm32wlxx_hal_adc.h"
+#include "stm32wlxx_hal_dac.h"
+#endif //STM32WL
+
 #if defined (STM32F0) || defined (STM32F1) || defined (STM32F2) || defined (STM32F3) || defined (STM32F4) || defined (STM32F7) || \
     defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
     defined (STM32C0) || \

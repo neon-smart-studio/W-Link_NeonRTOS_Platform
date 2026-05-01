@@ -111,9 +111,6 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
             g_adc[inst].Instance = ADC5;
             break;
 #endif
-
-        default:
-            return hwADC_InvalidParameter;
     }
 
     g_adc[inst].Init.ClockPrescaler        = ADC_CLOCK_SYNC_PCLK_DIV4;
@@ -190,10 +187,37 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
             }
             break;
 #endif
-
-        default:
-            return hwADC_InvalidParameter;
     }
+
+    return hwADC_OK;
+}
+
+hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
+{
+    if (inst >= hwADC_Instance_MAX)
+        return hwADC_InvalidParameter;
+
+    if (ch >= hwADC_Channel_Index_MAX)
+        return hwADC_InvalidParameter;
+
+    ADC_HandleTypeDef *hadc = &g_adc[inst];
+
+    ADC_ChannelConfTypeDef cfg = {0};
+    cfg.Channel = ADC_Channel_To_HAL(ch);
+
+    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
+    {
+        return hwADC_InvalidParameter;
+    }
+
+    cfg.Rank         = ADC_REGULAR_RANK_1;
+    cfg.SamplingTime = ADC_SAMPLETIME_247CYCLES_5;
+    cfg.SingleDiff   = ADC_SINGLE_ENDED;
+    cfg.OffsetNumber = ADC_OFFSET_NONE;
+    cfg.Offset       = 0;
+
+    if (HAL_ADC_ConfigChannel(hadc, &cfg) != HAL_OK)
+        return hwADC_HwError;
 
     return hwADC_OK;
 }
@@ -235,36 +259,6 @@ void ADC_NVIC_DeInit(void)
 #if defined(ADC5_BASE)
     HAL_NVIC_DisableIRQ(ADC5_IRQn);
 #endif
-}
-
-hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
-{
-    if (inst >= hwADC_Instance_MAX)
-        return hwADC_InvalidParameter;
-
-    if (ch >= hwADC_Channel_Index_MAX)
-        return hwADC_InvalidParameter;
-
-    ADC_HandleTypeDef *hadc = &g_adc[inst];
-
-    ADC_ChannelConfTypeDef cfg = {0};
-    cfg.Channel = ADC_Channel_To_HAL(ch);
-
-    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
-    {
-        return hwADC_InvalidParameter;
-    }
-
-    cfg.Rank         = ADC_REGULAR_RANK_1;
-    cfg.SamplingTime = ADC_SAMPLETIME_247CYCLES_5;
-    cfg.SingleDiff   = ADC_SINGLE_ENDED;
-    cfg.OffsetNumber = ADC_OFFSET_NONE;
-    cfg.Offset       = 0;
-
-    if (HAL_ADC_ConfigChannel(hadc, &cfg) != HAL_OK)
-        return hwADC_HwError;
-
-    return hwADC_OK;
 }
 
 #endif // STM32G4

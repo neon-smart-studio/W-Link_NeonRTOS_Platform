@@ -68,19 +68,17 @@ static const UART_Pin_Def UART_Pin_Def_Table[hwUART_Index_MAX][UART_Pinset_MAX] 
     },
 #endif
 #if defined(UART3_BASE) || defined(USART3_BASE)
-    /* ================= USART3 (UART2) ================= */
     {
-        { hwGPIO_Pin_D8,  hwGPIO_Pin_D9,  hwGPIO_Pin_B14, hwGPIO_Pin_B13 },
+        { hwGPIO_Pin_B10, hwGPIO_Pin_B11, hwGPIO_Pin_B14, hwGPIO_Pin_B13 },
         { hwGPIO_Pin_C10, hwGPIO_Pin_C11, hwGPIO_Pin_B14, hwGPIO_Pin_B13 },
-        { hwGPIO_Pin_B10, hwGPIO_Pin_B11, hwGPIO_Pin_D12, hwGPIO_Pin_D11 },
+        { hwGPIO_Pin_D8,  hwGPIO_Pin_D9,  hwGPIO_Pin_D12, hwGPIO_Pin_D11 },
     },
 #endif
 #if defined(UART4_BASE) || defined(USART4_BASE)
-    /* ================= USART4 (UART3) ================= */
     {
-        { hwGPIO_Pin_A0,  hwGPIO_Pin_A1,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
-        { hwGPIO_Pin_C10, hwGPIO_Pin_C11, hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
-        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
+        { hwGPIO_Pin_C10, hwGPIO_Pin_C11, hwGPIO_Pin_NC, hwGPIO_Pin_NC },
+        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC, hwGPIO_Pin_NC },
+        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC, hwGPIO_Pin_NC },
     },
 #endif
 #if defined(UART5_BASE) || defined(USART5_BASE)

@@ -1,0 +1,40 @@
+{
+  "build": {
+    "core": "stm32",
+    "cpu": "cortex-m33",
+    "extra_flags": "-DSTM32WBA -DSTM32WBA55xx -DSTM32WBA55CG",
+    "f_cpu": "100000000L",
+    "mcu": "stm32wba55cg",
+    "product_line": "STM32WBA55xx"
+  },
+  "connectivity": [
+    "bluetooth"
+  ],
+  "debug": {
+    "default_tools": [
+      "stlink"
+    ],
+    "jlink_device": "STM32WBA55CG",
+    "onboard_tools": [
+      "stlink"
+    ],
+    "openocd_target": "stm32wbax"
+  },
+  "frameworks": [
+    "cmsis"
+  ],
+  "name": "NUCLEO-WBA55CG",
+  "upload": {
+    "maximum_ram_size": 262144,
+    "maximum_size": 1048576,
+    "protocol": "stlink",
+    "protocols": [
+      "jlink",
+      "cmsis-dap",
+      "stlink",
+      "blackmagic"
+    ]
+  },
+  "url": "https://www.st.com/en/evaluation-tools/nucleo-wba55cg.html",
+  "vendor": "ST"
+}

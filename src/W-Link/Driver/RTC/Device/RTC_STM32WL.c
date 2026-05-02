@@ -69,6 +69,8 @@ hwRTC_OpResult RTC_Instance_DeInit(hwRTC_Index index)
 
     HAL_RTC_DeactivateAlarm(&g_rtc[index], RTC_ALARM_A);
 
+    HAL_RTC_DeactivateAlarm(&g_rtc[index], RTC_ALARM_B);
+
     if (HAL_RTC_DeInit(&g_rtc[index]) != HAL_OK)
         return hwRTC_HwError;
 
@@ -107,9 +109,22 @@ hwRTC_OpResult RTC_Device_SetAlarm(
 
     alarm.AlarmTime = *time;
     alarm.AlarmMask = RTC_ALARMMASK_DATEWEEKDAY;
-    alarm.Alarm = RTC_ALARM_A;
 
     alarm.AlarmSubSecondMask = RTC_ALARMSUBSECONDMASK_ALL;
+
+    switch (alarm_ch)
+    {
+        case hwRTC_Alarm_Channel_Index_0:
+            alarm.Alarm = RTC_ALARM_A;
+            break;
+
+        case hwRTC_Alarm_Channel_Index_1:
+            alarm.Alarm = RTC_ALARM_B;
+            break;
+
+        default:
+            return hwRTC_InvalidParameter;
+    }
 
     if (HAL_RTC_SetAlarm_IT(&g_rtc[index], &alarm, RTC_FORMAT_BIN) != HAL_OK)
         return hwRTC_HwError;
@@ -125,10 +140,23 @@ hwRTC_OpResult RTC_Device_ClearAlarm(
     if (index >= hwRTC_Index_MAX)
         return hwRTC_InvalidParameter;
 
-    if (alarm_ch != hwRTC_Alarm_Channel_Index_0)
-        return hwRTC_InvalidParameter;
+    uint32_t alarm;
 
-    if (HAL_RTC_DeactivateAlarm(&g_rtc[index], RTC_ALARM_A) != HAL_OK)
+    switch (alarm_ch)
+    {
+        case hwRTC_Alarm_Channel_Index_0:
+            alarm = RTC_ALARM_A;
+            break;
+
+        case hwRTC_Alarm_Channel_Index_1:
+            alarm = RTC_ALARM_B;
+            break;
+
+        default:
+            return hwRTC_InvalidParameter;
+    }
+
+    if (HAL_RTC_DeactivateAlarm(&g_rtc[index], alarm) != HAL_OK)
         return hwRTC_HwError;
 
     return hwRTC_OK;

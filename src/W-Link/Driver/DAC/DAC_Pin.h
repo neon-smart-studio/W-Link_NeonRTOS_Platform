@@ -70,10 +70,6 @@
 #include "Pin/DAC_Pin_STM32U5.h"
 #endif //STM32U5
 
-#ifdef STM32WBA
-#include "Pin/DAC_Pin_STM32WBA.h"
-#endif //STM32WBA
-
 #ifdef STM32WL
 #include "Pin/DAC_Pin_STM32WL.h"
 #endif //STM32WL

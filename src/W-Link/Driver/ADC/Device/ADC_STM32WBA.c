@@ -3,7 +3,7 @@
 
 #include "soc.h"
 
-#ifdef STM32WB
+#ifdef STM32WBA
 
 #include "ADC/ADC.h"
 #include "ADC_STM32.h"
@@ -28,18 +28,13 @@ static uint32_t ADC_Channel_To_HAL(hwADC_Channel_Index ch)
         case hwADC_Channel_Index_11: return ADC_CHANNEL_11;
         case hwADC_Channel_Index_12: return ADC_CHANNEL_12;
         case hwADC_Channel_Index_13: return ADC_CHANNEL_13;
-        case hwADC_Channel_Index_14: return ADC_CHANNEL_14;
-        case hwADC_Channel_Index_15: return ADC_CHANNEL_15;
-        case hwADC_Channel_Index_16: return ADC_CHANNEL_16;
-        case hwADC_Channel_Index_17: return ADC_CHANNEL_17;
-        case hwADC_Channel_Index_18: return ADC_CHANNEL_18;
         default: return 0;
     }
 }
 
-void ADC1_IRQHandler(void)
+void ADC4_IRQHandler(void)
 {
-    HAL_ADC_IRQHandler(&g_adc[hwADC_Instance_1]);
+    HAL_ADC_IRQHandler(&g_adc[hwADC_Instance_4]);
 }
 
 hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
@@ -47,11 +42,11 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
     if (inst >= hwADC_Instance_MAX)
         return hwADC_InvalidParameter;
 
-    __HAL_RCC_ADC_CLK_ENABLE();
+    __HAL_RCC_ADC4_CLK_ENABLE();
 
-    g_adc[inst].Instance = ADC1;
+    g_adc[inst].Instance = ADC4;
 
-    g_adc[inst].Init.ClockPrescaler        = ADC_CLOCK_SYNC_PCLK_DIV4;
+    g_adc[inst].Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV4;
     g_adc[inst].Init.Resolution            = ADC_RESOLUTION_12B;
     g_adc[inst].Init.DataAlign             = ADC_DATAALIGN_RIGHT;
     g_adc[inst].Init.ScanConvMode          = ADC_SCAN_DISABLE;
@@ -63,12 +58,12 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
     g_adc[inst].Init.ExternalTrigConv      = ADC_SOFTWARE_START;
     g_adc[inst].Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;
     g_adc[inst].Init.Overrun               = ADC_OVR_DATA_OVERWRITTEN;
-    g_adc[inst].Init.OversamplingMode      = DISABLE;
+    g_adc[inst].Init.OversamplingMode = DISABLE;
 
     if (HAL_ADC_Init(&g_adc[inst]) != HAL_OK)
         return hwADC_HwError;
 
-    if (HAL_ADCEx_Calibration_Start(&g_adc[inst], ADC_SINGLE_ENDED) != HAL_OK)
+    if (HAL_ADCEx_Calibration_Start(&g_adc[inst]) != HAL_OK)
         return hwADC_HwError;
 
     return hwADC_OK;
@@ -81,7 +76,7 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
 
     HAL_ADC_DeInit(&g_adc[inst]);
 
-    __HAL_RCC_ADC_CLK_DISABLE();
+    __HAL_RCC_ADC4_CLK_DISABLE();
 
     return hwADC_OK;
 }
@@ -95,7 +90,7 @@ hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
 
     cfg.Channel = ADC_Channel_To_HAL(ch);
     cfg.Rank = ADC_REGULAR_RANK_1;
-    cfg.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
+    cfg.SamplingTime = ADC_SAMPLETIME_814CYCLES_5;
 
     if (HAL_ADC_ConfigChannel(&g_adc[inst], &cfg) != HAL_OK)
         return hwADC_HwError;
@@ -105,13 +100,13 @@ hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
 
 void ADC_NVIC_Init(void)
 {
-    HAL_NVIC_SetPriority(ADC1_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
-    HAL_NVIC_EnableIRQ(ADC1_IRQn);
+    HAL_NVIC_SetPriority(ADC4_IRQn, ADC_IRQ_NVIC_PRIORITY, ADC_IRQ_NVIC_SUB_PRIORITY);
+    HAL_NVIC_EnableIRQ(ADC4_IRQn);
 }
 
 void ADC_NVIC_DeInit(void)
 {
-    HAL_NVIC_DisableIRQ(ADC1_IRQn);
+    HAL_NVIC_DisableIRQ(ADC4_IRQn);
 }
 
-#endif // STM32WB
+#endif // STM32WBA

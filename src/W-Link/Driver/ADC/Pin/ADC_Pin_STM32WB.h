@@ -3,7 +3,7 @@
 
 #include "ADC_Pin_STM32.h"
 
-const ADC_Channel_Def ADC_Channel_Def_Table[hwADC_Channel_Index_MAX] = {
+static const ADC_Channel_Def ADC_Channel_Def_Table[hwADC_Channel_Index_MAX] = {
 #if defined(ADC1_BASE)
     /* ===== ADC1 ===== */
     { hwGPIO_Pin_A0, hwADC_Instance_1 },   // ADC1_IN0

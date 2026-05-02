@@ -3,14 +3,14 @@
 
 #include "soc.h"
 
-#ifdef STM32WB
+#ifdef STM32WBA
 
 #include "RTC/RTC.h"
 #include "RTC_STM32.h"
 
 RTC_HandleTypeDef g_rtc[hwRTC_Index_MAX];
 
-void RTC_Alarm_IRQHandler(void)
+void RTC_IRQHandler(void)
 {
     HAL_RTC_AlarmIRQHandler(&g_rtc[hwRTC_Index_0]);
 }
@@ -84,17 +84,17 @@ hwRTC_OpResult RTC_Instance_DeInit(hwRTC_Index index)
 void RTC_NVIC_Init(void)
 {
     HAL_NVIC_SetPriority(
-        RTC_Alarm_IRQn,
+        RTC_IRQn,
         RTC_IRQ_NVIC_PRIORITY,
         RTC_IRQ_NVIC_SUB_PRIORITY
     );
 
-    HAL_NVIC_EnableIRQ(RTC_Alarm_IRQn);
+    HAL_NVIC_EnableIRQ(RTC_IRQn);
 }
 
 void RTC_NVIC_DeInit(void)
 {
-    HAL_NVIC_DisableIRQ(RTC_Alarm_IRQn);
+    HAL_NVIC_DisableIRQ(RTC_IRQn);
 }
 
 hwRTC_OpResult RTC_Device_SetAlarm(
@@ -166,4 +166,4 @@ hwRTC_OpResult RTC_Device_ClearAlarm(
     return hwRTC_OK;
 }
 
-#endif // STM32WB
+#endif // STM32WBA

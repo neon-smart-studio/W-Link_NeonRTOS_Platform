@@ -450,7 +450,7 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
 #ifdef GPIO_SPEED_FREQ_VERY_HIGH
     g_i2c_sda.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
 #else
-    g_i2c_sda.Speed     = GPIO_SPEED_HIGH;
+    g_i2c_sda.Speed     = GPIO_SPEED_FREQ_HIGH;
 #endif
 #ifndef STM32F1
     g_i2c_sda.Alternate = sda_af;
@@ -464,7 +464,7 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
 #ifdef GPIO_SPEED_FREQ_VERY_HIGH
     g_i2c_scl.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
 #else
-    g_i2c_scl.Speed     = GPIO_SPEED_HIGH;
+    g_i2c_scl.Speed     = GPIO_SPEED_FREQ_HIGH;
 #endif
 #ifndef STM32F1
     g_i2c_scl.Alternate = scl_af;

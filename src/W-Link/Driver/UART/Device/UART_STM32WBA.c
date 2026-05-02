@@ -4,7 +4,7 @@
 
 #include "soc.h"
 
-#ifdef STM32WB
+#ifdef STM32WBA
 
 #include "UART/UART.h"
 #include "UART_STM32.h"
@@ -20,6 +20,12 @@ USART_TypeDef *UART_Map_Soc_Base(hwUART_Index index)
         case hwUART_Index_0: return USART1;
 #elif defined(UART1_BASE)
         case hwUART_Index_0: return UART1;
+#endif
+
+#if defined(USART2_BASE)
+        case hwUART_Index_1: return USART2;
+#elif defined(UART2_BASE)
+        case hwUART_Index_1: return UART2;
 #endif
 
 #if defined(LPUART1_BASE)
@@ -43,6 +49,12 @@ static void UART_EnableClock(hwUART_Index index)
         case hwUART_Index_0: __HAL_RCC_UART1_CLK_ENABLE(); break;
 #endif
 
+#if defined(USART2_BASE)
+        case hwUART_Index_1: __HAL_RCC_USART2_CLK_ENABLE(); break;
+#elif defined(UART2_BASE)
+        case hwUART_Index_1: __HAL_RCC_UART2_CLK_ENABLE(); break;
+#endif
+
 #if defined(LPUART1_BASE)
         case hwUART_Index_L1: __HAL_RCC_LPUART1_CLK_ENABLE(); break;
 #endif
@@ -60,6 +72,12 @@ static void UART_DisableClock(hwUART_Index index)
         case hwUART_Index_0: __HAL_RCC_USART1_CLK_DISABLE(); break;
 #elif defined(UART1_BASE)
         case hwUART_Index_0: __HAL_RCC_UART1_CLK_DISABLE(); break;
+#endif
+
+#if defined(USART2_BASE)
+        case hwUART_Index_1: __HAL_RCC_USART2_CLK_DISABLE(); break;
+#elif defined(UART2_BASE)
+        case hwUART_Index_1: __HAL_RCC_UART2_CLK_DISABLE(); break;
 #endif
 
 #if defined(LPUART1_BASE)
@@ -189,6 +207,19 @@ void USART1_IRQHandler(void)
 }
 #endif
 
+#if defined(UART2_BASE)
+void UART2_IRQHandler(void)
+{
+    UART_HAL_IRQHandler(hwUART_Index_1);
+}
+#endif
+#if defined(USART2_BASE)
+void USART2_IRQHandler(void)
+{
+    UART_HAL_IRQHandler(hwUART_Index_1);
+}
+#endif
+
 #if defined(LPUART1_BASE)
 void LPUART1_IRQHandler(void)
 {
@@ -210,6 +241,19 @@ void UART_NVIC_Init(hwUART_Index index)
         case hwUART_Index_0:
             HAL_NVIC_SetPriority(USART1_IRQn, UART_IRQ_NVIC_PRIORITY, UART_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(USART1_IRQn);
+            break;
+#endif
+
+#if defined(UART2_BASE)
+        case hwUART_Index_1:
+            HAL_NVIC_SetPriority(UART2_IRQn, UART_IRQ_NVIC_PRIORITY, UART_IRQ_NVIC_SUB_PRIORITY);
+            HAL_NVIC_EnableIRQ(UART2_IRQn);
+            break;
+#endif
+#if defined(USART2_BASE)
+        case hwUART_Index_1:
+            HAL_NVIC_SetPriority(USART2_IRQn, UART_IRQ_NVIC_PRIORITY, UART_IRQ_NVIC_SUB_PRIORITY);
+            HAL_NVIC_EnableIRQ(USART2_IRQn);
             break;
 #endif
 
@@ -240,6 +284,17 @@ void UART_NVIC_DeInit(hwUART_Index index)
             break;
 #endif
 
+#if defined(UART2_BASE)
+        case hwUART_Index_1:
+            HAL_NVIC_DisableIRQ(UART2_IRQn);
+            break;
+#endif
+#if defined(USART2_BASE)
+        case hwUART_Index_1:
+            HAL_NVIC_DisableIRQ(USART2_IRQn);
+            break;
+#endif
+
 #if defined(LPUART1_BASE)
         case hwUART_Index_L1:
             HAL_NVIC_DisableIRQ(LPUART1_IRQn);
@@ -251,4 +306,4 @@ void UART_NVIC_DeInit(hwUART_Index index)
     }
 }
 
-#endif // STM32WB
+#endif // STM32WBA

@@ -1,0 +1,73 @@
+#ifndef I2C_PIN_STM32G0_H
+#define I2C_PIN_STM32G0_H
+
+#include "I2C_Pin_STM32_Def.h"
+
+typedef enum {
+    I2C_Pinset_DEFAULT = 0,
+    I2C_Pinset_ALT,
+    I2C_Pinset_MAX
+} I2C_Pinset_t;
+
+#ifndef CONFIG_I2C0_PINSET
+#define CONFIG_I2C0_PINSET I2C_Pinset_DEFAULT
+#endif
+
+#ifndef CONFIG_I2C1_PINSET
+#define CONFIG_I2C1_PINSET I2C_Pinset_DEFAULT
+#endif
+
+static const I2C_Pinset_t I2C_Index_Map_Alt[hwI2C_Index_MAX] = {
+#if defined(I2C1_BASE)
+    CONFIG_I2C0_PINSET,
+#endif
+#if defined(I2C2_BASE)
+    CONFIG_I2C1_PINSET,
+#endif
+};
+
+static const I2C_Pin_Def I2C_Pin_Def_Table[hwI2C_Index_MAX][I2C_Pinset_MAX] =
+{
+#if defined(I2C1_BASE)
+    /* ================= I2C1 (I2C0) ================= */
+    {
+        /* DEFAULT: SCL, SDA */
+        { hwGPIO_Pin_B6, hwGPIO_Pin_B7 },
+
+        /* ALT */
+        { hwGPIO_Pin_B8, hwGPIO_Pin_B9 },
+    },
+#endif
+
+#if defined(I2C2_BASE)
+    /* ================= I2C2 (I2C1) ================= */
+    {
+        /* DEFAULT: SCL, SDA */
+        { hwGPIO_Pin_B10, hwGPIO_Pin_B11 },
+
+        /* ALT */
+        { hwGPIO_Pin_A11, hwGPIO_Pin_A12 },
+    },
+#endif
+};
+
+static const I2C_AF_Map I2C_Pin_AF_Map[] =
+{
+#if defined(I2C1_BASE)
+    /* I2C1 */
+    { hwI2C_Index_0, hwGPIO_Pin_B6,  GPIO_AF6_I2C1 },
+    { hwI2C_Index_0, hwGPIO_Pin_B7,  GPIO_AF6_I2C1 },
+    { hwI2C_Index_0, hwGPIO_Pin_B8,  GPIO_AF6_I2C1 },
+    { hwI2C_Index_0, hwGPIO_Pin_B9,  GPIO_AF6_I2C1 },
+#endif
+
+#if defined(I2C2_BASE)
+    /* I2C2 */
+    { hwI2C_Index_1, hwGPIO_Pin_B10, GPIO_AF6_I2C2 },
+    { hwI2C_Index_1, hwGPIO_Pin_B11, GPIO_AF6_I2C2 },
+    { hwI2C_Index_1, hwGPIO_Pin_A11, GPIO_AF6_I2C2 },
+    { hwI2C_Index_1, hwGPIO_Pin_A12, GPIO_AF6_I2C2 },
+#endif
+};
+
+#endif // I2C_PIN_STM32G0_H

@@ -1,0 +1,13 @@
+
+#ifndef PWM_PIN_H
+#define PWM_PIN_H
+
+#ifdef DEVICE_STM32
+#include "STM32/PWM_Pin_STM32.h"
+#endif
+
+#ifdef DEVICE_TM4C1294
+#include "TI/PWM_Pin_TM4C1294.h"
+#endif
+
+#endif //PWM_PIN_H

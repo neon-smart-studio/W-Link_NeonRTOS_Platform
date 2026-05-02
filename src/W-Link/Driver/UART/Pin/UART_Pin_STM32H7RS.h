@@ -1,6 +1,6 @@
 
-#ifndef UART_PIN_STM32H7_H
-#define UART_PIN_STM32H7_H
+#ifndef UART_PIN_STM32H7RS_H
+#define UART_PIN_STM32H7RS_H
 
 #include "UART_Pin_STM32.h"
 
@@ -32,10 +32,6 @@ typedef enum {
 #define CONFIG_UART4_PINSET UART_Pinset_DEFAULT
 #endif //CONFIG_UART4_PINSET
 
-#ifndef CONFIG_UART5_PINSET
-#define CONFIG_UART5_PINSET UART_Pinset_DEFAULT
-#endif //CONFIG_UART5_PINSET
-
 #ifndef CONFIG_UART6_PINSET
 #define CONFIG_UART6_PINSET UART_Pinset_DEFAULT
 #endif //CONFIG_UART6_PINSET
@@ -43,14 +39,6 @@ typedef enum {
 #ifndef CONFIG_UART7_PINSET
 #define CONFIG_UART7_PINSET UART_Pinset_DEFAULT
 #endif //CONFIG_UART7_PINSET
-
-#ifndef CONFIG_UART8_PINSET
-#define CONFIG_UART8_PINSET UART_Pinset_DEFAULT
-#endif //CONFIG_UART8_PINSET
-
-#ifndef CONFIG_UART9_PINSET
-#define CONFIG_UART9_PINSET UART_Pinset_DEFAULT
-#endif //CONFIG_UART9_PINSET
 
 #ifndef CONFIG_UART_L1_PINSET
 #define CONFIG_UART_L1_PINSET UART_Pinset_DEFAULT
@@ -72,20 +60,11 @@ static const UART_Pinset_t UART_Index_Map_Alt[hwUART_Index_MAX] = {
 #if defined(UART5_BASE) || defined(USART5_BASE)
     CONFIG_UART4_PINSET,
 #endif
-#if defined(UART6_BASE) || defined(USART6_BASE)
-    CONFIG_UART5_PINSET,
-#endif
 #if defined(UART7_BASE) || defined(USART7_BASE)
     CONFIG_UART6_PINSET,
 #endif
 #if defined(UART8_BASE) || defined(USART8_BASE)
     CONFIG_UART7_PINSET,
-#endif
-#if defined(UART9_BASE) || defined(USART9_BASE)
-    CONFIG_UART8_PINSET,
-#endif
-#if defined(UART10_BASE) || defined(USART10_BASE)
-    CONFIG_UART9_PINSET,
 #endif
 #if defined(LPUART1_BASE)
     CONFIG_UART_L1_PINSET,
@@ -145,15 +124,6 @@ static const UART_Pin_Def UART_Pin_Def_Table[hwUART_Index_MAX][UART_Pinset_MAX] 
         { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC },
     },
 #endif
-#if defined(UART6_BASE) || defined(USART6_BASE)
-    /* ================= UART5 / USART6 ================= */
-    {
-        { hwGPIO_Pin_C6,  hwGPIO_Pin_C7, hwGPIO_Pin_G8,  hwGPIO_Pin_G13 },
-        { hwGPIO_Pin_G14, hwGPIO_Pin_G9, hwGPIO_Pin_G12, hwGPIO_Pin_G15 },
-        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC, hwGPIO_Pin_NC,  hwGPIO_Pin_NC },
-        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC, hwGPIO_Pin_NC,  hwGPIO_Pin_NC },
-    },
-#endif
 #if defined(UART7_BASE) || defined(USART7_BASE)
     /* ================= UART6 / UART7 ================= */
     {
@@ -170,24 +140,6 @@ static const UART_Pin_Def UART_Pin_Def_Table[hwUART_Index_MAX][UART_Pinset_MAX] 
         { hwGPIO_Pin_NC, hwGPIO_Pin_NC, hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
         { hwGPIO_Pin_NC, hwGPIO_Pin_NC, hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
         { hwGPIO_Pin_NC, hwGPIO_Pin_NC, hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
-    },
-#endif
-#if defined(UART9_BASE) || defined(USART9_BASE)
-    /* ================= UART8 / UART9 ================= */
-    {
-        { hwGPIO_Pin_G1,  hwGPIO_Pin_G0,  hwGPIO_Pin_D13, hwGPIO_Pin_D0 },
-        { hwGPIO_Pin_D15, hwGPIO_Pin_D14, hwGPIO_Pin_D13, hwGPIO_Pin_D0 },
-        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC },
-        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC },
-    },
-#endif
-#if defined(UART10_BASE) || defined(USART10_BASE)
-    /* ================= UART9 / USART10 ================= */
-    {
-        { hwGPIO_Pin_E3,  hwGPIO_Pin_E2,  hwGPIO_Pin_G14, hwGPIO_Pin_G13 },
-        { hwGPIO_Pin_G12, hwGPIO_Pin_G11, hwGPIO_Pin_G14, hwGPIO_Pin_G13 },
-        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC },
-        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC },
     },
 #endif
 #if defined(LPUART1_BASE)
@@ -260,17 +212,6 @@ static const UART_AF_Map UART_Pin_AF_Map[] =
     { hwUART_Index_4, hwGPIO_Pin_C8,  GPIO_AF8_UART5 },
     { hwUART_Index_4, hwGPIO_Pin_C9,  GPIO_AF8_UART5 },
 #endif
-#if defined(UART6_BASE) || defined(USART6_BASE)
-    /* ================= USART6 ================= */
-    { hwUART_Index_5, hwGPIO_Pin_C6,  GPIO_AF7_USART6 },
-    { hwUART_Index_5, hwGPIO_Pin_C7,  GPIO_AF7_USART6 },
-    { hwUART_Index_5, hwGPIO_Pin_G14, GPIO_AF7_USART6 },
-    { hwUART_Index_5, hwGPIO_Pin_G9,  GPIO_AF7_USART6 },
-    { hwUART_Index_5, hwGPIO_Pin_G8,  GPIO_AF7_USART6 },
-    { hwUART_Index_5, hwGPIO_Pin_G12, GPIO_AF7_USART6 },
-    { hwUART_Index_5, hwGPIO_Pin_G13, GPIO_AF7_USART6 },
-    { hwUART_Index_5, hwGPIO_Pin_G15, GPIO_AF7_USART6 },
-#endif
 #if defined(UART7_BASE) || defined(USART7_BASE)
     /* ================= UART7 ================= */
     { hwUART_Index_6, hwGPIO_Pin_E8,  GPIO_AF7_UART7 },
@@ -293,24 +234,6 @@ static const UART_AF_Map UART_Pin_AF_Map[] =
     { hwUART_Index_7, hwGPIO_Pin_D15, GPIO_AF8_UART8 },
     { hwUART_Index_7, hwGPIO_Pin_D14, GPIO_AF8_UART8 },
 #endif
-#if defined(UART9_BASE) || defined(USART9_BASE)
-    /* ================= UART9 ================= */
-    { hwUART_Index_8, hwGPIO_Pin_G1,  GPIO_AF11_UART9 },
-    { hwUART_Index_8, hwGPIO_Pin_G0,  GPIO_AF11_UART9 },
-    { hwUART_Index_8, hwGPIO_Pin_D15, GPIO_AF11_UART9 },
-    { hwUART_Index_8, hwGPIO_Pin_D14, GPIO_AF11_UART9 },
-    { hwUART_Index_8, hwGPIO_Pin_D13, GPIO_AF11_UART9 },
-    { hwUART_Index_8, hwGPIO_Pin_D0,  GPIO_AF11_UART9 },
-#endif
-#if defined(UART10_BASE) || defined(USART10_BASE)
-    /* ================= USART10 ================= */
-    { hwUART_Index_9, hwGPIO_Pin_E3,  GPIO_AF11_USART10 },
-    { hwUART_Index_9, hwGPIO_Pin_E2,  GPIO_AF4_USART10 },
-    { hwUART_Index_9, hwGPIO_Pin_G12, GPIO_AF4_USART10 },
-    { hwUART_Index_9, hwGPIO_Pin_G11, GPIO_AF4_USART10 },
-    { hwUART_Index_9, hwGPIO_Pin_G14, GPIO_AF4_USART10 },
-    { hwUART_Index_9, hwGPIO_Pin_G13, GPIO_AF4_USART10 },
-#endif
 #if defined(LPUART1_BASE)
     /* ================= LPUART1 ================= */
     { hwUART_Index_L1, hwGPIO_Pin_G7, GPIO_AF8_LPUART1 },
@@ -322,4 +245,4 @@ static const UART_AF_Map UART_Pin_AF_Map[] =
 #endif
 };
 
-#endif //UART_PIN_STM32H7_H
+#endif //UART_PIN_STM32H7RS_H

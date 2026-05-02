@@ -4,7 +4,7 @@
 
 #include "soc.h"
 
-#ifdef STM32H7
+#ifdef STM32H7RS
 
 #include "SPI/SPI_Master.h"
 #include "SPI_Master_STM32.h"
@@ -134,33 +134,33 @@ int SPI_Master_Get_Clock_Freq(hwSPI_Index index)
     switch (index)
     {
 #if defined(SPI1_BASE)
-        case hwSPI_Index_0:   /* SPI1 */
-            return HAL_RCC_GetPCLK2Freq();
+        case hwSPI_Index_0:
+            return HAL_RCC_GetPCLK1Freq();
 #endif
 
 #if defined(SPI2_BASE)
-        case hwSPI_Index_1:   /* SPI2 */
+        case hwSPI_Index_1:
             return HAL_RCC_GetPCLK1Freq();
 #endif
 
 #if defined(SPI3_BASE)
-        case hwSPI_Index_2:   /* SPI3 */
+        case hwSPI_Index_2:
             return HAL_RCC_GetPCLK1Freq();
 #endif
 
 #if defined(SPI4_BASE)
-        case hwSPI_Index_3:   /* SPI4 */
+        case hwSPI_Index_3:
             return HAL_RCC_GetPCLK2Freq();
 #endif
 
 #if defined(SPI5_BASE)
-        case hwSPI_Index_4:   /* SPI5 */
+        case hwSPI_Index_4:
             return HAL_RCC_GetPCLK2Freq();
 #endif
 
 #if defined(SPI6_BASE)
-        case hwSPI_Index_5:   /* SPI6 */
-            return HAL_RCC_GetPCLK4Freq();
+        case hwSPI_Index_5:
+            return HAL_RCC_GetPCLK2Freq();
 #endif
 
         default:
@@ -409,4 +409,4 @@ void SPI_NVIC_DeInit(hwSPI_Index index)
     }
 }
 
-#endif // STM32H7
+#endif // STM32H7RS

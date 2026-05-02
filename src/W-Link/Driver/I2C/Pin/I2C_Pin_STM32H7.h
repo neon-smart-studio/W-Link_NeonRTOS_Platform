@@ -38,7 +38,7 @@ static const I2C_Pinset_t I2C_Index_Map_Alt[hwI2C_Index_MAX] = {
 #if defined (I2C1_BASE)
     CONFIG_I2C0_PINSET,
 #endif
-#if defined (I2C1_BASE)
+#if defined (I2C2_BASE)
     CONFIG_I2C1_PINSET,
 #endif
 #if defined (I2C3_BASE)

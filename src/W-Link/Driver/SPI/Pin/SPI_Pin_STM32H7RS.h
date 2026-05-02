@@ -1,0 +1,207 @@
+
+#ifndef SPI_PIN_STM32H7RS_H
+#define SPI_PIN_STM32H7RS_H
+
+#include "SPI_Pin_STM32.h"
+
+typedef enum {
+    SPI_Pinset_DEFAULT = 0,
+    SPI_Pinset_ALT1,
+    SPI_Pinset_ALT2,
+    SPI_Pinset_MAX
+} SPI_Pinset_t;
+
+#ifndef CONFIG_SPI0_PINSET
+#define CONFIG_SPI0_PINSET SPI_Pinset_DEFAULT
+#endif //CONFIG_SPI0_PINSET
+
+#ifndef CONFIG_SPI1_PINSET
+#define CONFIG_SPI1_PINSET SPI_Pinset_DEFAULT
+#endif //CONFIG_SPI1_PINSET
+
+#ifndef CONFIG_SPI2_PINSET
+#define CONFIG_SPI2_PINSET SPI_Pinset_DEFAULT
+#endif //CONFIG_SPI2_PINSET
+
+#ifndef CONFIG_SPI3_PINSET
+#define CONFIG_SPI3_PINSET SPI_Pinset_DEFAULT
+#endif //CONFIG_SPI3_PINSET
+
+#ifndef CONFIG_SPI4_PINSET
+#define CONFIG_SPI4_PINSET SPI_Pinset_DEFAULT
+#endif //CONFIG_SPI4_PINSET
+
+#ifndef CONFIG_SPI5_PINSET
+#define CONFIG_SPI5_PINSET SPI_Pinset_DEFAULT
+#endif //CONFIG_SPI5_PINSET
+
+static const SPI_Pinset_t SPI_Index_Map_Alt[hwSPI_Index_MAX] = {
+#if defined(SPI1_BASE)
+    CONFIG_SPI0_PINSET,
+#endif
+#if defined(SPI2_BASE)
+    CONFIG_SPI1_PINSET,
+#endif
+#if defined(SPI3_BASE)
+    CONFIG_SPI2_PINSET,
+#endif
+#if defined(SPI4_BASE)
+    CONFIG_SPI3_PINSET,
+#endif
+#if defined(SPI5_BASE)
+    CONFIG_SPI4_PINSET,
+#endif
+#if defined(SPI6_BASE)
+    CONFIG_SPI5_PINSET,
+#endif
+};
+
+static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX][SPI_Pinset_MAX] =
+{
+#if defined(SPI1_BASE)
+    {
+        { hwGPIO_Pin_A7, hwGPIO_Pin_A6, hwGPIO_Pin_A5, hwGPIO_Pin_A4 },
+        { hwGPIO_Pin_B5, hwGPIO_Pin_B4, hwGPIO_Pin_B3, hwGPIO_Pin_A15 },
+        { hwGPIO_Pin_D7, hwGPIO_Pin_G9, hwGPIO_Pin_G11, hwGPIO_Pin_G10 },
+    },
+#endif
+
+#if defined(SPI2_BASE)
+    {
+        { hwGPIO_Pin_B15, hwGPIO_Pin_B14, hwGPIO_Pin_B13, hwGPIO_Pin_B12 },
+        { hwGPIO_Pin_C1,  hwGPIO_Pin_C2,  hwGPIO_Pin_B10, hwGPIO_Pin_B9  },
+        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
+    },
+#endif
+
+#if defined(SPI3_BASE)
+    {
+        { hwGPIO_Pin_C12, hwGPIO_Pin_C11, hwGPIO_Pin_C10, hwGPIO_Pin_A15 },
+        { hwGPIO_Pin_B2,  hwGPIO_Pin_B4,  hwGPIO_Pin_B3,  hwGPIO_Pin_A4  },
+        { hwGPIO_Pin_D6,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
+    },
+#endif
+
+#if defined(SPI4_BASE)
+    {
+        { hwGPIO_Pin_E6,  hwGPIO_Pin_E5,  hwGPIO_Pin_E2,  hwGPIO_Pin_E4  },
+        { hwGPIO_Pin_E14, hwGPIO_Pin_E13, hwGPIO_Pin_E12, hwGPIO_Pin_E11 },
+        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
+    },
+#endif
+
+#if defined(SPI5_BASE)
+    {
+        { hwGPIO_Pin_F9,  hwGPIO_Pin_F8, hwGPIO_Pin_F7, hwGPIO_Pin_F6 },
+        { hwGPIO_Pin_F11, hwGPIO_Pin_H7, hwGPIO_Pin_H6, hwGPIO_Pin_H5 },
+        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC, hwGPIO_Pin_NC, hwGPIO_Pin_NC },
+    },
+#endif
+
+#if defined(SPI6_BASE)
+    {
+        { hwGPIO_Pin_G14, hwGPIO_Pin_G12, hwGPIO_Pin_G13, hwGPIO_Pin_G8  },
+        { hwGPIO_Pin_A7,  hwGPIO_Pin_A6,  hwGPIO_Pin_A5,  hwGPIO_Pin_A4  },
+        { hwGPIO_Pin_B5,  hwGPIO_Pin_B4,  hwGPIO_Pin_B3,  hwGPIO_Pin_A15 },
+    },
+#endif
+};
+
+static const SPI_AF_Map SPI_Pin_AF_Map[] =
+{
+#if defined(SPI1_BASE) && defined(GPIO_AF5_SPI1)
+    { hwSPI_Index_0, hwGPIO_Pin_A7,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_A6,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_A5,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_A4,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_B5,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_B4,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_B3,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_A15, GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_D7,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_G9,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_G11, GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_G10, GPIO_AF5_SPI1 },
+#endif
+
+#if defined(SPI2_BASE) && defined(GPIO_AF5_SPI2)
+    { hwSPI_Index_1, hwGPIO_Pin_B15, GPIO_AF5_SPI2 },
+    { hwSPI_Index_1, hwGPIO_Pin_B14, GPIO_AF5_SPI2 },
+    { hwSPI_Index_1, hwGPIO_Pin_B13, GPIO_AF5_SPI2 },
+    { hwSPI_Index_1, hwGPIO_Pin_B12, GPIO_AF5_SPI2 },
+    { hwSPI_Index_1, hwGPIO_Pin_C1,  GPIO_AF5_SPI2 },
+    { hwSPI_Index_1, hwGPIO_Pin_C2,  GPIO_AF5_SPI2 },
+    { hwSPI_Index_1, hwGPIO_Pin_B10, GPIO_AF5_SPI2 },
+    { hwSPI_Index_1, hwGPIO_Pin_B9,  GPIO_AF5_SPI2 },
+#endif
+
+#if defined(SPI2_BASE) && defined(GPIO_AF7_SPI2)
+    { hwSPI_Index_1, hwGPIO_Pin_B4, GPIO_AF7_SPI2 },
+#endif
+
+#if defined(SPI3_BASE) && defined(GPIO_AF6_SPI3)
+    { hwSPI_Index_2, hwGPIO_Pin_C12, GPIO_AF6_SPI3 },
+    { hwSPI_Index_2, hwGPIO_Pin_C11, GPIO_AF6_SPI3 },
+    { hwSPI_Index_2, hwGPIO_Pin_C10, GPIO_AF6_SPI3 },
+    { hwSPI_Index_2, hwGPIO_Pin_A15, GPIO_AF6_SPI3 },
+    { hwSPI_Index_2, hwGPIO_Pin_B4,  GPIO_AF6_SPI3 },
+    { hwSPI_Index_2, hwGPIO_Pin_B3,  GPIO_AF6_SPI3 },
+    { hwSPI_Index_2, hwGPIO_Pin_A4,  GPIO_AF6_SPI3 },
+#endif
+
+#if defined(SPI3_BASE) && defined(GPIO_AF7_SPI3)
+    { hwSPI_Index_2, hwGPIO_Pin_B2, GPIO_AF7_SPI3 },
+    { hwSPI_Index_2, hwGPIO_Pin_B5, GPIO_AF7_SPI3 },
+#endif
+
+#if defined(SPI3_BASE) && defined(GPIO_AF5_SPI3)
+    { hwSPI_Index_2, hwGPIO_Pin_D6, GPIO_AF5_SPI3 },
+#endif
+
+#if defined(SPI4_BASE) && defined(GPIO_AF5_SPI4)
+    { hwSPI_Index_3, hwGPIO_Pin_E6,  GPIO_AF5_SPI4 },
+    { hwSPI_Index_3, hwGPIO_Pin_E5,  GPIO_AF5_SPI4 },
+    { hwSPI_Index_3, hwGPIO_Pin_E2,  GPIO_AF5_SPI4 },
+    { hwSPI_Index_3, hwGPIO_Pin_E4,  GPIO_AF5_SPI4 },
+    { hwSPI_Index_3, hwGPIO_Pin_E14, GPIO_AF5_SPI4 },
+    { hwSPI_Index_3, hwGPIO_Pin_E13, GPIO_AF5_SPI4 },
+    { hwSPI_Index_3, hwGPIO_Pin_E12, GPIO_AF5_SPI4 },
+    { hwSPI_Index_3, hwGPIO_Pin_E11, GPIO_AF5_SPI4 },
+#endif
+
+#if defined(SPI5_BASE) && defined(GPIO_AF5_SPI5)
+    { hwSPI_Index_4, hwGPIO_Pin_F9,  GPIO_AF5_SPI5 },
+    { hwSPI_Index_4, hwGPIO_Pin_F8,  GPIO_AF5_SPI5 },
+    { hwSPI_Index_4, hwGPIO_Pin_F7,  GPIO_AF5_SPI5 },
+    { hwSPI_Index_4, hwGPIO_Pin_F6,  GPIO_AF5_SPI5 },
+    { hwSPI_Index_4, hwGPIO_Pin_F11, GPIO_AF5_SPI5 },
+    { hwSPI_Index_4, hwGPIO_Pin_H7,  GPIO_AF5_SPI5 },
+    { hwSPI_Index_4, hwGPIO_Pin_H6,  GPIO_AF5_SPI5 },
+    { hwSPI_Index_4, hwGPIO_Pin_H5,  GPIO_AF5_SPI5 },
+#endif
+
+#if defined(SPI6_BASE) && defined(GPIO_AF5_SPI6)
+    { hwSPI_Index_5, hwGPIO_Pin_G14, GPIO_AF5_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_G12, GPIO_AF5_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_G13, GPIO_AF5_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_G8,  GPIO_AF5_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_C12, GPIO_AF5_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_A0,  GPIO_AF5_SPI6 },
+#endif
+
+#if defined(SPI6_BASE) && defined(GPIO_AF8_SPI6)
+    { hwSPI_Index_5, hwGPIO_Pin_A7, GPIO_AF8_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_A6, GPIO_AF8_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_A5, GPIO_AF8_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_A4, GPIO_AF8_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_B5, GPIO_AF8_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_B4, GPIO_AF8_SPI6 },
+    { hwSPI_Index_5, hwGPIO_Pin_B3, GPIO_AF8_SPI6 },
+#endif
+
+#if defined(SPI6_BASE) && defined(GPIO_AF7_SPI6)
+    { hwSPI_Index_5, hwGPIO_Pin_A15, GPIO_AF7_SPI6 },
+#endif
+};
+
+#endif //SPI_PIN_STM32H7RS_H

@@ -328,7 +328,6 @@
 #include "stm32h7rsxx_hal_dma.h"
 #include "stm32h7rsxx_hal_rtc.h"
 #include "stm32h7rsxx_hal_adc.h"
-#include "stm32h7rsxx_hal_dac.h"
 #endif //STM32H7RS
 
 #if defined (STM32WB55xx) || defined (STM32WB5Mxx) || defined (STM32WB50xx) || defined (STM32WB35xx) || \

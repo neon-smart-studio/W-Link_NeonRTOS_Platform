@@ -23,11 +23,17 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
 
 void vApplicationIdleHook(void) {
     // MCU 進入低功耗模式，等待中斷
+#ifdef DEVICE_STM32
     __WFI(); // Wait For Interrupt
+#else
+    while (1);
+#endif
 }
 
 void vApplicationTickHook(void) {
+#ifdef DEVICE_STM32
     HAL_IncTick(); // 增加 HAL 的滴答計數
+#endif
 }
 
 void SystemClock_Config(void) {
@@ -35,7 +41,9 @@ void SystemClock_Config(void) {
 }
 
 int main(void) {
+#ifdef DEVICE_STM32
     HAL_Init();
+#endif
     SystemClock_Config();
 
     //__HAL_RCC_WWDG_CLK_DISABLE();  // 禁用窗口看門狗

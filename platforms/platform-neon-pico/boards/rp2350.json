@@ -1,0 +1,19 @@
+{
+  "build": {
+    "core": "rp2350",
+    "cpu": "cortex-m33",
+    "f_cpu": "150000000L",
+    "mcu": "rp2350",
+    "variant": "rp2350"
+  },
+  "frameworks": ["pico-sdk"],
+  "name": "Raspberry Pi RP2350 / Pico 2",
+  "url": "https://www.raspberrypi.com/products/raspberry-pi-pico-2/",
+  "vendor": "Raspberry Pi",
+  "upload": {
+    "maximum_ram_size": 520192,
+    "maximum_size": 4194304,
+    "protocol": "uf2",
+    "require_upload_port": false
+  }
+}

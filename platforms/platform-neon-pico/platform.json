@@ -1,0 +1,47 @@
+{
+  "name": "neon-pico",
+  "title": "Neon RPI Pico Platform",
+  "version": "0.1.0",
+  "description": "Custom PlatformIO support for Raspberry Pi RP2040 (Pico SDK + W-Link)",
+  "homepage": "https://github.com/raspberrypi/pico-sdk",
+
+  "frameworks": {
+    "pico-sdk": {
+      "script": "builder/main.py",
+      "description": "Raspberry Pi Pico SDK (baremetal / FreeRTOS ready)"
+    }
+  },
+
+  "packages": {
+    "toolchain-gccarmnoneeabi": {
+      "type": "toolchain",
+      "owner": "platformio",
+      "version": "^1.100301.0"
+    },
+    "framework-pico-sdk": {
+      "type": "framework",
+      "optional": true,
+      "version": "https://github.com/raspberrypi/pico-sdk.git"
+    },
+    "tool-rp2040tools": {
+      "type": "uploader",
+      "owner": "platformio",
+      "version": "~1.0.2"
+    },
+    "tool-openocd-raspberrypi": {
+      "type": "uploader",
+      "optional": true,
+      "owner": "platformio",
+      "version": "~2.1100.0"
+    },
+    "tool-jlink": {
+      "type": "uploader",
+      "optional": true,
+      "owner": "platformio",
+      "version": "^1.72000.0"
+    }
+  },
+  "boards": {
+    "pico": "boards/pico.json"
+  }
+}

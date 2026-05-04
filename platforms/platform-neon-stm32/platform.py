@@ -23,7 +23,7 @@ from platformio.project.helpers import get_project_dir
 IS_WINDOWS = sys.platform.startswith("win")
 
 
-class Ststm32Platform(PlatformBase):
+class Neonstm32Platform(PlatformBase):
 
     def configure_default_packages(self, variables, targets):
         board = variables.get("board")

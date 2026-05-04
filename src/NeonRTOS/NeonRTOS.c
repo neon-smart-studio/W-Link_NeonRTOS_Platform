@@ -125,7 +125,7 @@ NeonRTOS_ReturnVal_e NeonRTOS_SyncObjClear(NeonRTOS_SyncObj_t* pSyncObj)
     }
 }
 
-NeonRTOS_ReturnVal_e NeonRTOS_CountingObjCreate(NeonRTOS_CountingObj_t* pCountingObj, unsigned long uxMaxCount, unsigned long uxInitialCount)
+NeonRTOS_ReturnVal_e NeonRTOS_CountingObjCreate(NeonRTOS_CountingObj_t* pCountingObj, uint64_t uxMaxCount, uint64_t uxInitialCount)
 {
     //Check for NULL
     if(NULL == pCountingObj)
@@ -216,7 +216,7 @@ NeonRTOS_ReturnVal_e NeonRTOS_CountingObjWait(NeonRTOS_CountingObj_t* pCountingO
     }
 }
 
-NeonRTOS_ReturnVal_e NeonRTOS_CountingObjGetCount(NeonRTOS_CountingObj_t* pCountingObj, unsigned int* pCountVal)
+NeonRTOS_ReturnVal_e NeonRTOS_CountingObjGetCount(NeonRTOS_CountingObj_t* pCountingObj, uint32_t* pCountVal)
 {
 	//Check for NULL
 	if(NULL == pCountingObj || NULL == pCountVal)
@@ -224,7 +224,7 @@ NeonRTOS_ReturnVal_e NeonRTOS_CountingObjGetCount(NeonRTOS_CountingObj_t* pCount
 		return NeonRTOS_INVALID_PARAMS;
 	}
         
-        *pCountVal = (unsigned int)uxQueueMessagesWaiting( ( QueueHandle_t ) ( pCountingObj ) );
+        *pCountVal = (uint32_t)uxQueueMessagesWaiting( ( QueueHandle_t ) ( pCountingObj ) );
         
         return NeonRTOS_OK;
 }
@@ -237,11 +237,11 @@ NeonRTOS_ReturnVal_e NeonRTOS_CountingObjClear(NeonRTOS_CountingObj_t* pCounting
 		return NeonRTOS_INVALID_PARAMS;
 	}
         
-        unsigned int countClear;
+        uint32_t countClear;
         
         if(NeonRTOS_OK == NeonRTOS_CountingObjGetCount(pCountingObj, &countClear))
         {
-                for( unsigned int i = 0; i<countClear; i++)
+                for( uint32_t i = 0; i<countClear; i++)
                 {
                         if (NeonRTOS_OK != NeonRTOS_CountingObjWait(pCountingObj,0) )
                         {
@@ -276,7 +276,7 @@ NeonRTOS_ReturnVal_e NeonRTOS_LockObjCreate(NeonRTOS_LockObj_t* pLockObj)
 
 NeonRTOS_ReturnVal_e NeonRTOS_TaskCreate(P_NeonRTOS_TASK_ENTRY pEntry,const signed char * const pcName,
                               unsigned short usStackDepth, void *pvParameters,
-                              unsigned long uxPriority,NeonRTOS_TaskHandle* pTaskHandle)
+                              uint64_t uxPriority,NeonRTOS_TaskHandle* pTaskHandle)
 {
 	if(pdPASS == xTaskCreate( pEntry, (char const*)pcName,
                                 (usStackDepth/(sizeof( portSTACK_TYPE ))), 
@@ -353,8 +353,8 @@ NeonRTOS_ReturnVal_e NeonRTOS_LockObjUnlock(NeonRTOS_LockObj_t* pLockObj)
 
 NeonRTOS_ReturnVal_e NeonRTOS_MsgQCreate(NeonRTOS_MsgQ_t* 		pMsgQ , 
 			      char*			pMsgQName,
-			      unsigned long 		MsgSize,
-			      unsigned long		MaxMsgs)
+			      uint64_t 		MsgSize,
+			      uint64_t		MaxMsgs)
 {
 	//Check for NULL
 	if(NULL == pMsgQ)
@@ -433,7 +433,7 @@ NeonRTOS_ReturnVal_e NeonRTOS_MsgQRead(NeonRTOS_MsgQ_t* pMsgQ, void* pMsg , Neon
 	}
 }
 
-NeonRTOS_ReturnVal_e NeonRTOS_TimerCreate(NeonRTOS_TimerHandle* pTimerHandle, const signed char * const pcTimerName, NeonRTOS_Time_t periodMs, unsigned int autoLoad, unsigned int uTimerID, NeonRTOS_TimerCallbackFunction_t pCallbackFunction)
+NeonRTOS_ReturnVal_e NeonRTOS_TimerCreate(NeonRTOS_TimerHandle* pTimerHandle, const signed char * const pcTimerName, NeonRTOS_Time_t periodMs, uint32_t autoLoad, uint32_t uTimerID, NeonRTOS_TimerCallbackFunction_t pCallbackFunction)
 {
 	if(NULL == pTimerHandle)
 	{
@@ -533,7 +533,7 @@ NeonRTOS_ReturnVal_e NeonRTOS_TimerReStart(NeonRTOS_TimerHandle* pTimerHandle)
 	}
 }
 
-NeonRTOS_ReturnVal_e NeonRTOS_GetTimerID(NeonRTOS_TimerHandle* pTimerHandle, unsigned int* pxTimerID)
+NeonRTOS_ReturnVal_e NeonRTOS_GetTimerID(NeonRTOS_TimerHandle* pTimerHandle, uint32_t* pxTimerID)
 {
 	if(NULL == pTimerHandle)
 	{
@@ -545,7 +545,7 @@ NeonRTOS_ReturnVal_e NeonRTOS_GetTimerID(NeonRTOS_TimerHandle* pTimerHandle, uns
 		return NeonRTOS_INVALID_PARAMS;
 	}
         
-        unsigned int pTimerID = (uint32_t)pvTimerGetTimerID((TimerHandle_t)*pTimerHandle);
+        uint32_t pTimerID = (uint32_t)pvTimerGetTimerID((TimerHandle_t)*pTimerHandle);
         
 	if (pTimerID==NULL)
 	{
@@ -558,7 +558,7 @@ NeonRTOS_ReturnVal_e NeonRTOS_GetTimerID(NeonRTOS_TimerHandle* pTimerHandle, uns
 }
 
 
-NeonRTOS_ReturnVal_e NeonRTOS_PendingFunctionCall(NeonRTOS_PendingFunction_t pPendFunc, void* pParameter1, unsigned int uParameter2)
+NeonRTOS_ReturnVal_e NeonRTOS_PendingFunctionCall(NeonRTOS_PendingFunction_t pPendFunc, void* pParameter1, uint32_t uParameter2)
 {
 	if(NULL == pPendFunc)
 	{
@@ -576,7 +576,7 @@ NeonRTOS_ReturnVal_e NeonRTOS_PendingFunctionCall(NeonRTOS_PendingFunction_t pPe
 }
 
 
-void * mem_Malloc(unsigned long Size)
+void * mem_Malloc(uint64_t Size)
 {
     return ( void * ) pvPortMalloc( (size_t)Size );
 }
@@ -586,7 +586,7 @@ void mem_Free(void *pMem)
     vPortFree( pMem );
 }
 
-void *mem_Realloc(void *pMem, unsigned long newSize)
+void *mem_Realloc(void *pMem, uint64_t newSize)
 {
     if (pMem == NULL) {                  /* 相當於 malloc */
         return mem_Malloc(newSize);
@@ -631,7 +631,7 @@ void mem_copy(void *pDst, void *pSrc,size_t Size)
     memcpy(pDst,pSrc,Size);
 }
 
-unsigned long NeonRTOS_DisableAllInterrupts(void)
+uint64_t NeonRTOS_DisableAllInterrupts(void)
 {
     portDISABLE_INTERRUPTS();
 	return 0;
@@ -642,13 +642,13 @@ void NeonRTOS_EnableAllInterrupts()
     portENABLE_INTERRUPTS();
 }
 
-unsigned long NeonRTOS_EnterCritical(void)
+uint64_t NeonRTOS_EnterCritical(void)
 {
     vPortEnterCritical();
     return 0;
 }
 
-void NeonRTOS_ExitCritical(unsigned long ulKey)
+void NeonRTOS_ExitCritical(uint64_t ulKey)
 {
     vPortExitCritical();
 }
@@ -663,24 +663,24 @@ void NeonRTOS_start()
     vTaskStartScheduler();
 }
 
-void NeonRTOS_Sleep(unsigned int MilliSecs)
+void NeonRTOS_Sleep(uint32_t MilliSecs)
 {
 	vTaskDelay(MilliSecs / portTICK_PERIOD_MS);
 }
 
-unsigned long NeonRTOS_TaskDisable(void)
+uint64_t NeonRTOS_TaskDisable(void)
 {
    vTaskSuspendAll();
 
    return NeonRTOS_OK;
 }
 
-void NeonRTOS_TaskEnable(unsigned long key)
+void NeonRTOS_TaskEnable(uint64_t key)
 {
    xTaskResumeAll();
 }
 
-void NeonRTOS_TaskSetPriority(NeonRTOS_TaskHandle* pTaskHandle, unsigned long uxPriority)
+void NeonRTOS_TaskSetPriority(NeonRTOS_TaskHandle* pTaskHandle, uint64_t uxPriority)
 {
     vTaskPrioritySet((TaskHandle_t)(*pTaskHandle), uxPriority);
 }

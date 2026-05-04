@@ -1,0 +1,19 @@
+{
+  "build": {
+    "core": "rp2040",
+    "cpu": "cortex-m0plus",
+    "f_cpu": "125000000L",
+    "mcu": "rp2040",
+    "variant": "rp2040"
+  },
+  "frameworks": ["pico-sdk"],
+  "name": "Raspberry Pi RP2040 / Pico",
+  "url": "https://www.raspberrypi.com/products/raspberry-pi-pico/",
+  "vendor": "Raspberry Pi",
+  "upload": {
+    "maximum_ram_size": 262144,
+    "maximum_size": 2097152,
+    "protocol": "uf2",
+    "require_upload_port": false
+  }
+}

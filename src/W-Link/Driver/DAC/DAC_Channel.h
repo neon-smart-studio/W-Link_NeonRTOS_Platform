@@ -26,4 +26,11 @@ typedef enum hwDAC_Channel_Index_t
 }hwDAC_Channel_Index;
 #endif
 
+#ifdef DEVICE_RPI
+typedef enum hwDAC_Channel_Index_t
+{
+  hwDAC_Channel_Index_MAX = 0,
+}hwDAC_Channel_Index;
+#endif
+
 #endif //DAC_CHANNEL_H

@@ -2,6 +2,7 @@
 #ifndef TIMER_INDEX_H
 #define TIMER_INDEX_H
 
+#ifdef DEVICE_STM32
 typedef enum hwTimer_Index_t
 {
 #if defined (TIM1_BASE)
@@ -78,5 +79,13 @@ typedef enum hwTimer_Index_t
 #endif
   hwTimer_Index_MAX,
 }hwTimer_Index;
+#endif
+
+#ifdef DEVICE_RPI
+typedef enum hwTimer_Index_t
+{
+  hwTimer_Index_MAX,
+}hwTimer_Index;
+#endif
 
 #endif //TIMER_INDEX_H

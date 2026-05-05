@@ -12,6 +12,8 @@
 
 void SysCtrl_Init()
 {
+    HAL_Init();
+    
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 

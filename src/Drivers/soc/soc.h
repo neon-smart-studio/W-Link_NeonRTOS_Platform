@@ -368,6 +368,13 @@
 #include "stm32wlxx_hal_dac.h"
 #endif //STM32WL
 
+#if defined (RP2040) || defined (RP2350)
+#include "pico/time.h"
+#include "hardware/sync.h"
+#include "hardware/gpio.h"
+#include "hardware/irq.h"
+#endif
+
 #if defined (STM32F0) || defined (STM32F1) || defined (STM32F2) || defined (STM32F3) || defined (STM32F4) || defined (STM32F7) || \
     defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
     defined (STM32C0) || \
@@ -378,22 +385,8 @@
 #define DEVICE_STM32
 #endif
 
-#if defined (STM32F0) || defined (STM32F7) || defined (STM32F3) || defined (STM32G0) || \
-    defined (STM32G4) || defined (STM32H7) || defined (STM32L0) || defined (STM32L4) || \
-    defined (STM32L5) || defined (STM32U5) || defined (STM32WB) || defined (STM32WL)
-#define STM32_I2C_NEW_ARCH
-#endif
-#if defined (STM32F1) || defined (STM32F2) || defined (STM32F4) || defined (STM32L1)
-#define STM32_I2C_LEGACY_ARCH
-#endif
-
-#if defined (STM32F0) || defined (STM32F3) || defined (STM32G0) || \
-    defined (STM32G4) || defined (STM32H7) || defined (STM32L0) || defined (STM32L4) || \
-    defined (STM32L5) || defined (STM32U5) || defined (STM32WB) || defined (STM32WL)
-#define STM32_DMA_NEW_ARCH
-#endif
-#if defined (STM32F1) || defined (STM32F2) || defined (STM32F4) || defined (STM32F7) || defined (STM32L1)
-#define STM32_DMA_LEGACY_ARCH
+#if defined (RP2040) || defined (RP2350)
+#define DEVICE_RPI
 #endif
 
 #endif //SOC_H

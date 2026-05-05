@@ -27,4 +27,11 @@ typedef enum hwSPI_Index_t
 }hwSPI_Index;
 #endif //DEVICE_STM32
 
+#ifdef DEVICE_RPI
+typedef enum hwSPI_Index_t
+{
+  hwSPI_Index_MAX,
+}hwSPI_Index;
+#endif
+
 #endif //SPI_MASTER_INDEX_H

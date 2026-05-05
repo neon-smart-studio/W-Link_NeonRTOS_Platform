@@ -8,6 +8,8 @@
 
 #include "Delay/Delay.h"
 
+#ifdef DEVICE_STM32
+
 static uint32_t s_cycles_per_us = 0;
 static bool delay_has_init = false;
 
@@ -62,3 +64,5 @@ void Delay(float sec)
     uint32_t us = (uint32_t)(sec * 1000000.0f);
     Delay_uS(us);
 }
+
+#endif

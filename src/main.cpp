@@ -11,6 +11,8 @@
 
 #include "NeonRTOS.h"
 
+#include "GPIO/GPIO.h"
+
 void HardFault_Handler()
 {
     while (1);
@@ -38,27 +40,20 @@ void vApplicationTickHook(void) {
 #endif
 }
 
-void SystemClock_Config(void) {
-    SysCtrl_Init();
-}
-
 void LED_Task(void* p)
 {
+    GPIO_Pin_Init(hwGPIO_Pin_25, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_None);
+
     while (1) {
+        GPIO_Pin_Write(hwGPIO_Pin_25, true);
         NeonRTOS_Sleep(500);
+        GPIO_Pin_Write(hwGPIO_Pin_25, false);
         NeonRTOS_Sleep(500);
     }
 }
 
 int main(void) {
-#if defined(RP2040) || defined(RP2350)
-    stdio_init_all();
-#endif
-
-#ifdef DEVICE_STM32
-    HAL_Init();
-#endif
-    SystemClock_Config();
+    SysCtrl_Init();
 
     //__HAL_RCC_WWDG_CLK_DISABLE();  // 禁用窗口看門狗
     //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗

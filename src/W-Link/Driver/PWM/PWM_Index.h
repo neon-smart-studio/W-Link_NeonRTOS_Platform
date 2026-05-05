@@ -101,6 +101,13 @@ typedef enum
 }hwPWM_Channel;
 #endif //DEVICE_STM32
 
+#ifdef DEVICE_RPI
+typedef enum hwPWM_Channel_t
+{
+	hwPWM_Channel_MAX
+}hwPWM_Channel;
+#endif
+
 #ifdef DEVICE_TM4C1294
 #undef DEFAULT_PWM_INDEX
 typedef enum

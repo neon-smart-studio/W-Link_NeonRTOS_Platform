@@ -115,6 +115,19 @@ to exclude the API function. */
 */
 
 
+/* The lowest interrupt priority that can be used in a call to a "set priority"
+function. */
+
+/* The highest interrupt priority that can be used by any interrupt service
+routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
+INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
+PRIORITY THAN THIS! (higher priorities are lower numeric values. */
+
+#if defined(RP2350)
+#define configPRIO_BITS          3
+#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY 7
+#define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5
+#else
 /* Cortex-M specific definitions. */
 #ifdef __NVIC_PRIO_BITS
  /* __BVIC_PRIO_BITS will be specified when CMSIS is being used. */
@@ -123,15 +136,9 @@ to exclude the API function. */
  #define configPRIO_BITS         4        /* 15 priority levels */
 #endif
 
-/* The lowest interrupt priority that can be used in a call to a "set priority"
-function. */
-#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY   0xf
-
-/* The highest interrupt priority that can be used by any interrupt service
-routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
-INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
-PRIORITY THAN THIS! (higher priorities are lower numeric values. */
+#define configLIBRARY_LOWEST_INTERRUPT_PRIORITY 0xf
 #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5
+#endif
 
 /* Interrupt priorities used by the kernel port layer itself.  These are generic
 to all Cortex-M ports, and do not rely on any particular library functions. */
@@ -146,13 +153,29 @@ header file. */
 
 /* Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
    standard names. */
-#define vPortSVCHandler    SVC_Handler
-#define xPortPendSVHandler PendSV_Handler
-
 /* IMPORTANT: FreeRTOS is using the SysTick as internal time base, thus make sure the system and peripherials are
               using a different time base (TIM based for example).
  */
+#if defined(RP2040)
+
+#define vPortSVCHandler     isr_svcall
+#define xPortPendSVHandler  isr_pendsv
+#define xPortSysTickHandler isr_systick
+
+#elif defined(RP2350)
+
+#define configRUN_FREERTOS_SECURE_ONLY 1
+
+#define vPortSVCHandler     SVC_Handler
+#define xPortPendSVHandler  PendSV_Handler
 #define xPortSysTickHandler SysTick_Handler
 
+#else
+
+#define vPortSVCHandler     SVC_Handler
+#define xPortPendSVHandler  PendSV_Handler
+#define xPortSysTickHandler SysTick_Handler
+
+#endif
 #endif /* FREERTOS_CONFIG_H */
 

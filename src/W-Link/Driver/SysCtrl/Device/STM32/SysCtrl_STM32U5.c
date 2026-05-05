@@ -5,6 +5,10 @@
 
 #ifdef STM32U5
 
+#ifndef CONFIG_STM32_USE_HSE
+#define CONFIG_STM32_USE_HSE 0
+#endif
+
 void SysCtrl_Init(void)
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -18,12 +22,31 @@ void SysCtrl_Init(void)
     HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 #endif
 
+#if defined(PWR_FLAG_VOSRDY)
+    while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+#endif
+
+#if CONFIG_STM32_USE_HSE
+
     /*
-     * STM32U5 common
+     * HSE = 8MHz
+     * SYSCLK = 160MHz
+     * 8 / 1 * 40 / 2 = 160MHz
+     */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI;
+    RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
+    RCC_OscInitStruct.HSIState       = RCC_HSI_ON;
+
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM      = 1;
+    RCC_OscInitStruct.PLL.PLLN      = 40;
+
+#else
+
+    /*
      * HSI = 16MHz
      * SYSCLK = 160MHz
-     *
-     * 16MHz / 1 * 20 / 2 = 160MHz
+     * 16 / 1 * 20 / 2 = 160MHz
      */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState       = RCC_HSI_ON;
@@ -32,30 +55,26 @@ void SysCtrl_Init(void)
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
 #endif
 
-    RCC_OscInitStruct.PLL.PLLState  = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+    RCC_OscInitStruct.PLL.PLLM      = 1;
+    RCC_OscInitStruct.PLL.PLLN      = 20;
 
-#if defined(RCC_PLLM_DIV1)
-    RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
-#else
-    RCC_OscInitStruct.PLL.PLLM = 1;
 #endif
 
-    RCC_OscInitStruct.PLL.PLLN = 20;
+    RCC_OscInitStruct.PLL.PLLState  = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLP      = 2;
+    RCC_OscInitStruct.PLL.PLLQ      = 2;
+    RCC_OscInitStruct.PLL.PLLR      = 2;
 
-#if defined(RCC_PLLP_DIV2)
-    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+#if defined(RCC_PLL1VCIRANGE_2)
+    RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;
 #endif
 
-#if defined(RCC_PLLQ_DIV2)
-    RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
+#if defined(RCC_PLL1VCOWIDE)
+    RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
 #endif
 
-#if defined(RCC_PLLR_DIV2)
-    RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
-#endif
-
-#if defined(RCC_PLLFRACN_DISABLE)
+#if defined(RCC_PLL_FRACN_DISABLE)
     RCC_OscInitStruct.PLL.PLLFRACN = 0;
 #endif
 
@@ -92,6 +111,8 @@ void SysCtrl_Init(void)
     {
         while (1);
     }
+
+    SystemCoreClockUpdate();
 
     HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
     HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);

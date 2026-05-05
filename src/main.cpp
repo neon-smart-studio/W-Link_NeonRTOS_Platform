@@ -23,10 +23,12 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
 
 void vApplicationIdleHook(void) {
     // MCU 進入低功耗模式，等待中斷
-#ifdef DEVICE_STM32
-    __WFI(); // Wait For Interrupt
+#if defined(DEVICE_STM32)
+    __WFI();
+#elif defined(RP2040) || defined(RP2350)
+    __wfi();
 #else
-    while (1);
+    __asm volatile ("wfi");
 #endif
 }
 
@@ -40,7 +42,19 @@ void SystemClock_Config(void) {
     SysCtrl_Init();
 }
 
+void LED_Task(void* p)
+{
+    while (1) {
+        NeonRTOS_Sleep(500);
+        NeonRTOS_Sleep(500);
+    }
+}
+
 int main(void) {
+#if defined(RP2040) || defined(RP2350)
+    stdio_init_all();
+#endif
+
 #ifdef DEVICE_STM32
     HAL_Init();
 #endif
@@ -48,7 +62,16 @@ int main(void) {
 
     //__HAL_RCC_WWDG_CLK_DISABLE();  // 禁用窗口看門狗
     //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗
-    
+
+    NeonRTOS_TaskCreate(
+        LED_Task,
+        (const signed char *)"LED",
+        512,
+        NULL,
+        2,
+        NULL
+    );
+
     // 啟動 NeonRTOS 調度器
     NeonRTOS_start();
 

@@ -668,9 +668,14 @@ def upload_with_tool(source, target, env):
         print(">>> Uploading UF2 with picotool ...")
         subprocess.check_call([picotool, "load", "-x", uf2_path])
 
+if IS_RP2350:
+    upload_deps = [elf, bin_file, uf2_file]
+else:
+    upload_deps = [elf, bin_file]
+
 upload_target = env.Command(
     "upload",
-    [elf, bin_file],
+    upload_deps,
     upload_with_tool
 )
 

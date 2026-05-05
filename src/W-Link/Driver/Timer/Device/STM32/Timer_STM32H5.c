@@ -6,7 +6,7 @@
 #include "NeonRTOS.h"
 #include "Timer/Timer.h"
 
-#ifdef STM32U5
+#ifdef STM32H5
 
 #include "Timer_STM32.h"
 
@@ -506,4 +506,4 @@ void Timer_NVIC_Disable(hwTimer_Index index)
     }
 }
 
-#endif // STM32U5
+#endif // STM32H5

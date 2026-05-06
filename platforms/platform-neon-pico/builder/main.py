@@ -222,6 +222,7 @@ elif IS_RP2350:
         "RP2350",
         "PICO_RP2350",
         ("PICO_CHIP", 2350),
+        ("PICO_INCLUDE_RTC_DATETIME", 1),
     ]
 
 cpu_flags = [

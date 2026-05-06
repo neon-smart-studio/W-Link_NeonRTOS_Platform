@@ -7,9 +7,9 @@
 
 #include "GPIO/GPIO.h"
 
-#ifdef DEVICE_RPI
+#ifdef DEVICE_RP2
 
-#include "GPIO_RPI.h"
+#include "GPIO_RP2.h"
 
 bool gpio_pin_init_status[hwGPIO_Pin_MAX] = {false};
 

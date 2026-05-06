@@ -8,7 +8,7 @@
 
 #include "Delay/Delay.h"
 
-#ifdef DEVICE_RPI
+#ifdef DEVICE_RP2
 
 void Delay_uS(uint32_t us)
 {
@@ -28,4 +28,4 @@ void Delay(float sec)
     Delay_uS(us);
 }
 
-#endif
+#endif // DEVICE_RP2

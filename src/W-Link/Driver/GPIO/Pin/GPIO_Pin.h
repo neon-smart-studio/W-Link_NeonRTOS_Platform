@@ -8,8 +8,8 @@
 #include "STM32/GPIO_Pin_STM32.h"
 #endif
 
-#ifdef DEVICE_RPI
-#include "RPI/GPIO_Pin_RPI.h"
+#ifdef DEVICE_RP2
+#include "RP2/GPIO_Pin_RP2.h"
 #endif
 
 #ifdef DEVICE_TM4C1294

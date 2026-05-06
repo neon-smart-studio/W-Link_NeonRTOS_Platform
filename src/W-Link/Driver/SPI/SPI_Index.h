@@ -25,13 +25,15 @@ typedef enum hwSPI_Index_t
 #endif
   hwSPI_Index_MAX,
 }hwSPI_Index;
-#endif //DEVICE_STM32
+#endif // DEVICE_STM32
 
-#ifdef DEVICE_RPI
+#ifdef DEVICE_RP2
 typedef enum hwSPI_Index_t
 {
+  hwSPI_Index_0 = 0,
+  hwSPI_Index_1,
   hwSPI_Index_MAX,
 }hwSPI_Index;
-#endif
+#endif // DEVICE_RP2
 
 #endif //SPI_MASTER_INDEX_H

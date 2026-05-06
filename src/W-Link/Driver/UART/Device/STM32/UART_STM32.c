@@ -84,7 +84,7 @@ hwUART_OpResult UART_Open(hwUART_Index index, uint32_t baudrate, bool rts_cts)
     if (rts_cts) {
         if (UART_Pin_Def_Table[index][UART_Index_Map_Alt[index]].rts_pin == hwGPIO_Pin_NC ||
             UART_Pin_Def_Table[index][UART_Index_Map_Alt[index]].cts_pin == hwGPIO_Pin_NC) {
-            return hwUART_Unsupport;
+            return hwUART_InvalidParameter;
         }
     }
 

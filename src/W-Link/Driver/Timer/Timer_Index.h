@@ -79,13 +79,23 @@ typedef enum hwTimer_Index_t
 #endif
   hwTimer_Index_MAX,
 }hwTimer_Index;
-#endif
+#endif // DEVICE_STM32
 
-#ifdef DEVICE_RPI
+#ifdef DEVICE_RP2
 typedef enum hwTimer_Index_t
 {
+    hwTimer_Index_0 = 0,
+    hwTimer_Index_1,
+    hwTimer_Index_2,
+    hwTimer_Index_3,
+#if defined(RP2350)
+    hwTimer_Index_4,
+    hwTimer_Index_5,
+    hwTimer_Index_6,
+    hwTimer_Index_7,
+#endif
   hwTimer_Index_MAX,
 }hwTimer_Index;
-#endif
+#endif // DEVICE_RP2
 
 #endif //TIMER_INDEX_H

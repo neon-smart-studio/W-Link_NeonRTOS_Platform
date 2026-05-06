@@ -369,10 +369,22 @@
 #endif //STM32WL
 
 #if defined (RP2040) || defined (RP2350)
+#include "pico/types.h"
 #include "pico/time.h"
 #include "hardware/sync.h"
-#include "hardware/gpio.h"
 #include "hardware/irq.h"
+#include "hardware/resets.h"
+#include "hardware/clocks.h"
+#include "hardware/adc.h"
+#include "hardware/gpio.h"
+#include "hardware/i2c.h"
+#include "hardware/pwm.h"
+#include "hardware/rtc.h"
+#include "hardware/spi.h"
+#include "hardware/uart.h"
+#include "hardware/structs/adc.h"
+#include "hardware/structs/resets.h"
+#include "hardware/structs/clocks.h"
 #endif
 
 #if defined (STM32F0) || defined (STM32F1) || defined (STM32F2) || defined (STM32F3) || defined (STM32F4) || defined (STM32F7) || \
@@ -386,7 +398,7 @@
 #endif
 
 #if defined (RP2040) || defined (RP2350)
-#define DEVICE_RPI
+#define DEVICE_RP2
 #endif
 
 #endif //SOC_H

@@ -25,13 +25,15 @@ typedef enum hwI2C_Index_t
 #endif
   hwI2C_Index_MAX,
 }hwI2C_Index;
-#endif
+#endif // DEVICE_STM32
 
-#ifdef DEVICE_RPI
+#ifdef DEVICE_RP2
 typedef enum hwI2C_Index_t
 {
+  hwI2C_Index_0 = 0,
+  hwI2C_Index_1,
   hwI2C_Index_MAX,
 }hwI2C_Index;
-#endif
+#endif // DEVICE_RP2
 
 #endif //I2C_INDEX_H

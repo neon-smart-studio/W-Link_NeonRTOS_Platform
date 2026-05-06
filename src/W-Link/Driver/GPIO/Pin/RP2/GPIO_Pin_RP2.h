@@ -1,6 +1,6 @@
 
-#ifndef GPIO_PIN_RPI_H
-#define GPIO_PIN_RPI_H
+#ifndef GPIO_PIN_RP2_H
+#define GPIO_PIN_RP2_H
 
 #include <stdint.h>
 
@@ -76,4 +76,4 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_MAX
 } hwGPIO_Int_Pin;
 
-#endif //GPIO_PIN_RPI_H
+#endif //GPIO_PIN_RP2_H

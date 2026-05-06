@@ -56,15 +56,17 @@ typedef enum hwUART_Index_t
 #define LOG_UART_INDEX hwUART_Index_0
 #endif //DEVICE_STM32
 
-#ifdef DEVICE_RPI
+#ifdef DEVICE_RP2
 typedef enum hwUART_Index_t
 {
+  hwUART_Index_0 = 0,
+  hwUART_Index_1,
   hwUART_Index_MAX,
 }hwUART_Index;
-#endif
+#define LOG_UART_INDEX hwUART_Index_0
+#endif // DEVICE_RP2
 
 #ifdef DEVICE_TM4C1294
-#undef DEFAULT_UART_INDEX
 typedef enum hwUART_Index_t
 {
   hwUART_Index_0 = 0,

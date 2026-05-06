@@ -101,12 +101,28 @@ typedef enum
 }hwPWM_Channel;
 #endif //DEVICE_STM32
 
-#ifdef DEVICE_RPI
+#ifdef DEVICE_RP2
 typedef enum hwPWM_Channel_t
 {
+    hwPWM_Channel_0 = 0,
+    hwPWM_Channel_1,
+    hwPWM_Channel_2,
+    hwPWM_Channel_3,
+    hwPWM_Channel_4,
+    hwPWM_Channel_5,
+    hwPWM_Channel_6,
+    hwPWM_Channel_7,
+    hwPWM_Channel_8,
+    hwPWM_Channel_9,
+    hwPWM_Channel_10,
+    hwPWM_Channel_11,
+    hwPWM_Channel_12,
+    hwPWM_Channel_13,
+    hwPWM_Channel_14,
+    hwPWM_Channel_15,
 	hwPWM_Channel_MAX
 }hwPWM_Channel;
-#endif
+#endif // DEVICE_RP2
 
 #ifdef DEVICE_TM4C1294
 #undef DEFAULT_PWM_INDEX

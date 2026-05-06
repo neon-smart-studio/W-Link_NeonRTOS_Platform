@@ -65,4 +65,4 @@ void Delay(float sec)
     Delay_uS(us);
 }
 
-#endif
+#endif // DEVICE_STM32

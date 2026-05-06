@@ -60,16 +60,6 @@ const PWM_Pin_Def* PWM_Find_PinDef(hwPWM_Channel channel_index)
     return NULL;
 }
 
-static inline uint32_t PWM_Duty_To_CCR(
-    uint16_t duty,
-    uint32_t period,
-    bool inverse)
-{
-    float ratio = (float)duty / PWM_MAX_DUTY;
-    if (inverse) ratio = 1.0f - ratio;
-    return (uint32_t)(ratio * period);
-}
-
 hwPWM_OpResult PWM_Channel_Init(hwPWM_Channel channel_index, bool inverse)
 {
         if (channel_index >= hwPWM_Channel_MAX)
@@ -186,8 +176,6 @@ hwPWM_OpResult PWM_Channel_DeInit(hwPWM_Channel channel_index)
         PWM_Channel_OnOff_Status[channel_index] = false;
         PWM_Channel_Inverse_Status[channel_index] = false;
         
-        bool all_off;
-
         PWM_Clock_Disable(def->timer);
 
         gpio_pin_init_status[def->pin] = false;

@@ -2,9 +2,12 @@
 #ifndef ILI9xxx_H
 #define ILI9xxx_H
 
-/*******************
- * ILI9xxx CMDS
-*********************/
+#include <stdint.h>
+
+#include "GPIO/GPIO.h"
+#include "SPI/SPI_Master.h"
+
+#include "Display_Config.h"
 
 #ifdef CONFIG_DISPLAY_ILI9225
 #define DISPLAY_ILI9225
@@ -74,12 +77,23 @@ typedef enum {
 
 typedef union {
     struct {
+#ifdef CONFIG_COLOR_RGB565_SWAP
+        uint16_t green_h : 3;
+        uint16_t blue : 5;
+        uint16_t red : 5;
+        uint16_t green_l : 3;
+#else //CONFIG_COLOR_RGB565_SWAP
         uint16_t blue : 5;
         uint16_t green : 6;
         uint16_t red : 5;
+#endif //CONFIG_COLOR_RGB565_SWAP
     };
     uint16_t full;
 } ILI9xxx_Color16_RGB565;
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 ILI9xxx_OpResult ILI9xxx_Init(void);
 ILI9xxx_OpResult ILI9xxx_SetWindow(int16_t x1, int16_t x2, int16_t y1, int16_t y2);
@@ -92,5 +106,9 @@ ILI9xxx_OpResult ILI9xxx_VerticalScroll_StartLine(uint16_t startLine);
 
 ILI9xxx_OpResult ILI9xxx_DrawPixel(int16_t x, int16_t y, ILI9xxx_Color16_RGB565* data);
 ILI9xxx_OpResult ILI9xxx_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, ILI9xxx_Color16_RGB565* data);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif // ILI9xxx_H

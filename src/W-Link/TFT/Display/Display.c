@@ -1,4 +1,7 @@
+
 #include "Display.h"
+
+#include "GPIO/GPIO.h"
 
 #if defined(CONFIG_DISPLAY_GC9A01)
 static Display_Result Display_Map_Result(GC9A01_OpResult result)
@@ -134,6 +137,8 @@ static Display_Result Display_Map_Result(ST77xx_OpResult result)
 }
 #endif
 
+static bool Display_Backlight_Ready = false;
+
 Display_Result Display_Init(void)
 {
 #if defined(CONFIG_DISPLAY_GC9A01)
@@ -186,6 +191,58 @@ Display_Result Display_Power_Off(void)
 #else
     return Display_Unsupport;
 #endif
+}
+
+Display_Result Display_Backlight_Init(void)
+{
+    hwGPIO_OpStatus ret;
+
+    ret = GPIO_Pin_Init(CONFIG_DISPLAY_BACKLIGHT_PN,
+                        hwGPIO_Direction_Output,
+                        hwGPIO_Pull_Mode_Up);
+
+    if (ret != hwGPIO_OK) {
+        return Display_HwError;
+    }
+
+    Display_Backlight_Ready = true;
+
+    return Display_Backlight_Set(false);
+}
+
+Display_Result Display_Backlight_DeInit(void)
+{
+    if (!Display_Backlight_Ready) {
+        return Display_OK;
+    }
+
+    if (GPIO_Pin_DeInit(CONFIG_DISPLAY_BACKLIGHT_PN) != hwGPIO_OK) {
+        return Display_HwError;
+    }
+
+    Display_Backlight_Ready = false;
+    return Display_OK;
+}
+
+Display_Result Display_Backlight_Set(bool on)
+{
+    uint8_t level;
+
+    if (!Display_Backlight_Ready) {
+        return Display_NotInit;
+    }
+
+#if (CONFIG_DISPLAY_BACKLIGHT_ACTIVE_LEVEL == 1)
+    level = on ? 1 : 0;
+#else
+    level = on ? 0 : 1;
+#endif
+
+    if (GPIO_Pin_Write(CONFIG_DISPLAY_BACKLIGHT_PN, level) != hwGPIO_OK) {
+        return Display_HwError;
+    }
+
+    return Display_OK;
 }
 
 Display_Result Display_SetWindow(int16_t x1, int16_t x2, int16_t y1, int16_t y2)

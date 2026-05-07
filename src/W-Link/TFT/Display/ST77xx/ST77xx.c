@@ -208,7 +208,11 @@ ST77xx_Init_Command ST7735_Init_Cmds[]={
     {ST77xx_CMD_POWER_CONTROL_4, {0x8A,0x2A }, 2},           	// Power control, 2 args, no delay: BCLK/2, Opamp current small & Medium low
     {ST77xx_CMD_POWER_CONTROL_5, {0x8A, 0xEE}, 2},           	// Power control, 2 args, no delay:
     {ST77xx_CMD_VCOM_CONTROL_1, {0x0E}, 1},                 	// Power control, 1 arg, no delay:
+#ifdef CONFIG_DISPLAY_INVERTED
+    {ST77xx_CMD_DISP_INVERSION_ON, {0}, 0},                     // set inverted mode
+#else //CONFIG_DISPLAY_INVERTED
     {ST77xx_CMD_DISP_INVERSION_OFF, {0}, 0},                    // set non-inverted mode
+#endif //CONFIG_DISPLAY_INVERTED
     {ST77xx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x05}, 1},            // set color mode, 1 arg, no delay: 16-bit color
     {ST77xx_CMD_GAMMA_CORRECTION_POSTIVE_1,						// 16 args, no delay:
         {0x02, 0x1c, 0x07, 0x12,
@@ -244,7 +248,11 @@ ST77xx_Init_Command ST7789_Init_Cmds[] = {
         {ST77xx_CMD_MEMORY_ACCESS_CONTROL, {0x48}, 1},
 #endif //CONFIG_DISPLAY_ROTATE_180
     {ST77xx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x55}, 1},
-    {ST77xx_CMD_DISP_INVERSION_OFF, {0}, 0}, // set non-inverted mode
+#ifdef CONFIG_DISPLAY_INVERTED
+    {ST77xx_CMD_DISP_INVERSION_ON, {0}, 0},                     // set inverted mode
+#else //CONFIG_DISPLAY_INVERTED
+    {ST77xx_CMD_DISP_INVERSION_OFF, {0}, 0},                    // set non-inverted mode
+#endif //CONFIG_DISPLAY_INVERTED
     {ST77xx_CMD_RGB_CONTROL, {0x00, 0x1B}, 2},
     {0xF2, {0x08}, 1},
     {ST77xx_CMD_GAMSET, {0x01}, 1},
@@ -286,6 +294,11 @@ ST77xx_Init_Command ST7796S_Init_Cmds[] = {
 #else //CONFIG_DISPLAY_ROTATE_180
     {ST77xx_CMD_MEMORY_ACCESS_CONTROL, {0x48}, 1},
 #endif //CONFIG_DISPLAY_ROTATE_180
+#ifdef CONFIG_DISPLAY_INVERTED
+    {ST77xx_CMD_DISP_INVERSION_ON, {0}, 0},                     // set inverted mode
+#else //CONFIG_DISPLAY_INVERTED
+    {ST77xx_CMD_DISP_INVERSION_OFF, {0}, 0},                    // set non-inverted mode
+#endif //CONFIG_DISPLAY_INVERTED
     {ST77xx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x55}, 1},		 /*Pixel Format Set*/
     {ST77xx_CMD_FRAME_RATE_CONTROL_1, {0x00, 0x1B}, 2},
     {0xF2, {0x08}, 1},
@@ -462,6 +475,12 @@ static ST77xx_OpResult ST77xx_IO_Write(uint8_t cmd, uint8_t* param_data, uint16_
 
     if(param_length==0)
     {
+        gpio_op_result = GPIO_Pin_Write(CONFIG_ST77XX_CS_PN, 1);
+        if(gpio_op_result<hwGPIO_OK)
+        {
+            return ST77xx_Map_GPIO_Error_Code(gpio_op_result);
+        }
+
         return ST77xx_OK; 
     }
             

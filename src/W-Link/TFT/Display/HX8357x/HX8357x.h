@@ -6,6 +6,8 @@
 #include "GPIO/GPIO.h"
 #include "SPI/SPI_Master.h"
 
+#include "Display_Config.h"
+
 #ifdef CONFIG_DISPLAY_HX8357B
 #define DISPLAY_HX8357B
 #endif //CONFIG_DISPLAY_HX8357B
@@ -51,12 +53,23 @@ typedef enum {
 
 typedef union {
     struct {
+#ifdef CONFIG_COLOR_RGB565_SWAP
+        uint16_t green_h : 3;
+        uint16_t blue : 5;
+        uint16_t red : 5;
+        uint16_t green_l : 3;
+#else //CONFIG_COLOR_RGB565_SWAP
         uint16_t blue : 5;
         uint16_t green : 6;
         uint16_t red : 5;
+#endif //CONFIG_COLOR_RGB565_SWAP
     };
     uint16_t full;
 } HX8357x_Color16_RGB565;
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 HX8357x_OpResult HX8357x_Init(void);
 HX8357x_OpResult HX8357x_SetWindow(int16_t x1, int16_t x2, int16_t y1, int16_t y2);
@@ -66,5 +79,9 @@ HX8357x_OpResult HX8357x_Power_Off(void);
 
 HX8357x_OpResult HX8357x_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, HX8357x_Color16_RGB565 *data);
 HX8357x_OpResult HX8357x_DrawPixel(int16_t x, int16_t y, HX8357x_Color16_RGB565 *data);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif // HX8357x_H

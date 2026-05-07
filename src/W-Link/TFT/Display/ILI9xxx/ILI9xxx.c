@@ -304,12 +304,16 @@ ILI9xxx_Init_Command ILI9163_Init_Cmds[] = {
         {ILI9xxx_CMD_POWER_CTRL3, {0x02}, 1}, // Power control, 1 arg
         {ILI9xxx_CMD_VCOM_CONTROL_1, {0x20, 0x55}, 2}, // Power control, 1 arg, no delay:
         {ILI9xxx_CMD_VCOM_CONTROL_2, {0x40}, 1}, // VCOM Offset
-        {ILI9xxx_CMD_DISP_INVERSION_OFF, {0}, 0}, // set non-inverted mode
 #ifdef CONFIG_DISPLAY_ROTATE_180
         {ILI9xxx_CMD_MEMORY_ACCESS_CONTROL, {0x88}, 1},
 #else //CONFIG_DISPLAY_ROTATE_180
         {ILI9xxx_CMD_MEMORY_ACCESS_CONTROL, {0x48}, 1},
 #endif //CONFIG_DISPLAY_ROTATE_180
+#ifdef CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_ON, {0}, 0}, // set inverted mode
+#else //CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_OFF, {0}, 0}, // set non-inverted mode
+#endif //CONFIG_DISPLAY_INVERTED
         {ILI9xxx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x5}, 1}, // set color mode, 1 arg, no delay: 16-bit color
         //{ILI9xxx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x6}, 1}, // set color mode, 1 arg, no delay: 18-bit color
         {ILI9xxx_CMD_SOURCE_DRIVER_DIRECTION_CONTROL, {0}, 1}, // set source driver direction control
@@ -395,6 +399,11 @@ ILI9xxx_Init_Command ILI9341_Init_Cmds[]={
 #else //CONFIG_DISPLAY_ROTATE_180
         {ILI9xxx_CMD_MEMORY_ACCESS_CONTROL, {0x48}, 1},
 #endif //CONFIG_DISPLAY_ROTATE_180
+#ifdef CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_ON, {0}, 0}, // set inverted mode
+#else //CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_OFF, {0}, 0}, // set non-inverted mode
+#endif //CONFIG_DISPLAY_INVERTED
         {ILI9xxx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x05}, 1}, /*Pixel Format Set 16bit*/
         //{ILI9xxx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x06}, 1}, /*Pixel Format Set 18bit*/
         {ILI9xxx_CMD_FRAME_RATE_CONTROL_NORMAL, {0x00, 0x1B}, 2},
@@ -423,6 +432,11 @@ ILI9xxx_Init_Command ILI9481_Init_Cmds[]={
 #else //CONFIG_DISPLAY_ROTATE_180
         {ILI9xxx_CMD_MEMORY_ACCESS_CONTROL, {0x48}, 1},
 #endif //CONFIG_DISPLAY_ROTATE_180
+#ifdef CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_ON, {0}, 0}, // set inverted mode
+#else //CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_OFF, {0}, 0}, // set non-inverted mode
+#endif //CONFIG_DISPLAY_INVERTED
         {ILI9xxx_CMD_POWER_CONTROL_NORMAL, {0x01, 0x02}, 2},
         {ILI9xxx_CMD_PANEL_DRIVE, {0x10, 0x3B, 0x00, 0x02, 0x11}, 5},
         {ILI9xxx_CMD_FRAME_RATE, {0x03}, 1},
@@ -447,6 +461,11 @@ ILI9xxx_Init_Command ILI9486_Init_Cmds[]={
 #else //CONFIG_DISPLAY_ROTATE_180
         {ILI9xxx_CMD_MEMORY_ACCESS_CONTROL, {0x48}, 1},
 #endif //CONFIG_DISPLAY_ROTATE_180
+#ifdef CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_ON, {0}, 0}, // set inverted mode
+#else //CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_OFF, {0}, 0}, // set non-inverted mode
+#endif //CONFIG_DISPLAY_INVERTED
         {ILI9xxx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x05}, 1}, /*Pixel Format Set 16bit*/
         //{ILI9xxx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x06}, 1}, /*Pixel Format Set 18bit*/
         {ILI9xxx_CMD_MEMORY_WRITE, {0x44}, 1},
@@ -472,6 +491,11 @@ ILI9xxx_Init_Command ILI9xxx_Init_Cmds[]={
 #else //CONFIG_DISPLAY_ROTATE_180
         {ILI9xxx_CMD_MEMORY_ACCESS_CONTROL, {0x48}, 1},
 #endif //CONFIG_DISPLAY_ROTATE_180
+#ifdef CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_ON, {0}, 0}, // set inverted mode
+#else //CONFIG_DISPLAY_INVERTED
+        {ILI9xxx_CMD_DISP_INVERSION_OFF, {0}, 0}, // set non-inverted mode
+#endif //CONFIG_DISPLAY_INVERTED
         {ILI9xxx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x05}, 1}, /*Pixel Format Set 16bit*/
         //{ILI9xxx_CMD_COLMOD_PIXEL_FORMAT_SET, {0x06}, 1}, /*Pixel Format Set 18bit*/
         {ILI9xxx_CMD_INTERFACE_MODE_CONTROL, {0x00}, 1},
@@ -658,6 +682,12 @@ static ILI9xxx_OpResult ILI9xxx_IO_Write(uint8_t cmd, uint8_t* param_data, uint1
 
         if(param_length==0)
         {
+                gpio_op_result = GPIO_Pin_Write(CONFIG_ILI9XXX_CS_PN, 1);
+                if(gpio_op_result<hwGPIO_OK)
+                {
+                        return ILI9xxx_Map_GPIO_Error_Code(gpio_op_result);
+                }
+
                 return ILI9xxx_OK; 
         }
                 

@@ -120,7 +120,11 @@ static const GC9A01_Init_Command GC9A01_Init_Cmds[]={
     {GC9A01_CMD_MEMORY_ACCESS_CONTROL, {0x48}, 1},
 #endif //GC9A01_ROTATE_180
     {GC9A01_CMD_COLMOD_PIXEL_FORMAT_SET, {0x05}, 1},
+#ifdef CONFIG_DISPLAY_INVERTED
+    {GC9A01_CMD_DISP_INVERSION_ON, {0}, 0}, // set inverted mode
+#else //CONFIG_DISPLAY_INVERTED
     {GC9A01_CMD_DISP_INVERSION_OFF, {0}, 0}, // set non-inverted mode
+#endif //CONFIG_DISPLAY_INVERTED
     {0x90, {0x08, 0x08, 0X08, 0X08}, 4},
     {0xBD, {0x06}, 1},
     {0xBC, {0x00}, 1},
@@ -300,6 +304,12 @@ static GC9A01_OpResult GC9A01_IO_Write(uint8_t cmd, uint8_t* param_data, uint16_
 
     if(param_length==0)
     {
+        gpio_op_result = GPIO_Pin_Write(CONFIG_GC9A01_CS_PN, 1);
+        if(gpio_op_result<hwGPIO_OK)
+        {
+                return GC9A01_Map_GPIO_Error_Code(gpio_op_result);
+        }
+
         return GC9A01_OK; 
     }
 	

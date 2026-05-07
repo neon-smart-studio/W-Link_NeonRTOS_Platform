@@ -7,6 +7,8 @@
 #include "GPIO/GPIO.h"
 #include "SPI/SPI_Master.h"
 
+#include "Display_Config.h"
+
 #ifndef CONFIG_GC9A01_SPI_INDEX
 #define CONFIG_GC9A01_SPI_INDEX hwSPI_Index_0
 #endif
@@ -46,19 +48,23 @@ typedef enum GC9A01_OpResult_t
 
 typedef union {
     struct {
-#ifdef GC9A01_COLOR_RGB565_SWAP
+#ifdef CONFIG_COLOR_RGB565_SWAP
         uint16_t green_h : 3;
-        uint16_t red : 5;
         uint16_t blue : 5;
+        uint16_t red : 5;
         uint16_t green_l : 3;
-#else //GC9A01_COLOR_RGB565_SWAP
+#else //CONFIG_COLOR_RGB565_SWAP
         uint16_t blue : 5;
         uint16_t green : 6;
         uint16_t red : 5;
-#endif //GC9A01_COLOR_RGB565_SWAP
+#endif //CONFIG_COLOR_RGB565_SWAP
     };
     uint16_t full;
 } GC9A01_Color16_RGB565;
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 GC9A01_OpResult GC9A01_Init(void);
 GC9A01_OpResult GC9A01_SetWindow(int16_t x1, int16_t x2, int16_t y1, int16_t y2);
@@ -71,5 +77,9 @@ GC9A01_OpResult GC9A01_VerticalScroll_StartLine(uint16_t startLine);
 
 GC9A01_OpResult GC9A01_DrawPixel(int16_t x, int16_t y, GC9A01_Color16_RGB565* data);
 GC9A01_OpResult GC9A01_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, GC9A01_Color16_RGB565* data);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif // GC9A01_H

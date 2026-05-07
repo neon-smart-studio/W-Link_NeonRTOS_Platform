@@ -260,6 +260,12 @@ static HX8357x_OpResult HX8357x_IO_Write(uint8_t cmd, uint8_t* param_data, uint1
 
     if(param_length==0)
     {
+        gpio_op_result = GPIO_Pin_Write(CONFIG_HX8357X_CS_PN, 1);
+        if(gpio_op_result<hwGPIO_OK)
+        {
+                return HX8357x_Map_GPIO_Error_Code(gpio_op_result);
+        }
+
         return HX8357x_OK; 
     }
 	

@@ -89,7 +89,7 @@ static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX][SPI_Pinset_MAX] =
             hwGPIO_Pin_11,
             hwGPIO_Pin_12,
             hwGPIO_Pin_10,
-            hwGPIO_Pin_13
+            hwGPIO_Pin_NC, //hwGPIO_Pin_13
         },
 
         /*

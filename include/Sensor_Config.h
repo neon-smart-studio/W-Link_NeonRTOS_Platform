@@ -1,0 +1,5 @@
+
+#ifndef SENSOR_CONFIG_H
+#define SENSOR_CONFIG_H
+
+#endif //SENSOR_CONFIG_H

@@ -79,8 +79,8 @@ typedef union {
     struct {
 #ifdef CONFIG_COLOR_RGB565_SWAP
         uint16_t green_h : 3;
-        uint16_t blue : 5;
         uint16_t red : 5;
+        uint16_t blue : 5;
         uint16_t green_l : 3;
 #else //CONFIG_COLOR_RGB565_SWAP
         uint16_t blue : 5;

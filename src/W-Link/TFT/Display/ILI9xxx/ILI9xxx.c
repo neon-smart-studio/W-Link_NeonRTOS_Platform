@@ -719,6 +719,75 @@ static ILI9xxx_OpResult ILI9xxx_IO_Write(uint8_t cmd, uint8_t* param_data, uint1
         return ILI9xxx_OK;
 }
 
+static ILI9xxx_OpResult ILI9xxx_Nenory_Write(ILI9xxx_Color16_RGB565* data, uint16_t data_length)
+{
+        hwGPIO_OpStatus gpio_op_result;
+        hwSPI_OpResult spi_op_result;
+
+        if(data==NULL && data_length>0)
+        {
+                return ILI9xxx_InvalidParameter;
+        }
+                
+        gpio_op_result = GPIO_Pin_Write(CONFIG_ILI9XXX_CS_PN, 0);
+        if(gpio_op_result<hwGPIO_OK)
+        {
+                return ILI9xxx_Map_GPIO_Error_Code(gpio_op_result);
+        }
+
+        gpio_op_result = GPIO_Pin_Write(CONFIG_ILI9XXX_DC_PN, 0);
+        if(gpio_op_result<hwGPIO_OK)
+        {
+                return ILI9xxx_Map_GPIO_Error_Code(gpio_op_result);
+        }
+
+#if defined(DISPLAY_ILI9163) || defined(DISPLAY_ILI9341) || defined(DISPLAY_ILI9481) || defined(DISPLAY_ILI9486) || defined(DISPLAY_ILI9488)
+        spi_op_result = SPI_Master_WriteByte(CONFIG_ILI9XXX_SPI_INDEX, ILI9xxx_CMD_MEMORY_WRITE);
+        if(spi_op_result<hwSPI_OK)
+        {
+                return ILI9xxx_Map_SPI_Error_Code(spi_op_result);
+        }
+#endif // DISPLAY_ILI9163 || DISPLAY_ILI9341 || DISPLAY_ILI9481 || DISPLAY_ILI9486 || DISPLAY_ILI9488
+#if defined(DISPLAY_ILI9225)
+        spi_op_result = SPI_Master_WriteByte(CONFIG_ILI9XXX_SPI_INDEX, ILI9xxx_CMD_GRAM_DATA_REG);
+        if(spi_op_result<hwSPI_OK)
+        {
+                return ILI9xxx_Map_SPI_Error_Code(spi_op_result);
+        }
+#endif // DISPLAY_ILI9225
+        
+        gpio_op_result = GPIO_Pin_Write(CONFIG_ILI9XXX_DC_PN, 1);
+        if(gpio_op_result<hwGPIO_OK)
+        {
+                return ILI9xxx_Map_GPIO_Error_Code(gpio_op_result);
+        }
+
+        for(uint16_t i = 0; i<data_length; i++)
+        {
+                uint8_t buff[2];
+                buff[0] = ((uint16_t)data[i].full)>>8;
+                buff[1] = ((uint16_t)data[i].full)&0xff;
+                spi_op_result = SPI_Master_WriteByte(CONFIG_ILI9XXX_SPI_INDEX, buff[0]);
+                if(spi_op_result<hwSPI_OK)
+                {
+                return ILI9xxx_Map_SPI_Error_Code(spi_op_result);
+                }
+                spi_op_result = SPI_Master_WriteByte(CONFIG_ILI9XXX_SPI_INDEX, buff[1]);
+                if(spi_op_result<hwSPI_OK)
+                {
+                return ILI9xxx_Map_SPI_Error_Code(spi_op_result);
+                }
+        }
+
+        gpio_op_result = GPIO_Pin_Write(CONFIG_ILI9XXX_CS_PN, 1);
+        if(gpio_op_result<hwGPIO_OK)
+        {
+                return ILI9xxx_Map_GPIO_Error_Code(gpio_op_result);
+        }
+
+        return ILI9xxx_OK;
+}
+
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -963,14 +1032,8 @@ ILI9xxx_OpResult ILI9xxx_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, IL
         if(op_status<ILI9xxx_OK) { return op_status; }
         
         /*Memory write*/
-#if defined(DISPLAY_ILI9163) || defined(DISPLAY_ILI9341) || defined(DISPLAY_ILI9481) || defined(DISPLAY_ILI9486) || defined(DISPLAY_ILI9488)
-        op_status = ILI9xxx_IO_Write(ILI9xxx_CMD_MEMORY_WRITE, (uint8_t*)data, size * 2, draw_done_cb);
+        op_status = ILI9xxx_Nenory_Write(data, size);
         if(op_status<ILI9xxx_OK) { return op_status; }
-#endif // DISPLAY_ILI9163 || DISPLAY_ILI9341 || DISPLAY_ILI9481 || DISPLAY_ILI9486 || DISPLAY_ILI9488
-#if defined(DISPLAY_ILI9225)
-        op_status = ILI9xxx_IO_Write(ILI9xxx_CMD_GRAM_DATA_REG, (uint8_t*)data, size * 2, draw_done_cb);
-        if(op_status<ILI9xxx_OK) { return op_status; }
-#endif // DISPLAY_ILI9225
     
         return op_status;
 }

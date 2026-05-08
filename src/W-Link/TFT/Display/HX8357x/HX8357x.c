@@ -293,6 +293,66 @@ static HX8357x_OpResult HX8357x_IO_Write(uint8_t cmd, uint8_t* param_data, uint1
     return HX8357x_OK;
 }
 
+static HX8357x_OpResult HX8357x_Nenory_Write(HX8357x_Color16_RGB565* data, uint16_t data_length)
+{
+    hwGPIO_OpStatus gpio_op_result;
+    hwSPI_OpResult spi_op_result;
+
+    if(data==NULL && data_length>0)
+    {
+        return HX8357x_InvalidParameter;
+    }
+            
+    gpio_op_result = GPIO_Pin_Write(CONFIG_HX8357X_CS_PN, 0);
+    if(gpio_op_result<hwGPIO_OK)
+    {
+        return HX8357x_Map_GPIO_Error_Code(gpio_op_result);
+    }
+
+    gpio_op_result = GPIO_Pin_Write(CONFIG_HX8357X_DC_PN, 0);
+    if(gpio_op_result<hwGPIO_OK)
+    {
+        return HX8357x_Map_GPIO_Error_Code(gpio_op_result);
+    }
+
+    spi_op_result = SPI_Master_WriteByte(CONFIG_HX8357X_SPI_INDEX, HX8357X_CMD_RAMWR);
+    if(spi_op_result<hwSPI_OK)
+    {
+        return HX8357x_Map_SPI_Error_Code(spi_op_result);
+    }
+  
+    gpio_op_result = GPIO_Pin_Write(CONFIG_HX8357X_DC_PN, 1);
+    if(gpio_op_result<hwGPIO_OK)
+    {
+        return HX8357x_Map_GPIO_Error_Code(gpio_op_result);
+    }
+
+    for(uint16_t i = 0; i<data_length; i++)
+    {
+        uint8_t buff[2];
+        buff[0] = ((uint16_t)data[i].full)>>8;
+        buff[1] = ((uint16_t)data[i].full)&0xff;
+        spi_op_result = SPI_Master_WriteByte(CONFIG_HX8357X_SPI_INDEX, buff[0]);
+        if(spi_op_result<hwSPI_OK)
+        {
+            return HX8357x_Map_SPI_Error_Code(spi_op_result);
+        }
+        spi_op_result = SPI_Master_WriteByte(CONFIG_HX8357X_SPI_INDEX, buff[1]);
+        if(spi_op_result<hwSPI_OK)
+        {
+            return HX8357x_Map_SPI_Error_Code(spi_op_result);
+        }
+    }
+
+    gpio_op_result = GPIO_Pin_Write(CONFIG_HX8357X_CS_PN, 1);
+    if(gpio_op_result<hwGPIO_OK)
+    {
+        return HX8357x_Map_GPIO_Error_Code(gpio_op_result);
+    }
+
+    return HX8357x_OK;
+}
+
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -407,7 +467,7 @@ HX8357x_OpResult HX8357x_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, HX
     if(op_status<HX8357x_OK) { return op_status; }
     
     /*Memory write*/
-    op_status = HX8357x_IO_Write(HX8357X_CMD_RAMWR, (uint8_t*)data, size * 2);
+    op_status = HX8357x_Nenory_Write(data, size);
 	if(op_status<HX8357x_OK) { return op_status; }
     
     return HX8357x_OK;

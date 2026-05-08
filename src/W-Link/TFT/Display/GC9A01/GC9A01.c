@@ -337,6 +337,66 @@ static GC9A01_OpResult GC9A01_IO_Write(uint8_t cmd, uint8_t* param_data, uint16_
     return GC9A01_OK;
 }
 
+static GC9A01_OpResult GC9A01_Nenory_Write(GC9A01_Color16_RGB565* data, uint16_t data_length)
+{
+    hwGPIO_OpStatus gpio_op_result;
+    hwSPI_OpResult spi_op_result;
+
+    if(data==NULL && data_length>0)
+    {
+        return GC9A01_InvalidParameter;
+    }
+            
+    gpio_op_result = GPIO_Pin_Write(CONFIG_GC9A01_CS_PN, 0);
+    if(gpio_op_result<hwGPIO_OK)
+    {
+        return GC9A01_Map_GPIO_Error_Code(gpio_op_result);
+    }
+
+    gpio_op_result = GPIO_Pin_Write(CONFIG_GC9A01_DC_PN, 0);
+    if(gpio_op_result<hwGPIO_OK)
+    {
+        return GC9A01_Map_GPIO_Error_Code(gpio_op_result);
+    }
+
+    spi_op_result = SPI_Master_WriteByte(CONFIG_GC9A01_SPI_INDEX, GC9A01_CMD_MEMORY_WRITE);
+    if(spi_op_result<hwSPI_OK)
+    {
+        return GC9A01_Map_SPI_Error_Code(spi_op_result);
+    }
+  
+    gpio_op_result = GPIO_Pin_Write(CONFIG_GC9A01_DC_PN, 1);
+    if(gpio_op_result<hwGPIO_OK)
+    {
+        return GC9A01_Map_GPIO_Error_Code(gpio_op_result);
+    }
+
+    for(uint16_t i = 0; i<data_length; i++)
+    {
+        uint8_t buff[2];
+        buff[0] = ((uint16_t)data[i].full)>>8;
+        buff[1] = ((uint16_t)data[i].full)&0xff;
+        spi_op_result = SPI_Master_WriteByte(CONFIG_GC9A01_SPI_INDEX, buff[0]);
+        if(spi_op_result<hwSPI_OK)
+        {
+            return GC9A01_Map_SPI_Error_Code(spi_op_result);
+        }
+        spi_op_result = SPI_Master_WriteByte(CONFIG_GC9A01_SPI_INDEX, buff[1]);
+        if(spi_op_result<hwSPI_OK)
+        {
+            return GC9A01_Map_SPI_Error_Code(spi_op_result);
+        }
+    }
+
+    gpio_op_result = GPIO_Pin_Write(CONFIG_GC9A01_CS_PN, 1);
+    if(gpio_op_result<hwGPIO_OK)
+    {
+        return GC9A01_Map_GPIO_Error_Code(gpio_op_result);
+    }
+
+    return GC9A01_OK;
+}
+
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -472,7 +532,7 @@ GC9A01_OpResult GC9A01_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, GC9A
     op_status = GC9A01_SetWindow(x1, x2, y1, y2);
 	if(op_status<GC9A01_OK) { return op_status; }
 
-	op_status = GC9A01_IO_Write(GC9A01_CMD_MEMORY_WRITE, (uint8_t*)data, size * 2);
+	op_status = GC9A01_Nenory_Write(data, size);
 	if(op_status<GC9A01_OK) { return op_status; }
     
     return GC9A01_OK;

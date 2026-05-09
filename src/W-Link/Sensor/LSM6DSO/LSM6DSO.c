@@ -9,7 +9,6 @@ Modifications:
 - Removed STM32 BSP object/context dependency.
 */
 
-/* Includes ------------------------------------------------------------------*/
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -165,7 +164,7 @@ LSM6DSO_OpStatus LSM6DSO_DeInit()
     return op_status;
   }
 
-  op_status = LSM6DSO_IO_DeInit(false);
+  op_status = LSM6DSO_IO_DeInit();
   if(op_status<LSM6DSO_OK)
   {
     return op_status;

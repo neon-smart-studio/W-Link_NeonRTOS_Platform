@@ -20,28 +20,6 @@ Modifications:
 
 #include "LSM6DSO_IO.h"
 
-#define LSM6DSO_I2C_ADDR_L                 0x6A
-#define LSM6DSO_I2C_ADDR_H                 0x6B
-#define LSM6DSO_I2C_OP_TIMEOUT             500
-
-#ifdef CONFIG_LSM6DSO_I2C_ADDR_L
-#define LSM6DSO_I2C_ADDRESS                LSM6DSO_I2C_ADDR_L
-#endif
-
-#ifdef CONFIG_LSM6DSO_I2C_ADDR_H
-#define LSM6DSO_I2C_ADDRESS                LSM6DSO_I2C_ADDR_H
-#endif
-
-#ifndef LSM6DSO_I2C_ADDRESS
-#define LSM6DSO_I2C_ADDRESS                LSM6DSO_I2C_ADDR_H
-#endif
-
-#ifndef CONFIG_LSM6DSO_I2C_INDEX
-#define LSM6DSO_I2C_INDEX             hwI2C_Index_0
-#else
-#define LSM6DSO_I2C_INDEX             CONFIG_LSM6DSO_I2C_INDEX
-#endif
-
 #define LSM6DSO_IO_TX_BUF_SIZE             32
 
 static LSM6DSO_OpStatus LSM6DSO_IO_Map_I2C_Error(hwI2C_OpResult error_code)
@@ -99,20 +77,15 @@ LSM6DSO_OpStatus LSM6DSO_IO_Init(void)
     return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_IO_DeInit(bool deinit_IO)
+LSM6DSO_OpStatus LSM6DSO_IO_DeInit(void)
 {
 #if defined(CONFIG_LSM6DSO_AUTO_INIT_I2C)
-    if(deinit_IO == true)
+    if(I2C_Master_isInit(LSM6DSO_I2C_INDEX) == true)
     {
-        if(I2C_Master_isInit(LSM6DSO_I2C_INDEX) == true)
-        {
-            return LSM6DSO_IO_Map_I2C_Error(
-                I2C_Master_DeInit(LSM6DSO_I2C_INDEX)
-            );
-        }
+        return LSM6DSO_IO_Map_I2C_Error(
+            I2C_Master_DeInit(LSM6DSO_I2C_INDEX)
+        );
     }
-#else
-    (void)deinit_IO;
 #endif
 
     return LSM6DSO_OK;

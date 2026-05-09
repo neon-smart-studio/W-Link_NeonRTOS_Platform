@@ -59,7 +59,7 @@ typedef void (*LSM6DSO_IO_Event_IRQ)(LSM6DSO_Interrupt_Index index);
 /* Functions -----------------------------------------------------------------*/
 
 LSM6DSO_OpStatus LSM6DSO_IO_Init(void);
-LSM6DSO_OpStatus LSM6DSO_IO_DeInit(bool deinit_IO);
+LSM6DSO_OpStatus LSM6DSO_IO_DeInit(void);
 
 LSM6DSO_OpStatus LSM6DSO_Register_Interrupt_Handler(LSM6DSO_IO_Event_IRQ irq_callback);
 LSM6DSO_OpStatus LSM6DSO_UnRegister_Interrupt_Handler(void);

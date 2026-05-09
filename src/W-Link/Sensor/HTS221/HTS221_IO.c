@@ -9,7 +9,6 @@ Modifications:
 - Removed STM32 BSP object/context dependency.
 */
 
-/* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -89,18 +88,6 @@ HTS221_OpStatus HTS221_IO_DeInit(void)
 #endif
 
     return HTS221_OK;
-}
-
-HTS221_OpStatus HTS221_Register_Interrupt_Handler(HTS221_IO_Event_IRQ irq_callback)
-{
-    (void)irq_callback;
-
-    return HTS221_Unsupport;
-}
-
-HTS221_OpStatus HTS221_UnRegister_Interrupt_Handler(void)
-{
-    return HTS221_Unsupport;
 }
 
 HTS221_OpStatus HTS221_IO_Read(

@@ -19,8 +19,6 @@ Modifications:
 
 #include "Sensor_Config.h"
 
-/* Defines -------------------------------------------------------------------*/
-
 /*
  * HTS221 I2C 7-bit address
  *
@@ -39,17 +37,8 @@ Modifications:
 
 #define HTS221_IO_TX_BUF_SIZE             32
 
-/* Typedefs ------------------------------------------------------------------*/
-
-typedef void (*HTS221_IO_Event_IRQ)(HTS221_Interrupt_Index index);
-
-/* Functions -----------------------------------------------------------------*/
-
 HTS221_OpStatus HTS221_IO_Init(void);
 HTS221_OpStatus HTS221_IO_DeInit(void);
-
-HTS221_OpStatus HTS221_Register_Interrupt_Handler(HTS221_IO_Event_IRQ irq_callback);
-HTS221_OpStatus HTS221_UnRegister_Interrupt_Handler(void);
 
 HTS221_OpStatus HTS221_IO_Read(
     uint8_t RegisterAddr,

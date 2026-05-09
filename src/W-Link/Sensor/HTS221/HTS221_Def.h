@@ -24,11 +24,4 @@ typedef enum HTS221_IO_OpStatus_t
   HTS221_Unsupport = -7,
 } HTS221_OpStatus;
 
-typedef enum HTS221_Interrupt_Index_t
-{
-	HTS221_Interrupt_Index_1 = 0,
-	HTS221_Interrupt_Index_2,
-	HTS221_Interrupt_Index_MAX
-}HTS221_Interrupt_Index;
-
 #endif //HTS221_DEF_H

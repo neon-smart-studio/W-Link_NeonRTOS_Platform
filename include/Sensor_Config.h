@@ -2,4 +2,6 @@
 #ifndef SENSOR_CONFIG_H
 #define SENSOR_CONFIG_H
 
+#define CONFIG_HTS221_I2C_INDEX hwI2C_Index_1
+
 #endif //SENSOR_CONFIG_H

@@ -7,6 +7,8 @@
 
 #include "soc.h"  
 
+#include "NeonRTOS.h"
+
 #include "I2C_Def.h"
 
 #include "I2C_Index.h"

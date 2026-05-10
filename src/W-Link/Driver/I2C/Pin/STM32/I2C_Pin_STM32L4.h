@@ -1,7 +1,7 @@
 #ifndef I2C_PIN_STM32L4_H
 #define I2C_PIN_STM32L4_H
 
-#include "I2C_Pin_STM32_Def"
+#include "I2C_Pin_STM32_Def.h"
 
 typedef enum {
     I2C_Pinset_DEFAULT = 0,

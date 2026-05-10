@@ -47,7 +47,9 @@ hwRTC_OpResult RTC_Instance_Init(hwRTC_Index index)
     g_rtc[index].Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
     g_rtc[index].Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
     g_rtc[index].Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
+#if defined(STM32L412xx) || defined(STM32L422xx) || defined (STM32L4P5xx) || defined (STM32L4Q5xx)
     g_rtc[index].Init.OutPutPullUp = RTC_OUTPUT_PULLUP_NONE;
+#endif
 
     if (HAL_RTC_Init(&g_rtc[index]) != HAL_OK)
         return hwRTC_HwError;

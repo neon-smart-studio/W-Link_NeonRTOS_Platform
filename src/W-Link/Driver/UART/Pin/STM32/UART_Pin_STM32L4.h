@@ -98,22 +98,44 @@ static const UART_AF_Map UART_Pin_AF_Map[] = {
 #if defined(UART1_BASE) || defined(USART1_BASE)
     { hwUART_Index_0, hwGPIO_Pin_A9,  GPIO_AF7_USART1 },
     { hwUART_Index_0, hwGPIO_Pin_A10, GPIO_AF7_USART1 },
+    { hwUART_Index_0, hwGPIO_Pin_A11, GPIO_AF7_USART1 },
+    { hwUART_Index_0, hwGPIO_Pin_A12, GPIO_AF7_USART1 },
+    { hwUART_Index_0, hwGPIO_Pin_B3,  GPIO_AF7_USART1 },
+    { hwUART_Index_0, hwGPIO_Pin_B4,  GPIO_AF7_USART1 },
     { hwUART_Index_0, hwGPIO_Pin_B6,  GPIO_AF7_USART1 },
     { hwUART_Index_0, hwGPIO_Pin_B7,  GPIO_AF7_USART1 },
+    { hwUART_Index_0, hwGPIO_Pin_G9,  GPIO_AF7_USART1 },
+    { hwUART_Index_0, hwGPIO_Pin_G10, GPIO_AF7_USART1 },
+    { hwUART_Index_0, hwGPIO_Pin_G11, GPIO_AF7_USART1 },
+    { hwUART_Index_0, hwGPIO_Pin_G12, GPIO_AF7_USART1 },
 #endif
 
 #if defined(UART2_BASE) || defined(USART2_BASE)
-    { hwUART_Index_1, hwGPIO_Pin_A2, GPIO_AF7_USART2 },
-    { hwUART_Index_1, hwGPIO_Pin_A3, GPIO_AF7_USART2 },
-    { hwUART_Index_1, hwGPIO_Pin_D5, GPIO_AF7_USART2 },
-    { hwUART_Index_1, hwGPIO_Pin_D6, GPIO_AF7_USART2 },
+    { hwUART_Index_1, hwGPIO_Pin_A0,  GPIO_AF7_USART2 },
+    { hwUART_Index_1, hwGPIO_Pin_A1,  GPIO_AF7_USART2 },
+    { hwUART_Index_1, hwGPIO_Pin_A2,  GPIO_AF7_USART2 },
+    { hwUART_Index_1, hwGPIO_Pin_A3,  GPIO_AF7_USART2 },
+    { hwUART_Index_1, hwGPIO_Pin_D3,  GPIO_AF7_USART2 },
+    { hwUART_Index_1, hwGPIO_Pin_D4,  GPIO_AF7_USART2 },
+    { hwUART_Index_1, hwGPIO_Pin_D5,  GPIO_AF7_USART2 },
+    { hwUART_Index_1, hwGPIO_Pin_D6,  GPIO_AF7_USART2 },
+#if defined(GPIO_AF3_USART2)
+    { hwUART_Index_1, hwGPIO_Pin_A14, GPIO_AF3_USART2 },
+    { hwUART_Index_1, hwGPIO_Pin_A15, GPIO_AF3_USART2 },
+#endif
 #endif
 
 #if defined(UART3_BASE) || defined(USART3_BASE)
     { hwUART_Index_2, hwGPIO_Pin_B10, GPIO_AF7_USART3 },
     { hwUART_Index_2, hwGPIO_Pin_B11, GPIO_AF7_USART3 },
+    { hwUART_Index_2, hwGPIO_Pin_B13, GPIO_AF7_USART3 },
+    { hwUART_Index_2, hwGPIO_Pin_B14, GPIO_AF7_USART3 },
     { hwUART_Index_2, hwGPIO_Pin_C10, GPIO_AF7_USART3 },
     { hwUART_Index_2, hwGPIO_Pin_C11, GPIO_AF7_USART3 },
+    { hwUART_Index_2, hwGPIO_Pin_D8,  GPIO_AF7_USART3 },
+    { hwUART_Index_2, hwGPIO_Pin_D9,  GPIO_AF7_USART3 },
+    { hwUART_Index_2, hwGPIO_Pin_D11, GPIO_AF7_USART3 },
+    { hwUART_Index_2, hwGPIO_Pin_D12, GPIO_AF7_USART3 },
 #endif
 
 #if defined(UART4_BASE) || defined(USART4_BASE)
@@ -121,10 +143,12 @@ static const UART_AF_Map UART_Pin_AF_Map[] = {
     { hwUART_Index_3, hwGPIO_Pin_A1,  GPIO_AF8_UART4 },
     { hwUART_Index_3, hwGPIO_Pin_C10, GPIO_AF8_UART4 },
     { hwUART_Index_3, hwGPIO_Pin_C11, GPIO_AF8_UART4 },
+#if defined(GPIO_AF5_UART4)
     { hwUART_Index_3, hwGPIO_Pin_A0,  GPIO_AF5_UART4 },
     { hwUART_Index_3, hwGPIO_Pin_A1,  GPIO_AF5_UART4 },
     { hwUART_Index_3, hwGPIO_Pin_C10, GPIO_AF5_UART4 },
     { hwUART_Index_3, hwGPIO_Pin_C11, GPIO_AF5_UART4 },
+#endif
 #endif
 
 #if defined(UART5_BASE) || defined(USART5_BASE)
@@ -132,10 +156,12 @@ static const UART_AF_Map UART_Pin_AF_Map[] = {
     { hwUART_Index_4, hwGPIO_Pin_D2,  GPIO_AF8_UART5 },
     { hwUART_Index_4, hwGPIO_Pin_B3,  GPIO_AF8_UART5 },
     { hwUART_Index_4, hwGPIO_Pin_B4,  GPIO_AF8_UART5 },
+#if defined(GPIO_AF5_UART5)
     { hwUART_Index_4, hwGPIO_Pin_C12, GPIO_AF5_UART5 },
     { hwUART_Index_4, hwGPIO_Pin_D2,  GPIO_AF5_UART5 },
     { hwUART_Index_4, hwGPIO_Pin_B3,  GPIO_AF5_UART5 },
     { hwUART_Index_4, hwGPIO_Pin_B4,  GPIO_AF5_UART5 },
+#endif
 #endif
 
 #if defined(LPUART1_BASE)
@@ -143,6 +169,10 @@ static const UART_AF_Map UART_Pin_AF_Map[] = {
     { hwUART_Index_L1, hwGPIO_Pin_G8,  GPIO_AF8_LPUART1 },
     { hwUART_Index_L1, hwGPIO_Pin_B10, GPIO_AF8_LPUART1 },
     { hwUART_Index_L1, hwGPIO_Pin_B11, GPIO_AF8_LPUART1 },
+    { hwUART_Index_L1, hwGPIO_Pin_C0,  GPIO_AF8_LPUART1 },
+    { hwUART_Index_L1, hwGPIO_Pin_C1,  GPIO_AF8_LPUART1 },
+    { hwUART_Index_L1, hwGPIO_Pin_A2,  GPIO_AF8_LPUART1 },
+    { hwUART_Index_L1, hwGPIO_Pin_A3,  GPIO_AF8_LPUART1 },
 #endif
 };
 

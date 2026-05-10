@@ -332,7 +332,7 @@ void Timer_NVIC_Enable(hwTimer_Index index)
 #endif
 
 #if defined(TIM5_BASE)
-        case hwTimer_Index_5:
+        case hwTimer_Index_4:
             HAL_NVIC_SetPriority(TIM5_IRQn, TIMER_IRQ_NVIC_PRIORITY, TIMER_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(TIM5_IRQn);
             break;
@@ -369,7 +369,6 @@ void Timer_NVIC_Enable(hwTimer_Index index)
 #if defined(TIM17_BASE)
 #if defined (STM32L471xx) || defined (STM32L475xx) || defined (STM32L476xx) || defined (STM32L485xx) || defined (STM32L486xx) || \
     defined (STM32L496xx)
-void TIM1_TRG_COM_IRQHandler(void) { Timer_HAL_IRQHandler(hwTimer_Index_17); }
         case hwTimer_Index_16:
             HAL_NVIC_SetPriority(TIM1_TRG_COM_IRQn, TIMER_IRQ_NVIC_PRIORITY, TIMER_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(TIM1_TRG_COM_IRQn);
@@ -427,7 +426,7 @@ void Timer_NVIC_Disable(hwTimer_Index index)
 #endif
 
 #if defined(TIM5_BASE)
-        case hwTimer_Index_5:
+        case hwTimer_Index_4:
             HAL_NVIC_DisableIRQ(TIM5_IRQn);
             break;
 #endif
@@ -459,7 +458,6 @@ void Timer_NVIC_Disable(hwTimer_Index index)
 #if defined(TIM17_BASE)
 #if defined (STM32L471xx) || defined (STM32L475xx) || defined (STM32L476xx) || defined (STM32L485xx) || defined (STM32L486xx) || \
     defined (STM32L496xx)
-void TIM1_TRG_COM_IRQHandler(void) { Timer_HAL_IRQHandler(hwTimer_Index_17); }
         case hwTimer_Index_16:
             HAL_NVIC_DisableIRQ(TIM1_TRG_COM_IRQn);
             break;

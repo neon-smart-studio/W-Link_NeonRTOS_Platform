@@ -68,7 +68,7 @@ HTS221_OpStatus HTS221_IO_Read(
     status = HTS221_IO_Map_I2C_Error(
         I2C_Master_Write(
             HTS221_I2C_INDEX,
-            HTS221_I2C_ADDRESS,
+            HTS221_I2C_ADDRESS >> 1,
             &RegisterAddr,
             1,
             false,
@@ -84,7 +84,7 @@ HTS221_OpStatus HTS221_IO_Read(
     status = HTS221_IO_Map_I2C_Error(
         I2C_Master_Read(
             HTS221_I2C_INDEX,
-            HTS221_I2C_ADDRESS,
+            HTS221_I2C_ADDRESS >> 1,
             pBuffer,
             NumByteToRead,
             true,
@@ -125,7 +125,7 @@ HTS221_OpStatus HTS221_IO_Write(
     status = HTS221_IO_Map_I2C_Error(
         I2C_Master_Write(
             HTS221_I2C_INDEX,
-            HTS221_I2C_ADDRESS,
+            HTS221_I2C_ADDRESS >> 1,
             tx_buf,
             NumByteToWrite + 1,
             true,

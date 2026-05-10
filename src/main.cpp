@@ -8,6 +8,10 @@
 #include "task.h"
 
 #include "SysCtrl/SysCtrl.h"
+#include "UART/UART.h"
+#include "I2C/I2C_Master.h"
+
+#include "Sensor/HTS221/HTS221.h"
 
 #include "NeonRTOS.h"
 
@@ -40,15 +44,61 @@ void vApplicationTickHook(void) {
 #endif
 }
 
-void LED_Task(void* p)
+void Sensor_Task(void* p)
 {
-    GPIO_Pin_Init(hwGPIO_Pin_25, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_None);
+    uint8_t id = 0;
+    float temperature = 0.0f;
+    float humidity = 0.0f;
+    HTS221_OpStatus status;
+
+    I2C_Master_Init(hwI2C_Index_1, hwI2C_Standard_Mode);
+
+    status = HTS221_Init();
+    if (status != HTS221_OK) {
+        UART_Printf("HTS221_Init failed: %d\r\n", status);
+        while (1) {
+            NeonRTOS_Sleep(1000);
+        }
+    }
+
+    status = HTS221_ReadID(&id);
+    if (status != HTS221_OK) {
+        UART_Printf("HTS221_ReadID failed: %d\r\n", status);
+    } else {
+        UART_Printf("HTS221 ID: 0x%02X\r\n", id);
+    }
+
+    status = HTS221_SetODR(1.0f);
+    if (status != HTS221_OK) {
+        UART_Printf("HTS221_SetODR failed: %d\r\n", status);
+    }
+
+    status = HTS221_Enable();
+    if (status != HTS221_OK) {
+        UART_Printf("HTS221_Enable failed: %d\r\n", status);
+        while (1) {
+            NeonRTOS_Sleep(1000);
+        }
+    }
+
+    UART_Printf("HTS221 demo started\r\n");
 
     while (1) {
-        GPIO_Pin_Write(hwGPIO_Pin_25, true);
-        NeonRTOS_Sleep(500);
-        GPIO_Pin_Write(hwGPIO_Pin_25, false);
-        NeonRTOS_Sleep(500);
+        status = HTS221_GetTemperature(&temperature);
+        if (status != HTS221_OK) {
+            UART_Printf("Read temperature failed: %d\r\n", status);
+        }
+
+        status = HTS221_GetHumidity(&humidity);
+        if (status != HTS221_OK) {
+            UART_Printf("Read humidity failed: %d\r\n", status);
+        }
+
+        UART_Printf("Temperature: %.2f C, Humidity: %.2f %%RH\r\n",
+               temperature,
+               humidity);
+
+        NeonRTOS_Sleep(1000);
     }
 }
 
@@ -58,9 +108,11 @@ int main(void) {
     //__HAL_RCC_WWDG_CLK_DISABLE();  // 禁用窗口看門狗
     //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗
 
+    UART_Open(LOG_UART_INDEX, 115200, false);
+
     NeonRTOS_TaskCreate(
-        LED_Task,
-        (const signed char *)"LED",
+        Sensor_Task,
+        (const signed char *)"Sensor",
         512,
         NULL,
         2,

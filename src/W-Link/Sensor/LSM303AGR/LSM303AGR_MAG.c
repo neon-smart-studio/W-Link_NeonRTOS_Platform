@@ -39,146 +39,124 @@
  * Modified by Neon Smart Studio for W-Link
  */
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-/* Includes ------------------------------------------------------------------*/
+#include "NeonRTOS.h"
 
-#include "Arduino.h"
-#include "Wire.h"
-#include "LSM303AGR_MAG_Sensor.h"
+#include "I2C/I2C_Master.h"
 
+#include "LSM303AGR_MAG.h"
 
-/* Class Implementation ------------------------------------------------------*/
+#include "LSM303AGR_MAG_Register_Def.h"
+#include "LSM303AGR_MAG_Register.h"
 
-/** Constructor
- * @param i2c object of an helper class which handles the I2C peripheral
- * @param address the address of the component's instance
- */
-LSM303AGR_MAG_Sensor::LSM303AGR_MAG_Sensor(TwoWire *i2c) : dev_i2c(i2c)
+LSM303AGR_OpStatus LSM303AGR_MAG_Init(void)
 {
-  address = LSM303AGR_MAG_I2C_ADDRESS;
-}
-
-/**
- * @brief  Configure the sensor in order to be used
- * @retval 0 in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::begin(void)
-{
+  LSM303AGR_OpStatus op_status;
+  
   /* Operating mode selection - power down */
-  if ( LSM303AGR_MAG_W_MD( (void *)this, LSM303AGR_MAG_MD_IDLE1_MODE ) == MEMS_ERROR )
+  op_status = LSM303AGR_MAG_W_MD( LSM303AGR_MAG_MD_IDLE1_MODE );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
   
   /* Enable BDU */
-  if ( LSM303AGR_MAG_W_BDU( (void *)this, LSM303AGR_MAG_BDU_ENABLED ) == MEMS_ERROR )
+  op_status = LSM303AGR_MAG_W_BDU( LSM303AGR_MAG_BDU_ENABLED );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
   
-  if ( SetODR( 100.0f ) == LSM303AGR_MAG_STATUS_ERROR )
+  op_status = LSM303AGR_MAG_SetODR( 100.0f );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
   
-  if ( SetFS( 50.0f ) == LSM303AGR_MAG_STATUS_ERROR )
+  op_status = LSM303AGR_MAG_SetFS( 50.0f );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
 
-  if ( LSM303AGR_MAG_W_ST( (void *)this, LSM303AGR_MAG_ST_DISABLED ) == MEMS_ERROR )
+  op_status = LSM303AGR_MAG_W_ST( LSM303AGR_MAG_ST_DISABLED );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
 
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_OK;
 }
 
-/**
- * @brief  Disable the sensor and relative resources
- * @retval 0 in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::end(void)
+LSM303AGR_OpStatus LSM303AGR_MAG_DeInit(void)
 {
-  if(Disable() != LSM303AGR_MAG_STATUS_OK)
+  LSM303AGR_OpStatus op_status;
+  
+  op_status = LSM303AGR_MAG_Disable();
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
 
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_OK;
 }
 
-/**
- * @brief  Enable LSM303AGR magnetometer
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::Enable(void)
+LSM303AGR_OpStatus LSM303AGR_MAG_Enable(void)
 {
   /* Operating mode selection */
-  if ( LSM303AGR_MAG_W_MD( (void *)this, LSM303AGR_MAG_MD_CONTINUOS_MODE ) == MEMS_ERROR )
-  {
-    return LSM303AGR_MAG_STATUS_ERROR;
-  }
   
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_MAG_W_MD( LSM303AGR_MAG_MD_CONTINUOS_MODE );
 }
 
-/**
- * @brief  Disable LSM303AGR magnetometer
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::Disable(void)
+LSM303AGR_OpStatus LSM303AGR_MAG_Disable(void)
 {
   /* Operating mode selection - power down */
-  if ( LSM303AGR_MAG_W_MD( (void *)this, LSM303AGR_MAG_MD_IDLE1_MODE ) == MEMS_ERROR )
-  {
-    return LSM303AGR_MAG_STATUS_ERROR;
-  }
   
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_MAG_W_MD( LSM303AGR_MAG_MD_IDLE1_MODE );
 }
 
-/**
- * @brief  Read ID of LSM303AGR Magnetometer
- * @param  p_id the pointer where the ID of the device is stored
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::ReadID(uint8_t *p_id)
+LSM303AGR_OpStatus LSM303AGR_MAG_ReadID(uint8_t *p_id)
 {
+  LSM303AGR_OpStatus op_status;
+  
   if(!p_id)
   { 
-    return LSM303AGR_MAG_STATUS_ERROR; 
+    return LSM303AGR_InvalidParameter; 
   }
  
   /* Read WHO AM I register */
-  if ( LSM303AGR_MAG_R_WHO_AM_I( (void *)this, p_id ) == MEMS_ERROR )
+  op_status = LSM303AGR_MAG_R_WHO_AM_I( p_id );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
   
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_OK;
 }
 
-/**
- * @brief  Read data from LSM303AGR Magnetometer
- * @param  pData the pointer where the magnetometer data are stored
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::GetAxes(int32_t *pData)
+LSM303AGR_OpStatus LSM303AGR_MAG_GetAxes(int32_t *pData)
 {
+  LSM303AGR_OpStatus op_status;
+  
   int16_t pDataRaw[3];
   float sensitivity = 0;
   
   /* Read raw data from LSM303AGR output register. */
-  if ( GetAxesRaw( pDataRaw ) == LSM303AGR_MAG_STATUS_ERROR )
+  op_status = LSM303AGR_MAG_GetAxesRaw( pDataRaw );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
   
   /* Get LSM303AGR actual sensitivity. */
-  if ( GetSensitivity( &sensitivity ) == LSM303AGR_MAG_STATUS_ERROR )
+  op_status = LSM303AGR_MAG_GetSensitivity( &sensitivity );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
   
   /* Calculate the data. */
@@ -186,35 +164,28 @@ LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::GetAxes(int32_t *pData)
   pData[1] = ( int32_t )( pDataRaw[1] * sensitivity );
   pData[2] = ( int32_t )( pDataRaw[2] * sensitivity );
   
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_OK;
 }
 
-/**
- * @brief  Read Magnetometer Sensitivity
- * @param  pfData the pointer where the magnetometer sensitivity is stored
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::GetSensitivity(float *pfData)
+LSM303AGR_OpStatus LSM303AGR_MAG_GetSensitivity(float *pfData)
 {
   *pfData = 1.5f;
   
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_OK;
 }
 
-/**
- * @brief  Read raw data from LSM303AGR Magnetometer
- * @param  pData the pointer where the magnetomer raw data are stored
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::GetAxesRaw(int16_t *pData)
+LSM303AGR_OpStatus LSM303AGR_MAG_GetAxesRaw(int16_t *pData)
 {
+  LSM303AGR_OpStatus op_status;
+  
   uint8_t regValue[6] = {0, 0, 0, 0, 0, 0};
   int16_t *regValueInt16;
   
   /* Read output registers from LSM303AGR_MAG_OUTX_L to LSM303AGR_MAG_OUTZ_H. */
-  if ( LSM303AGR_MAG_Get_Raw_Magnetic( (void *)this, regValue ) == MEMS_ERROR )
+  op_status = LSM303AGR_MAG_Get_Raw_Magnetic( regValue );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
   
   regValueInt16 = (int16_t *)regValue;
@@ -224,21 +195,19 @@ LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::GetAxesRaw(int16_t *pData)
   pData[1] = regValueInt16[1];
   pData[2] = regValueInt16[2];
   
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_OK;
 }
 
-/**
- * @brief  Read LSM303AGR Magnetometer output data rate
- * @param  odr the pointer to the output data rate
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::GetODR(float* odr)
+LSM303AGR_OpStatus LSM303AGR_MAG_GetODR(float* odr)
 {
+  LSM303AGR_OpStatus op_status;
+  
   LSM303AGR_MAG_ODR_t odr_low_level;
   
-  if ( LSM303AGR_MAG_R_ODR( (void *)this, &odr_low_level ) == MEMS_ERROR )
+  op_status = LSM303AGR_MAG_R_ODR( &odr_low_level );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
   
   switch( odr_low_level )
@@ -257,18 +226,15 @@ LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::GetODR(float* odr)
       break;
     default:
       *odr = -1.000f;
-      return LSM303AGR_MAG_STATUS_ERROR;
+      return LSM303AGR_InvalidParameter;
   }  
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_OK;
 }
 
-/**
- * @brief  Set ODR
- * @param  odr the output data rate to be set
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::SetODR(float odr)
+LSM303AGR_OpStatus LSM303AGR_MAG_SetODR(float odr)
 {
+  LSM303AGR_OpStatus op_status;
+  
   LSM303AGR_MAG_ODR_t new_odr;
   
   new_odr = ( odr <= 10.000f ) ? LSM303AGR_MAG_ODR_10Hz
@@ -276,81 +242,25 @@ LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::SetODR(float odr)
           : ( odr <= 50.000f ) ? LSM303AGR_MAG_ODR_50Hz
           :                      LSM303AGR_MAG_ODR_100Hz;
             
-  if ( LSM303AGR_MAG_W_ODR( (void *)this, new_odr ) == MEMS_ERROR )
+  op_status = LSM303AGR_MAG_W_ODR( new_odr );
+  if(op_status < LSM303AGR_OK)
   {
-    return LSM303AGR_MAG_STATUS_ERROR;
+    return op_status;
   }
   
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_OK;
 }
 
-
-/**
- * @brief  Read LSM303AGR Magnetometer full scale
- * @param  fullScale the pointer to the output data rate
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::GetFS(float* fullScale)
+LSM303AGR_OpStatus LSM303AGR_MAG_GetFS(float* fullScale)
 {
   *fullScale = 50.0f;
   
-  return LSM303AGR_MAG_STATUS_OK;
+  return LSM303AGR_OK;
 }
 
-/**
- * @brief  Set full scale
- * @param  fullScale the full scale to be set
- * @retval LSM303AGR_MAG_STATUS_OK in case of success, an error code otherwise
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::SetFS(float fullScale)
+LSM303AGR_OpStatus LSM303AGR_MAG_SetFS(float fullScale)
 {
   (void)(fullScale);
 
-  return LSM303AGR_MAG_STATUS_OK;
-}
-
-
-/**
- * @brief Read magnetometer data from register
- * @param reg register address
- * @param data register data
- * @retval LSM303AGR_MAG_STATUS_OK in case of success
- * @retval LSM303AGR_MAG_STATUS_ERROR in case of failure
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::ReadReg( uint8_t reg, uint8_t *data )
-{
-  if ( LSM303AGR_MAG_ReadReg( (void *)this, reg, data ) == MEMS_ERROR )
-  {
-    return LSM303AGR_MAG_STATUS_ERROR;
-  }
-
-  return LSM303AGR_MAG_STATUS_OK;
-}
-
-
-/**
- * @brief Write magnetometer data to register
- * @param reg register address
- * @param data register data
- * @retval LSM303AGR_MAG_STATUS_OK in case of success
- * @retval LSM303AGR_MAG_STATUS_ERROR in case of failure
- */
-LSM303AGR_MAG_StatusTypeDef LSM303AGR_MAG_Sensor::WriteReg( uint8_t reg, uint8_t data )
-{
-  if ( LSM303AGR_MAG_WriteReg( (void *)this, reg, data ) == MEMS_ERROR )
-  {
-    return LSM303AGR_MAG_STATUS_ERROR;
-  }
-
-  return LSM303AGR_MAG_STATUS_OK;
-}
-
-uint8_t LSM303AGR_MAG_IO_Write( void *handle, uint8_t WriteAddr, uint8_t *pBuffer, uint16_t nBytesToWrite )
-{
-  return ((LSM303AGR_MAG_Sensor *)handle)->IO_Write(pBuffer, WriteAddr, nBytesToWrite);
-}
-
-uint8_t LSM303AGR_MAG_IO_Read( void *handle, uint8_t ReadAddr, uint8_t *pBuffer, uint16_t nBytesToRead )
-{
-  return ((LSM303AGR_MAG_Sensor *)handle)->IO_Read(pBuffer, ReadAddr, nBytesToRead);
+  return LSM303AGR_OK;
 }

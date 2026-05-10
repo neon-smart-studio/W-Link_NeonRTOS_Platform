@@ -39,8 +39,8 @@
  * Modified by Neon Smart Studio for W-Link
  */
 
-#ifndef __LSM303AGR_MAG_DRIVER__H
-#define __LSM303AGR_MAG_DRIVER__H
+#ifndef LSM303AGR_REGISTER_DEF_H
+#define LSM303AGR_REGISTER_DEF_H
 
 #include <stdint.h>
 
@@ -320,4 +320,4 @@ typedef enum {
 }
 #endif
 
-#endif
+#endif // LSM303AGR_REGISTER_DEF_H

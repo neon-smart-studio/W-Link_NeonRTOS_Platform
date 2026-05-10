@@ -62,28 +62,12 @@ typedef union{
 
 LSM303AGR_OpStatus LSM303AGR_MAG_ReadReg(uint8_t reg, uint8_t* p_data ) 
 {
-  LSM303AGR_OpStatus op_status;
-  
-  op_status = LSM303AGR_MAG_IO_Read(reg, p_data, 1);
-  if (op_status < LSM303AGR_OK) 
-  {
-    return op_status;
-  }
-
-  return LSM303AGR_OK;
+  return LSM303AGR_MAG_IO_Read(reg, p_data, 1);
 }
 
 LSM303AGR_OpStatus LSM303AGR_MAG_WriteReg(uint8_t reg, uint8_t data ) 
 {
-  LSM303AGR_OpStatus op_status;
-  
-  op_status = LSM303AGR_MAG_IO_Write(reg, &data, 1);
-  if (op_status < LSM303AGR_OK) 
-  {
-    return op_status;
-  }
-
-  return LSM303AGR_OK;
+  return LSM303AGR_MAG_IO_Write(reg, &data, 1);
 }
 
 void LSM303AGR_MAG_SwapHighLowByte(uint8_t *bufferToSwap, uint8_t numberOfByte, uint8_t dimension)

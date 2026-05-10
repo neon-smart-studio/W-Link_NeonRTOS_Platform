@@ -57,11 +57,14 @@
 extern "C" {
 #endif
 
+LPS22HB_OpStatus LPS22HB_ReadReg( uint8_t RegAddr, uint16_t NumByteToRead, uint8_t *p_data );
+LPS22HB_OpStatus LPS22HB_WriteReg( uint8_t RegAddr, uint16_t NumByteToWrite, uint8_t *p_data );
+
 LPS22HB_OpStatus LPS22HB_Get_DriverVersion(LPS22HB_DriverVersion_st *Version);
 
-LPS22HB_OpStatus LPS22HB_Init();
+LPS22HB_OpStatus LPS22HB_Set_InitConfig();
 
-LPS22HB_OpStatus LPS22HB_DeInit();
+LPS22HB_OpStatus LPS22HB_Clear_InitConfig();
 
 LPS22HB_OpStatus LPS22HB_Get_DeviceID(uint8_t* deviceid);
 

@@ -19,8 +19,8 @@ Modifications:
 
 #include "LSM6DSO_Register_Def.h"
 
-LSM6DSO_OpStatus LSM6DSO_Read_Register(uint8_t reg, uint8_t* data, uint16_t len);
-LSM6DSO_OpStatus LSM6DSO_Write_Register(uint8_t reg, uint8_t* data, uint16_t len);
+LSM6DSO_OpStatus LSM6DSO_Read_Reg(uint8_t reg, uint8_t* data, uint16_t len);
+LSM6DSO_OpStatus LSM6DSO_Write_Reg(uint8_t reg, uint8_t* data, uint16_t len);
 
 LSM6DSO_OpStatus LSM6DSO_Reg_XL_Full_Scale_Set(LSM6DSO_FS_XL val);
 LSM6DSO_OpStatus LSM6DSO_Reg_XL_Full_Scale_Get(LSM6DSO_FS_XL *val);

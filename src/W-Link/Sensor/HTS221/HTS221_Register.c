@@ -186,7 +186,7 @@ HTS221_OpStatus HTS221_Get_InitConfig(HTS221_Init_st* pxInit)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_DeInit()
+HTS221_OpStatus HTS221_Clear_InitConfig()
 {
   HTS221_OpStatus op_status;
   

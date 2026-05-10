@@ -52,6 +52,9 @@
 extern "C" {
 #endif
 
+LSM303AGR_OpStatus LSM303AGR_ACC_ReadReg(uint8_t reg, uint8_t* p_data);
+LSM303AGR_OpStatus LSM303AGR_ACC_WriteReg(uint8_t reg, uint8_t data);
+
 LSM303AGR_OpStatus LSM303AGR_ACC_R_x_data_avail(LSM303AGR_ACC_1DA_t *value);
 
 LSM303AGR_OpStatus LSM303AGR_ACC_R_y_data_avail(LSM303AGR_ACC_2DA__t *value);

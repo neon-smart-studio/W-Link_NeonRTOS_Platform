@@ -358,7 +358,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
       LSM6DSO_Ctrl5_C val1;
       LSM6DSO_Ctrl6_C val2;
 
-      op_status = LSM6DSO_Read_Register(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
+      op_status = LSM6DSO_Read_Reg(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
       if(op_status<LSM6DSO_OK)
       {
         return op_status;
@@ -378,14 +378,14 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
 
         val1.xl_ulp_en = 0;
 
-        op_status = LSM6DSO_Write_Register(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
+        op_status = LSM6DSO_Write_Reg(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
         if(op_status<LSM6DSO_OK)
         {
           return op_status;
         }
       }
 
-      op_status = LSM6DSO_Read_Register(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
+      op_status = LSM6DSO_Read_Reg(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
       if(op_status<LSM6DSO_OK)
       {
         return op_status;
@@ -395,7 +395,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
       {
         val2.xl_hm_mode = 0;
 
-        op_status = LSM6DSO_Write_Register(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
+        op_status = LSM6DSO_Write_Reg(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
         if(op_status<LSM6DSO_OK)
         {
           return op_status;
@@ -416,7 +416,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
       LSM6DSO_Ctrl5_C val1;
       LSM6DSO_Ctrl6_C val2;
 
-      op_status = LSM6DSO_Read_Register(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
+      op_status = LSM6DSO_Read_Reg(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
       if(op_status<LSM6DSO_OK)
       {
         return op_status;
@@ -436,14 +436,14 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
 
         val1.xl_ulp_en = 0;
 
-        op_status = LSM6DSO_Write_Register(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
+        op_status = LSM6DSO_Write_Reg(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
         if(op_status<LSM6DSO_OK)
         {
           return op_status;
         }
       }
 
-      op_status = LSM6DSO_Read_Register(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
+      op_status = LSM6DSO_Read_Reg(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
       if(op_status<LSM6DSO_OK)
       {
         return op_status;
@@ -453,7 +453,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
       {
         val2.xl_hm_mode = 1U;
 
-        op_status = LSM6DSO_Write_Register(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
+        op_status = LSM6DSO_Write_Reg(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
         if(op_status<LSM6DSO_OK)
         {
           return op_status;
@@ -475,7 +475,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
       LSM6DSO_Ctrl5_C val1;
       LSM6DSO_Ctrl6_C val2;
 
-      op_status = LSM6DSO_Read_Register(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
+      op_status = LSM6DSO_Read_Reg(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
       if(op_status<LSM6DSO_OK)
       {
         return op_status;
@@ -485,7 +485,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
       {
         val2.xl_hm_mode = 0;
 
-        op_status = LSM6DSO_Write_Register(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
+        op_status = LSM6DSO_Write_Reg(LSM6DSO_CTRL6_C, (uint8_t *)&val2, 1);
         if(op_status<LSM6DSO_OK)
         {
           return op_status;
@@ -502,7 +502,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
         }
       }
 
-      op_status = LSM6DSO_Read_Register(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
+      op_status = LSM6DSO_Read_Reg(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
       if(op_status<LSM6DSO_OK)
       {
         return op_status;
@@ -522,7 +522,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
 
         val1.xl_ulp_en = 1U;
         
-        op_status = LSM6DSO_Write_Register(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
+        op_status = LSM6DSO_Write_Reg(LSM6DSO_CTRL5_C, (uint8_t *)&val1, 1);
         if(op_status<LSM6DSO_OK)
         {
           return op_status;
@@ -901,7 +901,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_With_Mode(float Odr, LSM6DSO_GYRO_Operating_M
       /* We must uncheck Low Power bit if it is enabled */
       LSM6DSO_Ctrl7_G val1;
 
-      op_status = LSM6DSO_Read_Register(LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1);
+      op_status = LSM6DSO_Read_Reg(LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1);
       if(op_status<LSM6DSO_OK)
       {
         return op_status;
@@ -911,7 +911,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_With_Mode(float Odr, LSM6DSO_GYRO_Operating_M
       {
         val1.g_hm_mode = 0;
 
-        op_status = LSM6DSO_Write_Register(LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1);
+        op_status = LSM6DSO_Write_Reg(LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1);
         if(op_status<LSM6DSO_OK)
         {
           return op_status;
@@ -924,7 +924,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_With_Mode(float Odr, LSM6DSO_GYRO_Operating_M
       /* We must check the Low Power bit if it is unchecked */
       LSM6DSO_Ctrl7_G val1;
 
-      op_status = LSM6DSO_Read_Register(LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1);
+      op_status = LSM6DSO_Read_Reg(LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1);
       if(op_status<LSM6DSO_OK)
       {
         return op_status;
@@ -934,7 +934,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_With_Mode(float Odr, LSM6DSO_GYRO_Operating_M
       {
         val1.g_hm_mode = 1U;
         
-        op_status = LSM6DSO_Write_Register(LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1);
+        op_status = LSM6DSO_Write_Reg(LSM6DSO_CTRL7_G, (uint8_t *)&val1, 1);
         if(op_status<LSM6DSO_OK)
         {
           return op_status;
@@ -2351,7 +2351,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_XL(uint8_t *XLow)
     return LSM6DSO_InvalidParameter;
   }
   
-  op_status = LSM6DSO_Read_Register(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2372,7 +2372,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_XH(uint8_t *XHigh)
     return LSM6DSO_InvalidParameter;
   }
   
-  op_status = LSM6DSO_Read_Register(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2393,7 +2393,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_YL(uint8_t *YLow)
     return LSM6DSO_InvalidParameter;
   }
   
-  op_status = LSM6DSO_Read_Register(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2414,7 +2414,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_YH(uint8_t *YHigh)
     return LSM6DSO_InvalidParameter;
   }
   
-  op_status = LSM6DSO_Read_Register(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2435,7 +2435,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_ZL(uint8_t *ZLow)
     return LSM6DSO_InvalidParameter;
   }
   
-  op_status = LSM6DSO_Read_Register(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2456,7 +2456,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_ZH(uint8_t *ZHigh)
     return LSM6DSO_InvalidParameter;
   }
   
-  op_status = LSM6DSO_Read_Register(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_D6D_SRC, (uint8_t *)&data, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2505,19 +2505,19 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_Event_Status(LSM6DSO_Event_Status *Status)
   
   (void)memset((void *)Status, 0x0, sizeof(LSM6DSO_Event_Status));
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_WAKE_UP_SRC, (uint8_t *)&wake_up_src, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_WAKE_UP_SRC, (uint8_t *)&wake_up_src, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
   }
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_TAP_SRC, (uint8_t *)&tap_src, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_TAP_SRC, (uint8_t *)&tap_src, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
   }
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_D6D_SRC, (uint8_t *)&d6d_src, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_D6D_SRC, (uint8_t *)&d6d_src, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2529,19 +2529,19 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_Event_Status(LSM6DSO_Event_Status *Status)
     return op_status;
   }
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_EMB_FUNC_SRC, (uint8_t *)&func_src, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_EMB_FUNC_SRC, (uint8_t *)&func_src, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
   }
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_EMB_FUNC_INT1, (uint8_t *)&int1_ctrl, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_EMB_FUNC_INT1, (uint8_t *)&int1_ctrl, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
   }
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_EMB_FUNC_INT2, (uint8_t *)&int2_ctrl, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_EMB_FUNC_INT2, (uint8_t *)&int2_ctrl, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2553,13 +2553,13 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_Event_Status(LSM6DSO_Event_Status *Status)
     return op_status;
   }
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_MD1_CFG, (uint8_t *)&md1_cfg, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_MD1_CFG, (uint8_t *)&md1_cfg, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
   }
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_MD2_CFG, (uint8_t *)&md2_cfg, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_MD2_CFG, (uint8_t *)&md2_cfg, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2714,7 +2714,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Full_Status(uint8_t *Status)
     return LSM6DSO_InvalidParameter;
   }
   
-  op_status = LSM6DSO_Read_Register(LSM6DSO_FIFO_STATUS2, &reg.byte, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_FIFO_STATUS2, &reg.byte, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2730,7 +2730,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_INT1_FIFO_Full(uint8_t Status)
   LSM6DSO_OpStatus op_status;
   LSM6DSO_Reg reg;
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_INT1_CTRL, &reg.byte, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_INT1_CTRL, &reg.byte, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2738,7 +2738,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_INT1_FIFO_Full(uint8_t Status)
 
   reg.int1_ctrl.int1_fifo_full = Status;
 
-  op_status = LSM6DSO_Write_Register(LSM6DSO_INT1_CTRL, &reg.byte, 1);
+  op_status = LSM6DSO_Write_Reg(LSM6DSO_INT1_CTRL, &reg.byte, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2752,7 +2752,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_INT2_FIFO_Full(uint8_t Status)
   LSM6DSO_OpStatus op_status;
   LSM6DSO_Reg reg;
 
-  op_status = LSM6DSO_Read_Register(LSM6DSO_INT2_CTRL, &reg.byte, 1);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_INT2_CTRL, &reg.byte, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2760,7 +2760,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_INT2_FIFO_Full(uint8_t Status)
 
   reg.int2_ctrl.int2_fifo_full = Status;
 
-  op_status = LSM6DSO_Write_Register(LSM6DSO_INT2_CTRL, &reg.byte, 1);
+  op_status = LSM6DSO_Write_Reg(LSM6DSO_INT2_CTRL, &reg.byte, 1);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;
@@ -2870,7 +2870,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Data_Raw(uint8_t *Data)
     return LSM6DSO_InvalidParameter;
   }
   
-  op_status = LSM6DSO_Read_Register(LSM6DSO_FIFO_DATA_OUT_X_L, Data, 6);
+  op_status = LSM6DSO_Read_Reg(LSM6DSO_FIFO_DATA_OUT_X_L, Data, 6);
   if (op_status < LSM6DSO_OK)
   {
     return op_status;

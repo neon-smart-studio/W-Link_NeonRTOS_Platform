@@ -39,8 +39,8 @@
  * Modified by Neon Smart Studio for W-Link
  */
 
-#ifndef __LSM303AGR_MAG_DRIVER__H
-#define __LSM303AGR_MAG_DRIVER__H
+#ifndef LSM303AGR_REGISTER_H
+#define LSM303AGR_REGISTER_H
 
 #include "LSM303AGR_IO.h"
 
@@ -51,6 +51,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+LSM303AGR_OpStatus LSM303AGR_MAG_ReadReg(uint8_t reg, uint8_t* p_data );
+LSM303AGR_OpStatus LSM303AGR_MAG_WriteReg(uint8_t reg, uint8_t data );
 
 LSM303AGR_OpStatus LSM303AGR_MAG_W_OFF_X_L(uint8_t newValue);
 LSM303AGR_OpStatus LSM303AGR_MAG_R_OFF_X_L(uint8_t *p_value);
@@ -177,4 +180,4 @@ LSM303AGR_OpStatus LSM303AGR_MAG_Set_IntThreshld(uint8_t *buff);
 }
 #endif
 
-#endif
+#endif // LSM303AGR_REGISTER_H

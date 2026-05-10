@@ -62,7 +62,7 @@ HTS221_OpStatus HTS221_Get_DeviceID(uint8_t* deviceid);
 
 HTS221_OpStatus HTS221_Set_InitConfig(HTS221_Init_st* pxInit);
 HTS221_OpStatus HTS221_Get_InitConfig(HTS221_Init_st* pxInit);
-HTS221_OpStatus HTS221_DeInit();
+HTS221_OpStatus HTS221_Clear_InitConfig();
 HTS221_OpStatus HTS221_IsMeasurementCompleted(HTS221_BitStatus_et* Is_Measurement_Completed);
 
 HTS221_OpStatus HTS221_Get_Measurement(uint16_t* humidity, int16_t* temperature);

@@ -42,16 +42,13 @@
 
 /* Prevent recursive inclusion -----------------------------------------------*/
 
-#ifndef __LSM303AGR_ACC_Sensor_H__
-#define __LSM303AGR_ACC_Sensor_H__
+#ifndef LSM303AGR_ACC_H
+#define LSM303AGR_ACC_H
 
+#include "LSM303AGR_IO.h"
 
-/* Includes ------------------------------------------------------------------*/
+#include "LSM303AGR_Def.h"
 
-#include "Wire.h"
-#include "LSM303AGR_ACC_Driver.h"
-
-/* Defines -------------------------------------------------------------------*/
 #define LSM303AGR_ACC_SENSITIVITY_FOR_FS_2G_NORMAL_MODE               3.900f  /**< Sensitivity value for 2 g full scale and normal mode [mg/LSB] */
 #define LSM303AGR_ACC_SENSITIVITY_FOR_FS_2G_HIGH_RESOLUTION_MODE      0.980f  /**< Sensitivity value for 2 g full scale and high resolution mode [mg/LSB] */
 #define LSM303AGR_ACC_SENSITIVITY_FOR_FS_2G_LOW_POWER_MODE           15.630f  /**< Sensitivity value for 2 g full scale and low power mode [mg/LSB] */
@@ -65,116 +62,30 @@
 #define LSM303AGR_ACC_SENSITIVITY_FOR_FS_16G_HIGH_RESOLUTION_MODE    11.720f  /**< Sensitivity value for 16 g full scale and high resolution mode [mg/LSB] */
 #define LSM303AGR_ACC_SENSITIVITY_FOR_FS_16G_LOW_POWER_MODE         187.580f  /**< Sensitivity value for 16 g full scale and low power mode [mg/LSB] */
 
-
-/* Typedefs ------------------------------------------------------------------*/
-typedef enum
-{
-  LSM303AGR_ACC_STATUS_OK = 0,
-  LSM303AGR_ACC_STATUS_ERROR,
-  LSM303AGR_ACC_STATUS_TIMEOUT,
-  LSM303AGR_ACC_STATUS_NOT_IMPLEMENTED
-} LSM303AGR_ACC_StatusTypeDef;
-
-
-/* Class Declaration ---------------------------------------------------------*/
-
-/**
- * Abstract class of an LSM303AGR Inertial Measurement Unit (IMU) 6 axes
- * sensor.
- */
-class LSM303AGR_ACC_Sensor
-{
-  public:
-    LSM303AGR_ACC_Sensor                                 (TwoWire *i2c);
-    LSM303AGR_ACC_StatusTypeDef begin                    (void);
-    LSM303AGR_ACC_StatusTypeDef end                      (void);
-    LSM303AGR_ACC_StatusTypeDef Enable                   (void);
-    LSM303AGR_ACC_StatusTypeDef Disable                  (void);
-    LSM303AGR_ACC_StatusTypeDef ReadID                   (uint8_t *p_id);
-    LSM303AGR_ACC_StatusTypeDef GetAxes                  (int32_t *pData);
-    LSM303AGR_ACC_StatusTypeDef GetSensitivity           (float *pfData);
-    LSM303AGR_ACC_StatusTypeDef GetAxesRaw               (int16_t *pData);
-    LSM303AGR_ACC_StatusTypeDef GetODR                   (float *odr);
-    LSM303AGR_ACC_StatusTypeDef SetODR                   (float odr);
-    LSM303AGR_ACC_StatusTypeDef GetFS                    (float *fullScale);
-    LSM303AGR_ACC_StatusTypeDef SetFS                    (float fullScale);
-    LSM303AGR_ACC_StatusTypeDef EnableSelfTest           (uint8_t self_test = 0);
-    LSM303AGR_ACC_StatusTypeDef DisableSelfTest          (void);
-    LSM303AGR_ACC_StatusTypeDef EnableTemperatureSensor  (void);
-    LSM303AGR_ACC_StatusTypeDef DisableTemperatureSensor (void);
-    LSM303AGR_ACC_StatusTypeDef GetTemperature           (float* temperature);
-    LSM303AGR_ACC_StatusTypeDef ReadReg                  (uint8_t reg, uint8_t *data);
-    LSM303AGR_ACC_StatusTypeDef WriteReg                 (uint8_t reg, uint8_t data);
-	
-    /**
-     * @brief Utility function to read data.
-     * @param  pBuffer: pointer to data to be read.
-     * @param  RegisterAddr: specifies internal address register to be read.
-     * @param  NumByteToRead: number of bytes to be read.
-     * @retval 0 if ok, an error code otherwise.
-     */
-    uint8_t IO_Read(uint8_t* pBuffer, uint8_t RegisterAddr, uint16_t NumByteToRead)
-    {
-      dev_i2c->beginTransmission(((uint8_t)(((address) >> 1) & 0x7F)));
-      dev_i2c->write(RegisterAddr);
-      dev_i2c->endTransmission(false);
-
-      dev_i2c->requestFrom(((uint8_t)(((address) >> 1) & 0x7F)), (byte) NumByteToRead);
-
-      int i=0;
-      while (dev_i2c->available())
-      {
-        pBuffer[i] = dev_i2c->read();
-        i++;
-      }
-
-      return 0;
-    }
-    
-    /**
-     * @brief Utility function to write data.
-     * @param  pBuffer: pointer to data to be written.
-     * @param  RegisterAddr: specifies internal address register to be written.
-     * @param  NumByteToWrite: number of bytes to write.
-     * @retval 0 if ok, an error code otherwise.
-     */
-    uint8_t IO_Write(uint8_t* pBuffer, uint8_t RegisterAddr, uint16_t NumByteToWrite)
-    {
-      dev_i2c->beginTransmission(((uint8_t)(((address) >> 1) & 0x7F)));
-
-      dev_i2c->write(RegisterAddr);
-      for (int i = 0 ; i < NumByteToWrite ; i++)
-        dev_i2c->write(pBuffer[i]);
-
-      dev_i2c->endTransmission(true);
-
-      return 0;
-    }
-
-  private:
-    LSM303AGR_ACC_StatusTypeDef SetODR_When_Enabled(float odr);
-    LSM303AGR_ACC_StatusTypeDef SetODR_When_Disabled(float odr);
-    LSM303AGR_ACC_StatusTypeDef GetSensitivity_Normal_Mode( float *sensitivity );
-    LSM303AGR_ACC_StatusTypeDef GetSensitivity_LP_Mode( float *sensitivity );
-    LSM303AGR_ACC_StatusTypeDef GetSensitivity_HR_Mode( float *sensitivity );
-
-    /* Helper classes. */
-    TwoWire *dev_i2c;
-
-    /* Configuration */
-    uint8_t address;
-
-    uint8_t isEnabled;
-    float Last_ODR;
-};
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-uint8_t LSM303AGR_ACC_IO_Write( void *handle, uint8_t WriteAddr, uint8_t *pBuffer, uint16_t nBytesToWrite );
-uint8_t LSM303AGR_ACC_IO_Read( void *handle, uint8_t ReadAddr, uint8_t *pBuffer, uint16_t nBytesToRead );
+
+LSM303AGR_OpStatus LSM303AGR_ACC_begin(void);
+LSM303AGR_OpStatus LSM303AGR_ACC_end(void);
+LSM303AGR_OpStatus LSM303AGR_ACC_Enable(void);
+LSM303AGR_OpStatus LSM303AGR_ACC_Disable(void);
+LSM303AGR_OpStatus LSM303AGR_ACC_ReadID(uint8_t *p_id);
+LSM303AGR_OpStatus LSM303AGR_ACC_GetAxes(int32_t *pData);
+LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity(float *pfData);
+LSM303AGR_OpStatus LSM303AGR_ACC_GetAxesRaw(int16_t *pData);
+LSM303AGR_OpStatus LSM303AGR_ACC_GetODR(float *odr);
+LSM303AGR_OpStatus LSM303AGR_ACC_SetODR(float odr);
+LSM303AGR_OpStatus LSM303AGR_ACC_GetFS(float *fullScale);
+LSM303AGR_OpStatus LSM303AGR_ACC_SetFS(float fullScale);
+LSM303AGR_OpStatus LSM303AGR_ACC_EnableSelfTest(bool self_test);
+LSM303AGR_OpStatus LSM303AGR_ACC_DisableSelfTest(void);
+LSM303AGR_OpStatus LSM303AGR_ACC_EnableTemperatureSensor(void);
+LSM303AGR_OpStatus LSM303AGR_ACC_DisableTemperatureSensor(void);
+LSM303AGR_OpStatus LSM303AGR_ACC_GetTemperature(float* temperature);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif // LSM303AGR_ACC_H

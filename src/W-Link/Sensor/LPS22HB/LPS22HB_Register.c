@@ -1282,7 +1282,7 @@ LPS22HB_OpStatus LPS22HB_Get_Measurement(LPS22HB_MeasureTypeDef_st *Measurement_
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Init()
+LPS22HB_OpStatus LPS22HB_Set_InitConfig()
 {
   LPS22HB_OpStatus op_status;
   
@@ -1313,7 +1313,7 @@ LPS22HB_OpStatus LPS22HB_Init()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_DeInit()
+LPS22HB_OpStatus LPS22HB_Clear_InitConfig()
 {
   LPS22HB_OpStatus op_status;
   

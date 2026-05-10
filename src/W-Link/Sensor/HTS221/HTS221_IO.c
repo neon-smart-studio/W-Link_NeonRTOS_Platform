@@ -52,44 +52,6 @@ static HTS221_OpStatus HTS221_IO_Map_I2C_Error(hwI2C_OpResult error_code)
     }
 }
 
-HTS221_OpStatus HTS221_IO_Init(void)
-{
-    /*
-     * 若你的 W-Link I2C bus 已經由系統初始化，
-     * 這裡可以保持空 init。
-     *
-     * 若 I2C_Master_Init() 是必要的，再打開下面這段。
-     */
-
-#if defined(CONFIG_HTS221_AUTO_INIT_I2C)
-    if(I2C_Master_isInit(HTS221_I2C_INDEX) == false)
-    {
-        return HTS221_IO_Map_I2C_Error(
-            I2C_Master_Init(
-                HTS221_I2C_INDEX,
-                hwI2C_Fast_Mode
-            )
-        );
-    }
-#endif
-
-    return HTS221_OK;
-}
-
-HTS221_OpStatus HTS221_IO_DeInit(void)
-{
-#if defined(CONFIG_HTS221_AUTO_INIT_I2C)
-    if(I2C_Master_isInit(HTS221_I2C_INDEX) == true)
-    {
-        return HTS221_IO_Map_I2C_Error(
-            I2C_Master_DeInit(HTS221_I2C_INDEX)
-        );
-    }
-#endif
-
-    return HTS221_OK;
-}
-
 HTS221_OpStatus HTS221_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,

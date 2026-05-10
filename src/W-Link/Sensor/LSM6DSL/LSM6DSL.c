@@ -67,12 +67,6 @@ LSM6DSL_OpStatus LSM6DSL_Init()
 {
   LSM6DSL_OpStatus op_status;
 
-  op_status = LSM6DSL_IO_Init();
-  if(op_status < LSM6DSL_OK)
-  {
-    return op_status;
-  }
-
   /* Enable register address automatically incremented during a multiple byte
      access with a serial interface. */
   op_status = LSM6DSL_ACC_GYRO_W_IF_Addr_Incr(LSM6DSL_ACC_GYRO_IF_INC_ENABLED);
@@ -146,12 +140,6 @@ LSM6DSL_OpStatus LSM6DSL_DeInit()
   }
 
   op_status = LSM6DSL_Disable_G();
-  if(op_status < LSM6DSL_OK)
-  {
-    return op_status;
-  }
-
-  op_status = LSM6DSL_IO_DeInit();
   if(op_status < LSM6DSL_OK)
   {
     return op_status;

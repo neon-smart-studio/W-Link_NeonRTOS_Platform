@@ -37,14 +37,6 @@ Modifications:
 
 #define LPS22HB_IO_TX_BUF_SIZE             32
 
-typedef void (*LPS22HB_IO_Event_IRQ)(LPS22HB_Interrupt_Index index);
-
-LPS22HB_OpStatus LPS22HB_IO_Init(void);
-LPS22HB_OpStatus LPS22HB_IO_DeInit(void);
-
-LPS22HB_OpStatus LPS22HB_Register_Interrupt_Handler(LPS22HB_IO_Event_IRQ irq_callback);
-LPS22HB_OpStatus LPS22HB_UnRegister_Interrupt_Handler(void);
-
 LPS22HB_OpStatus LPS22HB_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,

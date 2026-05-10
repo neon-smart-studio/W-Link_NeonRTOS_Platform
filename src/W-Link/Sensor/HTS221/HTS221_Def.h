@@ -12,7 +12,7 @@ Modifications:
 #ifndef HTS221_DEF_H
 #define HTS221_DEF_H
 
-typedef enum HTS221_IO_OpStatus_t
+typedef enum HTS221_OpStatus_t
 {
   HTS221_OK = 0,
   HTS221_NotInit = -1,

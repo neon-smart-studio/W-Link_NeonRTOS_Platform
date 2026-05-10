@@ -12,7 +12,7 @@ Modifications:
 #ifndef LSM6DSO_DEF_H
 #define LSM6DSO_DEF_H
 
-typedef enum LSM6DSO_IO_OpStatus_t
+typedef enum LSM6DSO_OpStatus_t
 {
   LSM6DSO_OK = 0,
   LSM6DSO_NotInit = -1,

@@ -63,12 +63,6 @@ LPS22HB_OpStatus LPS22HB_Init(void)
 {
   LPS22HB_OpStatus op_status;
 
-  op_status = LPS22HB_IO_Init();
-  if(op_status < LPS22HB_OK)
-  {
-    return op_status;
-  }
-
   op_status = LPS22HB_Set_PowerMode(LPS22HB_LowPower);
   if(op_status < LPS22HB_OK)
   {
@@ -120,12 +114,6 @@ LPS22HB_OpStatus LPS22HB_DeInit(void)
   /* Disable pressure and temperature sensor */
 
   op_status = LPS22HB_Disable();
-  if(op_status < LPS22HB_OK)
-  {
-    return op_status;
-  }
-
-  op_status = LPS22HB_IO_DeInit();
   if(op_status < LPS22HB_OK)
   {
     return op_status;

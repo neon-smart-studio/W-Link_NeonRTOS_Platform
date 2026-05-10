@@ -52,56 +52,6 @@ static LPS22HB_OpStatus LPS22HB_IO_Map_I2C_Error(hwI2C_OpResult error_code)
     }
 }
 
-LPS22HB_OpStatus LPS22HB_IO_Init(void)
-{
-    /*
-     * 若你的 W-Link I2C bus 已經由系統初始化，
-     * 這裡可以保持空 init。
-     *
-     * 若 I2C_Master_Init() 是必要的，再打開下面這段。
-     */
-
-#if defined(CONFIG_LPS22HB_AUTO_INIT_I2C)
-    if(I2C_Master_isInit(LPS22HB_I2C_INDEX) == false)
-    {
-        return LPS22HB_IO_Map_I2C_Error(
-            I2C_Master_Init(
-                LPS22HB_I2C_INDEX,
-                hwI2C_Fast_Mode
-            )
-        );
-    }
-#endif
-
-    return LPS22HB_OK;
-}
-
-LPS22HB_OpStatus LPS22HB_IO_DeInit(void)
-{
-#if defined(CONFIG_LPS22HB_AUTO_INIT_I2C)
-    if(I2C_Master_isInit(LPS22HB_I2C_INDEX) == true)
-    {
-        return LPS22HB_IO_Map_I2C_Error(
-            I2C_Master_DeInit(LPS22HB_I2C_INDEX)
-        );
-    }
-#endif
-
-    return LPS22HB_OK;
-}
-
-LPS22HB_OpStatus LPS22HB_Register_Interrupt_Handler(LPS22HB_IO_Event_IRQ irq_callback)
-{
-    (void)irq_callback;
-
-    return LPS22HB_Unsupport;
-}
-
-LPS22HB_OpStatus LPS22HB_UnRegister_Interrupt_Handler(void)
-{
-    return LPS22HB_Unsupport;
-}
-
 LPS22HB_OpStatus LPS22HB_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,

@@ -56,12 +56,6 @@ HTS221_OpStatus HTS221_Init()
 {
   HTS221_OpStatus op_status;
   
-  op_status = HTS221_IO_Init();
-  if(op_status < HTS221_OK)
-  {
-    return op_status;
-  }
-
   /* Power down the device */
   op_status = HTS221_DeActivate();
   if(op_status < HTS221_OK)
@@ -91,12 +85,6 @@ HTS221_OpStatus HTS221_DeInit()
   
   /* Disable humidity and temperature sensor */
   op_status = HTS221_Disable();
-  if(op_status < HTS221_OK)
-  {
-    return op_status;
-  }
-
-  op_status = HTS221_IO_DeInit();
   if(op_status < HTS221_OK)
   {
     return op_status;

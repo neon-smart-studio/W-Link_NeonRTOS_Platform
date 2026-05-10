@@ -37,9 +37,6 @@ Modifications:
 
 #define HTS221_IO_TX_BUF_SIZE             32
 
-HTS221_OpStatus HTS221_IO_Init(void);
-HTS221_OpStatus HTS221_IO_DeInit(void);
-
 HTS221_OpStatus HTS221_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,

@@ -53,44 +53,6 @@ static LSM6DSL_OpStatus LSM6DSL_IO_Map_I2C_Error(hwI2C_OpResult error_code)
     }
 }
 
-LSM6DSL_OpStatus LSM6DSL_IO_Init(void)
-{
-    /*
-     * 若你的 W-Link I2C bus 已經由系統初始化，
-     * 這裡可以保持空 init。
-     *
-     * 若 I2C_Master_Init() 是必要的，再打開下面這段。
-     */
-
-#if defined(CONFIG_LSM6DSL_AUTO_INIT_I2C)
-    if(I2C_Master_isInit(LSM6DSL_I2C_INDEX) == false)
-    {
-        return LSM6DSL_IO_Map_I2C_Error(
-            I2C_Master_Init(
-                LSM6DSL_I2C_INDEX,
-                hwI2C_Fast_Mode
-            )
-        );
-    }
-#endif
-
-    return LSM6DSL_OK;
-}
-
-LSM6DSL_OpStatus LSM6DSL_IO_DeInit(void)
-{
-#if defined(CONFIG_LSM6DSL_AUTO_INIT_I2C)
-    if(I2C_Master_isInit(LSM6DSL_I2C_INDEX) == true)
-    {
-        return LSM6DSL_IO_Map_I2C_Error(
-            I2C_Master_DeInit(LSM6DSL_I2C_INDEX)
-        );
-    }
-#endif
-
-    return LSM6DSL_OK;
-}
-
 LSM6DSL_OpStatus LSM6DSL_Register_Interrupt_Handler(LSM6DSL_IO_Event_IRQ irq_callback)
 {
     (void)irq_callback;

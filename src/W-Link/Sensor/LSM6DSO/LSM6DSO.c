@@ -55,12 +55,6 @@ LSM6DSO_OpStatus LSM6DSO_Init()
 {
   LSM6DSO_OpStatus op_status;
 
-  op_status = LSM6DSO_IO_Init();
-  if(op_status<LSM6DSO_OK)
-  {
-    return op_status;
-  }
-
   /* Disable I3C */
   op_status = LSM6DSO_Reg_I3C_Disable_Set(LSM6DSO_I3C_DISABLE);
   if(op_status<LSM6DSO_OK)
@@ -167,12 +161,6 @@ LSM6DSO_OpStatus LSM6DSO_DeInit()
     return op_status;
   }
 
-  op_status = LSM6DSO_IO_DeInit();
-  if(op_status<LSM6DSO_OK)
-  {
-    return op_status;
-  }
-  
   return LSM6DSO_OK;
 }
 

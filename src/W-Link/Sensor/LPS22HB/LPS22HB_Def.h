@@ -12,7 +12,7 @@ Modifications:
 #ifndef LPS22HB_DEF_H
 #define LPS22HB_DEF_H
 
-typedef enum LPS22HB_IO_OpStatus_t
+typedef enum LPS22HB_OpStatus_t
 {
   LPS22HB_OK = 0,
   LPS22HB_NotInit = -1,

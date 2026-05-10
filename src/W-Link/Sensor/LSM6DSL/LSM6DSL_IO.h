@@ -58,9 +58,6 @@ typedef void (*LSM6DSL_IO_Event_IRQ)(LSM6DSL_Interrupt_Index index);
 
 /* Functions -----------------------------------------------------------------*/
 
-LSM6DSL_OpStatus LSM6DSL_IO_Init(void);
-LSM6DSL_OpStatus LSM6DSL_IO_DeInit(void);
-
 LSM6DSL_OpStatus LSM6DSL_Register_Interrupt_Handler(LSM6DSL_IO_Event_IRQ irq_callback);
 LSM6DSL_OpStatus LSM6DSL_UnRegister_Interrupt_Handler(void);
 

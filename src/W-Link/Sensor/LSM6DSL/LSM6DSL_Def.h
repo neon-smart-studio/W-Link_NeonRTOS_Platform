@@ -12,7 +12,7 @@ Modifications:
 #ifndef LSM6DSL_DEF_H
 #define LSM6DSL_DEF_H
 
-typedef enum LSM6DSL_IO_OpStatus_t
+typedef enum LSM6DSL_OpStatus_t
 {
   LSM6DSL_OK = 0,
   LSM6DSL_NotInit = -1,

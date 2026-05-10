@@ -68,7 +68,7 @@ LIS3MDL_OpStatus LIS3MDL_IO_Read(
     status = LIS3MDL_IO_Map_I2C_Error(
         I2C_Master_Write(
             LIS3MDL_I2C_INDEX,
-            LIS3MDL_I2C_ADDRESS,
+            LIS3MDL_I2C_ADDRESS >> 1,
             &RegisterAddr,
             1,
             false,
@@ -84,7 +84,7 @@ LIS3MDL_OpStatus LIS3MDL_IO_Read(
     status = LIS3MDL_IO_Map_I2C_Error(
         I2C_Master_Read(
             LIS3MDL_I2C_INDEX,
-            LIS3MDL_I2C_ADDRESS,
+            LIS3MDL_I2C_ADDRESS >> 1,
             pBuffer,
             NumByteToRead,
             true,
@@ -125,7 +125,7 @@ LIS3MDL_OpStatus LIS3MDL_IO_Write(
     status = LIS3MDL_IO_Map_I2C_Error(
         I2C_Master_Write(
             LIS3MDL_I2C_INDEX,
-            LIS3MDL_I2C_ADDRESS,
+            LIS3MDL_I2C_ADDRESS >> 1,
             tx_buf,
             NumByteToWrite + 1,
             true,

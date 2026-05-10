@@ -81,7 +81,7 @@ LSM6DSO_OpStatus LSM6DSO_IO_Read(
     status = LSM6DSO_IO_Map_I2C_Error(
         I2C_Master_Write(
             LSM6DSO_I2C_INDEX,
-            LSM6DSO_I2C_ADDRESS,
+            LSM6DSO_I2C_ADDRESS >> 1,
             &RegisterAddr,
             1,
             false,
@@ -97,7 +97,7 @@ LSM6DSO_OpStatus LSM6DSO_IO_Read(
     status = LSM6DSO_IO_Map_I2C_Error(
         I2C_Master_Read(
             LSM6DSO_I2C_INDEX,
-            LSM6DSO_I2C_ADDRESS,
+            LSM6DSO_I2C_ADDRESS >> 1,
             pBuffer,
             NumByteToRead,
             true,
@@ -138,7 +138,7 @@ LSM6DSO_OpStatus LSM6DSO_IO_Write(
     status = LSM6DSO_IO_Map_I2C_Error(
         I2C_Master_Write(
             LSM6DSO_I2C_INDEX,
-            LSM6DSO_I2C_ADDRESS,
+            LSM6DSO_I2C_ADDRESS >> 1,
             tx_buf,
             NumByteToWrite + 1,
             true,

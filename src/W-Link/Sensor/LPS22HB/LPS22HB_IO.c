@@ -68,7 +68,7 @@ LPS22HB_OpStatus LPS22HB_IO_Read(
     status = LPS22HB_IO_Map_I2C_Error(
         I2C_Master_Write(
             LPS22HB_I2C_INDEX,
-            LPS22HB_I2C_ADDRESS,
+            LPS22HB_I2C_ADDRESS >> 1,
             &RegisterAddr,
             1,
             false,
@@ -84,7 +84,7 @@ LPS22HB_OpStatus LPS22HB_IO_Read(
     status = LPS22HB_IO_Map_I2C_Error(
         I2C_Master_Read(
             LPS22HB_I2C_INDEX,
-            LPS22HB_I2C_ADDRESS,
+            LPS22HB_I2C_ADDRESS >> 1,
             pBuffer,
             NumByteToRead,
             true,
@@ -125,7 +125,7 @@ LPS22HB_OpStatus LPS22HB_IO_Write(
     status = LPS22HB_IO_Map_I2C_Error(
         I2C_Master_Write(
             LPS22HB_I2C_INDEX,
-            LPS22HB_I2C_ADDRESS,
+            LPS22HB_I2C_ADDRESS >> 1,
             tx_buf,
             NumByteToWrite + 1,
             true,

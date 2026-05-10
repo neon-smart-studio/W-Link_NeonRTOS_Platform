@@ -69,7 +69,7 @@ LSM303AGR_OpStatus LSM303AGR_ACC_IO_Read(
     status = LSM303AGR_IO_Map_I2C_Error(
         I2C_Master_Write(
             LSM303AGR_I2C_INDEX,
-            LSM303AGR_ACC_I2C_ADDRESS,
+            LSM303AGR_ACC_I2C_ADDRESS >> 1,
             &RegisterAddr,
             1,
             false,
@@ -85,7 +85,7 @@ LSM303AGR_OpStatus LSM303AGR_ACC_IO_Read(
     status = LSM303AGR_IO_Map_I2C_Error(
         I2C_Master_Read(
             LSM303AGR_I2C_INDEX,
-            LSM303AGR_ACC_I2C_ADDRESS,
+            LSM303AGR_ACC_I2C_ADDRESS >> 1,
             pBuffer,
             NumByteToRead,
             true,
@@ -126,7 +126,7 @@ LSM303AGR_OpStatus LSM303AGR_ACC_IO_Write(
     status = LSM303AGR_IO_Map_I2C_Error(
         I2C_Master_Write(
             LSM303AGR_I2C_INDEX,
-            LSM303AGR_ACC_I2C_ADDRESS,
+            LSM303AGR_ACC_I2C_ADDRESS >> 1,
             tx_buf,
             NumByteToWrite + 1,
             true,

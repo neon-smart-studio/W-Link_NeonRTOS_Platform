@@ -1,0 +1,323 @@
+/**
+ ******************************************************************************
+ * @file    LSM303AGR_MAG_driver.h
+ * @author  MEMS Application Team
+ * @version V1.1
+ * @date    25-February-2016
+ * @brief   LSM303AGR Magnetometer header driver file
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *   1. Redistributions of source code must retain the above copyright notice,
+ *      this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright notice,
+ *      this list of conditions and the following disclaimer in the documentation
+ *      and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its contributors
+ *      may be used to endorse or promote products derived from this software
+ *      without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ ******************************************************************************
+ */
+/*
+ * Based on STMicroelectronics LSM303AGR driver
+ * Modified by Neon Smart Studio for W-Link
+ */
+
+#ifndef __LSM303AGR_MAG_DRIVER__H
+#define __LSM303AGR_MAG_DRIVER__H
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/************** Who am I  *******************/
+
+#define LSM303AGR_MAG_WHO_AM_I         0x40
+
+/************** Device Register  *******************/
+#define LSM303AGR_MAG_OFFSET_X_REG_L  	0X45
+#define LSM303AGR_MAG_OFFSET_X_REG_H  	0X46
+#define LSM303AGR_MAG_OFFSET_Y_REG_L  	0X47
+#define LSM303AGR_MAG_OFFSET_Y_REG_H  	0X48
+#define LSM303AGR_MAG_OFFSET_Z_REG_L  	0X49
+#define LSM303AGR_MAG_OFFSET_Z_REG_H  	0X4A
+#define LSM303AGR_MAG_WHO_AM_I_REG  	0X4F
+#define LSM303AGR_MAG_CFG_REG_A  	0X60
+#define LSM303AGR_MAG_CFG_REG_B  	0X61
+#define LSM303AGR_MAG_CFG_REG_C  	0X62
+#define LSM303AGR_MAG_INT_CTRL_REG  	0X63
+#define LSM303AGR_MAG_INT_SOURCE_REG  	0X64
+#define LSM303AGR_MAG_INT_THS_L_REG  	0X65
+#define LSM303AGR_MAG_INT_THS_H_REG  	0X66
+#define LSM303AGR_MAG_STATUS_REG  	0X67
+#define LSM303AGR_MAG_OUTX_L_REG  	0X68
+#define LSM303AGR_MAG_OUTX_H_REG  	0X69
+#define LSM303AGR_MAG_OUTY_L_REG  	0X6A
+#define LSM303AGR_MAG_OUTY_H_REG  	0X6B
+#define LSM303AGR_MAG_OUTZ_L_REG  	0X6C
+#define LSM303AGR_MAG_OUTZ_H_REG  	0X6D
+
+#define LSM303AGR_MAG_OFF_X_L_MASK  	0xFF
+#define LSM303AGR_MAG_OFF_X_L_POSITION  	0
+
+#define LSM303AGR_MAG_OFF_X_H_MASK  	0xFF
+#define LSM303AGR_MAG_OFF_X_H_POSITION  	0
+
+#define LSM303AGR_MAG_OFF_Y_L_MASK  	0xFF
+#define LSM303AGR_MAG_OFF_Y_L_POSITION  	0
+
+#define LSM303AGR_MAG_OFF_Y_H_MASK  	0xFF
+#define LSM303AGR_MAG_OFF_Y_H_POSITION  	0
+
+#define LSM303AGR_MAG_OFF_Z_L_MASK  	0xFF
+#define LSM303AGR_MAG_OFF_Z_L_POSITION  	0
+
+#define LSM303AGR_MAG_OFF_Z_H_MASK  	0xFF
+#define LSM303AGR_MAG_OFF_Z_H_POSITION  	0
+
+#define LSM303AGR_MAG_WHO_AM_I_MASK  	0xFF
+#define LSM303AGR_MAG_WHO_AM_I_POSITION  	0
+
+#define LSM303AGR_MAG_MD_MASK  	0x03
+typedef enum {
+  	LSM303AGR_MAG_MD_CONTINUOS_MODE 		 =0x00,
+  	LSM303AGR_MAG_MD_SINGLE_MODE 		 =0x01,
+  	LSM303AGR_MAG_MD_IDLE1_MODE 		 =0x02,
+  	LSM303AGR_MAG_MD_IDLE2_MODE 		 =0x03,
+} LSM303AGR_MAG_MD_t;
+
+#define LSM303AGR_MAG_ODR_MASK  	0x0C
+typedef enum {
+  	LSM303AGR_MAG_ODR_10Hz 		 =0x00,
+  	LSM303AGR_MAG_ODR_20Hz 		 =0x04,
+  	LSM303AGR_MAG_ODR_50Hz 		 =0x08,
+  	LSM303AGR_MAG_ODR_100Hz 		 =0x0C,
+} LSM303AGR_MAG_ODR_t;
+
+#define LSM303AGR_MAG_LP_MASK  	0x10
+typedef enum {
+  	LSM303AGR_MAG_HR_MODE 		 =0x00,
+  	LSM303AGR_MAG_LP_MODE 		 =0x10,
+} LSM303AGR_MAG_LP_t;
+
+#define LSM303AGR_MAG_SOFT_RST_MASK  	0x20
+typedef enum {
+  	LSM303AGR_MAG_SOFT_RST_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_SOFT_RST_ENABLED 		 =0x20,
+} LSM303AGR_MAG_SOFT_RST_t;
+
+#define LSM303AGR_MAG_LPF_MASK  	0x01
+typedef enum {
+  	LSM303AGR_MAG_LPF_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_LPF_ENABLED 		 =0x01,
+} LSM303AGR_MAG_LPF_t;
+
+#define LSM303AGR_MAG_OFF_CANC_MASK  	0x02
+typedef enum {
+  	LSM303AGR_MAG_OFF_CANC_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_OFF_CANC_ENABLED 		 =0x02,
+} LSM303AGR_MAG_OFF_CANC_t;
+
+#define LSM303AGR_MAG_SET_FREQ_MASK  	0x04
+typedef enum {
+  	LSM303AGR_MAG_SET_FREQ_CONTINUOS 		 =0x00,
+  	LSM303AGR_MAG_SET_FREQ_SINGLE 		 =0x04,
+} LSM303AGR_MAG_SET_FREQ_t;
+
+#define LSM303AGR_MAG_INT_ON_DATAOFF_MASK  	0x08
+typedef enum {
+  	LSM303AGR_MAG_INT_ON_DATAOFF_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_INT_ON_DATAOFF_ENABLED 		 =0x08,
+} LSM303AGR_MAG_INT_ON_DATAOFF_t;
+
+#define LSM303AGR_MAG_INT_MAG_MASK  	0x01
+typedef enum {
+  	LSM303AGR_MAG_INT_MAG_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_INT_MAG_ENABLED 		 =0x01,
+} LSM303AGR_MAG_INT_MAG_t;
+
+#define LSM303AGR_MAG_ST_MASK  	0x02
+typedef enum {
+  	LSM303AGR_MAG_ST_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_ST_ENABLED 		 =0x02,
+} LSM303AGR_MAG_ST_t;
+
+#define LSM303AGR_MAG_BLE_MASK  	0x08
+typedef enum {
+  	LSM303AGR_MAG_BLE_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_BLE_ENABLED 		 =0x08,
+} LSM303AGR_MAG_BLE_t;
+
+#define LSM303AGR_MAG_BDU_MASK  	0x10
+typedef enum {
+  	LSM303AGR_MAG_BDU_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_BDU_ENABLED 		 =0x10,
+} LSM303AGR_MAG_BDU_t;
+
+#define LSM303AGR_MAG_I2C_DIS_MASK  	0x20
+typedef enum {
+  	LSM303AGR_MAG_I2C_ENABLED 		 =0x00,
+  	LSM303AGR_MAG_I2C_DISABLED 		 =0x20,
+} LSM303AGR_MAG_I2C_DIS_t;
+
+#define LSM303AGR_MAG_INT_MAG_PIN_MASK  	0x40
+typedef enum {
+  	LSM303AGR_MAG_INT_MAG_PIN_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_INT_MAG_PIN_ENABLED 		 =0x40,
+} LSM303AGR_MAG_INT_MAG_PIN_t;
+
+#define LSM303AGR_MAG_IEN_MASK  	0x01
+typedef enum {
+  	LSM303AGR_MAG_IEN_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_IEN_ENABLED 		 =0x01,
+} LSM303AGR_MAG_IEN_t;
+
+#define LSM303AGR_MAG_IEL_MASK  	0x02
+typedef enum {
+  	LSM303AGR_MAG_IEL_PULSED 		 =0x00,
+  	LSM303AGR_MAG_IEL_LATCHED 		 =0x02,
+} LSM303AGR_MAG_IEL_t;
+
+#define LSM303AGR_MAG_IEA_MASK  	0x04
+typedef enum {
+  	LSM303AGR_MAG_IEA_ACTIVE_LO 		 =0x00,
+  	LSM303AGR_MAG_IEA_ACTIVE_HI 		 =0x04,
+} LSM303AGR_MAG_IEA_t;
+
+#define LSM303AGR_MAG_ZIEN_MASK  	0x20
+typedef enum {
+  	LSM303AGR_MAG_ZIEN_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_ZIEN_ENABLED 		 =0x20,
+} LSM303AGR_MAG_ZIEN_t;
+
+#define LSM303AGR_MAG_YIEN_MASK  	0x40
+typedef enum {
+  	LSM303AGR_MAG_YIEN_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_YIEN_ENABLED 		 =0x40,
+} LSM303AGR_MAG_YIEN_t;
+
+#define LSM303AGR_MAG_XIEN_MASK  	0x80
+typedef enum {
+  	LSM303AGR_MAG_XIEN_DISABLED 		 =0x00,
+  	LSM303AGR_MAG_XIEN_ENABLED 		 =0x80,
+} LSM303AGR_MAG_XIEN_t;
+
+#define LSM303AGR_MAG_INT_MASK  	0x01
+typedef enum {
+  	LSM303AGR_MAG_INT_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_INT_EV_ON 		 =0x01,
+} LSM303AGR_MAG_INT_t;
+
+#define LSM303AGR_MAG_MROI_MASK  	0x02
+typedef enum {
+  	LSM303AGR_MAG_MROI_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_MROI_EV_ON 		 =0x02,
+} LSM303AGR_MAG_MROI_t;
+
+#define LSM303AGR_MAG_N_TH_S_Z_MASK  	0x04
+typedef enum {
+  	LSM303AGR_MAG_N_TH_S_Z_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_N_TH_S_Z_EV_ON 		 =0x04,
+} LSM303AGR_MAG_N_TH_S_Z_t;
+
+#define LSM303AGR_MAG_N_TH_S_Y_MASK  	0x08
+typedef enum {
+  	LSM303AGR_MAG_N_TH_S_Y_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_N_TH_S_Y_EV_ON 		 =0x08,
+} LSM303AGR_MAG_N_TH_S_Y_t;
+
+#define LSM303AGR_MAG_N_TH_S_X_MASK  	0x10
+typedef enum {
+  	LSM303AGR_MAG_N_TH_S_X_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_N_TH_S_X_EV_ON 		 =0x10,
+} LSM303AGR_MAG_N_TH_S_X_t;
+
+#define LSM303AGR_MAG_P_TH_S_Z_MASK  	0x20
+typedef enum {
+  	LSM303AGR_MAG_P_TH_S_Z_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_P_TH_S_Z_EV_ON 		 =0x20,
+} LSM303AGR_MAG_P_TH_S_Z_t;
+
+#define LSM303AGR_MAG_P_TH_S_Y_MASK  	0x40
+typedef enum {
+  	LSM303AGR_MAG_P_TH_S_Y_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_P_TH_S_Y_EV_ON 		 =0x40,
+} LSM303AGR_MAG_P_TH_S_Y_t;
+
+#define LSM303AGR_MAG_P_TH_S_X_MASK  	0x80
+typedef enum {
+  	LSM303AGR_MAG_P_TH_S_X_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_P_TH_S_X_EV_ON 		 =0x80,
+} LSM303AGR_MAG_P_TH_S_X_t;
+
+#define LSM303AGR_MAG_XDA_MASK  	0x01
+typedef enum {
+  	LSM303AGR_MAG_XDA_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_XDA_EV_ON 		 =0x01,
+} LSM303AGR_MAG_XDA_t;
+
+#define LSM303AGR_MAG_YDA_MASK  	0x02
+typedef enum {
+  	LSM303AGR_MAG_YDA_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_YDA_EV_ON 		 =0x02,
+} LSM303AGR_MAG_YDA_t;
+
+#define LSM303AGR_MAG_ZDA_MASK  	0x04
+typedef enum {
+  	LSM303AGR_MAG_ZDA_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_ZDA_EV_ON 		 =0x04,
+} LSM303AGR_MAG_ZDA_t;
+
+#define LSM303AGR_MAG_ZYXDA_MASK  	0x08
+typedef enum {
+  	LSM303AGR_MAG_ZYXDA_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_ZYXDA_EV_ON 		 =0x08,
+} LSM303AGR_MAG_ZYXDA_t;
+
+#define LSM303AGR_MAG_XOR_MASK  	0x10
+typedef enum {
+  	LSM303AGR_MAG_XOR_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_XOR_EV_ON 		 =0x10,
+} LSM303AGR_MAG_XOR_t;
+
+#define LSM303AGR_MAG_YOR_MASK  	0x20
+typedef enum {
+  	LSM303AGR_MAG_YOR_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_YOR_EV_ON 		 =0x20,
+} LSM303AGR_MAG_YOR_t;
+
+#define LSM303AGR_MAG_ZOR_MASK  	0x40
+typedef enum {
+  	LSM303AGR_MAG_ZOR_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_ZOR_EV_ON 		 =0x40,
+} LSM303AGR_MAG_ZOR_t;
+
+#define LSM303AGR_MAG_ZYXOR_MASK  	0x80
+typedef enum {
+  	LSM303AGR_MAG_ZYXOR_EV_OFF 		 =0x00,
+  	LSM303AGR_MAG_ZYXOR_EV_ON 		 =0x80,
+} LSM303AGR_MAG_ZYXOR_t;
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

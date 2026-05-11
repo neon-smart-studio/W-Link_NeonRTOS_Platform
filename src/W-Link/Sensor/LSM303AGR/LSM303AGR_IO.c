@@ -1,5 +1,5 @@
 /*
-This LSM303AGR driver is based on STMicroelectronics stm32-lsm6dso / LSM303AGR component driver.
+This LSM303AGR driver is based on STMicroelectronics stm32-LSM303AGR / LSM303AGR component driver.
 Original copyright: STMicroelectronics.
 Original license: BSD-3-Clause.
 

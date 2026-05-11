@@ -1,5 +1,5 @@
 /*
-This LSM6DSL driver is based on STMicroelectronics stm32-lsm6dso / LSM6DSL component driver.
+This LSM6DSL driver is based on STMicroelectronics stm32-LSM6DSL / LSM6DSL component driver.
 Original copyright: STMicroelectronics.
 Original license: BSD-3-Clause.
 

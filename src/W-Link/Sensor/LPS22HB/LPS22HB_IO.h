@@ -1,5 +1,5 @@
 /*
-This LPS22HB driver is based on STMicroelectronics stm32-lsm6dso / LPS22HB component driver.
+This LPS22HB driver is based on STMicroelectronics stm32-LPS22HB / LPS22HB component driver.
 Original copyright: STMicroelectronics.
 Original license: BSD-3-Clause.
 

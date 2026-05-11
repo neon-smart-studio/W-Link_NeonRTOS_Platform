@@ -1,5 +1,5 @@
 /*
-This HTS221 driver is based on STMicroelectronics stm32-lsm6dso / HTS221 component driver.
+This HTS221 driver is based on STMicroelectronics stm32-HTS221 / HTS221 component driver.
 Original copyright: STMicroelectronics.
 Original license: BSD-3-Clause.
 

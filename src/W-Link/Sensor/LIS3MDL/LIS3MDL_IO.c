@@ -1,5 +1,5 @@
 /*
-This LIS3MDL driver is based on STMicroelectronics stm32-lsm6dso / LIS3MDL component driver.
+This LIS3MDL driver is based on STMicroelectronics stm32-LIS3MDL / LIS3MDL component driver.
 Original copyright: STMicroelectronics.
 Original license: BSD-3-Clause.
 

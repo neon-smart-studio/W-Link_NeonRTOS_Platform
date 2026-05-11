@@ -187,7 +187,7 @@ static HX8357x_OpResult HX8357x_IO_Init()
         return HX8357x_Map_GPIO_Error_Code(gpio_op_result);
     }
 
-    spi_op_result = SPI_Master_Init(CONFIG_HX8357X_SPI_INDEX, CONFIG_HX8357X_SPI_CLOCK, CONFIG_HX8357X_SPI_MODE);
+    spi_op_result = SPI_Master_Init(CONFIG_HX8357X_SPI_INDEX, CONFIG_HX8357X_SPI_CLOCK, CONFIG_HX8357X_SPI_MODE, false);
     if(spi_op_result<hwSPI_OK)
     {
         GPIO_Pin_DeInit(CONFIG_HX8357X_CS_PN);

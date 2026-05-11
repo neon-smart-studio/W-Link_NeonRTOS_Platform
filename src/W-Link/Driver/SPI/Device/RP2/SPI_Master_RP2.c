@@ -119,7 +119,7 @@ static void SPI1_IRQ_Handler(void)
     RP2_SPI_IRQ_Process(hwSPI_Index_1);
 }
 
-hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_OpMode opMode)
+hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_OpMode opMode, bool cs)
 {
     if (opMode >= hwSPI_OpMode_MAX)
     {
@@ -150,7 +150,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     gpio_set_function(mosi_pin, GPIO_FUNC_SPI);
     gpio_set_function(sclk_pin, GPIO_FUNC_SPI);
 
-    if (cs_pin != hwGPIO_Pin_NC) {
+    if (cs_pin != hwGPIO_Pin_NC && cs) {
         gpio_set_function(cs_pin, GPIO_FUNC_SPI);
         Spi_Master_Use_CS[index] = true;
     }
@@ -210,7 +210,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     gpio_pin_init_status[mosi_pin] = true;
     gpio_pin_init_status[sclk_pin] = true;
 
-    if (cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC && cs)
     {
         gpio_pin_init_status[cs_pin] = true;
         Spi_Master_Use_CS[index] = true;

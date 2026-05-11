@@ -589,7 +589,7 @@ static ILI9xxx_OpResult ILI9xxx_IO_Init()
                 return ILI9xxx_Map_GPIO_Error_Code(gpio_op_result);
         }
 
-        spi_op_result = SPI_Master_Init(CONFIG_ILI9XXX_SPI_INDEX, CONFIG_ILI9XXX_SPI_CLOCK, CONFIG_ILI9XXX_SPI_MODE);
+        spi_op_result = SPI_Master_Init(CONFIG_ILI9XXX_SPI_INDEX, CONFIG_ILI9XXX_SPI_CLOCK, CONFIG_ILI9XXX_SPI_MODE, false);
         if(spi_op_result<hwSPI_OK)
         {
                 GPIO_Pin_DeInit(CONFIG_ILI9XXX_CS_PN);

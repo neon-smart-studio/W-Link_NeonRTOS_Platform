@@ -90,7 +90,7 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
     NeonRTOS_SyncObjSignalFromISR(&Spi_Master_Recv_SyncHandle[idx]);
 }
 
-hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_OpMode opMode)
+hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_OpMode opMode, bool cs)
 {
     if (opMode >= hwSPI_OpMode_MAX)
     {
@@ -130,7 +130,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         return hwSPI_InvalidParameter;
     }
 
-    if (cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC && cs)
     {
         cs_soc_base = GPIO_Map_Soc_Base(cs_pin);
         cs_soc_pin  = GPIO_Map_Soc_Pin(cs_pin);
@@ -152,7 +152,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         return hwSPI_InvalidParameter;
     }
 
-    if (cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC && cs)
     {
         cs_af = STM32_SPI_GetAF(index, cs_pin);
         if (cs_af == 0)
@@ -186,7 +186,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     GPIO_Enable_RCC_Clock(mosi_soc_base);
     GPIO_Enable_RCC_Clock(sclk_soc_base);
 
-    if (cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC && cs)
     {
         GPIO_Enable_RCC_Clock(cs_soc_base);
     }
@@ -235,7 +235,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     
     bool hw_cs = false;
 
-    if (cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC && cs)
     {
         hw_cs = true;
 
@@ -289,7 +289,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     gpio_pin_init_status[mosi_pin] = true;
     gpio_pin_init_status[sclk_pin] = true;
 
-    if (cs_pin != hwGPIO_Pin_NC)
+    if (cs_pin != hwGPIO_Pin_NC && cs)
     {
         gpio_pin_init_status[cs_pin] = true;
         Spi_Master_Use_CS[index] = true;

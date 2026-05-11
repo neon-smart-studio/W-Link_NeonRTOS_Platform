@@ -402,7 +402,7 @@ static ST77xx_OpResult ST77xx_IO_Init()
         return ST77xx_Map_GPIO_Error_Code(gpio_op_result);
     }
 
-    spi_op_result = SPI_Master_Init(CONFIG_ST77XX_SPI_INDEX, CONFIG_ST77XX_SPI_CLOCK, CONFIG_ST77XX_SPI_MODE);
+    spi_op_result = SPI_Master_Init(CONFIG_ST77XX_SPI_INDEX, CONFIG_ST77XX_SPI_CLOCK, CONFIG_ST77XX_SPI_MODE, false);
     if(spi_op_result<hwSPI_OK)
     {
         GPIO_Pin_DeInit(CONFIG_ST77XX_CS_PN);

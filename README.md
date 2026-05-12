@@ -40,3 +40,14 @@ W-Link 解決：
 統一 API
 抽離 SoC 差異
 讓上層邏輯完全不依賴 MCU 型號
+
+## Third Party Components
+
+This repository contains third-party middleware from STMicroelectronics.
+
+Files under:
+Bluetooth/BlueNRG/
+
+remain the property of STMicroelectronics and retain their original license and copyright notices.
+
+Only W-Link abstraction layers and framework code are licensed under Apache-2.0.

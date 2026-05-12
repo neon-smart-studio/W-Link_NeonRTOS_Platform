@@ -27,6 +27,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************
  */
+/*
+ * Based on STMicroelectronics SPBTLE driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
 #ifndef __SPBTLE_H
 #define __SPBTLE_H

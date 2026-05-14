@@ -6,6 +6,8 @@
 
 #include "Display_Config.h"
 
+#include "Display_Def.h"
+
 #if defined(CONFIG_DISPLAY_GC9A01)
 #include "GC9A01/GC9A01.h"
 #elif defined(CONFIG_DISPLAY_HX8357B) || defined(CONFIG_DISPLAY_HX8357D)
@@ -26,34 +28,6 @@
 #ifndef CONFIG_DISPLAY_BACKLIGHT_ACTIVE_LEVEL
 #define CONFIG_DISPLAY_BACKLIGHT_ACTIVE_LEVEL 1
 #endif
-
-typedef enum {
-    Display_OK = 0,
-    Display_NotInit = -1,
-    Display_InvalidParameter = -2,
-    Display_MemoryError = -3,
-    Display_HwError = -4,
-    Display_MutexTimeout = -5,
-    Display_SlaveTimeout = -6,
-    Display_SyncTimeout = -7,
-    Display_Unsupport = -8,
-} Display_Result;
-
-typedef union {
-    struct {
-#ifdef CONFIG_COLOR_RGB565_SWAP
-        uint16_t green_h : 3;
-        uint16_t blue : 5;
-        uint16_t red : 5;
-        uint16_t green_l : 3;
-#else //CONFIG_COLOR_RGB565_SWAP
-        uint16_t blue : 5;
-        uint16_t green : 6;
-        uint16_t red : 5;
-#endif //CONFIG_COLOR_RGB565_SWAP
-    };
-    uint16_t full;
-} Display_Color16_RGB565;
 
 #ifdef	__cplusplus
 extern "C" {

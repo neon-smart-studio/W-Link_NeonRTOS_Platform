@@ -29,9 +29,9 @@ extern bool ADC_Channel_Init_Status[hwADC_Channel_Index_MAX];
 extern NeonRTOS_MsgQ_t ADC_Channel_SyncQueue[hwADC_Instance_MAX];
 extern ADC_HandleTypeDef g_adc[hwADC_Instance_MAX];
 
-hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst);
-hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst);
-hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch);
+hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst);
+hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst);
+hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch);
 void ADC_NVIC_Init(void);
 void ADC_NVIC_DeInit(void);
 

@@ -50,7 +50,7 @@ void ADC_IRQHandler(void)
 }
 #endif
 
-hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
+hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
 {
     if (inst >= hwADC_Instance_MAX)
         return hwADC_InvalidParameter;
@@ -95,7 +95,7 @@ hwADC_OpStatus ADC_Instance_Init(hwADC_Instance inst)
     return hwADC_OK;
 }
 
-hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
+hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
 {
     if (inst >= hwADC_Instance_MAX)
         return hwADC_InvalidParameter;
@@ -124,7 +124,7 @@ hwADC_OpStatus ADC_Instance_DeInit(hwADC_Instance inst)
     return hwADC_OK;
 }
 
-hwADC_OpStatus ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
+hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
 {
     if (inst >= hwADC_Instance_MAX || ch >= hwADC_Channel_Index_MAX)
         return hwADC_InvalidParameter;

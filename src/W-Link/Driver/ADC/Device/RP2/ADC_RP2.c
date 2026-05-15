@@ -61,7 +61,7 @@ bool ADC_IsAnyInstanceUsed(void)
     return false;
 }
 
-hwADC_OpStatus ADC_Channel_Init(hwADC_Channel_Index ch)
+hwADC_OpResult ADC_Channel_Init(hwADC_Channel_Index ch)
 {
     if (ch >= hwADC_Channel_Index_MAX)
         return hwADC_InvalidParameter;
@@ -125,7 +125,7 @@ hwADC_OpStatus ADC_Channel_Init(hwADC_Channel_Index ch)
     return hwADC_OK;
 }
 
-hwADC_OpStatus ADC_Channel_DeInit(hwADC_Channel_Index ch)
+hwADC_OpResult ADC_Channel_DeInit(hwADC_Channel_Index ch)
 {
     if (ch >= hwADC_Channel_Index_MAX)
         return hwADC_InvalidParameter;
@@ -173,7 +173,7 @@ hwADC_OpStatus ADC_Channel_DeInit(hwADC_Channel_Index ch)
     return hwADC_OK;
 }
 
-hwADC_OpStatus ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
+hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
 {
     if (!readMv || ch >= hwADC_Channel_Index_MAX)
         return hwADC_InvalidParameter;

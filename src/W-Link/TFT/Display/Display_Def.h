@@ -14,7 +14,7 @@ typedef enum {
     Display_SlaveTimeout = -6,
     Display_SyncTimeout = -7,
     Display_Unsupport = -8,
-} Display_Result;
+} Display_OpResult;
 
 typedef union {
     struct {

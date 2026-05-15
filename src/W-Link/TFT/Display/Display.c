@@ -4,7 +4,7 @@
 #include "GPIO/GPIO.h"
 
 #if defined(CONFIG_DISPLAY_GC9A01)
-static Display_Result Display_Map_Result(GC9A01_OpResult result)
+static Display_OpResult Display_Map_Result(GC9A01_OpResult result)
 {
     switch (result) {
     case GC9A01_OK:
@@ -39,7 +39,7 @@ static Display_Result Display_Map_Result(GC9A01_OpResult result)
 #endif
 
 #if defined(CONFIG_DISPLAY_HX8357B) || defined(CONFIG_DISPLAY_HX8357D)
-static Display_Result Display_Map_Result(HX8357x_OpResult result)
+static Display_OpResult Display_Map_Result(HX8357x_OpResult result)
 {
     switch (result) {
     case HX8357x_OK:
@@ -73,7 +73,7 @@ static Display_Result Display_Map_Result(HX8357x_OpResult result)
 #if defined(CONFIG_DISPLAY_ILI9225) || defined(CONFIG_DISPLAY_ILI9163) || \
       defined(CONFIG_DISPLAY_ILI9341) || defined(CONFIG_DISPLAY_ILI9481) || \
       defined(CONFIG_DISPLAY_ILI9486) || defined(CONFIG_DISPLAY_ILI9488)
-static Display_Result Display_Map_Result(ILI9xxx_OpResult result)
+static Display_OpResult Display_Map_Result(ILI9xxx_OpResult result)
 {
     switch (result) {
     case ILI9xxx_OK:
@@ -106,7 +106,7 @@ static Display_Result Display_Map_Result(ILI9xxx_OpResult result)
 
 #if defined(CONFIG_DISPLAY_ST7735) || defined(CONFIG_DISPLAY_ST7789) || \
       defined(CONFIG_DISPLAY_ST7796S) || defined(CONFIG_DISPLAY_ST7796HV)
-static Display_Result Display_Map_Result(ST77xx_OpResult result)
+static Display_OpResult Display_Map_Result(ST77xx_OpResult result)
 {
     switch (result) {
     case ST77xx_OK:
@@ -139,7 +139,7 @@ static Display_Result Display_Map_Result(ST77xx_OpResult result)
 
 static bool Display_Backlight_Ready = false;
 
-Display_Result Display_Init(void)
+Display_OpResult Display_Init(void)
 {
 #if defined(CONFIG_DISPLAY_GC9A01)
     return Display_Map_Result(GC9A01_Init());
@@ -157,7 +157,7 @@ Display_Result Display_Init(void)
 #endif
 }
 
-Display_Result Display_Power_On(void)
+Display_OpResult Display_Power_On(void)
 {
 #if defined(CONFIG_DISPLAY_GC9A01)
     return Display_Map_Result(GC9A01_Power_On());
@@ -175,7 +175,7 @@ Display_Result Display_Power_On(void)
 #endif
 }
 
-Display_Result Display_Power_Off(void)
+Display_OpResult Display_Power_Off(void)
 {
 #if defined(CONFIG_DISPLAY_GC9A01)
     return Display_Map_Result(GC9A01_Power_Off());
@@ -193,7 +193,7 @@ Display_Result Display_Power_Off(void)
 #endif
 }
 
-Display_Result Display_Backlight_Init(void)
+Display_OpResult Display_Backlight_Init(void)
 {
     hwGPIO_OpResult ret;
 
@@ -210,7 +210,7 @@ Display_Result Display_Backlight_Init(void)
     return Display_Backlight_Set(false);
 }
 
-Display_Result Display_Backlight_DeInit(void)
+Display_OpResult Display_Backlight_DeInit(void)
 {
     if (!Display_Backlight_Ready) {
         return Display_OK;
@@ -224,7 +224,7 @@ Display_Result Display_Backlight_DeInit(void)
     return Display_OK;
 }
 
-Display_Result Display_Backlight_Set(bool on)
+Display_OpResult Display_Backlight_Set(bool on)
 {
     uint8_t level;
 
@@ -245,7 +245,7 @@ Display_Result Display_Backlight_Set(bool on)
     return Display_OK;
 }
 
-Display_Result Display_SetWindow(int16_t x1, int16_t x2, int16_t y1, int16_t y2)
+Display_OpResult Display_SetWindow(int16_t x1, int16_t x2, int16_t y1, int16_t y2)
 {
 #if defined(CONFIG_DISPLAY_GC9A01)
     return Display_Map_Result(GC9A01_SetWindow(x1, x2, y1, y2));
@@ -263,7 +263,7 @@ Display_Result Display_SetWindow(int16_t x1, int16_t x2, int16_t y1, int16_t y2)
 #endif
 }
 
-Display_Result Display_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, Display_Color16_RGB565 *data)
+Display_OpResult Display_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, Display_Color16_RGB565 *data)
 {
     if (data == 0) {
         return Display_InvalidParameter;
@@ -285,12 +285,12 @@ Display_Result Display_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, Disp
 #endif
 }
 
-Display_Result Display_DrawPixel(int16_t x, int16_t y, Display_Color16_RGB565 *data)
+Display_OpResult Display_DrawPixel(int16_t x, int16_t y, Display_Color16_RGB565 *data)
 {
     return Display_Draw(x, x, y, y, data);
 }
 
-Display_Result Display_VerticalScroll_Definition(uint16_t topFixedLines, uint16_t scrollLines, uint16_t bottomFixedLines)
+Display_OpResult Display_VerticalScroll_Definition(uint16_t topFixedLines, uint16_t scrollLines, uint16_t bottomFixedLines)
 {
 #if defined(CONFIG_DISPLAY_GC9A01)
     return Display_Map_Result(GC9A01_VerticalScroll_Definition(topFixedLines, scrollLines, bottomFixedLines));
@@ -306,7 +306,7 @@ Display_Result Display_VerticalScroll_Definition(uint16_t topFixedLines, uint16_
 #endif
 }
 
-Display_Result Display_VerticalScroll_StartLine(uint16_t startLine)
+Display_OpResult Display_VerticalScroll_StartLine(uint16_t startLine)
 {
 #if defined(CONFIG_DISPLAY_GC9A01)
     return Display_Map_Result(GC9A01_VerticalScroll_StartLine(startLine));

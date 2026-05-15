@@ -33,20 +33,20 @@
 extern "C" {
 #endif
 
-Display_Result Display_Init(void);
-Display_Result Display_Power_On(void);
-Display_Result Display_Power_Off(void);
+Display_OpResult Display_Init(void);
+Display_OpResult Display_Power_On(void);
+Display_OpResult Display_Power_Off(void);
 
-Display_Result Display_Backlight_Init(void);
-Display_Result Display_Backlight_DeInit(void);
-Display_Result Display_Backlight_Set(bool on);
+Display_OpResult Display_Backlight_Init(void);
+Display_OpResult Display_Backlight_DeInit(void);
+Display_OpResult Display_Backlight_Set(bool on);
 
-Display_Result Display_SetWindow(int16_t x1, int16_t x2, int16_t y1, int16_t y2);
-Display_Result Display_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, Display_Color16_RGB565 *data);
-Display_Result Display_DrawPixel(int16_t x, int16_t y, Display_Color16_RGB565 *data);
+Display_OpResult Display_SetWindow(int16_t x1, int16_t x2, int16_t y1, int16_t y2);
+Display_OpResult Display_Draw(int16_t x1, int16_t x2, int16_t y1, int16_t y2, Display_Color16_RGB565 *data);
+Display_OpResult Display_DrawPixel(int16_t x, int16_t y, Display_Color16_RGB565 *data);
 
-Display_Result Display_VerticalScroll_Definition(uint16_t topFixedLines, uint16_t scrollLines, uint16_t bottomFixedLines);
-Display_Result Display_VerticalScroll_StartLine(uint16_t startLine);
+Display_OpResult Display_VerticalScroll_Definition(uint16_t topFixedLines, uint16_t scrollLines, uint16_t bottomFixedLines);
+Display_OpResult Display_VerticalScroll_StartLine(uint16_t startLine);
 
 #ifdef  __cplusplus
 }

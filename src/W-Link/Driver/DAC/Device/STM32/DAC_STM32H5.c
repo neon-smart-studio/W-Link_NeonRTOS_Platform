@@ -30,7 +30,7 @@ static uint32_t DAC_Channel_To_HAL(hwDAC_Instance inst, hwDAC_Channel_Index ch)
     return 0;
 }
 
-hwDAC_OpStatus DAC_Instance_Init(hwDAC_Instance inst)
+hwDAC_OpResult DAC_Instance_Init(hwDAC_Instance inst)
 {
     if (inst != hwDAC_Instance_1)
         return hwDAC_InvalidParameter;
@@ -51,7 +51,7 @@ hwDAC_OpStatus DAC_Instance_Init(hwDAC_Instance inst)
     return hwDAC_OK;
 }
 
-hwDAC_OpStatus DAC_Instance_DeInit(hwDAC_Instance inst)
+hwDAC_OpResult DAC_Instance_DeInit(hwDAC_Instance inst)
 {
     if (inst != hwDAC_Instance_1)
         return hwDAC_InvalidParameter;
@@ -71,7 +71,7 @@ hwDAC_OpStatus DAC_Instance_DeInit(hwDAC_Instance inst)
     return hwDAC_OK;
 }
 
-hwDAC_OpStatus DAC_ConfigChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
+hwDAC_OpResult DAC_ConfigChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 {
     if (inst != hwDAC_Instance_1 || ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;
@@ -93,7 +93,7 @@ hwDAC_OpStatus DAC_ConfigChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
         ? hwDAC_OK : hwDAC_HwError;
 }
 
-hwDAC_OpStatus DAC_StartChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
+hwDAC_OpResult DAC_StartChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 {
     uint32_t hal_ch = DAC_Channel_To_HAL(inst, ch);
 
@@ -104,7 +104,7 @@ hwDAC_OpStatus DAC_StartChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
         ? hwDAC_OK : hwDAC_HwError;
 }
 
-hwDAC_OpStatus DAC_StopChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
+hwDAC_OpResult DAC_StopChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
 {
     uint32_t hal_ch = DAC_Channel_To_HAL(inst, ch);
 
@@ -115,7 +115,7 @@ hwDAC_OpStatus DAC_StopChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch)
         ? hwDAC_OK : hwDAC_HwError;
 }
 
-hwDAC_OpStatus DAC_WriteRaw(hwDAC_Instance inst, hwDAC_Channel_Index ch, uint32_t raw)
+hwDAC_OpResult DAC_WriteRaw(hwDAC_Instance inst, hwDAC_Channel_Index ch, uint32_t raw)
 {
     uint32_t hal_ch = DAC_Channel_To_HAL(inst, ch);
 

@@ -19,13 +19,13 @@
 
 extern DAC_HandleTypeDef g_dac[hwDAC_Instance_MAX];
 
-hwDAC_OpStatus DAC_Instance_Init(hwDAC_Instance inst);
-hwDAC_OpStatus DAC_Instance_DeInit(hwDAC_Instance inst);
+hwDAC_OpResult DAC_Instance_Init(hwDAC_Instance inst);
+hwDAC_OpResult DAC_Instance_DeInit(hwDAC_Instance inst);
 
-hwDAC_OpStatus DAC_ConfigChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch);
-hwDAC_OpStatus DAC_StartChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch);
-hwDAC_OpStatus DAC_StopChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch);
-hwDAC_OpStatus DAC_WriteRaw(hwDAC_Instance inst, hwDAC_Channel_Index ch, uint32_t raw);
+hwDAC_OpResult DAC_ConfigChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch);
+hwDAC_OpResult DAC_StartChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch);
+hwDAC_OpResult DAC_StopChannel(hwDAC_Instance inst, hwDAC_Channel_Index ch);
+hwDAC_OpResult DAC_WriteRaw(hwDAC_Instance inst, hwDAC_Channel_Index ch, uint32_t raw);
 
 #endif // DAC_BASE || DAC1_BASE || DAC2_BASE || DAC3_BASE || DAC4_BASE
 

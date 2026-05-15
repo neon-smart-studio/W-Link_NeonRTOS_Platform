@@ -35,7 +35,7 @@ static bool DAC_IsInstanceUsed(hwDAC_Instance inst)
     return false;
 }
 
-hwDAC_OpStatus hwDAC_Channel_Init(hwDAC_Channel_Index ch)
+hwDAC_OpResult hwDAC_Channel_Init(hwDAC_Channel_Index ch)
 {
     if (ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;
@@ -68,7 +68,7 @@ hwDAC_OpStatus hwDAC_Channel_Init(hwDAC_Channel_Index ch)
 
     if (!DAC_Instance_Init_Status[inst])
     {
-        hwDAC_OpStatus status = DAC_Instance_Init(inst);
+        hwDAC_OpResult status = DAC_Instance_Init(inst);
 
         if (status != hwDAC_OK)
         {
@@ -79,7 +79,7 @@ hwDAC_OpStatus hwDAC_Channel_Init(hwDAC_Channel_Index ch)
         DAC_Instance_Init_Status[inst] = true;
     }
 
-    hwDAC_OpStatus status = DAC_ConfigChannel(inst, ch);
+    hwDAC_OpResult status = DAC_ConfigChannel(inst, ch);
     if (status != hwDAC_OK)
     {
         HAL_GPIO_DeInit(dac_pin_soc_base, dac_soc_pin);
@@ -99,7 +99,7 @@ hwDAC_OpStatus hwDAC_Channel_Init(hwDAC_Channel_Index ch)
     return hwDAC_OK;
 }
 
-hwDAC_OpStatus hwDAC_Channel_DeInit(hwDAC_Channel_Index ch)
+hwDAC_OpResult hwDAC_Channel_DeInit(hwDAC_Channel_Index ch)
 {
     if (ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;
@@ -137,7 +137,7 @@ hwDAC_OpStatus hwDAC_Channel_DeInit(hwDAC_Channel_Index ch)
     return hwDAC_OK;
 }
 
-hwDAC_OpStatus hwDAC_Write_MiniVolt(hwDAC_Channel_Index ch, float mv)
+hwDAC_OpResult hwDAC_Write_MiniVolt(hwDAC_Channel_Index ch, float mv)
 {
     if (ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;

@@ -328,7 +328,7 @@ ST77xx_Init_Command ST7796S_Init_Cmds[] = {
 uint16_t ST77xx_VerticalScrollingStartAddress = 0;
 #endif // DISPLAY_ST7735 || DISPLAY_ST7789 || DISPLAY_ST7796S
 
-static ST77xx_OpResult ST77xx_Map_GPIO_Error_Code(hwGPIO_OpStatus error_code)
+static ST77xx_OpResult ST77xx_Map_GPIO_Error_Code(hwGPIO_OpResult error_code)
 {
     switch(error_code)
     {
@@ -378,7 +378,7 @@ static ST77xx_OpResult ST77xx_Map_SPI_Error_Code(hwSPI_OpResult error_code)
 
 static ST77xx_OpResult ST77xx_IO_Init()
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
     hwSPI_OpResult spi_op_result;
     
     gpio_op_result = GPIO_Pin_Init(CONFIG_ST77XX_CS_PN, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
@@ -416,7 +416,7 @@ static ST77xx_OpResult ST77xx_IO_Init()
 
 static ST77xx_OpResult ST77xx_Reset()
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
 
     gpio_op_result = GPIO_Pin_Write(CONFIG_ST77XX_RST_PN, 1);
     if(gpio_op_result<hwGPIO_OK)
@@ -447,7 +447,7 @@ static ST77xx_OpResult ST77xx_Reset()
 
 static ST77xx_OpResult ST77xx_IO_Write(uint8_t cmd, uint8_t* param_data, uint16_t param_length)
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
     hwSPI_OpResult spi_op_result;
 
     if(param_data==NULL && param_length>0)
@@ -510,7 +510,7 @@ static ST77xx_OpResult ST77xx_IO_Write(uint8_t cmd, uint8_t* param_data, uint16_
 
 static ST77xx_OpResult ST77xx_Nenory_Write(ST77xx_Color16_RGB565* data, uint16_t data_length)
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
     hwSPI_OpResult spi_op_result;
 
     if(data==NULL && data_length>0)

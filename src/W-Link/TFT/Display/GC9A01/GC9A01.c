@@ -157,7 +157,7 @@ static const GC9A01_Init_Command GC9A01_Init_Cmds[]={
     {0, {0}, 0xff},		//init end flag
 };
 
-static GC9A01_OpResult GC9A01_Map_GPIO_Error_Code(hwGPIO_OpStatus error_code)
+static GC9A01_OpResult GC9A01_Map_GPIO_Error_Code(hwGPIO_OpResult error_code)
 {
   switch(error_code)
   {
@@ -207,7 +207,7 @@ static GC9A01_OpResult GC9A01_Map_SPI_Error_Code(hwSPI_OpResult error_code)
 
 static GC9A01_OpResult GC9A01_IO_Init()
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
     hwSPI_OpResult spi_op_result;
     
     gpio_op_result = GPIO_Pin_Init(CONFIG_GC9A01_CS_PN, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
@@ -245,7 +245,7 @@ static GC9A01_OpResult GC9A01_IO_Init()
 
 static GC9A01_OpResult GC9A01_Reset()
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
 
     gpio_op_result = GPIO_Pin_Write(CONFIG_GC9A01_RST_PN, 1);
     if(gpio_op_result<hwGPIO_OK)
@@ -276,7 +276,7 @@ static GC9A01_OpResult GC9A01_Reset()
 
 static GC9A01_OpResult GC9A01_IO_Write(uint8_t cmd, uint8_t* param_data, uint16_t param_length)
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
     hwSPI_OpResult spi_op_result;
 
     if(param_data==NULL && param_length>0)
@@ -339,7 +339,7 @@ static GC9A01_OpResult GC9A01_IO_Write(uint8_t cmd, uint8_t* param_data, uint16_
 
 static GC9A01_OpResult GC9A01_Nenory_Write(GC9A01_Color16_RGB565* data, uint16_t data_length)
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
     hwSPI_OpResult spi_op_result;
 
     if(data==NULL && data_length>0)

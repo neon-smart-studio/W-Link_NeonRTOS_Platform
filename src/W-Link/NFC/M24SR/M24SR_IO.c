@@ -34,7 +34,7 @@
 
 static M24SR_GPO_Event_Handler M24SR_GPO_Event_Handler_CB = NULL;
 
-static M24SR_OpStatus M24SR_Map_GPIO_Error_Code(hwGPIO_OpStatus error_code)
+static M24SR_OpStatus M24SR_Map_GPIO_Error_Code(hwGPIO_OpResult error_code)
 {
     switch (error_code)
     {
@@ -100,7 +100,7 @@ void M24SR_IO_Interrupt_Handler(hwGPIO_Int_Pin pin, hwGPIO_Interrupt_Action acti
 
 M24SR_OpStatus M24SR_IO_Init(M24SR_GPO_Event_Handler cb)
 {
-    hwGPIO_OpStatus gpio_op_status;
+    hwGPIO_OpResult gpio_op_status;
 
     gpio_op_status = GPIO_Interrupt_Init(M24SR_GPIO_GPO_PIN, hwGPIO_Interrupt_Mode_Falling_Edge);
     if(gpio_op_status<hwGPIO_OK)
@@ -139,7 +139,7 @@ M24SR_OpStatus M24SR_IO_Init(M24SR_GPO_Event_Handler cb)
 
 M24SR_OpStatus M24SR_IO_DeInit()
 {
-    hwGPIO_OpStatus gpio_op_status;
+    hwGPIO_OpResult gpio_op_status;
 
     gpio_op_status = GPIO_DeInit(M24SR_GPIO_RFDISABLE_PIN);
     if(gpio_op_status<hwGPIO_OK)

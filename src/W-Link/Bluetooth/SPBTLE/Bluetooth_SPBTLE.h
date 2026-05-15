@@ -97,15 +97,4 @@ typedef enum {
   ENABLE_LOW_POWER_MODE
 } lowPowerMode_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-Bluetooth_OpResult Bluetooth_Init(const char *name, uint8_t addr[BDADDR_SIZE]);
-Bluetooth_OpResult Bluetooth_DeIniit(void);
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif //__SPBTLE_H

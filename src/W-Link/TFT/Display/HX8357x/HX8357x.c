@@ -113,7 +113,7 @@ static const HX8357X_Init_Command HX8357D_Init_Cmds[] = {
 };
 #endif //DISPLAY_HX8357D
 
-static HX8357x_OpResult HX8357x_Map_GPIO_Error_Code(hwGPIO_OpStatus error_code)
+static HX8357x_OpResult HX8357x_Map_GPIO_Error_Code(hwGPIO_OpResult error_code)
 {
   switch(error_code)
   {
@@ -163,7 +163,7 @@ static HX8357x_OpResult HX8357x_Map_SPI_Error_Code(hwSPI_OpResult error_code)
 
 static HX8357x_OpResult HX8357x_IO_Init()
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
     hwSPI_OpResult spi_op_result;
     
     gpio_op_result = GPIO_Pin_Init(CONFIG_HX8357X_CS_PN, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
@@ -201,7 +201,7 @@ static HX8357x_OpResult HX8357x_IO_Init()
 
 static HX8357x_OpResult HX8357x_Reset()
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
 
     gpio_op_result = GPIO_Pin_Write(CONFIG_HX8357X_RST_PN, 1);
     if(gpio_op_result<hwGPIO_OK)
@@ -232,7 +232,7 @@ static HX8357x_OpResult HX8357x_Reset()
 
 static HX8357x_OpResult HX8357x_IO_Write(uint8_t cmd, uint8_t* param_data, uint16_t param_length)
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
     hwSPI_OpResult spi_op_result;
 
     if(param_data==NULL && param_length>0)
@@ -295,7 +295,7 @@ static HX8357x_OpResult HX8357x_IO_Write(uint8_t cmd, uint8_t* param_data, uint1
 
 static HX8357x_OpResult HX8357x_Nenory_Write(HX8357x_Color16_RGB565* data, uint16_t data_length)
 {
-    hwGPIO_OpStatus gpio_op_result;
+    hwGPIO_OpResult gpio_op_result;
     hwSPI_OpResult spi_op_result;
 
     if(data==NULL && data_length>0)

@@ -2,7 +2,7 @@
 #ifndef DAC_DEF_H
 #define DAC_DEF_H
 
-typedef enum hwDAC_OpStatus_t
+typedef enum hwDAC_OpResult_t
 {
   hwDAC_OK = 0,
   hwDAC_NotInit = -1,
@@ -12,6 +12,6 @@ typedef enum hwDAC_OpStatus_t
   hwDAC_MutexTimeout = -5,
   hwDAC_HW_Error = -6,
   hwDAC_Unsupport = -7
-} hwDAC_OpStatus;
+} hwDAC_OpResult;
 
 #endif //DAC_DEF_H

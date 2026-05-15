@@ -515,7 +515,7 @@ ILI9xxx_Init_Command ILI9xxx_Init_Cmds[]={
 uint16_t ILI9xxx_VerticalScrollingStartAddress = 0;
 #endif // DISPLAY_ILI9163 || DISPLAY_ILI9341 || DISPLAY_ILI9481 || DISPLAY_ILI9486 || DISPLAY_ILI9488
 
-static ILI9xxx_OpResult ILI9xxx_Map_GPIO_Error_Code(hwGPIO_OpStatus error_code)
+static ILI9xxx_OpResult ILI9xxx_Map_GPIO_Error_Code(hwGPIO_OpResult error_code)
 {
         switch(error_code)
         {
@@ -565,7 +565,7 @@ static ILI9xxx_OpResult ILI9xxx_Map_SPI_Error_Code(hwSPI_OpResult error_code)
 
 static ILI9xxx_OpResult ILI9xxx_IO_Init()
 {
-        hwGPIO_OpStatus gpio_op_result;
+        hwGPIO_OpResult gpio_op_result;
         hwSPI_OpResult spi_op_result;
         
         gpio_op_result = GPIO_Pin_Init(CONFIG_ILI9XXX_CS_PN, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
@@ -603,7 +603,7 @@ static ILI9xxx_OpResult ILI9xxx_IO_Init()
 
 static ILI9xxx_OpResult ILI9xxx_Reset()
 {
-        hwGPIO_OpStatus gpio_op_result;
+        hwGPIO_OpResult gpio_op_result;
 
         gpio_op_result = GPIO_Pin_Write(CONFIG_ILI9XXX_RST_PN, 1);
         if(gpio_op_result<hwGPIO_OK)
@@ -650,7 +650,7 @@ static ILI9xxx_OpResult ILI9xxx_Reset()
 
 static ILI9xxx_OpResult ILI9xxx_IO_Write(uint8_t cmd, uint8_t* param_data, uint16_t param_length)
 {
-        hwGPIO_OpStatus gpio_op_result;
+        hwGPIO_OpResult gpio_op_result;
         hwSPI_OpResult spi_op_result;
 
         if(param_data==NULL && param_length>0)
@@ -721,7 +721,7 @@ static ILI9xxx_OpResult ILI9xxx_IO_Write(uint8_t cmd, uint8_t* param_data, uint1
 
 static ILI9xxx_OpResult ILI9xxx_Nenory_Write(ILI9xxx_Color16_RGB565* data, uint16_t data_length)
 {
-        hwGPIO_OpStatus gpio_op_result;
+        hwGPIO_OpResult gpio_op_result;
         hwSPI_OpResult spi_op_result;
 
         if(data==NULL && data_length>0)

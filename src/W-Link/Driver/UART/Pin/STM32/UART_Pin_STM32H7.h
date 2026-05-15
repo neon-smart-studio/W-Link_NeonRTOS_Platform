@@ -313,12 +313,12 @@ static const UART_AF_Map UART_Pin_AF_Map[] =
 #endif
 #if defined(LPUART1_BASE)
     /* ================= LPUART1 ================= */
-    { hwUART_Index_L1, hwGPIO_Pin_G7, GPIO_AF8_LPUART1 },
-    { hwUART_Index_L1, hwGPIO_Pin_G8, GPIO_AF8_LPUART1 },
-    { hwUART_Index_L1, hwGPIO_Pin_A9, GPIO_AF8_LPUART1 },
-    { hwUART_Index_L1, hwGPIO_Pin_A10, GPIO_AF8_LPUART1 },
-    { hwUART_Index_L1, hwGPIO_Pin_C0, GPIO_AF8_LPUART1 },
-    { hwUART_Index_L1, hwGPIO_Pin_C1, GPIO_AF8_LPUART1 },
+    { hwUART_Index_L1, hwGPIO_Pin_G7, GPIO_AF8_LPUART },
+    { hwUART_Index_L1, hwGPIO_Pin_G8, GPIO_AF8_LPUART },
+    { hwUART_Index_L1, hwGPIO_Pin_A9, GPIO_AF8_LPUART },
+    { hwUART_Index_L1, hwGPIO_Pin_A10, GPIO_AF8_LPUART },
+    { hwUART_Index_L1, hwGPIO_Pin_C0, GPIO_AF8_LPUART },
+    { hwUART_Index_L1, hwGPIO_Pin_C1, GPIO_AF8_LPUART },
 #endif
 };
 

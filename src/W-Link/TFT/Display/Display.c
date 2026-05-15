@@ -195,7 +195,7 @@ Display_Result Display_Power_Off(void)
 
 Display_Result Display_Backlight_Init(void)
 {
-    hwGPIO_OpStatus ret;
+    hwGPIO_OpResult ret;
 
     ret = GPIO_Pin_Init(CONFIG_DISPLAY_BACKLIGHT_PN,
                         hwGPIO_Direction_Output,

@@ -2,14 +2,14 @@
 #ifndef GPIO_DEF_H
 #define GPIO_DEF_H
 
-typedef enum hwGPIO_OpStatus_t
+typedef enum hwGPIO_OpResult_t
 {
   hwGPIO_OK = 0,
   hwGPIO_InvalidParameter = -1,
   hwGPIO_PinConflict = -2,
   hwGPIO_HW_Error = -3,
   hwGPIO_Unsupport = -4
-} hwGPIO_OpStatus;
+} hwGPIO_OpResult;
 
 typedef enum hwGPIO_Direction_t
 {

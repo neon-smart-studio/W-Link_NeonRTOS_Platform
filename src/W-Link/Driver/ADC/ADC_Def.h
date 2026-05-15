@@ -2,7 +2,7 @@
 #ifndef ADC_DEF_H
 #define ADC_DEF_H
 
-typedef enum hwADC_OpStatus_t
+typedef enum hwADC_OpResult_t
 {
   hwADC_OK = 0,
   hwADC_NotInit = -1,
@@ -12,6 +12,6 @@ typedef enum hwADC_OpStatus_t
   hwADC_MutexTimeout = -5,
   hwADC_HW_Error = -6,
   hwADC_Unsupport = -7
-} hwADC_OpStatus;
+} hwADC_OpResult;
 
 #endif //ADC_DEF_H

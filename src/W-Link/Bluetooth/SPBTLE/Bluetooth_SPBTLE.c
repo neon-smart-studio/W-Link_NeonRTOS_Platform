@@ -214,7 +214,7 @@ static Bluetooth_OpResult SPBTLE_Map_SPI_Result(hwSPI_OpResult result)
     }
 }
 
-static Bluetooth_OpResult SPBTLE_Map_GPIO_Result(hwGPIO_OpStatus result)
+static Bluetooth_OpResult SPBTLE_Map_GPIO_Result(hwGPIO_OpResult result)
 {
     switch(result)
     {
@@ -897,7 +897,7 @@ void HCI_Event_CB(void *pckt)
 
 Bluetooth_OpResult Bluetooth_Init(const char *name, uint8_t addr[BDADDR_SIZE])
 {
-    hwGPIO_OpStatus gpio_op_status;
+    hwGPIO_OpResult gpio_op_status;
     hwSPI_OpResult spi_op_status;
 
     if(addr == NULL)
@@ -1003,7 +1003,7 @@ Bluetooth_OpResult Bluetooth_Init(const char *name, uint8_t addr[BDADDR_SIZE])
 
 Bluetooth_OpResult Bluetooth_DeInit(void)
 {
-    hwGPIO_OpStatus gpio_op_status;
+    hwGPIO_OpResult gpio_op_status;
     hwSPI_OpResult spi_op_status;
 
     if(g_hci_task != NULL)

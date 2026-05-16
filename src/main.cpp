@@ -14,11 +14,16 @@
 #include "Sensor/HTS221/HTS221.h"
 
 #include "NFC/M24SR/M24SR.h"
+#include "Bluetooth/Bluetooth.h"
 
 #include "NeonRTOS.h"
 
 #include "GPIO/GPIO.h"
-
+/*
+#define ENV_SERVICE_UUID      "42821a40-e477-11e2-82d0-0002a5d5c51b"
+#define TEMP_CHAR_UUID        "a32e5520-e477-11e2-a9e3-0002a5d5c51b"
+#define HUMIDITY_CHAR_UUID    "01c50b60-e48c-11e2-a073-0002a5d5c51b"
+*/
 void HardFault_Handler()
 {
     while (1);
@@ -44,64 +49,6 @@ void vApplicationTickHook(void) {
 #ifdef DEVICE_STM32
     HAL_IncTick(); // 增加 HAL 的滴答計數
 #endif
-}
-
-void Sensor_Task(void* p)
-{
-    uint8_t id = 0;
-    float temperature = 0.0f;
-    float humidity = 0.0f;
-    HTS221_OpStatus status;
-
-    I2C_Master_Init(hwI2C_Index_1, hwI2C_Standard_Mode);
-
-    status = HTS221_Init();
-    if (status != HTS221_OK) {
-        UART_Printf("HTS221_Init failed: %d\r\n", status);
-        while (1) {
-            NeonRTOS_Sleep(1000);
-        }
-    }
-
-    status = HTS221_ReadID(&id);
-    if (status != HTS221_OK) {
-        UART_Printf("HTS221_ReadID failed: %d\r\n", status);
-    } else {
-        UART_Printf("HTS221 ID: 0x%02X\r\n", id);
-    }
-
-    status = HTS221_SetODR(1.0f);
-    if (status != HTS221_OK) {
-        UART_Printf("HTS221_SetODR failed: %d\r\n", status);
-    }
-
-    status = HTS221_Enable();
-    if (status != HTS221_OK) {
-        UART_Printf("HTS221_Enable failed: %d\r\n", status);
-        while (1) {
-            NeonRTOS_Sleep(1000);
-        }
-    }
-
-    UART_Printf("HTS221 demo started\r\n");
-
-    while (1) {
-        status = HTS221_GetTemperature(&temperature);
-        if (status != HTS221_OK) {
-            UART_Printf("Read temperature failed: %d\r\n", status);
-        }
-
-        status = HTS221_GetHumidity(&humidity);
-        if (status != HTS221_OK) {
-            UART_Printf("Read humidity failed: %d\r\n", status);
-        }
-
-        UART_Printf("Temperature: %.2f C, Humidity: %.2f %%RH\r\n",
-               temperature,
-               humidity);
-
-        NeonRTOS_Sleep(1000);
-    }
 }
 
 static uint16_t NFC_BuildUriNdef(uint8_t *out, uint16_t out_size, float temp, float hum)
@@ -143,7 +90,7 @@ static uint16_t NFC_BuildUriNdef(uint8_t *out, uint16_t out_size, float temp, fl
 
     return idx;
 }
-
+/*
 static void NFC_Task(void *arg)
 {
     M24SR_OpStatus nfc_status;
@@ -236,7 +183,114 @@ static void NFC_Task(void *arg)
         NeonRTOS_Sleep(5000);
     }
 }
+*/
+/*
+void BLE_Task(void* p)
+{
+    Bluetooth_OpResult bt_ret;
+    HTS221_OpStatus sensor_status;
 
+    const char *name = "NeonSmart-IotHub";
+    uint8_t SERVER_BDADDR[] = {0x12, 0x34, 0x00, 0xE1, 0x80, 0x03};
+
+    uint16_t env_service_handle = 0;
+    uint16_t temp_char_handle = 0;
+    uint16_t humidity_char_handle = 0;
+
+    float temperature = 0.0f;
+    float humidity = 0.0f;
+
+    int16_t ble_temp = 0;
+    uint16_t ble_humidity = 0;
+
+    I2C_Master_Init(hwI2C_Index_1, hwI2C_Standard_Mode);
+
+    bt_ret = Bluetooth_Init(name, SERVER_BDADDR);
+    UART_Printf("Bluetooth_Init=%d\r\n", bt_ret);
+
+    NeonRTOS_Sleep(1000);
+
+    bt_ret = Bluetooth_Add_Service(
+        ENV_SERVICE_UUID,
+        Bluetooth_Service_Type_Primary,
+        10,
+        &env_service_handle
+    );
+    UART_Printf("Bluetooth_Add_Service=%d handle=0x%04X\r\n",
+                bt_ret,
+                env_service_handle);
+
+    bt_ret = Bluetooth_Service_Add_Char(
+        env_service_handle,
+        TEMP_CHAR_UUID,
+        2,
+        (Bluetooth_Char_Property)(Bluetooth_Char_Property_Read | Bluetooth_Char_Property_Notify),
+        Bluetooth_Char_Permission_None,
+        &temp_char_handle
+    );
+    UART_Printf("Add Temp Char=%d handle=0x%04X\r\n",
+                bt_ret,
+                temp_char_handle);
+
+    bt_ret = Bluetooth_Service_Add_Char(
+        env_service_handle,
+        HUMIDITY_CHAR_UUID,
+        2,
+        (Bluetooth_Char_Property)(Bluetooth_Char_Property_Read | Bluetooth_Char_Property_Notify),
+        Bluetooth_Char_Permission_None,
+        &humidity_char_handle
+    );
+    UART_Printf("Add Humidity Char=%d handle=0x%04X\r\n",
+                bt_ret,
+                humidity_char_handle);
+
+    bt_ret = Bluetooth_Set_TX_Power(Bluetooth_PA_Level_7);
+    UART_Printf("Bluetooth_Set_TX_Power=%d\r\n", bt_ret);
+
+    bt_ret = Bluetooth_Set_Scan_Response_Data(NULL);
+    UART_Printf("Bluetooth_Set_Scan_Response_Data=%d\r\n", bt_ret);
+
+    bt_ret = Bluetooth_Set_Discoverable();
+    UART_Printf("Bluetooth_Set_Discoverable=%d\r\n", bt_ret);
+
+    while(1)
+    {
+        sensor_status = HTS221_GetTemperature(&temperature);
+        if(sensor_status == HTS221_OK)
+        {
+            ble_temp = (int16_t)(temperature * 100.0f);
+
+            bt_ret = Bluetooth_Service_Update_Char_Value(
+                env_service_handle,
+                temp_char_handle,
+                0,
+                2,
+                (const uint8_t *)&ble_temp
+            );
+
+            UART_Printf("BLE Temp Update=%d %.2f\r\n", bt_ret, temperature);
+        }
+
+        sensor_status = HTS221_GetHumidity(&humidity);
+        if(sensor_status == HTS221_OK)
+        {
+            ble_humidity = (uint16_t)(humidity * 100.0f);
+
+            bt_ret = Bluetooth_Service_Update_Char_Value(
+                env_service_handle,
+                humidity_char_handle,
+                0,
+                2,
+                (const uint8_t *)&ble_humidity
+            );
+
+            UART_Printf("BLE Humidity Update=%d %.2f\r\n", bt_ret, humidity);
+        }
+
+        NeonRTOS_Sleep(1000);
+    }
+}
+*/
 int main(void) {
     SysCtrl_Init();
 
@@ -254,15 +308,16 @@ int main(void) {
         NULL
     );
 */
+/*
     NeonRTOS_TaskCreate(
-        NFC_Task,
-        (const signed char *)"NFC",
+        BLE_Task,
+        (const signed char *)"BLE",
         2048,
         NULL,
         2,
         NULL
     );
-
+*/
     // 啟動 NeonRTOS 調度器
     NeonRTOS_start();
 

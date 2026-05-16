@@ -628,6 +628,33 @@ hwSPI_OpResult SPI_Master_DummyByte(hwSPI_Index index)
     return SPI_Master_WriteByte(index, 0x00);
 }
 
+hwSPI_OpResult SPI_Master_DummyBytes(hwSPI_Index index, uint32_t len)
+{
+    if (index >= hwSPI_Index_MAX)
+    {
+        return hwSPI_InvalidParameter;
+    }
+
+    if (Spi_Master_Init_Status[index] == false)
+    {
+        return hwSPI_NotInit;
+    }
+
+    for (uint32_t i = 0; i < len; i++)
+    {
+        hwSPI_OpResult ret;
+
+        ret = SPI_Master_DummyByte(index);
+
+        if (ret != hwSPI_OK)
+        {
+            return ret;
+        }
+    }
+
+    return hwSPI_OK;
+}
+
 hwSPI_OpResult SPI_Master_Stream_Write(hwSPI_Index index, const uint8_t* buf, uint16_t len)
 {
     if (index >= hwSPI_Index_MAX)

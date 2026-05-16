@@ -19,6 +19,7 @@ hwSPI_OpResult SPI_Master_DeInit(hwSPI_Index index);
 hwSPI_OpResult SPI_Change_Frequency(hwSPI_Index index, uint32_t clock_rate_hz);
 hwSPI_OpResult SPI_Change_Mode(hwSPI_Index index, hwSPI_OpMode opMode);
 hwSPI_OpResult SPI_Master_DummyByte(hwSPI_Index index);
+hwSPI_OpResult SPI_Master_DummyBytes(hwSPI_Index index, uint32_t len);
 hwSPI_OpResult SPI_Master_WriteByte(hwSPI_Index index, uint8_t dat);
 hwSPI_OpResult SPI_Master_ReadByte(hwSPI_Index index, uint8_t* dat);
 hwSPI_OpResult SPI_Master_TransferByte(hwSPI_Index index, uint8_t wr_dat, uint8_t* rd_dat);

@@ -209,9 +209,9 @@ typedef struct {
   ST25R95_AnalogConfigRegAddrMaskVal regSet[];                       /*!< Register-Mask-Value sets           */ /*  PRQA S 1060 # MISRA 18.7 - Flexible Array Members are the only meaningful way of denoting a variable length input buffer which follows a fixed header structure. */
 } ST25R95_AnalogConfig;
 
-ST25R95_OpResult ST25R95_AnalogConfig_Init(void);
-ST25R95_OpResult ST25R95_AnalogConfig_List_Read_Raw(uint8_t *tblBuf, uint16_t tblBufLen, uint16_t *configTblSize);
-ST25R95_OpResult ST25R95_AnalogConfig_List_Read(ST25R95_AnalogConfigOffset *configOffset, uint8_t *more, ST25R95_AnalogConfig *config, ST25R95_AnalogConfigNum numConfig);
-ST25R95_OpResult ST25R95_AnalogConfig_Set(ST25R95_AnalogConfigId configId);
+NFC_OpResult ST25R95_AnalogConfig_Init(void);
+NFC_OpResult ST25R95_AnalogConfig_List_Read_Raw(uint8_t *tblBuf, uint16_t tblBufLen, uint16_t *configTblSize);
+NFC_OpResult ST25R95_AnalogConfig_List_Read(ST25R95_AnalogConfigOffset *configOffset, uint8_t *more, ST25R95_AnalogConfig *config, ST25R95_AnalogConfigNum numConfig);
+NFC_OpResult ST25R95_AnalogConfig_Set(ST25R95_AnalogConfigId configId);
 
 #endif /* ST25R95_RFST25R95_ANALOG_CONFIG_H */

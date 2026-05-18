@@ -39,6 +39,8 @@
 #ifndef ST25R95_DEF_H
 #define ST25R95_DEF_H
 
+#include "NFC/NFC_Def.h"
+
 #define ST25R95_ERRCODE_NONE                             0x00 /*!< no error occurred */
 #define ST25R95_ERRCODE_FRAMEOKADDITIONALINFO            0x80 /*!< Frame correctly received (additionally see CRC/Parity information) */
 #define ST25R95_ERRCODE_INVALIDCMDLENGHT                 0x82 /*!< Invalid command length */
@@ -112,33 +114,6 @@
 #define ST25R95_REG_TIMERW                               0x3A00 /*!< TIMER register address */
 
 #define ST25R95_NFCF_LENGTH_LEN                     1U      /*!< LEN field length                                  */
-
-typedef enum {
-    ST25R95_OK = 0,
-    ST25R95_NotInit = -1,
-    ST25R95_InvalidParameter = -2,
-    ST25R95_MemoryError = -3,
-    ST25R95_MutexTimeout = -4,
-    ST25R95_SlaveTimeout = -5,
-    ST25R95_IO_Error = -6,
-    ST25R95_Busy = -6,
-    ST25R95_Again = -7,
-    ST25R95_Hw_Mismatch = -8,
-    ST25R95_Hw_OverRun = -9,
-    ST25R95_System = -10,
-    ST25R95_WrongState = -11,
-    ST25R95_CRC_Error = -12,
-    ST25R95_ParityError = -13,
-    ST25R95_CalibrateError = -14,
-    ST25R95_FrameTimeout = -15,
-    ST25R95_FramingError = -16,
-    ST25R95_RF_Collision = -17,
-    ST25R95_LinkLoss = -18,
-    ST25R95_InternalError = -19,
-    ST25R95_RequestError = -20,
-    ST25R95_ImcompleteByte = -21,
-    ST25R95_Unsupport = -22
-} ST25R95_OpResult;
 
 typedef enum{
     ST25R95_Protocol_FieldOff       = 0x00U, /*!< Field OFF */

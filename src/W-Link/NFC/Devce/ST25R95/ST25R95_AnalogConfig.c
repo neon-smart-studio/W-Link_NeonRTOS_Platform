@@ -86,25 +86,25 @@ static ST25R95_AnalogConfigNum ST25R95_AnalogConfigSearch(ST25R95_AnalogConfigId
   return ST25R95_ANALOG_CONFIG_LUT_NOT_FOUND;
 }
 
-ST25R95_OpResult ST25R95_AnalogConfig_Init(void)
+NFC_OpResult ST25R95_AnalogConfig_Init(void)
 {
   /* Use default Analog configuration settings in Flash by default. */
   gRfalAnalogConfigMgmt.currentAnalogConfigTbl = (const uint8_t *)&ST25R95_AnalogConfigDefaultSettings;
   gRfalAnalogConfigMgmt.configTblSize          = sizeof(ST25R95_AnalogConfigDefaultSettings);
 
-  return ST25R95_OK;
+  return NFC_OK;
 }
 
-ST25R95_OpResult ST25R95_AnalogConfig_List_Read_Raw(uint8_t *tblBuf, uint16_t tblBufLen, uint16_t *configTblSize)
+NFC_OpResult ST25R95_AnalogConfig_List_Read_Raw(uint8_t *tblBuf, uint16_t tblBufLen, uint16_t *configTblSize)
 {
   /* Check if the the current table will fit into the given buffer */
   if (tblBufLen < gRfalAnalogConfigMgmt.configTblSize) {
-    return ST25R95_MemoryError;
+    return NFC_MemoryError;
   }
 
   /* Check for invalid parameters */
   if (configTblSize == NULL) {
-    return ST25R95_InvalidParameter;
+    return NFC_InvalidParameter;
   }
 
   /* Copy the whole Table to the given buffer */
@@ -113,10 +113,10 @@ ST25R95_OpResult ST25R95_AnalogConfig_List_Read_Raw(uint8_t *tblBuf, uint16_t tb
   }
   *configTblSize = gRfalAnalogConfigMgmt.configTblSize;
 
-  return ST25R95_OK;
+  return NFC_OK;
 }
 
-ST25R95_OpResult ST25R95_AnalogConfig_List_Read(ST25R95_AnalogConfigOffset *configOffset, uint8_t *more, ST25R95_AnalogConfig *config, ST25R95_AnalogConfigNum numConfig)
+NFC_OpResult ST25R95_AnalogConfig_List_Read(ST25R95_AnalogConfigOffset *configOffset, uint8_t *more, ST25R95_AnalogConfig *config, ST25R95_AnalogConfigNum numConfig)
 {
   uint16_t configSize;
   ST25R95_AnalogConfigOffset offset = *configOffset;
@@ -124,7 +124,7 @@ ST25R95_OpResult ST25R95_AnalogConfig_List_Read(ST25R95_AnalogConfigOffset *conf
 
   /* Check if the number of register-mask-value settings for the respective Configuration ID will fit into the buffer passed in. */
   if (gRfalAnalogConfigMgmt.currentAnalogConfigTbl[offset + sizeof(ST25R95_AnalogConfigId)] > numConfig) {
-    return ST25R95_MemoryError;
+    return NFC_MemoryError;
   }
 
   /* Get the number of Configuration set */
@@ -142,17 +142,17 @@ ST25R95_OpResult ST25R95_AnalogConfig_List_Read(ST25R95_AnalogConfigOffset *conf
   *more = (uint8_t)((*configOffset >= gRfalAnalogConfigMgmt.configTblSize) ? ST25R95_ANALOG_CONFIG_UPDATE_LAST
                     : ST25R95_ANALOG_CONFIG_UPDATE_MORE);
 
-  return ST25R95_OK;
+  return NFC_OK;
 } /* ST25R95_AnalogConfigListRead() */
 
 
-ST25R95_OpResult ST25R95_AnalogConfig_Set(ST25R95_AnalogConfigId configId)
+NFC_OpResult ST25R95_AnalogConfig_Set(ST25R95_AnalogConfigId configId)
 {
   ST25R95_AnalogConfigOffset configOffset = 0;
   ST25R95_AnalogConfigNum numConfigSet;
   ST25R95_AnalogConfigRegAddrMaskVal *configTbl;
   ST25R95_AnalogConfigNum i;
-  ST25R95_OpResult op_status;
+  NFC_OpResult op_status;
 
   /* Search LUT for the specific Configuration ID. */
   while (true) {
@@ -167,21 +167,21 @@ ST25R95_OpResult ST25R95_AnalogConfig_Set(ST25R95_AnalogConfigId configId)
 
     if ((gRfalAnalogConfigMgmt.configTblSize + 1U) < configOffset) {
       /* Error check make sure that the we do not access outside the configuration Table Size */
-      return ST25R95_MemoryError;
+      return NFC_MemoryError;
     }
 
     for (i = 0; i < numConfigSet; i++) {
       if ((GETU16(configTbl[i].addr) & ST25R95_TEST_REG) == 0U)
       {
         op_status = ST25R95_ChipChangeRegBits(GETU16(configTbl[i].addr), configTbl[i].mask, configTbl[i].val);
-        if(op_status < ST25R95_OK)
+        if(op_status < NFC_OK)
         {
           return op_status;
         }
       }
       else
       {
-        return ST25R95_Unsupport;
+        return NFC_Unsupport;
       }
     }
 

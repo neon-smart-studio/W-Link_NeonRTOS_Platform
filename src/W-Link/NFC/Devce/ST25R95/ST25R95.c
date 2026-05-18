@@ -90,7 +90,7 @@ static uint8_t Calibrate[] = {ST25R95_COMMAND_IDLE, 0x0E, 0x03, 0xA1, 0x00, 0xB8
 static uint8_t WrRegAnalogRegConfigIndex[]  = {0x09, 0x03, 0x68, 0x00, 0x01};
 static uint8_t RdRegAnalogRegConfig[]       = {0x08, 0x03, 0x69, 0x01, 0x00};
 
-ST25R95_OpResult ST25R95_Field_On(ST25R95_Protocol protocol)
+NFC_OpResult ST25R95_Field_On(ST25R95_Protocol protocol)
 {
   if (protocol == ST25R95_Protocol_FieldOff) {
     protocol = ST25R95_Protocol_ISO15693;
@@ -98,17 +98,17 @@ ST25R95_OpResult ST25R95_Field_On(ST25R95_Protocol protocol)
   return (ST25R95_ProtocolSelect(protocol));
 }
 
-ST25R95_OpResult ST25R95_Field_Off(void)
+NFC_OpResult ST25R95_Field_Off(void)
 {
   return (ST25R95_ProtocolSelect(ST25R95_Protocol_FieldOff));
 }
 
-ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate txBR, ST25R95_BitRate rxBR)
+NFC_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate txBR, ST25R95_BitRate rxBR)
 {
     uint8_t *conf;
     if ((protocol == ST25R95_Protocol_FieldOff) || (protocol > ST25R95_Protocol_MAX))
     {
-      return ST25R95_InvalidParameter;
+      return NFC_InvalidParameter;
     }
     
     conf = &ProtocolSelectCommands[protocol][ST25R95_PROTOCOLSELECT_BR_OFFSET];
@@ -123,7 +123,7 @@ ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate 
             *conf |= 0x10;
             break;
           default:
-            return ST25R95_Unsupport;
+            return NFC_Unsupport;
         }
         break;
       case (ST25R95_Protocol_ISO14443A):
@@ -137,7 +137,7 @@ ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate 
             *conf |= 0x80;
             break;
           default:
-            return ST25R95_Unsupport;
+            return NFC_Unsupport;
         }
         switch (rxBR) {
           case (ST25R95_BitRate_106):
@@ -149,7 +149,7 @@ ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate 
             *conf |= 0x20;
             break;
           default:
-            return ST25R95_Unsupport;
+            return NFC_Unsupport;
         }
         break;
       case (ST25R95_Protocol_ISO14443B):
@@ -166,7 +166,7 @@ ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate 
             *conf |= 0xC0;
             break;
           default:
-            return ST25R95_Unsupport;
+            return NFC_Unsupport;
         }
         switch (rxBR) {
           case (ST25R95_BitRate_106):
@@ -181,7 +181,7 @@ ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate 
             *conf |= 0x30;
             break;
           default:
-            return ST25R95_Unsupport;
+            return NFC_Unsupport;
         }
         break;
       case (ST25R95_Protocol_ISO18092):
@@ -193,7 +193,7 @@ ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate 
             *conf |= 0x80;
             break;
           default:
-            return ST25R95_Unsupport;
+            return NFC_Unsupport;
         }
         switch (rxBR) {
           case (ST25R95_BitRate_212):
@@ -203,7 +203,7 @@ ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate 
             *conf |= 0x20;
             break;
           default:
-            return ST25R95_Unsupport;
+            return NFC_Unsupport;
         }
         break;
       case (ST25R95_Protocol_CE_ISO14443A):
@@ -211,23 +211,23 @@ ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate 
           case (ST25R95_BitRate_106):
             break;
           default:
-            return ST25R95_Unsupport;
+            return NFC_Unsupport;
         }
         switch (rxBR) {
           case (ST25R95_BitRate_106):
             break;
           default:
-            return ST25R95_Unsupport;
+            return NFC_Unsupport;
         }
         break;
       default:
-        return ST25R95_Unsupport;
+        return NFC_Unsupport;
     }
 
     return ST25R95_IO_Set_BitRate(txBR, rxBR);
 }
 
-ST25R95_OpResult ST25R95_Set_FWT(ST25R95_Protocol protocol, uint32_t fwt)
+NFC_OpResult ST25R95_Set_FWT(ST25R95_Protocol protocol, uint32_t fwt)
 {
     uint8_t PP;
     uint32_t MM;
@@ -337,7 +337,7 @@ ST25R95_OpResult ST25R95_Set_FWT(ST25R95_Protocol protocol, uint32_t fwt)
       default:
         break;
     }
-    return ST25R95_OK;
+    return NFC_OK;
 }
 
 bool ST25R95_CheckChipID(void)
@@ -345,7 +345,7 @@ bool ST25R95_CheckChipID(void)
     bool ret = false;
     uint8_t respBuffer[ST25R95_IDN_RESPONSE_BUFLEN];
 
-    if (ST25R95_IO_SPI_Send_Command_Type_And_Len(ST25R95_CommandIDN, respBuffer, ST25R95_IDN_RESPONSE_BUFLEN) == ST25R95_OK)
+    if (ST25R95_IO_SPI_Send_Command_Type_And_Len(ST25R95_CommandIDN, respBuffer, ST25R95_IDN_RESPONSE_BUFLEN) == NFC_OK)
     {
       if (respBuffer[ST25R95_CMD_LENGTH_OFFSET] != 0)
       {
@@ -356,7 +356,7 @@ bool ST25R95_CheckChipID(void)
     return (ret);
 }
 
-ST25R95_OpResult ST25R95_Set_SlotCounter(ST25R95_FeliCaPollSlots slots)
+NFC_OpResult ST25R95_Set_SlotCounter(ST25R95_FeliCaPollSlots slots)
 {
     if ((ProtocolSelectCommandISO18092[4] & 0xF) != slots)
     {
@@ -365,35 +365,35 @@ ST25R95_OpResult ST25R95_Set_SlotCounter(ST25R95_FeliCaPollSlots slots)
       return (ST25R95_Protocol_Select(ST25R95_Protocol_ISO18092));
     }
 
-    return ST25R95_OK;
+    return NFC_OK;
 }
 
-ST25R95_OpResult ST25R95_Protocol_Select(ST25R95_Protocol protocol)
+NFC_OpResult ST25R95_Protocol_Select(ST25R95_Protocol protocol)
 {
-    ST25R95_OpResult op_status;
+    NFC_OpResult op_status;
 
     uint8_t protocolResp[ST25R95_PROTOCOLSELECT_RESPONSE_BUFLEN];
     uint8_t wrregResp[ST25R95_WRREG_RESPONSE_BUFLEN];
 
     if (protocol > ST25R95_Protocol_CE_ISO14443A)
     {
-        return ST25R95_InvalidParameter;
+        return NFC_InvalidParameter;
     }
 
     if (ProtocolSelectCommands[protocol] == NULL)
     {
-        return ST25R95_InvalidParameter;
+        return NFC_InvalidParameter;
     }
 
     op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(ProtocolSelectCommands[protocol], protocolResp, ST25R95_PROTOCOLSELECT_RESPONSE_BUFLEN);
-    if ((op_status == ST25R95_OK) && (protocolResp[ST25R95_CMD_RESULT_OFFSET] != ST25R95_ERRCODE_NONE)) {
-      return ST25R95_InvalidParameter;
+    if ((op_status == NFC_OK) && (protocolResp[ST25R95_CMD_RESULT_OFFSET] != ST25R95_ERRCODE_NONE)) {
+      return NFC_InvalidParameter;
     }
 
     /* Adjust ARC_B or ACC_A register */
     if ((protocol != ST25R95_Protocol_FieldOff)) {
       op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(WrRegAnalogRegConfigs[protocol], wrregResp, ST25R95_WRREG_RESPONSE_BUFLEN);
-      if(op_status < ST25R95_OK)
+      if(op_status < NFC_OK)
       {
           return op_status;
       }
@@ -401,25 +401,25 @@ ST25R95_OpResult ST25R95_Protocol_Select(ST25R95_Protocol protocol)
 
     if (protocol == ST25R95_Protocol_ISO18092) {
       op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(WrRegEnableAutoDetectFilter, wrregResp, ST25R95_WRREG_RESPONSE_BUFLEN);
-      if(op_status < ST25R95_OK)
+      if(op_status < NFC_OK)
       {
           return op_status;
       }
     }
     if (protocol == ST25R95_Protocol_ISO14443A) {
       op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(WrRegTimerWindowValue, wrregResp, ST25R95_WRREG_RESPONSE_BUFLEN);
-      if(op_status < ST25R95_OK)
+      if(op_status < NFC_OK)
       {
           return op_status;
       }
     }
     
-    return (ST25R95_OK);
+    return (NFC_OK);
 }
 
-ST25R95_OpResult ST25R95_Calibrate_Tag_Detector(uint8_t* pCalibrate)
+NFC_OpResult ST25R95_Calibrate_Tag_Detector(uint8_t* pCalibrate)
 {
-    ST25R95_OpResult op_status;
+    NFC_OpResult op_status;
 
     const uint8_t steps[6] = {0x80U, 0x40U, 0x20U, 0x10U, 0x08U, 0x4U};
     uint8_t       respBuffer[ST25R95_IDLE_RESPONSE_BUFLEN];
@@ -431,28 +431,28 @@ ST25R95_OpResult ST25R95_Calibrate_Tag_Detector(uint8_t* pCalibrate)
     Calibrate[ST25R95_IDLE_DACDATAH_OFFSET] = 0x00U;
 
     op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(Calibrate, respBuffer, ST25R95_IDLE_RESPONSE_BUFLEN);
-    if(op_status < ST25R95_OK)
+    if(op_status < NFC_OK)
     {
         return op_status;
     }
 
     if ((respBuffer[ST25R95_CMD_RESULT_OFFSET] != ST25R95_ERRCODE_NONE) || (respBuffer[ST25R95_CMD_LENGTH_OFFSET] != 0x01) || (respBuffer[ST25R95_CMD_DATA_OFFSET] != ST25R95_IDLE_WKUP_TAGDETECT)) {
         *pCalibrate = (0xFFU);
-        return ST25R95_CalibrateError;
+        return NFC_CalibrateError;
     }
 
     /* Check that wake up detection is timeout (0x01) when DacDataH is Max Dac value 0xFC */
     Calibrate[ST25R95_IDLE_DACDATAH_OFFSET] = ST25R95_DACDATA_MAX;
 
     op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(Calibrate, respBuffer, ST25R95_IDLE_RESPONSE_BUFLEN);
-    if(op_status < ST25R95_OK)
+    if(op_status < NFC_OK)
     {
         return op_status;
     }
 
     if ((respBuffer[ST25R95_CMD_RESULT_OFFSET] != ST25R95_ERRCODE_NONE) || (respBuffer[ST25R95_CMD_LENGTH_OFFSET] != 0x01) || (respBuffer[ST25R95_CMD_DATA_OFFSET] != ST25R95_IDLE_WKUP_TIMEOUT)) {
         *pCalibrate = (0xFFU);
-        return ST25R95_CalibrateError;
+        return NFC_CalibrateError;
     }
 
     for (i = 0; i < 6; i++)
@@ -466,7 +466,7 @@ ST25R95_OpResult ST25R95_Calibrate_Tag_Detector(uint8_t* pCalibrate)
             Calibrate[ST25R95_IDLE_DACDATAH_OFFSET] += steps[i];
             break;
           default:
-            return ST25R95_System;
+            return NFC_System;
             /*NOTREACHED*/
             break;
         }
@@ -474,7 +474,7 @@ ST25R95_OpResult ST25R95_Calibrate_Tag_Detector(uint8_t* pCalibrate)
         respBuffer[ST25R95_CMD_DATA_OFFSET] = 0x00U;
 
         op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(Calibrate, respBuffer, ST25R95_IDLE_RESPONSE_BUFLEN);
-        if(op_status < ST25R95_OK)
+        if(op_status < NFC_OK)
         {
             return op_status;
         }
@@ -486,12 +486,12 @@ ST25R95_OpResult ST25R95_Calibrate_Tag_Detector(uint8_t* pCalibrate)
 
     *pCalibrate = (Calibrate[ST25R95_IDLE_DACDATAH_OFFSET]);
 
-    return ST25R95_OK;
+    return NFC_OK;
 }
 
-ST25R95_OpResult ST25R95_Read_Reg(uint16_t reg, uint8_t *value)
+NFC_OpResult ST25R95_Read_Reg(uint16_t reg, uint8_t *value)
 {
-  ST25R95_OpResult op_status;
+  NFC_OpResult op_status;
 
   uint8_t respBuffer[ST25R95_RDREG_RESPONSE_BUFLEN];
 
@@ -505,39 +505,39 @@ ST25R95_OpResult ST25R95_Read_Reg(uint16_t reg, uint8_t *value)
       break;
 
     default:
-      return ST25R95_InvalidParameter;
+      return NFC_InvalidParameter;
   }
 
   op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(WrRegAnalogRegConfigIndex, respBuffer, ST25R95_RDREG_RESPONSE_BUFLEN);
-  if(op_status < ST25R95_OK)
+  if(op_status < NFC_OK)
   {
       return op_status;
   }
 
   if (respBuffer[ST25R95_CMD_RESULT_OFFSET] != ST25R95_ERRCODE_NONE)
   {
-      return ST25R95_InvalidParameter;
+      return NFC_InvalidParameter;
   }
 
   op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(RdRegAnalogRegConfig, respBuffer, ST25R95_RDREG_RESPONSE_BUFLEN);
-  if(op_status < ST25R95_OK)
+  if(op_status < NFC_OK)
   {
       return op_status;
   }
 
   if (respBuffer[ST25R95_CMD_RESULT_OFFSET] != ST25R95_ERRCODE_NONE)
   {
-    return ST25R95_InvalidParameter;
+    return NFC_InvalidParameter;
   }
 
   *value = respBuffer[2];
 
-  return ST25R95_OK;
+  return NFC_OK;
 }
 
-ST25R95_OpResult ST25R95_Write_Reg(ST25R95_Protocol protocol, uint16_t reg, uint8_t value)
+NFC_OpResult ST25R95_Write_Reg(ST25R95_Protocol protocol, uint16_t reg, uint8_t value)
 {
-  ST25R95_OpResult op_status;
+  NFC_OpResult op_status;
 
   uint8_t respBuffer[ST25R95_WRREG_RESPONSE_BUFLEN];
 
@@ -551,19 +551,19 @@ ST25R95_OpResult ST25R95_Write_Reg(ST25R95_Protocol protocol, uint16_t reg, uint
               WrRegAnalogRegConfigs[protocol][5] = value;
 
               op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(WrRegAnalogRegConfigs[protocol], respBuffer, ST25R95_WRREG_RESPONSE_BUFLEN);
-              if(op_status < ST25R95_OK)
+              if(op_status < NFC_OK)
               {
                   return op_status;
               }
               
               if(respBuffer[ST25R95_CMD_RESULT_OFFSET] != 0)
               {
-                  return ST25R95_InvalidParameter;
+                  return NFC_InvalidParameter;
               }
           }
           else
           {
-              return ST25R95_WrongState;
+              return NFC_WrongState;
           }
       break;
 
@@ -574,24 +574,24 @@ ST25R95_OpResult ST25R95_Write_Reg(ST25R95_Protocol protocol, uint16_t reg, uint
 
           op_status = ST25R95_IO_SPI_Send_Command_Type_And_Len(WrRegAnalogRegConfigs[protocol], respBuffer, ST25R95_WRREG_RESPONSE_BUFLEN);
           
-          if(op_status < ST25R95_OK)
+          if(op_status < NFC_OK)
           {
               return op_status;
           }
 
           if(respBuffer[ST25R95_CMD_RESULT_OFFSET] != 0)
           {
-              return ST25R95_InvalidParameter;
+              return NFC_InvalidParameter;
           }
       }
       else
       {
-          return ST25R95_WrongState;
+          return NFC_WrongState;
       }
       break;
     default:
-      return ST25R95_InvalidParameter;
+      return NFC_InvalidParameter;
   }
 
-  return ST25R95_OK;
+  return NFC_OK;
 }

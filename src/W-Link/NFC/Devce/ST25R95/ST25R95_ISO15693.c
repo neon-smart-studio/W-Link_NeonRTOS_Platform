@@ -89,7 +89,7 @@
 
 ST25R95_ISO15693_PhyConfig_t ST25R95_ISO15693_PhyConfig; /*!< current phy configuration */
 
-static ST25R95_OpResult ST25R95_ISO15693_PhyVCDCode1Of4(const uint8_t data, uint8_t *outbuffer, uint16_t maxOutBufLen, uint16_t *outBufLen)
+static NFC_OpResult ST25R95_ISO15693_PhyVCDCode1Of4(const uint8_t data, uint8_t *outbuffer, uint16_t maxOutBufLen, uint16_t *outBufLen)
 {
   uint8_t tmp;
   uint16_t a;
@@ -98,7 +98,7 @@ static ST25R95_OpResult ST25R95_ISO15693_PhyVCDCode1Of4(const uint8_t data, uint
   *outBufLen = 0;
 
   if (maxOutBufLen < 4U) {
-    return ST25R95_MemoryError;
+    return NFC_MemoryError;
   }
 
   tmp = data;
@@ -125,10 +125,10 @@ static ST25R95_OpResult ST25R95_ISO15693_PhyVCDCode1Of4(const uint8_t data, uint
     tmp >>= 2;
   }
 
-  return ST25R95_OK;
+  return NFC_OK;
 }
 
-static ST25R95_OpResult ST25R95_ISO15693_PhyVCDCode1Of256(const uint8_t data, uint8_t *outbuffer, uint16_t maxOutBufLen, uint16_t *outBufLen)
+static NFC_OpResult ST25R95_ISO15693_PhyVCDCode1Of256(const uint8_t data, uint8_t *outbuffer, uint16_t maxOutBufLen, uint16_t *outBufLen)
 {
   uint8_t tmp;
   uint16_t a;
@@ -137,7 +137,7 @@ static ST25R95_OpResult ST25R95_ISO15693_PhyVCDCode1Of256(const uint8_t data, ui
   *outBufLen = 0;
 
   if (maxOutBufLen < 64U) {
-    return ST25R95_MemoryError;
+    return NFC_MemoryError;
   }
 
   tmp = data;
@@ -164,9 +164,9 @@ static ST25R95_OpResult ST25R95_ISO15693_PhyVCDCode1Of256(const uint8_t data, ui
     tmp -= 4U;
   }
 
-  return ST25R95_OK;
+  return NFC_OK;
 }
-ST25R95_OpResult ST25R95_ISO15693_PhyConfigure(const ST25R95_ISO15693_PhyConfig_t *config, const struct ST25R95_ISO15693_StreamConfig **needed_stream_config)
+NFC_OpResult ST25R95_ISO15693_PhyConfigure(const ST25R95_ISO15693_PhyConfig_t *config, const struct ST25R95_ISO15693_StreamConfig **needed_stream_config)
 {
   static struct ST25R95_ISO15693_StreamConfig stream_config = {                                       /* MISRA 8.9 */
     .useBPSK = 0,              /* 0: subcarrier, 1:BPSK */
@@ -189,25 +189,25 @@ ST25R95_OpResult ST25R95_ISO15693_PhyConfigure(const ST25R95_ISO15693_PhyConfig_
 
   *needed_stream_config = &stream_config;
 
-  return ST25R95_OK;
+  return NFC_OK;
 }
 
-ST25R95_OpResult ST25R95_ISO15693_PhyGetConfiguration(ST25R95_ISO15693_PhyConfig_t *config)
+NFC_OpResult ST25R95_ISO15693_PhyGetConfiguration(ST25R95_ISO15693_PhyConfig_t *config)
 {
   memcpy(config, &ST25R95_ISO15693_PhyConfig, sizeof(ST25R95_ISO15693_PhyConfig_t));
 
-  return ST25R95_OK;
+  return NFC_OK;
 }
 
-ST25R95_OpResult ST25R95_ISO15693_VCDCode(uint8_t *buffer, uint16_t length, bool sendCrc, bool sendFlags, bool picopassMode,
+NFC_OpResult ST25R95_ISO15693_VCDCode(uint8_t *buffer, uint16_t length, bool sendCrc, bool sendFlags, bool picopassMode,
                                                uint16_t *subbit_total_length, uint16_t *offset,
                                                uint8_t *outbuf, uint16_t outBufSize, uint16_t *actOutBufSize)
 {
-  ST25R95_OpResult err = ST25R95_OK;
+  NFC_OpResult err = NFC_OK;
   uint8_t eof, sof;
   uint8_t transbuf[2];
   uint16_t crc = 0;
-  ST25R95_OpResult(*txFunc)(const uint8_t data, uint8_t *outbuffer, uint16_t maxOutBufLen, uint16_t *outBufLen);
+  NFC_OpResult(*txFunc)(const uint8_t data, uint8_t *outbuffer, uint16_t maxOutBufLen, uint16_t *outBufLen);
   uint8_t crc_len;
   uint8_t *outputBuf;
   uint16_t outputBufSize;
@@ -226,7 +226,7 @@ ST25R95_OpResult ST25R95_ISO15693_VCDCode(uint8_t *buffer, uint16_t length, bool
                               + 1U) /* EOF */
                            );
     if (outBufSize < 5U) { /* 5 should be safe: enough for sof + 1byte data in 1of4 */
-      return ST25R95_MemoryError;
+      return NFC_MemoryError;
     }
   } else {
     sof = ISO15693_DAT_SOF_1_256;
@@ -240,11 +240,11 @@ ST25R95_OpResult ST25R95_ISO15693_VCDCode(uint8_t *buffer, uint16_t length, bool
 
     if (*offset != 0U) {
       if (outBufSize < 64U) { /* 64 should be safe: enough a single byte data in 1of256 */
-        return ST25R95_MemoryError;
+        return NFC_MemoryError;
       }
     } else {
       if (outBufSize < 65U) { /* At beginning of a frame we need at least 65 bytes to start: enough for sof + 1byte data in 1of256 */
-        return ST25R95_MemoryError;
+        return NFC_MemoryError;
       }
     }
   }
@@ -271,22 +271,22 @@ ST25R95_OpResult ST25R95_ISO15693_VCDCode(uint8_t *buffer, uint16_t length, bool
     outputBuf++;
   }
 
-  while ((*offset < length) && (err == ST25R95_OK)) {
+  while ((*offset < length) && (err == NFC_OK)) {
     uint16_t filled_size;
     /* send data */
     err = txFunc(buffer[*offset], outputBuf, outputBufSize, &filled_size);
     (*actOutBufSize) += filled_size;
     outputBuf = &outputBuf[filled_size];  /* MISRA 18.4: Avoid pointer arithmetic */
     outputBufSize -= filled_size;
-    if (err == ST25R95_OK) {
+    if (err == NFC_OK) {
       (*offset)++;
     }
   }
-  if (err != ST25R95_OK) {
-    return ST25R95_Again;
+  if (err != NFC_OK) {
+    return NFC_Again;
   }
 
-  while ((err == ST25R95_OK) && sendCrc && (*offset < (length + 2U))) {
+  while ((err == NFC_OK) && sendCrc && (*offset < (length + 2U))) {
     uint16_t filled_size;
     if (0U == crc) {
       crc = rfalCrcCalculateCcitt((uint16_t)((picopassMode) ? 0xE012U : 0xFFFFU),          /* In PicoPass Mode a different Preset Value is used   */
@@ -302,12 +302,12 @@ ST25R95_OpResult ST25R95_ISO15693_VCDCode(uint8_t *buffer, uint16_t length, bool
     (*actOutBufSize) += filled_size;
     outputBuf = &outputBuf[filled_size];  /* MISRA 18.4: Avoid pointer arithmetic */
     outputBufSize -= filled_size;
-    if (err == ST25R95_OK) {
+    if (err == NFC_OK) {
       (*offset)++;
     }
   }
-  if (err != ST25R95_OK) {
-    return ST25R95_Again;
+  if (err != NFC_OK) {
+    return NFC_Again;
   }
 
   if ((!sendCrc && (*offset == length))
@@ -317,13 +317,13 @@ ST25R95_OpResult ST25R95_ISO15693_VCDCode(uint8_t *buffer, uint16_t length, bool
     outputBufSize--;
     outputBuf++;
   } else {
-    return ST25R95_Again;
+    return NFC_Again;
   }
 
   return err;
 }
 
-ST25R95_OpResult ST25R95_ISO15693_VICCDecode(const uint8_t *inBuf,
+NFC_OpResult ST25R95_ISO15693_VICCDecode(const uint8_t *inBuf,
                                                   uint16_t inBufLen,
                                                   uint8_t *outBuf,
                                                   uint16_t outBufLen,
@@ -332,7 +332,7 @@ ST25R95_OpResult ST25R95_ISO15693_VICCDecode(const uint8_t *inBuf,
                                                   uint16_t ignoreBits,
                                                   bool picopassMode)
 {
-  ST25R95_OpResult err = ST25R95_OK;
+  NFC_OpResult err = NFC_OK;
   uint16_t crc;
   uint16_t mp; /* Current bit position in manchester bit inBuf*/
   uint16_t bp; /* Current bit position in outBuf */
@@ -343,12 +343,12 @@ ST25R95_OpResult ST25R95_ISO15693_VICCDecode(const uint8_t *inBuf,
   /* first check for valid SOF. Since it starts with 3 unmodulated pulses it is 0x17. */
   if ((inBuf[0] & 0x1fU) != 0x17U) {
     ISO_15693_DEBUG("0x%x\n", ST25R95_ISO15693_PhyBitBuffer[0]);
-    return ST25R95_FramingError;
+    return NFC_FramingError;
   }
   ISO_15693_DEBUG("SOF\n");
 
   if (outBufLen == 0U) {
-    return ST25R95_OK;
+    return NFC_OK;
   }
 
   mp = 5; /* 5 bits were SOF, now manchester starts: 2 bits per payload bit */
@@ -357,7 +357,7 @@ ST25R95_OpResult ST25R95_ISO15693_VICCDecode(const uint8_t *inBuf,
   ST_MEMSET(outBuf, 0, outBufLen);
 
   if (inBufLen == 0U) {
-    return ST25R95_CRC_Error;
+    return NFC_CRC_Error;
   }
 
   for (; mp < ((inBufLen * 8U) - 2U); mp += 2U) {
@@ -385,13 +385,13 @@ ST25R95_OpResult ST25R95_ISO15693_VICCDecode(const uint8_t *inBuf,
     }
     if (((0U == man) || (3U == man)) && !isEOF) {
       if (bp >= ignoreBits) {
-        err = ST25R95_RF_Collision;
+        err = NFC_RF_Collision;
       } else {
         /* ignored collision: leave as 0 */
         bp++;
       }
     }
-    if ((bp >= (outBufLen * 8U)) || (err == ST25R95_RF_Collision) || isEOF) {
+    if ((bp >= (outBufLen * 8U)) || (err == NFC_RF_Collision) || isEOF) {
       /* Don't write beyond the end */
       break;
     }
@@ -400,12 +400,12 @@ ST25R95_OpResult ST25R95_ISO15693_VICCDecode(const uint8_t *inBuf,
   *outBufPos = (bp / 8U);
   *bitsBeforeCol = bp;
 
-  if (err != ST25R95_OK) {
+  if (err != NFC_OK) {
     return err;
   }
 
   if ((bp % 8U) != 0U) {
-    return ST25R95_CRC_Error;
+    return NFC_CRC_Error;
   }
 
   if (*outBufPos > 2U) {
@@ -418,15 +418,15 @@ ST25R95_OpResult ST25R95_ISO15693_VICCDecode(const uint8_t *inBuf,
 
     if (((crc & 0xffU) == outBuf[*outBufPos - 2U]) &&
         (((crc >> 8U) & 0xffU) == outBuf[*outBufPos - 1U])) {
-      err = ST25R95_OK;
+      err = NFC_OK;
       ISO_15693_DEBUG("OK\n");
     } else {
       ISO_15693_DEBUG("error! Expected: 0x%x, got ", crc);
       ISO_15693_DEBUG("0x%hhx 0x%hhx\n", outBuf[*outBufPos - 2], outBuf[*outBufPos - 1]);
-      err = ST25R95_CRC_Error;
+      err = NFC_CRC_Error;
     }
   } else {
-    err = ST25R95_CRC_Error;
+    err = NFC_CRC_Error;
   }
 
   return err;

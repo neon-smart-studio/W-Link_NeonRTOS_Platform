@@ -52,15 +52,15 @@
 extern "C" {
 #endif
 
-ST25R95_OpResult ST25R95_Field_On(ST25R95_Protocol protocol);
-ST25R95_OpResult ST25R95_Field_Off(void);
-ST25R95_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate txBR, ST25R95_BitRate rxBR);
-ST25R95_OpResult ST25R95_Set_FWT(ST25R95_Protocol protocol, uint32_t fwt);
-ST25R95_OpResult ST25R95_Set_SlotCounter(ST25R95_FeliCaPollSlots slots);
-ST25R95_OpResult ST25R95_Protocol_Select(ST25R95_Protocol protocol);
-ST25R95_OpResult ST25R95_Calibrate_Tag_Detector(uint8_t* pCalibrate);
-ST25R95_OpResult ST25R95_Read_Reg(uint16_t reg, uint8_t *value);
-ST25R95_OpResult ST25R95_Write_Reg(ST25R95_Protocol protocol, uint16_t reg, uint8_t value);
+NFC_OpResult ST25R95_Field_On(ST25R95_Protocol protocol);
+NFC_OpResult ST25R95_Field_Off(void);
+NFC_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate txBR, ST25R95_BitRate rxBR);
+NFC_OpResult ST25R95_Set_FWT(ST25R95_Protocol protocol, uint32_t fwt);
+NFC_OpResult ST25R95_Set_SlotCounter(ST25R95_FeliCaPollSlots slots);
+NFC_OpResult ST25R95_Protocol_Select(ST25R95_Protocol protocol);
+NFC_OpResult ST25R95_Calibrate_Tag_Detector(uint8_t* pCalibrate);
+NFC_OpResult ST25R95_Read_Reg(uint16_t reg, uint8_t *value);
+NFC_OpResult ST25R95_Write_Reg(ST25R95_Protocol protocol, uint16_t reg, uint8_t value);
 bool ST25R95_CheckChipID(void);
 
 #ifdef __cplusplus

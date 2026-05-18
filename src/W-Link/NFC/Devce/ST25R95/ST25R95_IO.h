@@ -141,22 +141,22 @@
 extern "C" {
 #endif
 
-ST25R95_OpResult ST25R95_IO_SPI_Wait_Read(NeonRTOS_Time_t timeout);
-ST25R95_OpResult ST25R95_IO_SPI_Wait_Send(void);
-ST25R95_OpResult ST25R95_IO_SPI_Send_Command_Type_And_Len(uint8_t *cmd, uint8_t *resp, uint16_t respBuffLen);
-ST25R95_OpResult ST25R95_IO_SPI_Command_Echo(void);
-ST25R95_OpResult ST25R95_IO_SPI_Send_Transmit_Flag(ST25R95_Protocol protocol, uint8_t transmitFlag);
-ST25R95_OpResult ST25R95_IO_SPI_Send_Data(uint8_t *buf, uint8_t bufLen, ST25R95_Protocol protocol, uint32_t flags);
-ST25R95_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes);
-ST25R95_OpResult ST25R95_IO_SPI_Idle(uint8_t dacDataL, uint8_t dacDataH, uint8_t WUPeriod);
-ST25R95_OpResult ST25R95_IO_SPI_Get_Idle_Response(void);
-ST25R95_OpResult ST25R95_IO_SPI_nIRQ_IN_Pulse(void);
-ST25R95_OpResult ST25R95_IO_SPI_Kill_Idle(void);
-ST25R95_OpResult ST25R95_IO_SPI_Reset_Chip(void);
-ST25R95_OpResult ST25R95_IO_Set_BitRate(ST25R95_BitRate txBR, ST25R95_BitRate rxBR);
-ST25R95_OpResult ST25R95_IO_Get_BitRate(ST25R95_BitRate* pTxBR, ST25R95_BitRate* pRxBR);
-ST25R95_OpResult ST25R95_IO_Init(void);
-ST25R95_OpResult ST25R95_IO_DeInit(void);
+NFC_OpResult ST25R95_IO_SPI_Wait_Read(NeonRTOS_Time_t timeout);
+NFC_OpResult ST25R95_IO_SPI_Wait_Send(void);
+NFC_OpResult ST25R95_IO_SPI_Send_Command_Type_And_Len(uint8_t *cmd, uint8_t *resp, uint16_t respBuffLen);
+NFC_OpResult ST25R95_IO_SPI_Command_Echo(void);
+NFC_OpResult ST25R95_IO_SPI_Send_Transmit_Flag(ST25R95_Protocol protocol, uint8_t transmitFlag);
+NFC_OpResult ST25R95_IO_SPI_Send_Data(uint8_t *buf, uint8_t bufLen, ST25R95_Protocol protocol, uint32_t flags);
+NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes);
+NFC_OpResult ST25R95_IO_SPI_Idle(uint8_t dacDataL, uint8_t dacDataH, uint8_t WUPeriod);
+NFC_OpResult ST25R95_IO_SPI_Get_Idle_Response(void);
+NFC_OpResult ST25R95_IO_SPI_nIRQ_IN_Pulse(void);
+NFC_OpResult ST25R95_IO_SPI_Kill_Idle(void);
+NFC_OpResult ST25R95_IO_SPI_Reset_Chip(void);
+NFC_OpResult ST25R95_IO_Set_BitRate(ST25R95_BitRate txBR, ST25R95_BitRate rxBR);
+NFC_OpResult ST25R95_IO_Get_BitRate(ST25R95_BitRate* pTxBR, ST25R95_BitRate* pRxBR);
+NFC_OpResult ST25R95_IO_Init(void);
+NFC_OpResult ST25R95_IO_DeInit(void);
 
 
 #ifdef __cplusplus

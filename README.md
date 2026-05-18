@@ -41,21 +41,32 @@ W-Link 解決：
 抽離 SoC 差異
 讓上層邏輯完全不依賴 MCU 型號
 
-## Third Party Components
+## License
 
-This repository contains third-party middleware from STMicroelectronics.
+W-Link core framework is licensed under Apache-2.0.
+
+Some optional third-party middleware components from STMicroelectronics are
+included under their original license terms and are not covered by Apache-2.0.
+See [NOTICE](./NOTICE) for details.
+
+## Third-Party Components
+
+This repository may include third-party middleware, drivers, or example code from
+STMicroelectronics.
 
 Files under:
-Bluetooth/BlueNRG/
 
-remain the property of STMicroelectronics and retain their original license and copyright notices.
+- `Bluetooth/BlueNRG/`
+- `NFC/RFal/`
+- `NFC/NDef/`
 
-Only W-Link abstraction layers and framework code are licensed under Apache-2.0.
+remain the property of STMicroelectronics and retain their original copyright
+notices, license terms, and disclaimers.
 
-Third-party notice
+These third-party components are **not** relicensed under Apache-2.0.
 
-Some files in this repository are derived from or include middleware/example code from STMicroelectronics, including BlueNRG HCI/ACI related files.
+The Apache-2.0 license applies only to original W-Link / NeonRTOS abstraction
+layers, integration code, and framework code written by Neon Smart Studio.
 
-Those files retain their original STMicroelectronics copyright notices and disclaimers.
-
-The Apache-2.0 license of W-Link applies only to original W-Link / NeonRTOS integration code written by Neon Smart Studio, not to third-party STMicroelectronics source files.
+Users are responsible for reviewing and complying with the applicable
+third-party licenses before using those components in commercial products.

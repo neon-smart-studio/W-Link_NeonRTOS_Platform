@@ -1,0 +1,18 @@
+W-Link
+Copyright 2026 Neon Smart Studio
+
+W-Link core framework, NeonRTOS integration layers, and original abstraction
+code are licensed under the Apache License 2.0.
+
+This repository may include third-party middleware, drivers, or example code
+from STMicroelectronics, including but not limited to:
+
+- Bluetooth/BlueNRG/
+- NFC/RFal/
+- NFC/NDef/
+
+These third-party components remain under their original STMicroelectronics
+license terms and are not relicensed under Apache License 2.0.
+
+Users must review and comply with the applicable third-party licenses before
+using those components in commercial products.

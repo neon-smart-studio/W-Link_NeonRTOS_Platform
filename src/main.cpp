@@ -13,7 +13,8 @@
 
 #include "Sensor/HTS221/HTS221.h"
 
-#include "NFC/M24SR/M24SR.h"
+//#include "NFC/Device/M24SR/M24SR.h"
+#include "NFC/Devce/ST25R95/ST25R95_RFal.h"
 #include "Bluetooth/Bluetooth.h"
 
 #include "NeonRTOS.h"
@@ -89,6 +90,15 @@ static uint16_t NFC_BuildUriNdef(uint8_t *out, uint16_t out_size, float temp, fl
     idx += uri_len;
 
     return idx;
+}
+static void NFC_Reader_Task(void *arg)
+{
+    ST25R95_RFal_Init();
+
+    while(1)
+    {
+        NeonRTOS_Sleep(1000);
+    }
 }
 /*
 static void NFC_Task(void *arg)
@@ -318,6 +328,15 @@ int main(void) {
         NULL
     );
 */
+    NeonRTOS_TaskCreate(
+        NFC_Reader_Task,
+        (const signed char *)"NFC_Reader",
+        2048,
+        NULL,
+        2,
+        NULL
+    );
+
     // 啟動 NeonRTOS 調度器
     NeonRTOS_start();
 

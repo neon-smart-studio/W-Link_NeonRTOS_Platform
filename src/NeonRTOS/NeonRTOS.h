@@ -12,12 +12,6 @@ extern "C" {
 
 #define NEONRT_NO_WAIT        			(0)
 
-#ifndef SPAWN_TASK_STACK
-#define STACK_LEN          (2048) /*Stack Size*/
-#else
-#define STACK_LEN          (SPAWN_TASK_STACK)
-#endif
-
 #define NEONRT_LOOP_FOREVER()                      while(1);
 
 typedef enum

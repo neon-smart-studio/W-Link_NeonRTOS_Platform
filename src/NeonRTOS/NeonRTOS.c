@@ -13,9 +13,6 @@
 
 static portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
-// Queue size 
-#define slQUEUE_SIZE				( 3 )
-
 NeonRTOS_ReturnVal_e NeonRTOS_SyncObjCreate(NeonRTOS_SyncObj_t* pSyncObj)
 {
     //Check for NULL

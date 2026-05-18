@@ -112,16 +112,16 @@ static const SPI_AF_Map SPI_Pin_AF_Map[] =
 {
 #if defined(SPI1_BASE)
     /* ================= SPI1 (SPI0) ================= */
+    { hwSPI_Index_0, hwGPIO_Pin_A4,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_A5,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_A6,  GPIO_AF5_SPI1 },
     { hwSPI_Index_0, hwGPIO_Pin_A7,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_B3,  GPIO_AF5_SPI1 },
+    { hwSPI_Index_0, hwGPIO_Pin_B4,  GPIO_AF5_SPI1 },
     { hwSPI_Index_0, hwGPIO_Pin_B5,  GPIO_AF5_SPI1 },
     { hwSPI_Index_0, hwGPIO_Pin_D7,  GPIO_AF5_SPI1 },
-    { hwSPI_Index_0, hwGPIO_Pin_A6,  GPIO_AF5_SPI1 },
-    { hwSPI_Index_0, hwGPIO_Pin_B4,  GPIO_AF5_SPI1 },
     { hwSPI_Index_0, hwGPIO_Pin_G9,  GPIO_AF5_SPI1 },
-    { hwSPI_Index_0, hwGPIO_Pin_A5,  GPIO_AF5_SPI1 },
-    { hwSPI_Index_0, hwGPIO_Pin_B3,  GPIO_AF5_SPI1 },
     { hwSPI_Index_0, hwGPIO_Pin_G11, GPIO_AF5_SPI1 },
-    { hwSPI_Index_0, hwGPIO_Pin_A4,  GPIO_AF5_SPI1 },
     { hwSPI_Index_0, hwGPIO_Pin_A15, GPIO_AF5_SPI1 },
     { hwSPI_Index_0, hwGPIO_Pin_G10, GPIO_AF5_SPI1 },
 #endif

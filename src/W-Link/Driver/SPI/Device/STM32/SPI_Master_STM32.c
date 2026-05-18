@@ -233,12 +233,8 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
 #endif
     HAL_GPIO_Init(sclk_soc_base, &g_spi_sclk);
     
-    bool hw_cs = false;
-
     if (cs_pin != hwGPIO_Pin_NC && cs)
     {
-        hw_cs = true;
-
         GPIO_InitTypeDef g_spi_cs = {0};
         g_spi_cs.Pin       = cs_soc_pin;
         g_spi_cs.Mode      = GPIO_MODE_AF_PP;
@@ -263,7 +259,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         miso_pin,
         sclk_pin,
         cs_pin,
-        hw_cs
+        cs
     );
 
     if (result != hwSPI_OK) {

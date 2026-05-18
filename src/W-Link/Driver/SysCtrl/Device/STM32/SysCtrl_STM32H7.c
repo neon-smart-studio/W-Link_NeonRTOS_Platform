@@ -5,15 +5,27 @@
 
 #ifdef STM32H7
 
+#ifndef CONFIG_STM32_USE_HSE
+#define CONFIG_STM32_USE_HSE 0
+#endif
+
+#ifndef CONFIG_STM32_HSE_VALUE
+#define CONFIG_STM32_HSE_VALUE 8000000UL
+#endif
+
 void SysCtrl_Init(void)
 {
     HAL_Init();
-    
+
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
 #if defined(__HAL_RCC_PWR_CLK_ENABLE)
     __HAL_RCC_PWR_CLK_ENABLE();
+#endif
+
+#if defined(PWR_LDO_SUPPLY)
+    HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
 #endif
 
 #if defined(PWR_REGULATOR_VOLTAGE_SCALE0)
@@ -22,22 +34,39 @@ void SysCtrl_Init(void)
     HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 #endif
 
+#if defined(PWR_FLAG_VOSRDY)
     while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+#endif
+
+#if CONFIG_STM32_USE_HSE
 
     /*
-     * STM32H7 common source:
-     * HSI = 64MHz
-     *
-     * H723 / H725 / H733:
-     * 64 / 4 * 275 / 2 = 2200 / 2 = 550MHz
-     *
-     * H745 / H747 / H755 / H757:
-     * 64 / 4 * 240 / 2 = 1920 / 2 = 480MHz
-     *
-     * H743 / H753:
-     * 64 / 4 * 200 / 2 = 1600 / 2 = 400MHz
+     * HSE = 8MHz
+     * PLL input = 8MHz / 1 = 8MHz
+     * VCO = 8MHz * 100 = 800MHz
+     * SYSCLK = 800MHz / 2 = 400MHz
      */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE |
+                                       RCC_OSCILLATORTYPE_HSI;
+    RCC_OscInitStruct.HSEState       = RCC_HSE_ON;
+    RCC_OscInitStruct.HSIState       = RCC_HSI_ON;
+    RCC_OscInitStruct.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
 
+#if CONFIG_STM32_HSE_VALUE == 8000000UL
+    RCC_OscInitStruct.PLL.PLLM = 1;
+    RCC_OscInitStruct.PLL.PLLN = 100;
+#else
+#error "Unsupported CONFIG_STM32_HSE_VALUE for STM32H7"
+#endif
+
+#else
+
+    /*
+     * HSI = 64MHz
+     * PLL input = 64MHz / 4 = 16MHz
+     * VCO = 16MHz * 50 = 800MHz
+     * SYSCLK = 800MHz / 2 = 400MHz
+     */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
     RCC_OscInitStruct.HSIState       = RCC_HSI_ON;
 
@@ -45,7 +74,6 @@ void SysCtrl_Init(void)
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
 #endif
 
-    RCC_OscInitStruct.PLL.PLLState  = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
 
 #if defined(RCC_PLLM_DIV4)
@@ -54,15 +82,11 @@ void SysCtrl_Init(void)
     RCC_OscInitStruct.PLL.PLLM = 4;
 #endif
 
-#if defined(STM32H723xx) || defined(STM32H725xx) || defined(STM32H730xx) || \
-    defined(STM32H733xx) || defined(STM32H735xx)
-    RCC_OscInitStruct.PLL.PLLN = 275;   /* 550MHz */
-#elif defined(STM32H745xx) || defined(STM32H747xx) || defined(STM32H755xx) || \
-      defined(STM32H757xx)
-    RCC_OscInitStruct.PLL.PLLN = 240;   /* 480MHz */
-#else
-    RCC_OscInitStruct.PLL.PLLN = 200;   /* 400MHz: H743 / H753 common */
+    RCC_OscInitStruct.PLL.PLLN = 50;
+
 #endif
+
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
 
 #if defined(RCC_PLLP_DIV2)
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
@@ -120,6 +144,11 @@ void SysCtrl_Init(void)
     RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
 #endif
 
+    /*
+     * SYSCLK = 400MHz
+     * HCLK   = 200MHz
+     * APB    = 100MHz
+     */
 #if defined(RCC_HCLK_DIV2)
     RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
 #else
@@ -149,15 +178,12 @@ void SysCtrl_Init(void)
     RCC_ClkInitStruct.APB4CLKDivider = RCC_D3PCLK1_DIV2;
 #endif
 
-#if defined(STM32H723xx) || defined(STM32H725xx) || defined(STM32H730xx) || \
-    defined(STM32H733xx) || defined(STM32H735xx)
     if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
-#else
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
-#endif
     {
         while (1);
     }
+
+    SystemCoreClockUpdate();
 
     HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
     HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);

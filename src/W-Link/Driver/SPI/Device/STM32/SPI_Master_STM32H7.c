@@ -160,7 +160,7 @@ int SPI_Master_Get_Clock_Freq(hwSPI_Index index)
 
 #if defined(SPI6_BASE)
         case hwSPI_Index_5:   /* SPI6 */
-            return HAL_RCC_GetPCLK4Freq();
+            return HAL_RCC_GetHCLKFreq();
 #endif
 
         default:

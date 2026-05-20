@@ -15,41 +15,37 @@
   *
   ******************************************************************************
   */
-
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #ifndef NDEF_TYPE_RTD_DEVICE_INFO_H
 #define NDEF_TYPE_RTD_DEVICE_INFO_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
-
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
+#include "NFC/NFC_Def.h"
 
 /*! Device Information defines */
 #define NDEF_UUID_LENGTH                16U    /*!< Device Information UUID length */
 
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
-
 /*! RTD Device Information Record Type buffer */
-extern const ndefConstBuffer8 bufRtdTypeDeviceInfo; /*! Device Information Record Type buffer               */
+extern const NDef_Const_Buffer_8 bufRtdTypeDeviceInfo; /*! Device Information Record Type buffer               */
 
 
 /*! RTD Device Information types */
@@ -66,81 +62,18 @@ typedef struct {
   uint8_t        type;      /*!< Device Information Type              */
   uint8_t        length;    /*!< Device Information length            */
   const uint8_t *buffer;    /*!< Device Information pointer to buffer */
-} ndefDeviceInfoEntry;
+} NDef_DeviceInfoEntry;
 
 
 /*! RTD Type Device Information */
 typedef struct {
-  ndefDeviceInfoEntry devInfo[NDEF_DEVICE_INFO_TYPE_COUNT]; /*!< Device Information entries */
-} ndefTypeRtdDeviceInfo;
+  NDef_DeviceInfoEntry devInfo[NDEF_DEVICE_INFO_TYPE_COUNT]; /*!< Device Information entries */
+} NDef_Type_Rtd_DeviceInfo;
 
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*********************
- * Device Information
- *********************
- */
-
-
-/*!
- *****************************************************************************
- * Initialize a RTD Device Information type
- *
- * \param[out] devInfo:          Type to initialize
- * \param[in]  devInfoData:      Device Information data
- * \param[in]  devInfoDataCount: Number of Device Information data
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdDeviceInfoInit(ndefType *devInfo, const ndefDeviceInfoEntry *devInfoData, uint8_t devInfoDataCount);
-
-
-/*!
- *****************************************************************************
- * Get RTD Device Information type content
- *
- * \param[in]  devInfo:     Type to get information from
- * \param[out] devInfoData: Device Information data
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdDeviceInfo(const ndefType *devInfo, ndefTypeRtdDeviceInfo *devInfoData);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a Device Information RTD type
- *
- * \param[in]  record:  Record to convert
- * \param[out] devInfo: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdDeviceInfo(const ndefRecord *record, ndefType *devInfo);
-
-
-/*!
- *****************************************************************************
- * Convert a Device Information RTD type to an NDEF record
- *
- * \param[in]  devInfo: Type to convert
- * \param[out] record:  The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdDeviceInfoToRecord(const ndefType *devInfo, ndefRecord *record);
-
-
+NFC_OpResult NDef_RtdDeviceInfoInit(NDef_Type *devInfo, const NDef_DeviceInfoEntry *devInfoData, uint8_t devInfoDataCount);
+NFC_OpResult NDef_GetRtdDeviceInfo(const NDef_Type *devInfo, NDef_Type_Rtd_DeviceInfo *devInfoData);
+NFC_OpResult NDef_RecordToRtdDeviceInfo(const NDef_Record *record, NDef_Type *devInfo);
+NFC_OpResult NDef_RtdDeviceInfoToRecord(const NDef_Type *devInfo, NDef_Record *record);
 
 #endif /* NDEF_TYPE_RTD_DEVICE_INFO_H */
 

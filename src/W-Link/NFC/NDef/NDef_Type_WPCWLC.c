@@ -15,65 +15,46 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_wpcwlc.h"
-#include "nfc_utils.h"
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_WPCWLC.h"
 
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_RTD_WPCWLC_SUPPORT
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
 
 /*! RTD Type strings */
 static const uint8_t ndefRtdTypeWptWlc[] = "www.wirelesspowerconsortium.com:wlc"; /*!< External Type (Wireless Power Consortium WLC  Record)  */
 
-const ndefConstBuffer8 bufRtdTypeWpcWlc  = { ndefRtdTypeWptWlc, sizeof(ndefRtdTypeWptWlc) - 1U };    /*!< WPCWLC External Type Record buffer  */
-
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
-
-/*
- * NFC Forum External Type (Wireless Power Consortium WLC Record)
- */
-
+const NDef_Const_Buffer_8 bufRtdTypeWpcWlc  = { ndefRtdTypeWptWlc, sizeof(ndefRtdTypeWptWlc) - 1U };    /*!< WPCWLC External Type Record buffer  */
 
 /*****************************************************************************/
-static uint32_t ndefRtdWpcWlcPayloadGetLength(const ndefType *wpcWlc)
+static uint32_t NDef_RtdWpcWlcPayloadGetLength(const NDef_Type *wpcWlc)
 {
-  const ndefTypeRtdWpcWlc *rtdWpcWlc;
+  const NDef_Type_Rtd_WpcWlc *rtdWpcWlc;
 
   if ((wpcWlc == NULL) || (wpcWlc->id != NDEF_TYPE_ID_RTD_WPCWLC)) {
     return 0;
@@ -86,10 +67,10 @@ static uint32_t ndefRtdWpcWlcPayloadGetLength(const ndefType *wpcWlc)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdWpcWlcToPayloadItem(const ndefType *wpcWlc, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdWpcWlcToPayloadItem(const NDef_Type *wpcWlc, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeRtdWpcWlc *rtdWpcWlc;
+  const NDef_Type_Rtd_WpcWlc *rtdWpcWlc;
 
   if ((wpcWlc  == NULL) || (wpcWlc->id != NDEF_TYPE_ID_RTD_WPCWLC) ||
       (bufItem == NULL)) {
@@ -123,35 +104,35 @@ static const uint8_t *ndefRtdWpcWlcToPayloadItem(const ndefType *wpcWlc, ndefCon
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWpcWlcInit(ndefType *wpcWlc, const ndefConstBuffer *bufPayload)
+NFC_OpResult NDef_RtdWpcWlcInit(NDef_Type *wpcWlc, const NDef_Const_Buffer *bufPayload)
 {
-  ndefTypeRtdWpcWlc *rtdWpcWlc;
+  NDef_Type_Rtd_WpcWlc *rtdWpcWlc;
 
   if ((wpcWlc == NULL) || (bufPayload == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   wpcWlc->id               = NDEF_TYPE_ID_RTD_WPCWLC;
-  wpcWlc->getPayloadLength = ndefRtdWpcWlcPayloadGetLength;
-  wpcWlc->getPayloadItem   = ndefRtdWpcWlcToPayloadItem;
-  wpcWlc->typeToRecord     = ndefRtdWpcWlcToRecord;
+  wpcWlc->getPayloadLength = NDef_RtdWpcWlcPayloadGetLength;
+  wpcWlc->getPayloadItem   = NDef_RtdWpcWlcToPayloadItem;
+  wpcWlc->typeToRecord     = NDef_RtdWpcWlcToRecord;
   rtdWpcWlc                = &wpcWlc->data.wpcWlc;
 
   rtdWpcWlc->bufPayload.buffer = bufPayload->buffer;
   rtdWpcWlc->bufPayload.length = bufPayload->length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdWpcWlc(const ndefType *wpcWlc, ndefConstBuffer *bufWpcWlc)
+NFC_OpResult NDef_GetRtdWpcWlc(const NDef_Type *wpcWlc, NDef_Const_Buffer *bufWpcWlc)
 {
-  const ndefTypeRtdWpcWlc *rtdWpcWlc;
+  const NDef_Type_Rtd_WpcWlc *rtdWpcWlc;
 
   if ((wpcWlc    == NULL) || (wpcWlc->id != NDEF_TYPE_ID_RTD_WPCWLC) ||
       (bufWpcWlc == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   rtdWpcWlc = &wpcWlc->data.wpcWlc;
@@ -159,45 +140,45 @@ ReturnCode ndefGetRtdWpcWlc(const ndefType *wpcWlc, ndefConstBuffer *bufWpcWlc)
   bufWpcWlc->buffer = rtdWpcWlc->bufPayload.buffer;
   bufWpcWlc->length = rtdWpcWlc->bufPayload.length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdWpcWlc(const ndefRecord *record, ndefType *wpcWlc)
+NFC_OpResult NDef_RecordToRtdWpcWlc(const NDef_Record *record, NDef_Type *wpcWlc)
 {
   if ((record == NULL) || (wpcWlc == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeWpcWlc)) { /* "www.wirelesspowerconsortium.com:wlc" */
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeWpcWlc)) { /* "www.wirelesspowerconsortium.com:wlc" */
+    return NFC_ProtocolError;
   }
 
   /* No constraint on payload length */
 
-  return ndefRtdWpcWlcInit(wpcWlc, &record->bufPayload);
+  return NDef_RtdWpcWlcInit(wpcWlc, &record->bufPayload);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWpcWlcToRecord(const ndefType *wpcWlc, ndefRecord *record)
+NFC_OpResult NDef_RtdWpcWlcToRecord(const NDef_Type *wpcWlc, NDef_Record *record)
 {
   if ((wpcWlc == NULL) || (wpcWlc->id != NDEF_TYPE_ID_RTD_WPCWLC) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* "www.wirelesspowerconsortium.com:wlc" */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeWpcWlc);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeWpcWlc);
 
-  if (ndefRecordSetNdefType(record, wpcWlc) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, wpcWlc) < NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

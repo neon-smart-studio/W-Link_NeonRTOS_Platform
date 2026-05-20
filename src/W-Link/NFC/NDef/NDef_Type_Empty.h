@@ -15,91 +15,34 @@
   *
   ******************************************************************************
   */
-
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #ifndef NDEF_TYPE_EMPTY_H
 #define NDEF_TYPE_EMPTY_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
+#include "NFC/NFC_Def.h"
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/***************
- * Empty type
- ***************
- */
-
-/*!
- *****************************************************************************
- * Initialize an Empty type
- *
- * \param[out] empty: Type to initialize
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefEmptyTypeInit(ndefType *empty);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to an Empty type
- *
- * \param[in]  record: Record to convert
- * \param[out] empty:  The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToEmptyType(const ndefRecord *record, ndefType *empty);
-
-
-/*!
- *****************************************************************************
- * Convert an Empty type to an NDEF record
- *
- * \param[in]  empty:  Type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefEmptyTypeToRecord(const ndefType *empty, ndefRecord *record);
-
-
+NFC_OpResult NDef_EmptyTypeInit(NDef_Type *empty);
+NFC_OpResult NDef_RecordToEmptyType(const NDef_Record *record, NDef_Type *empty);
+NFC_OpResult NDef_EmptyTypeToRecord(const NDef_Type *empty, NDef_Record *record);
 
 #endif /* NDEF_TYPE_EMPTY_H */
-
-/**
-  * @}
-  *
-  */

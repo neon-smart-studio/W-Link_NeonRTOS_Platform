@@ -15,27 +15,31 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #ifndef NDEF_TYPE_WIFI_H
 #define NDEF_TYPE_WIFI_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
+#include "NFC/NFC_Def.h"
 
 #define NDEF_WIFI_AUTHENTICATION_NONE       0U  /*!< WPS No Authentication (Should be 1, but set to 0 for Android native support) */
 #define NDEF_WIFI_AUTHENTICATION_WPAPSK     2U  /*!< WPS Authentication based on WPAPSK  */
@@ -50,85 +54,21 @@
 #define NDEF_WIFI_ENCRYPTION_TKIP    3U  /*!< WPS Encryption based on TKIP */
 #define NDEF_WIFI_ENCRYPTION_AES     4U  /*!< WPS Encryption based on AES  */
 
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
-
-
 /*! Structure to store Network SSID, Authentication Type, Encryption Type and Network Key */
 typedef struct {
-  ndefConstBuffer bufNetworkSSID;   /*!< Network SSID        */
-  ndefConstBuffer bufNetworkKey;    /*!< Network Key         */
+  NDef_Const_Buffer bufNetworkSSID;   /*!< Network SSID        */
+  NDef_Const_Buffer bufNetworkKey;    /*!< Network Key         */
   uint8_t         authentication;   /*!< Authentication type */
   uint8_t         encryption;       /*!< Encryption          */
-} ndefTypeWifi;
-
+} NDef_Type_Wifi;
 
 /*! Wifi Record Type buffers */
-extern const ndefConstBuffer8 bufMediaTypeWifi;  /*! Wifi Record Type buffer */
+extern const NDef_Const_Buffer_8 bufMediaTypeWifi;  /*! Wifi Record Type buffer */
 
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*!
- *****************************************************************************
- * Initialize a Wifi configuration
- *
- * \param[out] wifi:       wifi type to initialize
- * \param[in]  wifiConfig: wifi configuration to use
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefWifiInit(ndefType *wifi, const ndefTypeWifi *wifiConfig);
-
-
-/*!
- *****************************************************************************
- * Get Wifi configuration
- *
- * \param[in]  wifi:       wifi type to get information from
- * \param[out] wifiConfig: wifi configuration
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetWifi(const ndefType *wifi, ndefTypeWifi *wifiConfig);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a wifi type
- *
- * \param[in]  record: Record to convert
- * \param[out] wifi:   The converted wifi type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToWifi(const ndefRecord *record, ndefType *wifi);
-
-
-/*!
- *****************************************************************************
- * Convert a wifi type to an NDEF record
- *
- * \param[in]  wifi:   wifi type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefWifiToRecord(const ndefType *wifi, ndefRecord *record);
-
+NFC_OpResult NDef_WifiInit(NDef_Type *wifi, const NDef_Type_Wifi *wifiConfig);
+NFC_OpResult NDef_GetWifi(const NDef_Type *wifi, NDef_Type_Wifi *wifiConfig);
+NFC_OpResult NDef_RecordToWifi(const NDef_Record *record, NDef_Type *wifi);
+NFC_OpResult NDef_WifiToRecord(const NDef_Type *wifi, NDef_Record *record);
 
 #endif /* NDEF_TYPE_WIFI_H */
 

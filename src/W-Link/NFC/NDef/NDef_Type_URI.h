@@ -15,29 +15,31 @@
   *
   ******************************************************************************
   */
-
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #ifndef NDEF_TYPE_URI_H
 #define NDEF_TYPE_URI_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
-
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
+#include "NFC/NFC_Def.h"
 
 /*! RTD Type URI Protocols */
 #define NDEF_URI_PREFIX_NONE          0x00U    /*!< No URI Protocol               */
@@ -79,92 +81,18 @@
 #define NDEF_URI_PREFIX_AUTODETECT    0x24U    /*!< ST Protocol Autodetect        */
 #define NDEF_URI_PREFIX_COUNT         0x25U    /*!< Number of URI protocols       */
 
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
-
 /*! RTD URI Record Type buffer */
-extern const ndefConstBuffer8 bufRtdTypeUri;        /*! URI Record Type buffer                              */
+extern const NDef_Const_Buffer_8 bufRtdTypeURI;        /*! URI Record Type buffer                              */
 
 /*! RTD Type URI */
 typedef struct {
   uint8_t         protocol;     /*!< Protocol Identifier */
-  ndefConstBuffer bufUriString; /*!< URI string buffer   */
-} ndefTypeRtdUri;
+  NDef_Const_Buffer bufURIString; /*!< URI string buffer   */
+} NDef_Type_Rtd_URI;
 
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/***************
- * URI
- ***************
- */
-
-/*!
- *****************************************************************************
- * Initialize a URI RTD type
- *
- * \param[out] uri:          Type to initialize
- * \param[in]  protocol:     URI protocol
- * \param[in]  bufUriString: URI string buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdUriInit(ndefType *uri, uint8_t protocol, const ndefConstBuffer *bufUriString);
-
-
-/*!
- *****************************************************************************
- * Get URI RTD type content
- *
- * \param[in]  uri:          Type to get information from
- * \param[out] bufProtocol:  URI protocol buffer
- * \param[out] bufUriString: URI string buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdUri(const ndefType *uri, ndefConstBuffer *bufProtocol, ndefConstBuffer *bufUriString);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a URI RTD type
- *
- * \param[in]  record: Record to convert
- * \param[out] uri:    The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdUri(const ndefRecord *record, ndefType *uri);
-
-
-/*!
- *****************************************************************************
- * Convert a URI RTD type to an NDEF record
- *
- * \param[in]  uri:    Type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdUriToRecord(const ndefType *uri, ndefRecord *record);
-
-
+NFC_OpResult NDef_RtdURIInit(NDef_Type *uri, uint8_t protocol, const NDef_Const_Buffer *bufURIString);
+NFC_OpResult NDef_GetRtdURI(const NDef_Type *uri, NDef_Const_Buffer *bufProtocol, NDef_Const_Buffer *bufURIString);
+NFC_OpResult NDef_RecordToRtdURI(const NDef_Record *record, NDef_Type *uri);
+NFC_OpResult NDef_RtdURIToRecord(const NDef_Type *uri, NDef_Record *record);
 
 #endif /* NDEF_TYPE_URI_H */
-
-/**
-  * @}
-  *
-  */

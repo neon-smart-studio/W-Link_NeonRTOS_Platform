@@ -15,27 +15,36 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_bluetooth.h"
-#include "nfc_utils.h"
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_Bluetooth.h"
 
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_BLUETOOTH_SUPPORT
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
 
 /*! Bluetooth Payload minimal length */
 #define NDEF_BLUETOOTH_BREDR_PAYLOAD_LENGTH_MIN            8U
@@ -66,57 +75,19 @@
 #define NDEF_BT_EIR_TYPE_OFFSET                     1U
 #define NDEF_BT_EIR_DATA_OFFSET                     2U
 
-
-/*
- ******************************************************************************
- * LOCAL TYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
 /*! Bluetooth Type strings */
-static const uint8_t ndefTypeBluetoothBrEdr[]       = "application/vnd.bluetooth.ep.oob";        /*!< Bluetooth BR/EDR Out-Of-Band Record Type            */
-static const uint8_t ndefTypeBluetoothLe[]          = "application/vnd.bluetooth.le.oob";        /*!< Bluetooth Low Energy Out-Of-Band Record Type        */
-static const uint8_t ndefTypeBluetoothSecureBrEdr[] = "application/vnd.bluetooth.secure.ep.oob"; /*!< Bluetooth Secure BR/EDR Out-Of-Band Record Type     */
-static const uint8_t ndefTypeBluetoothSecureLe[]    = "application/vnd.bluetooth.secure.le.oob"; /*!< Bluetooth Secure Low Energy Out-Of-Band Record type */
+static const uint8_t NDef_Type_BluetoothBrEdr[]       = "application/vnd.bluetooth.ep.oob";        /*!< Bluetooth BR/EDR Out-Of-Band Record Type            */
+static const uint8_t NDef_Type_BluetoothLe[]          = "application/vnd.bluetooth.le.oob";        /*!< Bluetooth Low Energy Out-Of-Band Record Type        */
+static const uint8_t NDef_Type_BluetoothSecureBrEdr[] = "application/vnd.bluetooth.secure.ep.oob"; /*!< Bluetooth Secure BR/EDR Out-Of-Band Record Type     */
+static const uint8_t NDef_Type_BluetoothSecureLe[]    = "application/vnd.bluetooth.secure.le.oob"; /*!< Bluetooth Secure Low Energy Out-Of-Band Record type */
 
-const ndefConstBuffer8 bufMediaTypeBluetoothBrEdr       = { ndefTypeBluetoothBrEdr,       sizeof(ndefTypeBluetoothBrEdr) - 1U };       /*!< Bluetooth BR/EDR Record Type buffer            */
-const ndefConstBuffer8 bufMediaTypeBluetoothLe          = { ndefTypeBluetoothLe,          sizeof(ndefTypeBluetoothLe) - 1U };          /*!< Bluetooth Low Energy Record Type buffer        */
-const ndefConstBuffer8 bufMediaTypeBluetoothSecureBrEdr = { ndefTypeBluetoothSecureBrEdr, sizeof(ndefTypeBluetoothSecureBrEdr) - 1U }; /*!< Bluetooth Secure BR/EDR Record Type buffer     */
-const ndefConstBuffer8 bufMediaTypeBluetoothSecureLe    = { ndefTypeBluetoothSecureLe,    sizeof(ndefTypeBluetoothSecureLe) - 1U };    /*!< Bluetooth Secure Low Energy Record Type buffer */
-
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
-
-/*
- * Bluetooth OOB
- */
-
-
-/* EIR Helper functions */
-
+const NDef_Const_Buffer_8 bufMediaTypeBluetoothBrEdr       = { NDef_Type_BluetoothBrEdr,       sizeof(NDef_Type_BluetoothBrEdr) - 1U };       /*!< Bluetooth BR/EDR Record Type buffer            */
+const NDef_Const_Buffer_8 bufMediaTypeBluetoothLe          = { NDef_Type_BluetoothLe,          sizeof(NDef_Type_BluetoothLe) - 1U };          /*!< Bluetooth Low Energy Record Type buffer        */
+const NDef_Const_Buffer_8 bufMediaTypeBluetoothSecureBrEdr = { NDef_Type_BluetoothSecureBrEdr, sizeof(NDef_Type_BluetoothSecureBrEdr) - 1U }; /*!< Bluetooth Secure BR/EDR Record Type buffer     */
+const NDef_Const_Buffer_8 bufMediaTypeBluetoothSecureLe    = { NDef_Type_BluetoothSecureLe,    sizeof(NDef_Type_BluetoothSecureLe) - 1U };    /*!< Bluetooth Secure Low Energy Record Type buffer */
 
 /*****************************************************************************/
-uint8_t ndefBluetoothEirLength(const uint8_t *eir)
+uint8_t NFC_Bluetooth_EirLength(const uint8_t *eir)
 {
   if (eir == NULL) {
     return 0;
@@ -134,7 +105,7 @@ uint8_t ndefBluetoothEirLength(const uint8_t *eir)
 
 
 /*****************************************************************************/
-uint8_t ndefBluetoothEirDataLength(const uint8_t *eir)
+uint8_t NFC_Bluetooth_EirDataLength(const uint8_t *eir)
 {
   if (eir == NULL) {
     return 0;
@@ -151,11 +122,11 @@ uint8_t ndefBluetoothEirDataLength(const uint8_t *eir)
 
 
 /*****************************************************************************/
-uint8_t ndefBluetoothEirType(const uint8_t *eir)
+uint8_t NFC_Bluetooth_EirType(const uint8_t *eir)
 {
   uint8_t type = 0;
 
-  if (ndefBluetoothEirLength(eir) != 0U) {
+  if (NFC_Bluetooth_EirLength(eir) != 0U) {
     type = eir[NDEF_BT_EIR_TYPE_OFFSET];
   }
 
@@ -164,11 +135,11 @@ uint8_t ndefBluetoothEirType(const uint8_t *eir)
 
 
 /*****************************************************************************/
-const uint8_t *ndefBluetoothEirData(const uint8_t *eir)
+const uint8_t *NFC_Bluetooth_EirData(const uint8_t *eir)
 {
   const uint8_t *data = NULL;
 
-  if (ndefBluetoothEirDataLength(eir) != 0U) {
+  if (NFC_Bluetooth_EirDataLength(eir) != 0U) {
     data = &eir[NDEF_BT_EIR_DATA_OFFSET];
   }
 
@@ -177,24 +148,24 @@ const uint8_t *ndefBluetoothEirData(const uint8_t *eir)
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothEirDataToBuffer(const uint8_t *eir, ndefConstBuffer *bufEir)
+NFC_OpResult NFC_Bluetooth_EirDataToBuffer(const uint8_t *eir, NDef_Const_Buffer *bufEir)
 {
   if ((eir == NULL) || (bufEir == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  bufEir->buffer = ndefBluetoothEirData(eir);
-  bufEir->length = ndefBluetoothEirDataLength(eir);
+  bufEir->buffer = NFC_Bluetooth_EirData(eir);
+  bufEir->length = NFC_Bluetooth_EirDataLength(eir);
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothSetEir(ndefTypeBluetooth *bluetooth, const uint8_t *eir)
+NFC_OpResult NFC_Bluetooth_SetEir(NDef_Type_Bluetooth *bluetooth, const uint8_t *eir)
 {
   if ((bluetooth == NULL) || (eir == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* Find first free EIR */
@@ -202,23 +173,23 @@ ReturnCode ndefBluetoothSetEir(ndefTypeBluetooth *bluetooth, const uint8_t *eir)
     /* Append it */
     if (bluetooth->eir[i] == NULL) {
       bluetooth->eir[i] = eir;
-      return ERR_NONE;
+      return NFC_OK;
     }
     /* Or update existing one */
-    else if (ndefBluetoothEirType(bluetooth->eir[i]) == ndefBluetoothEirType(eir)) {
+    else if (NFC_Bluetooth_EirType(bluetooth->eir[i]) == NFC_Bluetooth_EirType(eir)) {
       bluetooth->eir[i] = eir;
-      return ERR_NONE;
+      return NFC_OK;
     } else {
       /* MISRA 15.7 - Empty else */
     }
   }
 
-  return ERR_NOMEM;
+  return NFC_MemoryError;
 }
 
 
 /*****************************************************************************/
-const uint8_t *ndefBluetoothGetEir(const ndefTypeBluetooth *bluetooth, uint8_t eirType)
+const uint8_t *NFC_Bluetooth_GetEir(const NDef_Type_Bluetooth *bluetooth, uint8_t eirType)
 {
   if (bluetooth == NULL) {
     return NULL;
@@ -226,7 +197,7 @@ const uint8_t *ndefBluetoothGetEir(const ndefTypeBluetooth *bluetooth, uint8_t e
 
   /* Find EIR with this type */
   for (uint32_t i = 0; i < (uint32_t)SIZEOF_ARRAY(bluetooth->eir); i++) {
-    if (ndefBluetoothEirType(bluetooth->eir[i]) == eirType) {
+    if (NFC_Bluetooth_EirType(bluetooth->eir[i]) == eirType) {
       return bluetooth->eir[i];
     }
   }
@@ -252,45 +223,45 @@ static uint8_t *NDEF_BluetoothReverse(uint8_t *dst, const uint8_t *src, uint32_t
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothGetEirData(const ndefTypeBluetooth *bluetooth, uint8_t eirType, ndefConstBuffer *bufData)
+NFC_OpResult NFC_Bluetooth_GetEirData(const NDef_Type_Bluetooth *bluetooth, uint8_t eirType, NDef_Const_Buffer *bufData)
 {
   if ((bluetooth == NULL) || (bufData == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  const uint8_t *eir = ndefBluetoothGetEir(bluetooth, eirType);
+  const uint8_t *eir = NFC_Bluetooth_GetEir(bluetooth, eirType);
 
-  return ndefBluetoothEirDataToBuffer(eir, bufData);
+  return NFC_Bluetooth_EirDataToBuffer(eir, bufData);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothGetEirDataReversed(const ndefTypeBluetooth *bluetooth, uint8_t eirType, ndefBuffer *bufDataReversed)
+NFC_OpResult NFC_Bluetooth_GetEirDataReversed(const NDef_Type_Bluetooth *bluetooth, uint8_t eirType, NDef_Buffer *bufDataReversed)
 {
   if ((bluetooth == NULL) || (bufDataReversed == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  const uint8_t *eir = ndefBluetoothGetEir(bluetooth, eirType);
+  const uint8_t *eir = NFC_Bluetooth_GetEir(bluetooth, eirType);
 
-  uint32_t data_length = ndefBluetoothEirDataLength(eir);
+  uint32_t data_length = NFC_Bluetooth_EirDataLength(eir);
   if (data_length > bufDataReversed->length) {
     bufDataReversed->length = data_length;
-    return ERR_NOMEM;
+    return NFC_MemoryError;
   }
   bufDataReversed->length = data_length;
 
-  const uint8_t *eir_data = ndefBluetoothEirData(eir);
+  const uint8_t *eir_data = NFC_Bluetooth_EirData(eir);
   (void)NDEF_BluetoothReverse(bufDataReversed->buffer, eir_data, data_length);
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static uint32_t ndefBluetoothPayloadGetLength(const ndefType *type)
+static uint32_t NFC_Bluetooth_PayloadGetLength(const NDef_Type *type)
 {
-  const ndefTypeBluetooth *ndefData;
+  const NDef_Type_Bluetooth *ndefData;
   uint32_t length = 0;
 
   if ((type == NULL) ||
@@ -318,10 +289,10 @@ static uint32_t ndefBluetoothPayloadGetLength(const ndefType *type)
     /* Send all/valid EIRs (even EIRs with data length == 0) */
 #else
     /* Send EIRs with data length != 0U only */
-    if (ndefBluetoothGetEirDataLength(ndefDtata->eir[i]) != 0U)
+    if (NFC_Bluetooth_GetEirDataLength(ndefDtata->eir[i]) != 0U)
 #endif
     {
-      length += ndefBluetoothEirLength(ndefData->eir[i]);
+      length += NFC_Bluetooth_EirLength(ndefData->eir[i]);
     }
   }
 
@@ -330,15 +301,15 @@ static uint32_t ndefBluetoothPayloadGetLength(const ndefType *type)
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothReset(ndefTypeBluetooth *bluetooth)
+NFC_OpResult NFC_Bluetooth_Reset(NDef_Type_Bluetooth *bluetooth)
 {
-  ndefConstBuffer bufEmpty = { NULL, 0 };
+  NDef_Const_Buffer bufEmpty = { NULL, 0 };
 
   if (bluetooth == NULL) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  /* Initialize ndefBuffer */
+  /* Initialize NDef_Buffer */
   bluetooth->bufDeviceAddress = bufEmpty;
 
   /* Initialize all EIRs */
@@ -346,17 +317,17 @@ ReturnCode ndefBluetoothReset(ndefTypeBluetooth *bluetooth)
     bluetooth->eir[i] = NULL;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static const uint8_t *ndefBluetoothToPayloadItem(const ndefType *type, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NFC_Bluetooth_ToPayloadItem(const NDef_Type *type, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
   static uint32_t eirId = 0;
 
-  const ndefTypeBluetooth *ndefData;
+  const NDef_Type_Bluetooth *ndefData;
 
   if ((type == NULL) || (bufItem == NULL) ||
       ((type->id != NDEF_TYPE_ID_BLUETOOTH_BREDR)        &&
@@ -384,7 +355,7 @@ static const uint8_t *ndefBluetoothToPayloadItem(const ndefType *type, ndefConst
       /* for BR-EDR and Secure LE, Device address & length are managed outside EIR */
       /* First item for NDEF_TYPE_ID_BLUETOOTH_BREDR: Payload length */
       static uint16_t len;
-      len = (uint16_t)ndefBluetoothPayloadGetLength(type);
+      len = (uint16_t)NFC_Bluetooth_PayloadGetLength(type);
       bufItem->buffer = (const uint8_t *)&len;
       bufItem->length = sizeof(uint16_t);
 
@@ -408,14 +379,14 @@ static const uint8_t *ndefBluetoothToPayloadItem(const ndefType *type, ndefConst
   while (eirId < (uint32_t)SIZEOF_ARRAY(ndefData->eir)) {
 #ifdef NDEF_BLUETOOTH_ENCODE_EMPTY_DATA_EIR
     /* Send all/valid EIRs (even EIRs with data length == 0) */
-    if (ndefBluetoothEirLength(ndefData->eir[eirId]) != 0U)
+    if (NFC_Bluetooth_EirLength(ndefData->eir[eirId]) != 0U)
 #else
     /* Send EIRs with data length != 0U only */
-    if (ndefBluetoothEirDataLength(ndefData->eir[eirId]) != 0U)
+    if (NFC_Bluetooth_EirDataLength(ndefData->eir[eirId]) != 0U)
 #endif
     {
       bufItem->buffer = (const uint8_t *)ndefData->eir[eirId];
-      bufItem->length = ndefBluetoothEirLength(ndefData->eir[eirId]);
+      bufItem->length = NFC_Bluetooth_EirLength(ndefData->eir[eirId]);
 
       eirId++;
       return bufItem->buffer;
@@ -428,108 +399,108 @@ static const uint8_t *ndefBluetoothToPayloadItem(const ndefType *type, ndefConst
 
 
 /*****************************************************************************/
-static ReturnCode ndefBluetoothInit(ndefType *type, const ndefTypeBluetooth *bluetooth)
+static NFC_OpResult NFC_Bluetooth_Init(NDef_Type *type, const NDef_Type_Bluetooth *bluetooth)
 {
-  ndefTypeBluetooth *ndefData;
+  NDef_Type_Bluetooth *ndefData;
 
   if ((type == NULL) || (bluetooth == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* type->id set by the caller */
-  type->getPayloadLength = ndefBluetoothPayloadGetLength;
-  type->getPayloadItem   = ndefBluetoothToPayloadItem;
-  type->typeToRecord     = ndefBluetoothToRecord;
+  type->getPayloadLength = NFC_Bluetooth_PayloadGetLength;
+  type->getPayloadItem   = NFC_Bluetooth_ToPayloadItem;
+  type->typeToRecord     = NDef_BluetoothToRecord;
   ndefData               = &type->data.bluetooth;
 
   /* Copy in a bulk */
-  (void)ST_MEMCPY(ndefData, bluetooth, sizeof(ndefTypeBluetooth));
+  (void)memcpy(ndefData, bluetooth, sizeof(NDef_Type_Bluetooth));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothBrEdrInit(ndefType *type, const ndefTypeBluetooth *bluetooth)
+NFC_OpResult NFC_Bluetooth_BrEdrInit(NDef_Type *type, const NDef_Type_Bluetooth *bluetooth)
 {
   if (type == NULL) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* Initialize a Basic Rate/Enhanced Data Rate type */
   type->id = NDEF_TYPE_ID_BLUETOOTH_BREDR;
 
-  return ndefBluetoothInit(type, bluetooth);
+  return NFC_Bluetooth_Init(type, bluetooth);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothLeInit(ndefType *type, const ndefTypeBluetooth *bluetooth)
+NFC_OpResult NFC_Bluetooth_LeInit(NDef_Type *type, const NDef_Type_Bluetooth *bluetooth)
 {
   if (type == NULL) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* Initialize a Bluetooth Low Energy type */
   type->id = NDEF_TYPE_ID_BLUETOOTH_LE;
 
-  return ndefBluetoothInit(type, bluetooth);
+  return NFC_Bluetooth_Init(type, bluetooth);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothSecureBrEdrInit(ndefType *type, const ndefTypeBluetooth *bluetooth)
+NFC_OpResult NFC_Bluetooth_SecureBrEdrInit(NDef_Type *type, const NDef_Type_Bluetooth *bluetooth)
 {
   if (type == NULL) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* Initialize a Secure BR/EDR type */
   type->id = NDEF_TYPE_ID_BLUETOOTH_SECURE_BREDR;
 
-  return ndefBluetoothInit(type, bluetooth);
+  return NFC_Bluetooth_Init(type, bluetooth);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothSecureLeInit(ndefType *type, const ndefTypeBluetooth *bluetooth)
+NFC_OpResult NFC_Bluetooth_SecureLeInit(NDef_Type *type, const NDef_Type_Bluetooth *bluetooth)
 {
   if (type == NULL) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* Initialize a Secure Low Energy type */
   type->id = NDEF_TYPE_ID_BLUETOOTH_SECURE_LE;
 
-  return ndefBluetoothInit(type, bluetooth);
+  return NFC_Bluetooth_Init(type, bluetooth);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetBluetooth(const ndefType *type, ndefTypeBluetooth *bluetooth)
+NFC_OpResult NDef_GetBluetooth(const NDef_Type *type, NDef_Type_Bluetooth *bluetooth)
 {
-  const ndefTypeBluetooth *ndefData;
+  const NDef_Type_Bluetooth *ndefData;
 
   if ((type == NULL) || (bluetooth == NULL) ||
       ((type->id != NDEF_TYPE_ID_BLUETOOTH_BREDR)        &&
        (type->id != NDEF_TYPE_ID_BLUETOOTH_LE)           &&
        (type->id != NDEF_TYPE_ID_BLUETOOTH_SECURE_BREDR) &&
        (type->id != NDEF_TYPE_ID_BLUETOOTH_SECURE_LE))) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   ndefData = &type->data.bluetooth;
 
   /* Copy in a bulk */
-  (void)ST_MEMCPY(bluetooth, ndefData, sizeof(ndefTypeBluetooth));
+  (void)memcpy(bluetooth, ndefData, sizeof(NDef_Type_Bluetooth));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
 #ifdef NDEF_BLUETOOTH_CHECK_REFERENCE_LENGTH
-static uint32_t ndefBluetoothEirRefLength(uint8_t eirType)
+static uint32_t NFC_Bluetooth_EirRefLength(uint8_t eirType)
 {
   uint32_t length;
   switch (eirType) {
@@ -570,17 +541,17 @@ static uint32_t ndefBluetoothEirRefLength(uint8_t eirType)
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToBluetooth(const ndefConstBuffer *bufPayload, ndefTypeId typeId, ndefType *type)
+static NFC_OpResult ndefPayloadToBluetooth(const NDef_Const_Buffer *bufPayload, NDef_Type_ID typeId, NDef_Type *type)
 {
-  ndefTypeBluetooth *ndefData;
+  NDef_Type_Bluetooth *ndefData;
 
   if ((bufPayload == NULL) || (bufPayload->buffer == NULL) ||
       (type       == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   if (bufPayload->length < NDEF_BLUETOOTH_PAYLOAD_LENGTH_MIN) { /* Bluetooth Payload Min */
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
   /* MISRA complains that this conditional expression is always false, so comment it out */
@@ -588,18 +559,18 @@ static ReturnCode ndefPayloadToBluetooth(const ndefConstBuffer *bufPayload, ndef
        (typeId != NDEF_TYPE_ID_BLUETOOTH_BLE)    &&
        (typeId != NDEF_TYPE_ID_BLUETOOTH_SECURE_LE) )
   {
-      return ERR_PARAM;
+      return NFC_InvalidParameter;
   } */
 
   type->id               = typeId;
-  type->getPayloadLength = ndefBluetoothPayloadGetLength;
-  type->getPayloadItem   = ndefBluetoothToPayloadItem;
-  type->typeToRecord     = ndefBluetoothToRecord;
+  type->getPayloadLength = NFC_Bluetooth_PayloadGetLength;
+  type->getPayloadItem   = NFC_Bluetooth_ToPayloadItem;
+  type->typeToRecord     = NDef_BluetoothToRecord;
   ndefData               = &type->data.bluetooth;
 
   /* Reset every field */
-  if (ndefBluetoothReset(ndefData) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NFC_Bluetooth_Reset(ndefData) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
   uint32_t offset = 0;
@@ -621,7 +592,7 @@ static ReturnCode ndefPayloadToBluetooth(const ndefConstBuffer *bufPayload, ndef
 
   while (offset < bufPayload->length) {
     const uint8_t *eir = &bufPayload->buffer[offset];
-    uint8_t eir_length = ndefBluetoothEirLength(eir);
+    uint8_t eir_length = NFC_Bluetooth_EirLength(eir);
 
     if (eir_length == 0U) {
       break;  /* Leave when find an empty EIR */
@@ -630,64 +601,64 @@ static ReturnCode ndefPayloadToBluetooth(const ndefConstBuffer *bufPayload, ndef
     offset += eir_length;
 
 #ifdef NDEF_BLUETOOTH_CHECK_REFERENCE_LENGTH
-    uint8_t  eir_data_length = ndefBluetoothEirDataLength(eir);
-    uint8_t  eir_type        = ndefBluetoothEirType(eir);
-    uint32_t refLength       = ndefBluetoothEirRefLength(eir_type);
+    uint8_t  eir_data_length = NFC_Bluetooth_EirDataLength(eir);
+    uint8_t  eir_type        = NFC_Bluetooth_EirType(eir);
+    uint32_t refLength       = NFC_Bluetooth_EirRefLength(eir_type);
     /* Check length match */
     if ((refLength != 0U) &&
         (refLength != eir_data_length)) {
-      return ERR_PROTO;
+      return NFC_ProtocolError;
     }
 #endif
-    ReturnCode err = ndefBluetoothSetEir(ndefData, eir);
-    if (err != ERR_NONE) {
+    NFC_OpResult err = NFC_Bluetooth_SetEir(ndefData, eir);
+    if (err != NFC_OK) {
       return err;
     }
   }
 
   /* The client is in charge to check that the mandatory fields are there */
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToBluetooth(const ndefRecord *record, ndefType *type)
+NFC_OpResult NDef_RecordToBluetooth(const NDef_Record *record, NDef_Type *type)
 {
-  const ndefType *ndefData;
-  ndefTypeId typeId;
+  const NDef_Type *ndefData;
+  NDef_Type_ID typeId;
 
   if ((record == NULL) || (type == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* "application/vnd.bluetooth.ep.oob" */
-  if (ndefRecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothBrEdr)) {
+  if (NDef_RecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothBrEdr)) {
     typeId = NDEF_TYPE_ID_BLUETOOTH_BREDR;
   }
   /* "application/vnd.bluetooth.le.oob" */
-  else if (ndefRecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothLe)) {
+  else if (NDef_RecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothLe)) {
     typeId = NDEF_TYPE_ID_BLUETOOTH_LE;
   }
   /* "application/vnd.bluetooth.secure.ep.oob" */
-  else if (ndefRecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureBrEdr)) {
+  else if (NDef_RecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureBrEdr)) {
     typeId = NDEF_TYPE_ID_BLUETOOTH_SECURE_BREDR;
   }
   /* "application/vnd.bluetooth.secure.le.oob" */
-  else if (ndefRecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureLe)) {
+  else if (NDef_RecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureLe)) {
     typeId = NDEF_TYPE_ID_BLUETOOTH_SECURE_LE;
   } else {
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
-  ndefData = ndefRecordGetNdefType(record);
+  ndefData = NDef_RecordGetNdefType(record);
   if ((ndefData != NULL) && ((ndefData->id == NDEF_TYPE_ID_BLUETOOTH_BREDR)        ||
                              (ndefData->id == NDEF_TYPE_ID_BLUETOOTH_LE)           ||
                              (ndefData->id == NDEF_TYPE_ID_BLUETOOTH_SECURE_BREDR) ||
                              (ndefData->id == NDEF_TYPE_ID_BLUETOOTH_SECURE_LE))
      ) {
-    (void)ST_MEMCPY(type, ndefData, sizeof(ndefType));
-    return ERR_NONE;
+    (void)memcpy(type, ndefData, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
   return ndefPayloadToBluetooth(&record->bufPayload, typeId, type);
@@ -695,35 +666,35 @@ ReturnCode ndefRecordToBluetooth(const ndefRecord *record, ndefType *type)
 
 
 /*****************************************************************************/
-ReturnCode ndefBluetoothToRecord(const ndefType *type, ndefRecord *record)
+NFC_OpResult NDef_BluetoothToRecord(const NDef_Type *type, NDef_Record *record)
 {
   if ((type == NULL) || (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   if (type->id == NDEF_TYPE_ID_BLUETOOTH_BREDR) {
     /* "application/vnd.bluetooth.ep.oob" */
-    (void)ndefRecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothBrEdr);
+    (void)NDef_RecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothBrEdr);
   } else if (type->id == NDEF_TYPE_ID_BLUETOOTH_LE) {
     /* "application/vnd.bluetooth.le.oob" */
-    (void)ndefRecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothLe);
+    (void)NDef_RecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothLe);
   } else if (type->id == NDEF_TYPE_ID_BLUETOOTH_SECURE_BREDR) {
     /* "application/vnd.bluetooth.secure.ep.oob" */
-    (void)ndefRecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureBrEdr);
+    (void)NDef_RecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureBrEdr);
   } else if (type->id == NDEF_TYPE_ID_BLUETOOTH_SECURE_LE) {
     /* "application/vnd.bluetooth.secure.le.oob" */
-    (void)ndefRecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureLe);
+    (void)NDef_RecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureLe);
   } else {
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
-  if (ndefRecordSetNdefType(record, type) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

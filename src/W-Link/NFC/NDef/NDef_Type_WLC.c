@@ -1,7 +1,7 @@
 
 /**
   ******************************************************************************
-  * @file           : ndef_type_wlc.cpp
+  * @file           : NDef__type_wlc.cpp
   * @brief          : NDEF WLC (Wireless Charging) types
   ******************************************************************************
   * @attention
@@ -15,28 +15,36 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_wlc.h"
-#include "nfc_utils.h"
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_WLC.h"
 
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_RTD_WLC_SUPPORT
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
 
 #define NDEF_TYPE_RTD_WLC_PAYLOAD_LENGTH                    6U   /*!< WLC Capability/Poll Info/Listen Control Records Payload Length */
 
@@ -149,49 +157,19 @@
 #define NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_SHIFT    0U /*! WLC Listen Control Error Info Temperature bit shift */
 #define NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_MASK     1U /*! WLC Listen Control Error Info Temperature mask */
 
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
 /*! RTD WLC Type strings */
-static const uint8_t ndefRtdTypeWlcCapability[] = "WLCCAP";  /*!< WLC Capability Record Type             */
-static const uint8_t ndefRtdTypeWlcStatusInfo[] = "WLCSTAI"; /*!< WLC Status and Information Record Type */
-static const uint8_t ndefRtdTypeWlcPollInfo[]   = "WLCINF";  /*!< WLC Poll Info Record Type              */
-static const uint8_t ndefRtdTypeWlcListenCtl[]  = "WLCCTL";  /*!< WLC Listen Control Record Type         */
+static const uint8_t NDef_RtdTypeWlcCapability[] = "WLCCAP";  /*!< WLC Capability Record Type             */
+static const uint8_t NDef_RtdTypeWlcStatusInfo[] = "WLCSTAI"; /*!< WLC Status and Information Record Type */
+static const uint8_t NDef_RtdTypeWlcPollInfo[]   = "WLCINF";  /*!< WLC Poll Info Record Type              */
+static const uint8_t NDef_RtdTypeWlcListenCtl[]  = "WLCCTL";  /*!< WLC Listen Control Record Type         */
 
-const ndefConstBuffer8 bufTypeRtdWlcCapability = { ndefRtdTypeWlcCapability, sizeof(ndefRtdTypeWlcCapability) - 1U };    /*!< WLC Capabiilty Type Record buffer       */
-const ndefConstBuffer8 bufTypeRtdWlcStatusInfo = { ndefRtdTypeWlcStatusInfo, sizeof(ndefRtdTypeWlcStatusInfo) - 1U };    /*!< WLC Capabiilty Type Record buffer       */
-const ndefConstBuffer8 bufTypeRtdWlcPollInfo   = { ndefRtdTypeWlcPollInfo,   sizeof(ndefRtdTypeWlcPollInfo) - 1U };      /*!< WLC Poll Information Type Record buffer */
-const ndefConstBuffer8 bufTypeRtdWlcListenCtl  = { ndefRtdTypeWlcListenCtl,  sizeof(ndefRtdTypeWlcListenCtl) - 1U };     /*!< WLC Listen Control Type Record buffer   */
-
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
+const NDef_Const_Buffer_8 bufTypeRtdWlcCapability = { NDef_RtdTypeWlcCapability, sizeof(NDef_RtdTypeWlcCapability) - 1U };    /*!< WLC Capabiilty Type Record buffer       */
+const NDef_Const_Buffer_8 bufTypeRtdWlcStatusInfo = { NDef_RtdTypeWlcStatusInfo, sizeof(NDef_RtdTypeWlcStatusInfo) - 1U };    /*!< WLC Capabiilty Type Record buffer       */
+const NDef_Const_Buffer_8 bufTypeRtdWlcPollInfo   = { NDef_RtdTypeWlcPollInfo,   sizeof(NDef_RtdTypeWlcPollInfo) - 1U };      /*!< WLC Poll Information Type Record buffer */
+const NDef_Const_Buffer_8 bufTypeRtdWlcListenCtl  = { NDef_RtdTypeWlcListenCtl,  sizeof(NDef_RtdTypeWlcListenCtl) - 1U };     /*!< WLC Listen Control Type Record buffer   */
 
 /*****************************************************************************/
-/*
- * WLC Capability
- */
-/*****************************************************************************/
-
-
-/*****************************************************************************/
-static uint32_t ndefRtdWlcCapabilityGetPayloadLength(const ndefType *type)
+static uint32_t NDef_RtdWlcCapabilityGetPayloadLength(const NDef_Type *type)
 {
   if ((type == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCCAP)) {
     return 0;
@@ -202,18 +180,18 @@ static uint32_t ndefRtdWlcCapabilityGetPayloadLength(const ndefType *type)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdWlcCapabilityGetPayloadItem(const ndefType *type, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdWlcCapabilityGetPayloadItem(const NDef_Type *type, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
   static uint8_t temp = 0;
-  const ndefTypeRtdWlcCapability *ndefData;
+  const NDef_Type_Rtd_WlcCapability *NDef_Data;
 
   if ((type    == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCCAP) ||
       (bufItem == NULL)) {
     return NULL;
   }
 
-  ndefData = &type->data.wlcCapability;
+  NDef_Data = &type->data.wlcCapability;
 
   if (begin == true) {
     item = 0;
@@ -224,33 +202,33 @@ static const uint8_t *ndefRtdWlcCapabilityGetPayloadItem(const ndefType *type, n
 
   switch (item) {
     case 0: /* WLC Protocol Version */
-      bufItem->buffer = &ndefData->wlcProtocolVersion;
+      bufItem->buffer = &NDef_Data->wlcProtocolVersion;
       break;
     case 1: { /* WLC Config */
         temp =
-          ((ndefData->wlcConfigModeReq       & NDEF_WLC_CAPABILITY_CONFIG_MODE_REQ_MASK)        << NDEF_WLC_CAPABILITY_CONFIG_MODE_REQ_SHIFT)
-          | ((ndefData->wlcConfigWaitTimeRetry & NDEF_WLC_CAPABILITY_CONFIG_WAIT_TIME_RETRY_MASK) << NDEF_WLC_CAPABILITY_CONFIG_WAIT_TIME_RETRY_SHIFT)
-          | ((ndefData->wlcConfigNegoWait      & NDEF_WLC_CAPABILITY_CONFIG_NEGO_WAIT_MASK)       << NDEF_WLC_CAPABILITY_CONFIG_NEGO_WAIT_SHIFT)
-          | ((ndefData->wlcConfigRdConf        & NDEF_WLC_CAPABILITY_CONFIG_RD_CONF_MASK)         << NDEF_WLC_CAPABILITY_CONFIG_RD_CONF_SHIFT);
+          ((NDef_Data->wlcConfigModeReq       & NDEF_WLC_CAPABILITY_CONFIG_MODE_REQ_MASK)        << NDEF_WLC_CAPABILITY_CONFIG_MODE_REQ_SHIFT)
+          | ((NDef_Data->wlcConfigWaitTimeRetry & NDEF_WLC_CAPABILITY_CONFIG_WAIT_TIME_RETRY_MASK) << NDEF_WLC_CAPABILITY_CONFIG_WAIT_TIME_RETRY_SHIFT)
+          | ((NDef_Data->wlcConfigNegoWait      & NDEF_WLC_CAPABILITY_CONFIG_NEGO_WAIT_MASK)       << NDEF_WLC_CAPABILITY_CONFIG_NEGO_WAIT_SHIFT)
+          | ((NDef_Data->wlcConfigRdConf        & NDEF_WLC_CAPABILITY_CONFIG_RD_CONF_MASK)         << NDEF_WLC_CAPABILITY_CONFIG_RD_CONF_SHIFT);
 
         bufItem->buffer = &temp;
         break;
       }
     case 2: /* Cap Wt Int */
       temp =
-        ((ndefData->capWtIntRfu & NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_RFU_MASK) << NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_RFU_SHIFT)
-        | ((ndefData->capWtInt    & NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_MASK)     << NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_SHIFT);
+        ((NDef_Data->capWtIntRfu & NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_RFU_MASK) << NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_RFU_SHIFT)
+        | ((NDef_Data->capWtInt    & NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_MASK)     << NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_SHIFT);
 
       bufItem->buffer = &temp;
       break;
     case 3: /* NDEF Rd Wt */
-      bufItem->buffer = &ndefData->ndefRdWt;
+      bufItem->buffer = &NDef_Data->ndefRdWt;
       break;
     case 4: /* NDEF Write To Int */
-      bufItem->buffer = &ndefData->ndefWriteToInt;
+      bufItem->buffer = &NDef_Data->ndefWriteToInt;
       break;
     case 5: /* NDEF Write Wt Int */
-      bufItem->buffer = &ndefData->ndefWriteWtInt;
+      bufItem->buffer = &NDef_Data->ndefWriteWtInt;
       break;
     default:
       bufItem->buffer = NULL;
@@ -266,137 +244,129 @@ static const uint8_t *ndefRtdWlcCapabilityGetPayloadItem(const ndefType *type, n
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWlcCapabilityInit(ndefType *type, const ndefTypeRtdWlcCapability *param)
+NFC_OpResult NDef_RtdWlcCapabilityInit(NDef_Type *type, const NDef_Type_Rtd_WlcCapability *param)
 {
-  ndefTypeRtdWlcCapability *ndefData;
+  NDef_Type_Rtd_WlcCapability *NDef_Data;
 
   if ((type == NULL) || (param == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_WLCCAP;
-  type->getPayloadLength = ndefRtdWlcCapabilityGetPayloadLength;
-  type->getPayloadItem   = ndefRtdWlcCapabilityGetPayloadItem;
-  type->typeToRecord     = ndefRtdWlcCapabilityToRecord;
-  ndefData               = &type->data.wlcCapability;
+  type->getPayloadLength = NDef_RtdWlcCapabilityGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdWlcCapabilityGetPayloadItem;
+  type->typeToRecord     = NDef_RtdWlcCapabilityToRecord;
+  NDef_Data               = &type->data.wlcCapability;
 
-  (void)ST_MEMCPY(ndefData, param, sizeof(ndefTypeRtdWlcCapability));
+  (void)memcpy(NDef_Data, param, sizeof(NDef_Type_Rtd_WlcCapability));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdWlcCapability(const ndefType *type, ndefTypeRtdWlcCapability *param)
+NFC_OpResult NDef_GetRtdWlcCapability(const NDef_Type *type, NDef_Type_Rtd_WlcCapability *param)
 {
-  const ndefTypeRtdWlcCapability *ndefData;
+  const NDef_Type_Rtd_WlcCapability *NDef_Data;
 
   if ((type  == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCCAP) ||
       (param == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  ndefData = &type->data.wlcCapability;
+  NDef_Data = &type->data.wlcCapability;
 
-  (void)ST_MEMCPY(param, ndefData, sizeof(ndefTypeRtdWlcCapability));
+  (void)memcpy(param, NDef_Data, sizeof(NDef_Type_Rtd_WlcCapability));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdWlcCapability(const ndefConstBuffer *bufPayload, ndefType *type)
+static NFC_OpResult NDef_PayloadToRtdWlcCapability(const NDef_Const_Buffer *bufPayload, NDef_Type *type)
 {
-  ndefTypeRtdWlcCapability *ndefData;
+  NDef_Type_Rtd_WlcCapability *NDef_Data;
 
   if ((bufPayload == NULL) || (bufPayload->buffer == NULL) ||
       (type       == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   if (bufPayload->length != NDEF_TYPE_RTD_WLC_PAYLOAD_LENGTH) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_WLCCAP;
-  type->getPayloadLength = ndefRtdWlcCapabilityGetPayloadLength;
-  type->getPayloadItem   = ndefRtdWlcCapabilityGetPayloadItem;
-  type->typeToRecord     = ndefRtdWlcCapabilityToRecord;
-  ndefData               = &type->data.wlcCapability;
+  type->getPayloadLength = NDef_RtdWlcCapabilityGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdWlcCapabilityGetPayloadItem;
+  type->typeToRecord     = NDef_RtdWlcCapabilityToRecord;
+  NDef_Data               = &type->data.wlcCapability;
 
-  ndefData->wlcProtocolVersion     = bufPayload->buffer[NDEF_WLC_CAPABILITY_PROTOCOL_VERSION_OFFSET];
+  NDef_Data->wlcProtocolVersion     = bufPayload->buffer[NDEF_WLC_CAPABILITY_PROTOCOL_VERSION_OFFSET];
 
   uint8_t config = bufPayload->buffer[NDEF_WLC_CAPABILITY_CONFIG_OFFSET];
-  ndefData->wlcConfigModeReq       = (config >> NDEF_WLC_CAPABILITY_CONFIG_MODE_REQ_SHIFT)        & NDEF_WLC_CAPABILITY_CONFIG_MODE_REQ_MASK;
-  ndefData->wlcConfigWaitTimeRetry = (config >> NDEF_WLC_CAPABILITY_CONFIG_WAIT_TIME_RETRY_SHIFT) & NDEF_WLC_CAPABILITY_CONFIG_WAIT_TIME_RETRY_MASK;
-  ndefData->wlcConfigNegoWait      = (config >> NDEF_WLC_CAPABILITY_CONFIG_NEGO_WAIT_SHIFT)       & NDEF_WLC_CAPABILITY_CONFIG_NEGO_WAIT_MASK;
-  ndefData->wlcConfigRdConf        = (config >> NDEF_WLC_CAPABILITY_CONFIG_RD_CONF_SHIFT)         & NDEF_WLC_CAPABILITY_CONFIG_RD_CONF_MASK;
+  NDef_Data->wlcConfigModeReq       = (config >> NDEF_WLC_CAPABILITY_CONFIG_MODE_REQ_SHIFT)        & NDEF_WLC_CAPABILITY_CONFIG_MODE_REQ_MASK;
+  NDef_Data->wlcConfigWaitTimeRetry = (config >> NDEF_WLC_CAPABILITY_CONFIG_WAIT_TIME_RETRY_SHIFT) & NDEF_WLC_CAPABILITY_CONFIG_WAIT_TIME_RETRY_MASK;
+  NDef_Data->wlcConfigNegoWait      = (config >> NDEF_WLC_CAPABILITY_CONFIG_NEGO_WAIT_SHIFT)       & NDEF_WLC_CAPABILITY_CONFIG_NEGO_WAIT_MASK;
+  NDef_Data->wlcConfigRdConf        = (config >> NDEF_WLC_CAPABILITY_CONFIG_RD_CONF_SHIFT)         & NDEF_WLC_CAPABILITY_CONFIG_RD_CONF_MASK;
 
   uint8_t capWtInt = bufPayload->buffer[NDEF_WLC_CAPABILITY_WT_INT_OFFSET];
-  ndefData->capWtIntRfu            = (capWtInt >> NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_RFU_SHIFT) & NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_RFU_MASK;
-  ndefData->capWtInt               = (capWtInt >> NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_SHIFT)     & NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_MASK;
-  ndefData->ndefRdWt               = bufPayload->buffer[NDEF_WLC_CAPABILITY_NDEF_RD_WT_OFFSET];
-  ndefData->ndefWriteToInt         = bufPayload->buffer[NDEF_WLC_CAPABILITY_NDEF_WR_TO_INT_OFFSET];
-  ndefData->ndefWriteWtInt         = bufPayload->buffer[NDEF_WLC_CAPABILITY_NDEF_WR_WT_INT_OFFSET];
+  NDef_Data->capWtIntRfu            = (capWtInt >> NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_RFU_SHIFT) & NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_RFU_MASK;
+  NDef_Data->capWtInt               = (capWtInt >> NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_SHIFT)     & NDEF_WLC_CAPABILITY_CONFIG_CAP_WT_INT_MASK;
+  NDef_Data->ndefRdWt               = bufPayload->buffer[NDEF_WLC_CAPABILITY_NDEF_RD_WT_OFFSET];
+  NDef_Data->ndefWriteToInt         = bufPayload->buffer[NDEF_WLC_CAPABILITY_NDEF_WR_TO_INT_OFFSET];
+  NDef_Data->ndefWriteWtInt         = bufPayload->buffer[NDEF_WLC_CAPABILITY_NDEF_WR_WT_INT_OFFSET];
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdWlcCapability(const ndefRecord *record, ndefType *type)
+NFC_OpResult NDef_RecordToRtdWlcCapability(const NDef_Record *record, NDef_Type *type)
 {
-  const ndefType *ndefData;
+  const NDef_Type *NDef_Data;
 
   if ((record == NULL) || (type == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* NDEF TNF and String type */
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability)) {
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability)) {
+    return NFC_ProtocolError;
   }
 
-  ndefData = ndefRecordGetNdefType(record);
-  if ((ndefData != NULL) && (ndefData->id == NDEF_TYPE_ID_RTD_WLCCAP)) {
-    (void)ST_MEMCPY(type, ndefData, sizeof(ndefType));
-    return ERR_NONE;
+  NDef_Data = NDef_RecordGetNdefType(record);
+  if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_WLCCAP)) {
+    (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
-  return ndefPayloadToRtdWlcCapability(&record->bufPayload, type);
+  return NDef_PayloadToRtdWlcCapability(&record->bufPayload, type);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWlcCapabilityToRecord(const ndefType *type, ndefRecord *record)
+NFC_OpResult NDef_RtdWlcCapabilityToRecord(const NDef_Type *type, NDef_Record *record)
 {
   if ((type   == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCCAP) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* String type */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability);
 
-  if (ndefRecordSetNdefType(record, type) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
-
 /*****************************************************************************/
-/*
- * WLC Status and Information
- */
-/*****************************************************************************/
-
-
-/*****************************************************************************/
-static uint32_t ndefRtdWlcStatusInfoGetPayloadLength(const ndefType *type)
+static uint32_t NDef_RtdWlcStatusInfoGetPayloadLength(const NDef_Type *type)
 {
   uint32_t length;
 
@@ -404,13 +374,13 @@ static uint32_t ndefRtdWlcStatusInfoGetPayloadLength(const ndefType *type)
     return 0;
   }
 
-  const ndefTypeRtdWlcStatusInfo *ndefData = &type->data.wlcStatusInfo;
+  const NDef_Type_Rtd_WlcStatusInfo *NDef_Data = &type->data.wlcStatusInfo;
 
   length = sizeof(uint8_t); /* Control byte 1 */
 
   /* Count the number of bits set in the Control byte 1 to get the number of following bytes */
   for (uint32_t i = 0; i < 8U; i++) {
-    if ((ndefData->controlByte1 & (1U << i)) != 0U) {
+    if ((NDef_Data->controlByte1 & (1U << i)) != 0U) {
       length += sizeof(uint8_t);
     }
   }
@@ -420,17 +390,17 @@ static uint32_t ndefRtdWlcStatusInfoGetPayloadLength(const ndefType *type)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdWlcStatusInfoGetPayloadItem(const ndefType *type, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdWlcStatusInfoGetPayloadItem(const NDef_Type *type, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeRtdWlcStatusInfo *ndefData;
+  const NDef_Type_Rtd_WlcStatusInfo *NDef_Data;
 
   if ((type    == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCSTAI) ||
       (bufItem == NULL)) {
     return NULL;
   }
 
-  ndefData = &type->data.wlcStatusInfo;
+  NDef_Data = &type->data.wlcStatusInfo;
 
   if (begin == true) {
     item = 0;
@@ -441,61 +411,61 @@ static const uint8_t *ndefRtdWlcStatusInfoGetPayloadItem(const ndefType *type, n
 
   switch (item) {
     case 0: /* Control Byte 1 */
-      bufItem->buffer = &ndefData->controlByte1;
+      bufItem->buffer = &NDef_Data->controlByte1;
       item++;
       break;
     case 1: /* Battery Level */
-      if ((ndefData->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_BATTERY_LEVEL_MASK) != 0U) {
-        bufItem->buffer = &ndefData->batteryLevel;
+      if ((NDef_Data->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_BATTERY_LEVEL_MASK) != 0U) {
+        bufItem->buffer = &NDef_Data->batteryLevel;
         item = 2;
         break;
       }
     /* fall through */
     case 2: /* Receive Power */
-      if ((ndefData->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_POWER_MASK) != 0U) {
-        bufItem->buffer = &ndefData->receivePower;
+      if ((NDef_Data->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_POWER_MASK) != 0U) {
+        bufItem->buffer = &NDef_Data->receivePower;
         item = 3;
         break;
       }
     /* fall through */
     case 3: /* Receive Voltage */
-      if ((ndefData->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_VOLTAGE_MASK) != 0U) {
-        bufItem->buffer = &ndefData->receiveVoltage;
+      if ((NDef_Data->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_VOLTAGE_MASK) != 0U) {
+        bufItem->buffer = &NDef_Data->receiveVoltage;
         item = 4;
         break;
       }
     /* fall through */
     case 4: /* Receive Current */
-      if ((ndefData->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_CURRENT_MASK) != 0U) {
-        bufItem->buffer = &ndefData->receiveCurrent;
+      if ((NDef_Data->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_CURRENT_MASK) != 0U) {
+        bufItem->buffer = &NDef_Data->receiveCurrent;
         item = 5;
         break;
       }
     /* fall through */
     case 5: /* Receive Current */
-      if ((ndefData->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_TEMPERATURE_BATTERY_MASK) != 0U) {
-        bufItem->buffer = &ndefData->temperatureBattery;
+      if ((NDef_Data->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_TEMPERATURE_BATTERY_MASK) != 0U) {
+        bufItem->buffer = &NDef_Data->temperatureBattery;
         item = 6;
         break;
       }
     /* fall through */
     case 6: /* Receive Current */
-      if ((ndefData->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_TEMPERATURE_WLCL_MASK) != 0U) {
-        bufItem->buffer = &ndefData->temperatureWlcl;
+      if ((NDef_Data->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_TEMPERATURE_WLCL_MASK) != 0U) {
+        bufItem->buffer = &NDef_Data->temperatureWlcl;
         item = 7;
         break;
       }
     /* fall through */
     case 7: /* Receive Current */
-      if ((ndefData->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RFU_MASK) != 0U) {
-        bufItem->buffer = &ndefData->rfu;
+      if ((NDef_Data->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RFU_MASK) != 0U) {
+        bufItem->buffer = &NDef_Data->rfu;
         item = 8;
         break;
       }
     /* fall through */
     case 8: /* Receive Current */
-      if ((ndefData->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_CONTROL_BYTE_2_MASK) != 0U) {
-        bufItem->buffer = &ndefData->controlByte2;
+      if ((NDef_Data->controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_CONTROL_BYTE_2_MASK) != 0U) {
+        bufItem->buffer = &NDef_Data->controlByte2;
         item = 9;
         break;
       }
@@ -511,64 +481,64 @@ static const uint8_t *ndefRtdWlcStatusInfoGetPayloadItem(const ndefType *type, n
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWlcStatusInfoInit(ndefType *type, const ndefTypeRtdWlcStatusInfo *param)
+NFC_OpResult NDef_RtdWlcStatusInfoInit(NDef_Type *type, const NDef_Type_Rtd_WlcStatusInfo *param)
 {
-  ndefTypeRtdWlcStatusInfo *ndefData;
+  NDef_Type_Rtd_WlcStatusInfo *NDef_Data;
 
   if ((type == NULL) || (param == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_WLCSTAI;
-  type->getPayloadLength = ndefRtdWlcStatusInfoGetPayloadLength;
-  type->getPayloadItem   = ndefRtdWlcStatusInfoGetPayloadItem;
-  type->typeToRecord     = ndefRtdWlcStatusInfoToRecord;
-  ndefData               = &type->data.wlcStatusInfo;
+  type->getPayloadLength = NDef_RtdWlcStatusInfoGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdWlcStatusInfoGetPayloadItem;
+  type->typeToRecord     = NDef_RtdWlcStatusInfoToRecord;
+  NDef_Data               = &type->data.wlcStatusInfo;
 
-  (void)ST_MEMCPY(ndefData, param, sizeof(ndefTypeRtdWlcStatusInfo));
+  (void)memcpy(NDef_Data, param, sizeof(NDef_Type_Rtd_WlcStatusInfo));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdWlcStatusInfo(const ndefType *type, ndefTypeRtdWlcStatusInfo *param)
+NFC_OpResult NDef_GetRtdWlcStatusInfo(const NDef_Type *type, NDef_Type_Rtd_WlcStatusInfo *param)
 {
-  const ndefTypeRtdWlcStatusInfo *ndefData;
+  const NDef_Type_Rtd_WlcStatusInfo *NDef_Data;
 
   if ((type  == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCSTAI) ||
       (param == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  ndefData = &type->data.wlcStatusInfo;
+  NDef_Data = &type->data.wlcStatusInfo;
 
-  (void)ST_MEMCPY(param, ndefData, sizeof(ndefTypeRtdWlcStatusInfo));
+  (void)memcpy(param, NDef_Data, sizeof(NDef_Type_Rtd_WlcStatusInfo));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdWlcStatusInfo(const ndefConstBuffer *bufPayload, ndefType *type)
+static NFC_OpResult NDef_PayloadToRtdWlcStatusInfo(const NDef_Const_Buffer *bufPayload, NDef_Type *type)
 {
-  ndefTypeRtdWlcStatusInfo *ndefData;
+  NDef_Type_Rtd_WlcStatusInfo *NDef_Data;
 
   if ((bufPayload == NULL) || (bufPayload->buffer == NULL) ||
       (type       == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   if ((bufPayload->length < NDEF_TYPE_RTD_WLC_STATUS_INFO_MIN_PAYLOAD_LENGTH) ||
       (bufPayload->length > NDEF_TYPE_RTD_WLC_STATUS_INFO_MAX_PAYLOAD_LENGTH)) {
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_WLCSTAI;
-  type->getPayloadLength = ndefRtdWlcStatusInfoGetPayloadLength;
-  type->getPayloadItem   = ndefRtdWlcStatusInfoGetPayloadItem;
-  type->typeToRecord     = ndefRtdWlcStatusInfoToRecord;
-  ndefData               = &type->data.wlcStatusInfo;
+  type->getPayloadLength = NDef_RtdWlcStatusInfoGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdWlcStatusInfoGetPayloadItem;
+  type->typeToRecord     = NDef_RtdWlcStatusInfoToRecord;
+  NDef_Data               = &type->data.wlcStatusInfo;
 
   uint32_t offset = NDEF_WLC_STATUSINFO_CONTROL_BYTE_1_OFFSET;
 
@@ -576,103 +546,103 @@ static ReturnCode ndefPayloadToRtdWlcStatusInfo(const ndefConstBuffer *bufPayloa
   offset++;
 
   /* Initialize each field */
-  ndefData->controlByte1       = controlByte1;
-  ndefData->batteryLevel       = 0;
-  ndefData->receivePower       = 0;
-  ndefData->receiveVoltage     = 0;
-  ndefData->receiveCurrent     = 0;
-  ndefData->temperatureBattery = 0;
-  ndefData->temperatureWlcl    = 0;
-  ndefData->rfu                = 0;
-  ndefData->controlByte2       = 0;
+  NDef_Data->controlByte1       = controlByte1;
+  NDef_Data->batteryLevel       = 0;
+  NDef_Data->receivePower       = 0;
+  NDef_Data->receiveVoltage     = 0;
+  NDef_Data->receiveCurrent     = 0;
+  NDef_Data->temperatureBattery = 0;
+  NDef_Data->temperatureWlcl    = 0;
+  NDef_Data->rfu                = 0;
+  NDef_Data->controlByte2       = 0;
 
   /* Check each bit in Control byte 1 and read the appropriate byte */
   if ((controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_BATTERY_LEVEL_MASK) != 0U) {
-    ndefData->batteryLevel = bufPayload->buffer[offset];
+    NDef_Data->batteryLevel = bufPayload->buffer[offset];
     offset++;
   }
 
   if ((controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_POWER_MASK) != 0U) {
-    ndefData->receivePower = bufPayload->buffer[offset];
+    NDef_Data->receivePower = bufPayload->buffer[offset];
     offset++;
   }
 
   if ((controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_VOLTAGE_MASK) != 0U) {
-    ndefData->receiveVoltage = bufPayload->buffer[offset];
+    NDef_Data->receiveVoltage = bufPayload->buffer[offset];
     offset++;
   }
 
   if ((controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_CURRENT_MASK) != 0U) {
-    ndefData->receiveCurrent = bufPayload->buffer[offset];
+    NDef_Data->receiveCurrent = bufPayload->buffer[offset];
     offset++;
   }
 
   if ((controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_TEMPERATURE_BATTERY_MASK) != 0U) {
-    ndefData->temperatureBattery = bufPayload->buffer[offset];
+    NDef_Data->temperatureBattery = bufPayload->buffer[offset];
     offset++;
   }
 
   if ((controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_TEMPERATURE_WLCL_MASK) != 0U) {
-    ndefData->temperatureWlcl = bufPayload->buffer[offset];
+    NDef_Data->temperatureWlcl = bufPayload->buffer[offset];
     offset++;
   }
 
   if ((controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_RFU_MASK) != 0U) {
-    ndefData->rfu = bufPayload->buffer[offset];
+    NDef_Data->rfu = bufPayload->buffer[offset];
     offset++;
   }
 
   if ((controlByte1 & NDEF_WLC_STATUSINFO_CONTROLBYTE1_CONTROL_BYTE_2_MASK) != 0U) {
-    ndefData->controlByte2 = bufPayload->buffer[offset];
+    NDef_Data->controlByte2 = bufPayload->buffer[offset];
     /*offset++;*/
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdWlcStatusInfo(const ndefRecord *record, ndefType *type)
+NFC_OpResult NDef_RecordToRtdWlcStatusInfo(const NDef_Record *record, NDef_Type *type)
 {
-  const ndefType *ndefData;
+  const NDef_Type *NDef_Data;
 
   if ((record == NULL) || (type == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* NDEF TNF and String type */
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo)) {
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo)) {
+    return NFC_ProtocolError;
   }
 
-  ndefData = ndefRecordGetNdefType(record);
-  if ((ndefData != NULL) && (ndefData->id == NDEF_TYPE_ID_RTD_WLCSTAI)) {
-    (void)ST_MEMCPY(type, ndefData, sizeof(ndefType));
-    return ERR_NONE;
+  NDef_Data = NDef_RecordGetNdefType(record);
+  if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_WLCSTAI)) {
+    (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
-  return ndefPayloadToRtdWlcStatusInfo(&record->bufPayload, type);
+  return NDef_PayloadToRtdWlcStatusInfo(&record->bufPayload, type);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWlcStatusInfoToRecord(const ndefType *type, ndefRecord *record)
+NFC_OpResult NDef_RtdWlcStatusInfoToRecord(const NDef_Type *type, NDef_Record *record)
 {
   if ((type   == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCSTAI) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* String type */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo);
 
-  if (ndefRecordSetNdefType(record, type) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
@@ -684,7 +654,7 @@ ReturnCode ndefRtdWlcStatusInfoToRecord(const ndefType *type, ndefRecord *record
 
 
 /*****************************************************************************/
-static uint32_t ndefRtdWlcPollInfoGetPayloadLength(const ndefType *type)
+static uint32_t NDef_RtdWlcPollInfoGetPayloadLength(const NDef_Type *type)
 {
   if ((type == NULL) || ((type)->id != NDEF_TYPE_ID_RTD_WLCINFO)) {
     return 0;
@@ -695,17 +665,17 @@ static uint32_t ndefRtdWlcPollInfoGetPayloadLength(const ndefType *type)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdWlcPollInfoGetPayloadItem(const ndefType *type, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdWlcPollInfoGetPayloadItem(const NDef_Type *type, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeRtdWlcPollInfo *ndefData;
+  const NDef_Type_Rtd_WlcPollInfo *NDef_Data;
 
   if ((type    == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCINFO) ||
       (bufItem == NULL)) {
     return NULL;
   }
 
-  ndefData = &type->data.wlcPollInfo;
+  NDef_Data = &type->data.wlcPollInfo;
 
   if (begin == true) {
     item = 0;
@@ -716,28 +686,28 @@ static const uint8_t *ndefRtdWlcPollInfoGetPayloadItem(const ndefType *type, nde
 
   switch (item) {
     case 0: /* P Tx */
-      bufItem->buffer = &ndefData->pTx;
+      bufItem->buffer = &NDef_Data->pTx;
       break;
     case 1: { /* WLC-P Capability | Power class */
         static uint8_t temp;
         temp =
-          ((ndefData->wlcPCap   << NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_SHIFT)
-           | ((ndefData->powerClass & NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_MASK)));
+          ((NDef_Data->wlcPCap   << NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_SHIFT)
+           | ((NDef_Data->powerClass & NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_MASK)));
 
         bufItem->buffer = &temp;
         break;
       }
     case 2: /* Total Power Steps */
-      bufItem->buffer = &ndefData->totPowerSteps;
+      bufItem->buffer = &NDef_Data->totPowerSteps;
       break;
     case 3: /* Current Power Steps */
-      bufItem->buffer = &ndefData->curPowerStep;
+      bufItem->buffer = &NDef_Data->curPowerStep;
       break;
     case 4: /* Next min step increment */
-      bufItem->buffer = &ndefData->nextMinStepInc;
+      bufItem->buffer = &NDef_Data->nextMinStepInc;
       break;
     case 5: /* Next min step decrement */
-      bufItem->buffer = &ndefData->nextMinStepDec;
+      bufItem->buffer = &NDef_Data->nextMinStepDec;
       break;
     default:
       bufItem->buffer = NULL;
@@ -753,118 +723,118 @@ static const uint8_t *ndefRtdWlcPollInfoGetPayloadItem(const ndefType *type, nde
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWlcPollInfoInit(ndefType *type, const ndefTypeRtdWlcPollInfo *param)
+NFC_OpResult NDef_RtdWlcPollInfoInit(NDef_Type *type, const NDef_Type_Rtd_WlcPollInfo *param)
 {
-  ndefTypeRtdWlcPollInfo *ndefData;
+  NDef_Type_Rtd_WlcPollInfo *NDef_Data;
 
   if ((type == NULL) || (param == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_WLCINFO;
-  type->getPayloadLength = ndefRtdWlcPollInfoGetPayloadLength;
-  type->getPayloadItem   = ndefRtdWlcPollInfoGetPayloadItem;
-  type->typeToRecord     = ndefRtdWlcPollInfoToRecord;
-  ndefData               = &type->data.wlcPollInfo;
+  type->getPayloadLength = NDef_RtdWlcPollInfoGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdWlcPollInfoGetPayloadItem;
+  type->typeToRecord     = NDef_RtdWlcPollInfoToRecord;
+  NDef_Data               = &type->data.wlcPollInfo;
 
-  (void)ST_MEMCPY(ndefData, param, sizeof(ndefTypeRtdWlcPollInfo));
+  (void)memcpy(NDef_Data, param, sizeof(NDef_Type_Rtd_WlcPollInfo));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdWlcPollInfo(const ndefType *type, ndefTypeRtdWlcPollInfo *param)
+NFC_OpResult NDef_GetRtdWlcPollInfo(const NDef_Type *type, NDef_Type_Rtd_WlcPollInfo *param)
 {
-  const ndefTypeRtdWlcPollInfo *ndefData;
+  const NDef_Type_Rtd_WlcPollInfo *NDef_Data;
 
   if ((type  == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCINFO) ||
       (param == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  ndefData = &type->data.wlcPollInfo;
+  NDef_Data = &type->data.wlcPollInfo;
 
-  (void)ST_MEMCPY(param, ndefData, sizeof(ndefTypeRtdWlcPollInfo));
+  (void)memcpy(param, NDef_Data, sizeof(NDef_Type_Rtd_WlcPollInfo));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdWlcPollInfo(const ndefConstBuffer *bufPayload, ndefType *type)
+static NFC_OpResult NDef_PayloadToRtdWlcPollInfo(const NDef_Const_Buffer *bufPayload, NDef_Type *type)
 {
-  ndefTypeRtdWlcPollInfo *ndefData;
+  NDef_Type_Rtd_WlcPollInfo *NDef_Data;
 
   if ((bufPayload == NULL) || (bufPayload->buffer == NULL) ||
       (type       == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   if (bufPayload->length != NDEF_TYPE_RTD_WLC_PAYLOAD_LENGTH) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_WLCINFO;
-  type->getPayloadLength = ndefRtdWlcPollInfoGetPayloadLength;
-  type->getPayloadItem   = ndefRtdWlcPollInfoGetPayloadItem;
-  type->typeToRecord     = ndefRtdWlcPollInfoToRecord;
-  ndefData               = &type->data.wlcPollInfo;
+  type->getPayloadLength = NDef_RtdWlcPollInfoGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdWlcPollInfoGetPayloadItem;
+  type->typeToRecord     = NDef_RtdWlcPollInfoToRecord;
+  NDef_Data               = &type->data.wlcPollInfo;
 
-  ndefData->pTx            = bufPayload->buffer[NDEF_WLC_POLL_INFO_PTX_OFFSET];
-  ndefData->wlcPCap        = bufPayload->buffer[NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_OFFSET] >> NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_SHIFT;
-  ndefData->powerClass     = bufPayload->buffer[NDEF_WLC_POLL_INFO_POWER_CLASS_OFFSET]       & NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_MASK;
-  ndefData->totPowerSteps  = bufPayload->buffer[NDEF_WLC_POLL_INFO_TOT_POWER_STEPS_OFFSET];
-  ndefData->curPowerStep   = bufPayload->buffer[NDEF_WLC_POLL_INFO_CUR_POWER_STEP_OFFSET];
-  ndefData->nextMinStepInc = bufPayload->buffer[NDEF_WLC_POLL_INFO_NEXT_MIN_STEP_INC_OFFSET];
-  ndefData->nextMinStepDec = bufPayload->buffer[NDEF_WLC_POLL_INFO_NEXT_MIN_STEP_DEC_OFFSET];
+  NDef_Data->pTx            = bufPayload->buffer[NDEF_WLC_POLL_INFO_PTX_OFFSET];
+  NDef_Data->wlcPCap        = bufPayload->buffer[NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_OFFSET] >> NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_SHIFT;
+  NDef_Data->powerClass     = bufPayload->buffer[NDEF_WLC_POLL_INFO_POWER_CLASS_OFFSET]       & NDEF_WLC_POLL_INFO_WLC_P_CAPABILITY_MASK;
+  NDef_Data->totPowerSteps  = bufPayload->buffer[NDEF_WLC_POLL_INFO_TOT_POWER_STEPS_OFFSET];
+  NDef_Data->curPowerStep   = bufPayload->buffer[NDEF_WLC_POLL_INFO_CUR_POWER_STEP_OFFSET];
+  NDef_Data->nextMinStepInc = bufPayload->buffer[NDEF_WLC_POLL_INFO_NEXT_MIN_STEP_INC_OFFSET];
+  NDef_Data->nextMinStepDec = bufPayload->buffer[NDEF_WLC_POLL_INFO_NEXT_MIN_STEP_DEC_OFFSET];
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdWlcPollInfo(const ndefRecord *record, ndefType *type)
+NFC_OpResult NDef_RecordToRtdWlcPollInfo(const NDef_Record *record, NDef_Type *type)
 {
-  const ndefType *ndefData;
+  const NDef_Type *NDef_Data;
 
   if ((record == NULL) || (type == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* NDEF TNF and String type */
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo)) {
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo)) {
+    return NFC_ProtocolError;
   }
 
-  ndefData = ndefRecordGetNdefType(record);
-  if ((ndefData != NULL) && (ndefData->id == NDEF_TYPE_ID_RTD_WLCINFO)) {
-    (void)ST_MEMCPY(type, ndefData, sizeof(ndefType));
-    return ERR_NONE;
+  NDef_Data = NDef_RecordGetNdefType(record);
+  if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_WLCINFO)) {
+    (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
-  return ndefPayloadToRtdWlcPollInfo(&record->bufPayload, type);
+  return NDef_PayloadToRtdWlcPollInfo(&record->bufPayload, type);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWlcPollInfoToRecord(const ndefType *type, ndefRecord *record)
+NFC_OpResult NDef_RtdWlcPollInfoToRecord(const NDef_Type *type, NDef_Record *record)
 {
   if ((type   == NULL) || ((type)->id != NDEF_TYPE_ID_RTD_WLCINFO) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* String type */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo);
 
-  if (ndefRecordSetNdefType(record, type) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
@@ -876,38 +846,38 @@ ReturnCode ndefRtdWlcPollInfoToRecord(const ndefType *type, ndefRecord *record)
 
 
 /*****************************************************************************/
-static uint32_t ndefRtdWlcListenCtlGetPayloadLength(const ndefType *type)
+static uint32_t NDef_RtdWlcListenCtlGetPayloadLength(const NDef_Type *type)
 {
-  const ndefTypeRtdWlcListenCtl *ndefData;
+  const NDef_Type_Rtd_WlcListenCtl *NDef_Data;
   uint32_t payloadLength;
 
   if ((type == NULL) || ((type)->id != NDEF_TYPE_ID_RTD_WLCCTL)) {
     return 0;
   }
 
-  ndefData = &type->data.wlcListenCtl;
+  NDef_Data = &type->data.wlcListenCtl;
 
   payloadLength  = NDEF_TYPE_RTD_WLC_PAYLOAD_LENGTH;
   /* Check for optional last ERROR_INFO byte */
-  payloadLength += ((ndefData->statusInfoErrorFlag != 0U) ? 1U : 0U);
+  payloadLength += ((NDef_Data->statusInfoErrorFlag != 0U) ? 1U : 0U);
 
   return payloadLength;
 }
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdWlcListenCtlGetPayloadItem(const ndefType *type, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdWlcListenCtlGetPayloadItem(const NDef_Type *type, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
   static uint8_t temp = 0;
-  const ndefTypeRtdWlcListenCtl *ndefData;
+  const NDef_Type_Rtd_WlcListenCtl *NDef_Data;
 
   if ((type    == NULL) || ((type)->id != NDEF_TYPE_ID_RTD_WLCCTL) ||
       (bufItem == NULL)) {
     return NULL;
   }
 
-  ndefData = &type->data.wlcListenCtl;
+  NDef_Data = &type->data.wlcListenCtl;
 
   if (begin == true) {
     item = 0;
@@ -919,44 +889,44 @@ static const uint8_t *ndefRtdWlcListenCtlGetPayloadItem(const ndefType *type, nd
   switch (item) {
     case 0: { /* Status Info */
         temp =
-          ((ndefData->statusInfoErrorFlag     & NDEF_WLC_LISTEN_CTL_STATUS_INFO_ERROR_MASK)   << NDEF_WLC_LISTEN_CTL_STATUS_INFO_ERROR_SHIFT)
-          | ((ndefData->statusInfoBatteryStatus & NDEF_WLC_LISTEN_CTL_STATUS_INFO_BATTERY_MASK) << NDEF_WLC_LISTEN_CTL_STATUS_INFO_BATTERY_SHIFT)
-          | ((ndefData->statusInfoCnt           & NDEF_WLC_LISTEN_CTL_STATUS_INFO_COUNTER_MASK) << NDEF_WLC_LISTEN_CTL_STATUS_INFO_COUNTER_SHIFT);
+          ((NDef_Data->statusInfoErrorFlag     & NDEF_WLC_LISTEN_CTL_STATUS_INFO_ERROR_MASK)   << NDEF_WLC_LISTEN_CTL_STATUS_INFO_ERROR_SHIFT)
+          | ((NDef_Data->statusInfoBatteryStatus & NDEF_WLC_LISTEN_CTL_STATUS_INFO_BATTERY_MASK) << NDEF_WLC_LISTEN_CTL_STATUS_INFO_BATTERY_SHIFT)
+          | ((NDef_Data->statusInfoCnt           & NDEF_WLC_LISTEN_CTL_STATUS_INFO_COUNTER_MASK) << NDEF_WLC_LISTEN_CTL_STATUS_INFO_COUNTER_SHIFT);
 
         bufItem->buffer = &temp;
         break;
       }
     case 1: /* WPT Config */
       temp =
-        ((ndefData->wptConfigWptReq      & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_REQ_MASK)      << NDEF_WLC_LISTEN_CTL_WPT_CONFIG_REQ_SHIFT)
-        | ((ndefData->wptConfigWptDuration & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_DURATION_MASK) << NDEF_WLC_LISTEN_CTL_WPT_CONFIG_DURATION_SHIFT)
-        | ((ndefData->wptConfigInfoReq     & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_INFO_REQ_MASK) << NDEF_WLC_LISTEN_CTL_WPT_CONFIG_INFO_REQ_SHIFT);
+        ((NDef_Data->wptConfigWptReq      & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_REQ_MASK)      << NDEF_WLC_LISTEN_CTL_WPT_CONFIG_REQ_SHIFT)
+        | ((NDef_Data->wptConfigWptDuration & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_DURATION_MASK) << NDEF_WLC_LISTEN_CTL_WPT_CONFIG_DURATION_SHIFT)
+        | ((NDef_Data->wptConfigInfoReq     & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_INFO_REQ_MASK) << NDEF_WLC_LISTEN_CTL_WPT_CONFIG_INFO_REQ_SHIFT);
 
       bufItem->buffer = &temp;
       break;
     case 2: /* Power Adjust Request */
-      bufItem->buffer = &ndefData->powerAdjReq;
+      bufItem->buffer = &NDef_Data->powerAdjReq;
       break;
     case 3: /* Battery Level */
-      bufItem->buffer = &ndefData->batteryLevel;
+      bufItem->buffer = &NDef_Data->batteryLevel;
       break;
     case 4: { /* Drv Info */
         temp =
-          ((ndefData->drvInfoFlag & NDEF_WLC_LISTEN_CTL_DRV_INFO_FLAG_MASK) << NDEF_WLC_LISTEN_CTL_DRV_INFO_FLAG_SHIFT)
-          | ((ndefData->drvInfoInt  & NDEF_WLC_LISTEN_CTL_DRV_INFO_INT_MASK)  << NDEF_WLC_LISTEN_CTL_DRV_INFO_INT_SHIFT);
+          ((NDef_Data->drvInfoFlag & NDEF_WLC_LISTEN_CTL_DRV_INFO_FLAG_MASK) << NDEF_WLC_LISTEN_CTL_DRV_INFO_FLAG_SHIFT)
+          | ((NDef_Data->drvInfoInt  & NDEF_WLC_LISTEN_CTL_DRV_INFO_INT_MASK)  << NDEF_WLC_LISTEN_CTL_DRV_INFO_INT_SHIFT);
 
         bufItem->buffer = &temp;
         break;
       }
     case 5: /* Hold Off Wt Int */
-      bufItem->buffer = &ndefData->holdOffWtInt;
+      bufItem->buffer = &NDef_Data->holdOffWtInt;
       break;
     case 6: /* Optional last ERROR_INFO byte */
-      if (ndefData->statusInfoErrorFlag != 0U) {
+      if (NDef_Data->statusInfoErrorFlag != 0U) {
         /* Send the ERROR_INFO byte */
         temp =
-          ((ndefData->errorInfoError       & NDEF_WLC_LISTEN_CTL_ERROR_INFO_PROTOCOL_MASK)    << NDEF_WLC_LISTEN_CTL_ERROR_INFO_PROTOCOL_SHIFT)
-          | ((ndefData->errorInfoTemperature & NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_MASK) << NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_SHIFT);
+          ((NDef_Data->errorInfoError       & NDEF_WLC_LISTEN_CTL_ERROR_INFO_PROTOCOL_MASK)    << NDEF_WLC_LISTEN_CTL_ERROR_INFO_PROTOCOL_SHIFT)
+          | ((NDef_Data->errorInfoTemperature & NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_MASK) << NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_SHIFT);
 
         bufItem->buffer = &temp;
         break;
@@ -976,137 +946,137 @@ static const uint8_t *ndefRtdWlcListenCtlGetPayloadItem(const ndefType *type, nd
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWlcListenCtlInit(ndefType *type, const ndefTypeRtdWlcListenCtl *param)
+NFC_OpResult NDef_RtdWlcListenCtlInit(NDef_Type *type, const NDef_Type_Rtd_WlcListenCtl *param)
 {
-  ndefTypeRtdWlcListenCtl *ndefData;
+  NDef_Type_Rtd_WlcListenCtl *NDef_Data;
 
   if ((type == NULL) || (param == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_WLCCTL;
-  type->getPayloadLength = ndefRtdWlcListenCtlGetPayloadLength;
-  type->getPayloadItem   = ndefRtdWlcListenCtlGetPayloadItem;
-  type->typeToRecord     = ndefRtdWlcListenCtlToRecord;
-  ndefData               = &type->data.wlcListenCtl;
+  type->getPayloadLength = NDef_RtdWlcListenCtlGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdWlcListenCtlGetPayloadItem;
+  type->typeToRecord     = NDef_RtdWlcListenCtlToRecord;
+  NDef_Data               = &type->data.wlcListenCtl;
 
-  (void)ST_MEMCPY(ndefData, param, sizeof(ndefTypeRtdWlcListenCtl));
+  (void)memcpy(NDef_Data, param, sizeof(NDef_Type_Rtd_WlcListenCtl));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdWlcListenCtl(const ndefType *type, ndefTypeRtdWlcListenCtl *param)
+NFC_OpResult NDef_GetRtdWlcListenCtl(const NDef_Type *type, NDef_Type_Rtd_WlcListenCtl *param)
 {
-  const ndefTypeRtdWlcListenCtl *ndefData;
+  const NDef_Type_Rtd_WlcListenCtl *NDef_Data;
 
   if ((type  == NULL) || (type->id != NDEF_TYPE_ID_RTD_WLCCTL) ||
       (param == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  ndefData = &type->data.wlcListenCtl;
+  NDef_Data = &type->data.wlcListenCtl;
 
-  (void)ST_MEMCPY(param, ndefData, sizeof(ndefTypeRtdWlcListenCtl));
+  (void)memcpy(param, NDef_Data, sizeof(NDef_Type_Rtd_WlcListenCtl));
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdWlcListenCtl(const ndefConstBuffer *bufPayload, ndefType *type)
+static NFC_OpResult NDef_PayloadToRtdWlcListenCtl(const NDef_Const_Buffer *bufPayload, NDef_Type *type)
 {
-  ndefTypeRtdWlcListenCtl *ndefData;
+  NDef_Type_Rtd_WlcListenCtl *NDef_Data;
 
   if ((bufPayload == NULL) || (bufPayload->buffer == NULL) ||
       (type       == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   if ((bufPayload->length !=  NDEF_TYPE_RTD_WLC_PAYLOAD_LENGTH) &&
       (bufPayload->length != (NDEF_TYPE_RTD_WLC_PAYLOAD_LENGTH + 1U))) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_WLCCTL;
-  type->getPayloadLength = ndefRtdWlcListenCtlGetPayloadLength;
-  type->getPayloadItem   = ndefRtdWlcListenCtlGetPayloadItem;
-  type->typeToRecord     = ndefRtdWlcListenCtlToRecord;
-  ndefData               = &type->data.wlcListenCtl;
+  type->getPayloadLength = NDef_RtdWlcListenCtlGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdWlcListenCtlGetPayloadItem;
+  type->typeToRecord     = NDef_RtdWlcListenCtlToRecord;
+  NDef_Data               = &type->data.wlcListenCtl;
 
   uint8_t status = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_STATUS_INFO_OFFSET];
-  ndefData->statusInfoErrorFlag     = (status >> NDEF_WLC_LISTEN_CTL_STATUS_INFO_ERROR_SHIFT)   & NDEF_WLC_LISTEN_CTL_STATUS_INFO_ERROR_MASK;
-  ndefData->statusInfoBatteryStatus = (status >> NDEF_WLC_LISTEN_CTL_STATUS_INFO_BATTERY_SHIFT) & NDEF_WLC_LISTEN_CTL_STATUS_INFO_BATTERY_MASK;
-  ndefData->statusInfoCnt           = (status >> NDEF_WLC_LISTEN_CTL_STATUS_INFO_COUNTER_SHIFT) & NDEF_WLC_LISTEN_CTL_STATUS_INFO_COUNTER_MASK;
+  NDef_Data->statusInfoErrorFlag     = (status >> NDEF_WLC_LISTEN_CTL_STATUS_INFO_ERROR_SHIFT)   & NDEF_WLC_LISTEN_CTL_STATUS_INFO_ERROR_MASK;
+  NDef_Data->statusInfoBatteryStatus = (status >> NDEF_WLC_LISTEN_CTL_STATUS_INFO_BATTERY_SHIFT) & NDEF_WLC_LISTEN_CTL_STATUS_INFO_BATTERY_MASK;
+  NDef_Data->statusInfoCnt           = (status >> NDEF_WLC_LISTEN_CTL_STATUS_INFO_COUNTER_SHIFT) & NDEF_WLC_LISTEN_CTL_STATUS_INFO_COUNTER_MASK;
 
   uint8_t config = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_WPT_CONFIG_OFFSET];
-  ndefData->wptConfigWptReq         = (config >> NDEF_WLC_LISTEN_CTL_WPT_CONFIG_REQ_SHIFT)      & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_REQ_MASK;
-  ndefData->wptConfigWptDuration    = (config >> NDEF_WLC_LISTEN_CTL_WPT_CONFIG_DURATION_SHIFT) & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_DURATION_MASK;
-  ndefData->wptConfigInfoReq        = (config >> NDEF_WLC_LISTEN_CTL_WPT_CONFIG_INFO_REQ_SHIFT) & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_INFO_REQ_MASK;
+  NDef_Data->wptConfigWptReq         = (config >> NDEF_WLC_LISTEN_CTL_WPT_CONFIG_REQ_SHIFT)      & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_REQ_MASK;
+  NDef_Data->wptConfigWptDuration    = (config >> NDEF_WLC_LISTEN_CTL_WPT_CONFIG_DURATION_SHIFT) & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_DURATION_MASK;
+  NDef_Data->wptConfigInfoReq        = (config >> NDEF_WLC_LISTEN_CTL_WPT_CONFIG_INFO_REQ_SHIFT) & NDEF_WLC_LISTEN_CTL_WPT_CONFIG_INFO_REQ_MASK;
 
-  ndefData->powerAdjReq             = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_POWER_ADJ_REQ_OFFSET];
-  ndefData->batteryLevel            = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_BATTERY_LEVEL_OFFSET];
+  NDef_Data->powerAdjReq             = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_POWER_ADJ_REQ_OFFSET];
+  NDef_Data->batteryLevel            = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_BATTERY_LEVEL_OFFSET];
 
   uint8_t drvInfo = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_DRV_INFO_OFFSET];
-  ndefData->drvInfoFlag             = (drvInfo >> NDEF_WLC_LISTEN_CTL_DRV_INFO_FLAG_SHIFT) & NDEF_WLC_LISTEN_CTL_DRV_INFO_FLAG_MASK;
-  ndefData->drvInfoInt              = (drvInfo >> NDEF_WLC_LISTEN_CTL_DRV_INFO_INT_SHIFT)  & NDEF_WLC_LISTEN_CTL_DRV_INFO_INT_MASK;
+  NDef_Data->drvInfoFlag             = (drvInfo >> NDEF_WLC_LISTEN_CTL_DRV_INFO_FLAG_SHIFT) & NDEF_WLC_LISTEN_CTL_DRV_INFO_FLAG_MASK;
+  NDef_Data->drvInfoInt              = (drvInfo >> NDEF_WLC_LISTEN_CTL_DRV_INFO_INT_SHIFT)  & NDEF_WLC_LISTEN_CTL_DRV_INFO_INT_MASK;
 
-  ndefData->holdOffWtInt            = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_HOLD_OFF_WT_INT_OFFSET];
+  NDef_Data->holdOffWtInt            = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_HOLD_OFF_WT_INT_OFFSET];
 
   uint8_t error = 0;
   if (bufPayload->length == (NDEF_TYPE_RTD_WLC_PAYLOAD_LENGTH + 1U)) {
     error = bufPayload->buffer[NDEF_WLC_LISTEN_CTL_ERROR_INFO_OFFSET];
   }
-  ndefData->errorInfoError          = (error >> NDEF_WLC_LISTEN_CTL_ERROR_INFO_PROTOCOL_SHIFT)    & NDEF_WLC_LISTEN_CTL_ERROR_INFO_PROTOCOL_MASK;
-  ndefData->errorInfoTemperature    = (error >> NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_SHIFT) & NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_MASK;
+  NDef_Data->errorInfoError          = (error >> NDEF_WLC_LISTEN_CTL_ERROR_INFO_PROTOCOL_SHIFT)    & NDEF_WLC_LISTEN_CTL_ERROR_INFO_PROTOCOL_MASK;
+  NDef_Data->errorInfoTemperature    = (error >> NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_SHIFT) & NDEF_WLC_LISTEN_CTL_ERROR_INFO_TEMPERATURE_MASK;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdWlcListenCtl(const ndefRecord *record, ndefType *type)
+NFC_OpResult NDef_RecordToRtdWlcListenCtl(const NDef_Record *record, NDef_Type *type)
 {
-  const ndefType *ndefData;
+  const NDef_Type *NDef_Data;
 
   if ((record == NULL) || (type == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* NDEF TNF and String type */
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl)) {
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl)) {
+    return NFC_ProtocolError;
   }
 
-  ndefData = ndefRecordGetNdefType(record);
-  if ((ndefData != NULL) && (ndefData->id == NDEF_TYPE_ID_RTD_WLCCTL)) {
-    (void)ST_MEMCPY(type, ndefData, sizeof(ndefType));
-    return ERR_NONE;
+  NDef_Data = NDef_RecordGetNdefType(record);
+  if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_WLCCTL)) {
+    (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
-  return ndefPayloadToRtdWlcListenCtl(&record->bufPayload, type);
+  return NDef_PayloadToRtdWlcListenCtl(&record->bufPayload, type);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdWlcListenCtlToRecord(const ndefType *type, ndefRecord *record)
+NFC_OpResult NDef_RtdWlcListenCtlToRecord(const NDef_Type *type, NDef_Record *record)
 {
   if ((type   == NULL) || ((type)->id != NDEF_TYPE_ID_RTD_WLCCTL) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* String type */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl);
 
-  if (ndefRecordSetNdefType(record, type) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

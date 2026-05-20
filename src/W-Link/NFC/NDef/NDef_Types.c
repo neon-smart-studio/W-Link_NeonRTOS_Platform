@@ -62,45 +62,45 @@ NFC_OpResult NDef_RecordToType(const NDef_Record *record, NDef_Type *type)
   /*! Array to match RTD strings with Well-known types, and converting functions */
   static const NDef_TypeConverter typeConverterTable[] = {
 #if NDEF_TYPE_EMPTY_SUPPORT
-    { NDEF_TNF_EMPTY,               &bufTypeEmpty,            NDef_Record_ToEmptyType        },
+    { NDEF_TNF_EMPTY,               &bufTypeEmpty,            NDef_RecordToEmptyType        },
 #endif
 #if NDEF_TYPE_RTD_DEVICE_INFO_SUPPORT
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo,    NDef_Record_ToRtdDeviceInfo    },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo,    NDef_RecordToRtdDeviceInfo    },
 #endif
 #if NDEF_TYPE_RTD_TEXT_SUPPORT
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeText,          NDef_Record_ToRtdText          },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeText,          NDef_RecordToRtdText          },
 #endif
 #if NDEF_TYPE_RTD_URI_SUPPORT
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeUri,           NDef_Record_ToRtdUri           },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeURI,           NDef_RecordToRtdURI           },
 #endif
 #if NDEF_TYPE_RTD_AAR_SUPPORT
-    { NDEF_TNF_RTD_EXTERNAL_TYPE,   &bufRtdTypeAar,           NDef_Record_ToRtdAar           },
+    { NDEF_TNF_RTD_EXTERNAL_TYPE,   &bufRtdTypeAAR,           NDef_RecordToRtdAAR           },
 #endif
 #if NDEF_TYPE_RTD_WLC_SUPPORT
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability, NDef_Record_ToRtdWlcCapability },
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo, NDef_Record_ToRtdWlcStatusInfo },
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo,   NDef_Record_ToRtdWlcPollInfo   },
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl,  NDef_Record_ToRtdWlcListenCtl  },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability, NDef_RecordToRtdWlcCapability },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo, NDef_RecordToRtdWlcStatusInfo },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo,   NDef_RecordToRtdWlcPollInfo   },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl,  NDef_RecordToRtdWlcListenCtl  },
 #endif
 #if NDEF_TYPE_RTD_WPCWLC_SUPPORT
-    { NDEF_TNF_RTD_EXTERNAL_TYPE,   &bufRtdTypeWpcWlc,        NDef_Record_ToRtdWpcWlc        },
+    { NDEF_TNF_RTD_EXTERNAL_TYPE,   &bufRtdTypeWpcWlc,        NDef_RecordToRtdWpcWlc        },
 #endif
 #if NDEF_TYPE_RTD_TNEP_SUPPORT
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter, NDef_Record_ToRtdTnepServiceParameter },
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect,    NDef_Record_ToRtdTnepServiceSelect    },
-    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus,           NDef_Record_ToRtdTnepStatus           },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter, NDef_RecordToRtdTnepServiceParameter },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect,    NDef_RecordToRtdTnepServiceSelect    },
+    { NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus,           NDef_RecordToRtdTnepStatus           },
 #endif
 #if NDEF_TYPE_BLUETOOTH_SUPPORT
-    { NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothBrEdr,       NDef_Record_ToBluetooth        },
-    { NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothLe,          NDef_Record_ToBluetooth        },
-    { NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureBrEdr, NDef_Record_ToBluetooth        },
-    { NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureLe,    NDef_Record_ToBluetooth        },
+    { NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothBrEdr,       NDef_RecordToBluetooth        },
+    { NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothLe,          NDef_RecordToBluetooth        },
+    { NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureBrEdr, NDef_RecordToBluetooth        },
+    { NDEF_TNF_MEDIA_TYPE, &bufMediaTypeBluetoothSecureLe,    NDef_RecordToBluetooth        },
 #endif
 #if NDEF_TYPE_VCARD_SUPPORT
-    { NDEF_TNF_MEDIA_TYPE,          &bufMediaTypeVCard,       NDef_Record_ToVCard            },
+    { NDEF_TNF_MEDIA_TYPE,          &bufMediaTypeVCard,       NDef_RecordToVCard            },
 #endif
 #if NDEF_TYPE_WIFI_SUPPORT
-    { NDEF_TNF_MEDIA_TYPE,          &bufMediaTypeWifi,        NDef_Record_ToWifi             },
+    { NDEF_TNF_MEDIA_TYPE,          &bufMediaTypeWifi,        NDef_RecordToWifi             },
 #endif
     /* Non-conditional field to avoid empty union when all types are disabled */
     { 0,                            NULL,                     NULL                         }

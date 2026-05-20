@@ -15,22 +15,31 @@
   *
   ******************************************************************************
   */
-
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #ifndef NDEF_TYPE_WPCWLC_H
 #define NDEF_TYPE_WPCWLC_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
-
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
+#include "NFC/NFC_Def.h"
 
 /*
  ******************************************************************************
@@ -59,91 +68,18 @@
 #define NDEF_KI_MIN_POWER_OFFSET            0x0EU   /*!< Ki Minimum Power Offset                   */
 #define NDEF_KI_MAX_POWER_OFFSET            0x0FU   /*!< Ki Maximum Power Offset                   */
 
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
-
 /*! RTD Record Type buffers */
-extern const ndefConstBuffer8 bufRtdTypeWpcWlc;        /*! WPCWLC (Wireless Power Consortium WLC) Record Type buffer */
+extern const NDef_Const_Buffer_8 bufRtdTypeWpcWlc;        /*! WPCWLC (Wireless Power Consortium WLC) Record Type buffer */
 
 
 /*! RTD Wireless Power Consortium WLC Record External Type */
 typedef struct {
-  ndefConstBuffer  bufPayload; /*!< WPCWLC payload */
-} ndefTypeRtdWpcWlc;
+  NDef_Const_Buffer  bufPayload; /*!< WPCWLC payload */
+} NDef_Type_Rtd_WpcWlc;
 
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/**********************
- * WPCWLC External Type
- **********************
- */
-
-/*!
- *****************************************************************************
- * Initialize an RTD Wireless Power Consortium WLC Record External type
- *
- * \param[out] wpcWlc:     Type to initialize
- * \param[in]  bufPayload: Payload buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWpcWlcInit(ndefType *wpcWlc, const ndefConstBuffer *bufPayload);
-
-
-/*!
- *****************************************************************************
- * Get RTD Wireless Power Consortium WLC Record type content
- *
- * \param[in]  wpcWlc:    Type to get information from
- * \param[out] bufWpcWlc: WPCWLC payload buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdWpcWlc(const ndefType *wpcWlc, ndefConstBuffer *bufWpcWlc);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to an RTD Wireless Power Consortium WLC Record External type
- *
- * \param[in]  record: Record to convert
- * \param[out] wpcWlc: The converted WPCWLC type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdWpcWlc(const ndefRecord *record, ndefType *wpcWlc);
-
-
-/*!
- *****************************************************************************
- * Convert an RTD Wireless Power Consortium WLC Record External type to an NDEF record
- *
- * \param[in]  wpcWlc: WPCWLC type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWpcWlcToRecord(const ndefType *wpcWlc, ndefRecord *record);
-
-
+NFC_OpResult NDef_RtdWpcWlcInit(NDef_Type *wpcWlc, const NDef_Const_Buffer *bufPayload);
+NFC_OpResult NDef_GetRtdWpcWlc(const NDef_Type *wpcWlc, NDef_Const_Buffer *bufWpcWlc);
+NFC_OpResult NDef_RecordToRtdWpcWlc(const NDef_Record *record, NDef_Type *wpcWlc);
+NFC_OpResult NDef_RtdWpcWlcToRecord(const NDef_Type *wpcWlc, NDef_Record *record);
 
 #endif /* NDEF_TYPE_WPCWLC_H */
-
-/**
-  * @}
-  *
-  */

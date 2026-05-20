@@ -15,72 +15,51 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_DeviceInfo.h"
 
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_deviceinfo.h"
-#include "nfc_utils.h"
-
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_RTD_DEVICE_INFO_SUPPORT
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
 
 /*! Device Information payload defines */
 #define NDEF_RTD_DEVICE_INFO_PAYLOAD_MIN     (2U * (sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint8_t))) /*!< Device Information minimum length (2 required TLV structures) */
 #define NDEF_RTD_DEVICE_INFO_PAYLOAD_MAX     ((4U * (sizeof(uint8_t) + sizeof(uint8_t) + 255U)) + (sizeof(uint8_t) + sizeof(uint8_t) + 16U)) /*!< Device Information maximum length */
 #define NDEF_RTD_DEVICE_INFO_TLV_LENGTH_MIN  (sizeof(uint8_t) + sizeof(uint8_t))  /*!< Device Information minimum TLV length */
 
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
 /*! RTD Device Information Type string */
 static const uint8_t ndefRtdTypeDeviceInfo[]     = "Di";              /*!< Device Information Record Type {0x44, 0x69} */
 
-const ndefConstBuffer8 bufRtdTypeDeviceInfo      = { ndefRtdTypeDeviceInfo, sizeof(ndefRtdTypeDeviceInfo) - 1U }; /*!< Device Information Record Type buffer */
-
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
-
-/*
- * Device Information
- */
-
+const NDef_Const_Buffer_8 bufRtdTypeDeviceInfo      = { ndefRtdTypeDeviceInfo, sizeof(ndefRtdTypeDeviceInfo) - 1U }; /*!< Device Information Record Type buffer */
 
 /*****************************************************************************/
-static uint32_t ndefRtdDeviceInfoPayloadGetLength(const ndefType *devInfo)
+static uint32_t NDef_RtdDeviceInfoPayloadGetLength(const NDef_Type *devInfo)
 {
-  const ndefTypeRtdDeviceInfo *rtdDevInfo;
+  const NDef_Type_Rtd_DeviceInfo *rtdDevInfo;
   uint32_t payloadLength = 0;
 
   if ((devInfo == NULL) || (devInfo->id != NDEF_TYPE_ID_RTD_DEVICE_INFO)) {
@@ -101,10 +80,10 @@ static uint32_t ndefRtdDeviceInfoPayloadGetLength(const ndefType *devInfo)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdDeviceInfoToPayloadItem(const ndefType *devInfo, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdDeviceInfoToPayloadItem(const NDef_Type *devInfo, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeRtdDeviceInfo *rtdDevInfo;
+  const NDef_Type_Rtd_DeviceInfo *rtdDevInfo;
   uint32_t index;
 
   if ((devInfo == NULL) || (devInfo->id != NDEF_TYPE_ID_RTD_DEVICE_INFO) ||
@@ -153,9 +132,9 @@ static const uint8_t *ndefRtdDeviceInfoToPayloadItem(const ndefType *devInfo, nd
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdDeviceInfoInit(ndefType *devInfo, const ndefDeviceInfoEntry *devInfoData, uint8_t devInfoDataCount)
+NFC_OpResult NDef_RtdDeviceInfoInit(NDef_Type *devInfo, const NDef_DeviceInfoEntry *devInfoData, uint8_t devInfoDataCount)
 {
-  ndefTypeRtdDeviceInfo *rtdDevInfo;
+  NDef_Type_Rtd_DeviceInfo *rtdDevInfo;
   uint8_t  count;
   uint8_t  manufacturerNameIndex;
   uint8_t  modelNameIndex;
@@ -163,13 +142,13 @@ ReturnCode ndefRtdDeviceInfoInit(ndefType *devInfo, const ndefDeviceInfoEntry *d
   if ((devInfo     == NULL)    ||
       (devInfoData == NULL)    || (devInfoData->length == 0U) ||
       (devInfoDataCount == 0U) || (devInfoDataCount > NDEF_DEVICE_INFO_TYPE_COUNT)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   devInfo->id               = NDEF_TYPE_ID_RTD_DEVICE_INFO;
-  devInfo->getPayloadLength = ndefRtdDeviceInfoPayloadGetLength;
-  devInfo->getPayloadItem   = ndefRtdDeviceInfoToPayloadItem;
-  devInfo->typeToRecord     = ndefRtdDeviceInfoToRecord;
+  devInfo->getPayloadLength = NDef_RtdDeviceInfoPayloadGetLength;
+  devInfo->getPayloadItem   = NDef_RtdDeviceInfoToPayloadItem;
+  devInfo->typeToRecord     = NDef_RtdDeviceInfoToRecord;
   rtdDevInfo                = &devInfo->data.deviceInfo;
 
   /* Clear the Device Information structure before parsing */
@@ -189,10 +168,10 @@ ReturnCode ndefRtdDeviceInfoInit(ndefType *devInfo, const ndefDeviceInfoEntry *d
     uint8_t type   = devInfoData[count].type;
     uint8_t length = devInfoData[count].length;
     if ((type == NDEF_DEVICE_INFO_UUID) && (length != NDEF_UUID_LENGTH)) {
-      return ERR_PROTO;
+      return NFC_ProtocolError;
     }
     if ((type > NDEF_DEVICE_INFO_TYPE_COUNT) || (length == 0U)) {
-      return ERR_PROTO;
+      return NFC_ProtocolError;
     }
     if (type == NDEF_DEVICE_INFO_MANUFACTURER_NAME) {
       manufacturerNameIndex = count;
@@ -212,21 +191,21 @@ ReturnCode ndefRtdDeviceInfoInit(ndefType *devInfo, const ndefDeviceInfoEntry *d
   if ((manufacturerNameIndex != modelNameIndex) &&
       (rtdDevInfo->devInfo[manufacturerNameIndex].buffer != NULL) &&
       (rtdDevInfo->devInfo[modelNameIndex].buffer        != NULL)) {
-    return ERR_NONE;
+    return NFC_OK;
   } else {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdDeviceInfo(const ndefType *devInfo, ndefTypeRtdDeviceInfo *devInfoData)
+NFC_OpResult NDef_GetRtdDeviceInfo(const NDef_Type *devInfo, NDef_Type_Rtd_DeviceInfo *devInfoData)
 {
-  const ndefTypeRtdDeviceInfo *rtdDevInfo;
+  const NDef_Type_Rtd_DeviceInfo *rtdDevInfo;
 
   if ((devInfo     == NULL) || (devInfo->id != NDEF_TYPE_ID_RTD_DEVICE_INFO) ||
       (devInfoData == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   rtdDevInfo = &devInfo->data.deviceInfo;
@@ -237,14 +216,14 @@ ReturnCode ndefGetRtdDeviceInfo(const ndefType *devInfo, ndefTypeRtdDeviceInfo *
     devInfoData->devInfo[i].buffer = rtdDevInfo->devInfo[i].buffer;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdDeviceInfo(const ndefConstBuffer *bufDevInfo, ndefType *devInfo)
+static NFC_OpResult NDef_PayloadToRtdDeviceInfo(const NDef_Const_Buffer *bufDevInfo, NDef_Type *devInfo)
 {
-  ndefTypeRtdDeviceInfo *rtdDevInfo;
+  NDef_Type_Rtd_DeviceInfo *rtdDevInfo;
   uint32_t offset;
   uint8_t  count;
   uint8_t  manufacturerNameIndex;
@@ -252,18 +231,18 @@ static ReturnCode ndefPayloadToRtdDeviceInfo(const ndefConstBuffer *bufDevInfo, 
 
   if ((bufDevInfo == NULL) || (bufDevInfo->buffer == NULL) ||
       (devInfo    == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   devInfo->id               = NDEF_TYPE_ID_RTD_DEVICE_INFO;
-  devInfo->getPayloadLength = ndefRtdDeviceInfoPayloadGetLength;
-  devInfo->getPayloadItem   = ndefRtdDeviceInfoToPayloadItem;
-  devInfo->typeToRecord     = ndefRtdDeviceInfoToRecord;
+  devInfo->getPayloadLength = NDef_RtdDeviceInfoPayloadGetLength;
+  devInfo->getPayloadItem   = NDef_RtdDeviceInfoToPayloadItem;
+  devInfo->typeToRecord     = NDef_RtdDeviceInfoToRecord;
   rtdDevInfo                = &devInfo->data.deviceInfo;
 
   if ((bufDevInfo->length < NDEF_RTD_DEVICE_INFO_PAYLOAD_MIN) ||
       (bufDevInfo->length > NDEF_RTD_DEVICE_INFO_PAYLOAD_MAX)) {
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
   /* Extract device information from the buffer */
@@ -287,10 +266,10 @@ static ReturnCode ndefPayloadToRtdDeviceInfo(const ndefConstBuffer *bufDevInfo, 
     uint8_t type   =  bufDevInfo->buffer[offset];
     uint8_t length =  bufDevInfo->buffer[offset + 1U];
     if ((type == NDEF_DEVICE_INFO_UUID) && (length != NDEF_UUID_LENGTH)) {
-      return ERR_PROTO;
+      return NFC_ProtocolError;
     }
     if ((type > NDEF_DEVICE_INFO_TYPE_COUNT) || (length == 0U)) {
-      return ERR_PROTO;
+      return NFC_ProtocolError;
     }
     if (type == NDEF_DEVICE_INFO_MANUFACTURER_NAME) {
       manufacturerNameIndex = count;
@@ -313,30 +292,30 @@ static ReturnCode ndefPayloadToRtdDeviceInfo(const ndefConstBuffer *bufDevInfo, 
   if ((manufacturerNameIndex != modelNameIndex) &&
       (rtdDevInfo->devInfo[manufacturerNameIndex].buffer != NULL) &&
       (rtdDevInfo->devInfo[modelNameIndex].buffer        != NULL)) {
-    return ERR_NONE;
+    return NFC_OK;
   } else {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdDeviceInfo(const ndefRecord *record, ndefType *devInfo)
+NFC_OpResult NDef_RecordToRtdDeviceInfo(const NDef_Record *record, NDef_Type *devInfo)
 {
-  const ndefType *type;
+  const NDef_Type *type;
 
   if ((record == NULL) || (devInfo == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo)) { /* "Di" */
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo)) { /* "Di" */
+    return NFC_ProtocolError;
   }
 
-  type = ndefRecordGetNdefType(record);
+  type = NDef_RecordGetNdefType(record);
   if ((type != NULL) && (type->id == NDEF_TYPE_ID_RTD_DEVICE_INFO)) {
-    (void)ST_MEMCPY(devInfo, type, sizeof(ndefType));
-    return ERR_NONE;
+    (void)memcpy(devInfo, type, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
   return ndefPayloadToRtdDeviceInfo(&record->bufPayload, devInfo);
@@ -344,23 +323,23 @@ ReturnCode ndefRecordToRtdDeviceInfo(const ndefRecord *record, ndefType *devInfo
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdDeviceInfoToRecord(const ndefType *devInfo, ndefRecord *record)
+NFC_OpResult NDef_RtdDeviceInfoToRecord(const NDef_Type *devInfo, NDef_Record *record)
 {
   if ((devInfo == NULL) || (devInfo->id != NDEF_TYPE_ID_RTD_DEVICE_INFO) ||
       (record  == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* "Di" */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo);
 
-  if (ndefRecordSetNdefType(record, devInfo) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, devInfo) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

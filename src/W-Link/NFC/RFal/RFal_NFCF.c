@@ -425,7 +425,7 @@ NFC_OpResult RFal_NFCF_PollerCheck(const uint8_t *nfcid2, const RFal_NFCF_ServBl
       (*rcvdLen) -= (RFAL_NFCF_LENGTH_LEN + RFAL_NFCF_CHECKUPDATE_RES_NOB_POS);
 
       if (*rcvdLen > 0U) {
-        ST_MEMMOVE(rxBuf, &checkRes[RFAL_NFCF_CHECKUPDATE_RES_NOB_POS], (*rcvdLen));
+        memmove(rxBuf, &checkRes[RFAL_NFCF_CHECKUPDATE_RES_NOB_POS], (*rcvdLen));
       }
     }
   }

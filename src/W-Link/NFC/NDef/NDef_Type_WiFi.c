@@ -1,7 +1,7 @@
 
 /**
   ******************************************************************************
-  * @file           : ndef_type_wifi.cpp
+  * @file           : NDef__type_wifi.cpp
   * @brief          : NDEF Wifi type
   ******************************************************************************
   * @attention
@@ -15,40 +15,41 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_wifi.h"
-#include "nfc_utils.h"
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_WiFi.h"
 
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_WIFI_SUPPORT
 
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
 /*! Wifi Type strings */
-static const uint8_t ndefMediaTypeWifi[]     = "application/vnd.wfa.wsc";   /*!< Wi-Fi Simple Configuration Type */
+static const uint8_t NDef_MediaTypeWifi[]     = "application/vnd.wfa.wsc";   /*!< Wi-Fi Simple Configuration Type */
 
-const ndefConstBuffer8 bufMediaTypeWifi      = { ndefMediaTypeWifi,      sizeof(ndefMediaTypeWifi) - 1U      };  /*!< Wifi Type buffer     */
+const NDef_Const_Buffer_8 bufMediaTypeWifi      = { NDef_MediaTypeWifi,      sizeof(NDef_MediaTypeWifi) - 1U      };  /*!< Wifi Type buffer     */
 
 
 /*! Wifi OBB (WPS) */
@@ -167,9 +168,9 @@ static uint8_t wifiConfigToken5[] = {
 
 
 /*****************************************************************************/
-static uint32_t ndefWifiPayloadGetLength(const ndefType *wifi)
+static uint32_t NDef_WifiPayloadGetLength(const NDef_Type *wifi)
 {
-  const ndefTypeWifi *wifiData;
+  const NDef_Type_Wifi *wifiData;
   uint32_t payloadLength;
 
   if ((wifi == NULL) || (wifi->id != NDEF_TYPE_ID_MEDIA_WIFI)) {
@@ -189,21 +190,21 @@ static uint32_t ndefWifiPayloadGetLength(const ndefType *wifi)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefWifiToPayloadItem(const ndefType *wifi, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_WifiToPayloadItem(const NDef_Type *wifi, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeWifi *wifiData;
+  const NDef_Type_Wifi *wifiData;
   uint16_t credentialLength;
 
   uint8_t defaultKey[4] = {0, 0, 0, 0};
-  ndefConstBuffer8 bufDefaultNetworkKey = { defaultKey, sizeof(defaultKey) };
+  NDef_Const_Buffer_8 bufDefaultNetworkKey = { defaultKey, sizeof(defaultKey) };
 
   const uint8_t CONFIG_TOKEN_1_CREDENTIAL_LENGTH_INDEX   =  7U;
   const uint8_t CONFIG_TOKEN_3_AUTHENTICATION_TYPE_INDEX =  5U;
   const uint8_t CONFIG_TOKEN_3_ENCRYPTION_TYPE_INDEX     = 11U;
 
   static uint8_t zero[] = { 0 };
-  static ndefConstBuffer8 bufZero = { zero, sizeof(zero) };
+  static NDef_Const_Buffer_8 bufZero = { zero, sizeof(zero) };
 
   if ((wifi    == NULL) || (wifi->id != NDEF_TYPE_ID_MEDIA_WIFI) ||
       (bufItem == NULL)) {
@@ -313,18 +314,18 @@ static const uint8_t *ndefWifiToPayloadItem(const ndefType *wifi, ndefConstBuffe
 
 
 /*****************************************************************************/
-ReturnCode ndefWifiInit(ndefType *wifi, const ndefTypeWifi *wifiConfig)
+NFC_OpResult NDef_WifiInit(NDef_Type *wifi, const NDef_Type_Wifi *wifiConfig)
 {
-  ndefTypeWifi *wifiData;
+  NDef_Type_Wifi *wifiData;
 
   if ((wifi == NULL) || (wifiConfig == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   wifi->id               = NDEF_TYPE_ID_MEDIA_WIFI;
-  wifi->getPayloadLength = ndefWifiPayloadGetLength;
-  wifi->getPayloadItem   = ndefWifiToPayloadItem;
-  wifi->typeToRecord     = ndefWifiToRecord;
+  wifi->getPayloadLength = NDef_WifiPayloadGetLength;
+  wifi->getPayloadItem   = NDef_WifiToPayloadItem;
+  wifi->typeToRecord     = NDef_WifiToRecord;
   wifiData               = &wifi->data.wifi;
 
   wifiData->bufNetworkSSID = wifiConfig->bufNetworkSSID;
@@ -332,18 +333,18 @@ ReturnCode ndefWifiInit(ndefType *wifi, const ndefTypeWifi *wifiConfig)
   wifiData->authentication = wifiConfig->authentication;
   wifiData->encryption     = wifiConfig->encryption;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetWifi(const ndefType *wifi, ndefTypeWifi *wifiConfig)
+NFC_OpResult NDef_GetWifi(const NDef_Type *wifi, NDef_Type_Wifi *wifiConfig)
 {
-  const ndefTypeWifi *wifiData;
+  const NDef_Type_Wifi *wifiData;
 
   if ((wifi       == NULL) || (wifi->id != NDEF_TYPE_ID_MEDIA_WIFI) ||
       (wifiConfig == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   wifiData = &wifi->data.wifi;
@@ -355,19 +356,19 @@ ReturnCode ndefGetWifi(const ndefType *wifi, ndefTypeWifi *wifiConfig)
   wifiConfig->authentication = wifiData->authentication;
   wifiConfig->encryption     = wifiData->encryption;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToWifi(const ndefConstBuffer *bufPayload, ndefType *wifi)
+static NFC_OpResult NDef_PayloadToWifi(const NDef_Const_Buffer *bufPayload, NDef_Type *wifi)
 {
-  ndefTypeWifi wifiConfig;
+  NDef_Type_Wifi wifiConfig;
   uint32_t offset;
 
   if ((bufPayload == NULL) || (bufPayload->buffer == NULL) ||
       (wifi       == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   wifiConfig.bufNetworkSSID.buffer = NULL;
@@ -389,7 +390,7 @@ static ReturnCode ndefPayloadToWifi(const ndefConstBuffer *bufPayload, ndefType 
         case NDEF_WIFI_ATTRIBUTE_ID_SSID_MSB:
           /* Network SSID */
           if (length > NDEF_WIFI_NETWORK_SSID_LENGTH) {
-            return ERR_PROTO;
+            return NFC_ProtocolError;
           }
           wifiConfig.bufNetworkSSID.buffer = &bufPayload->buffer[offset + NDEF_WIFI_ATTRIBUTE_DATA_OFFSET];
           wifiConfig.bufNetworkSSID.length = length;
@@ -398,7 +399,7 @@ static ReturnCode ndefPayloadToWifi(const ndefConstBuffer *bufPayload, ndefType 
         case NDEF_WIFI_ATTRIBUTE_ID_NETWORK_MSB:
           /* Network key */
           if (length > NDEF_WIFI_NETWORK_KEY_LENGTH) {
-            return ERR_PROTO;
+            return NFC_ProtocolError;
           }
           wifiConfig.bufNetworkKey.buffer = &bufPayload->buffer[offset + NDEF_WIFI_ATTRIBUTE_DATA_OFFSET];
           wifiConfig.bufNetworkKey.length = length;
@@ -407,7 +408,7 @@ static ReturnCode ndefPayloadToWifi(const ndefConstBuffer *bufPayload, ndefType 
         case NDEF_WIFI_ATTRIBUTE_AUTHENTICATION:
           /* Authentication */
           if (length != NDEF_WIFI_AUTHENTICATION_TYPE_LENGTH) {
-            return ERR_PROTO;
+            return NFC_ProtocolError;
           }
           wifiConfig.authentication = bufPayload->buffer[offset + NDEF_WIFI_ATTRIBUTE_AUTHENTICATION_LSB_OFFSET];
           offset += (NDEF_WIFI_ATTRIBUTE_DATA_OFFSET + length);
@@ -415,7 +416,7 @@ static ReturnCode ndefPayloadToWifi(const ndefConstBuffer *bufPayload, ndefType 
         case NDEF_WIFI_ATTRIBUTE_ENCRYPTION:
           /* Encryption */
           if (length != NDEF_WIFI_ENCRYPTION_TYPE_LENGTH) {
-            return ERR_PROTO;
+            return NFC_ProtocolError;
           }
           wifiConfig.encryption = bufPayload->buffer[offset + NDEF_WIFI_ATTRIBUTE_ENCRYPTION_LSB_OFFSET];
           offset += (NDEF_WIFI_ATTRIBUTE_DATA_OFFSET + length);
@@ -429,50 +430,50 @@ static ReturnCode ndefPayloadToWifi(const ndefConstBuffer *bufPayload, ndefType 
     }
   }
 
-  return ndefWifiInit(wifi, &wifiConfig);
+  return NDef_WifiInit(wifi, &wifiConfig);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToWifi(const ndefRecord *record, ndefType *wifi)
+NFC_OpResult NDef_RecordToWifi(const NDef_Record *record, NDef_Type *wifi)
 {
-  const ndefType *type;
+  const NDef_Type *type;
 
   if ((record == NULL) || (wifi == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeWifi)) { /* "application/vnd.wfa.wsc" */
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeWifi)) { /* "application/vnd.wfa.wsc" */
+    return NFC_ProtocolError;
   }
 
-  type = ndefRecordGetNdefType(record);
+  type = NDef_RecordGetNdefType(record);
   if ((type != NULL) && (type->id == NDEF_TYPE_ID_MEDIA_WIFI)) {
-    (void)ST_MEMCPY(wifi, type, sizeof(ndefType));
-    return ERR_NONE;
+    (void)memcpy(wifi, type, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
-  return ndefPayloadToWifi(&record->bufPayload, wifi);
+  return NDef_PayloadToWifi(&record->bufPayload, wifi);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefWifiToRecord(const ndefType *wifi, ndefRecord *record)
+NFC_OpResult NDef_WifiToRecord(const NDef_Type *wifi, NDef_Record *record)
 {
   if ((wifi   == NULL) || (wifi->id != NDEF_TYPE_ID_MEDIA_WIFI) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
-  (void)ndefRecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeWifi);
+  (void)NDef_RecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeWifi);
 
-  if (ndefRecordSetNdefType(record, wifi) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, wifi) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

@@ -268,30 +268,30 @@ struct NDef_Type_Struct {
     NDef_Const_Buffer           bufPayload;       /*!< Flat/unknown type    */
 #endif
 #if NDEF_TYPE_RTD_DEVICE_INFO_SUPPORT
-    NDef_Type_RtdDeviceInfo     deviceInfo;       /*!< Device Information   */
+    NDef_Type_Rtd_DeviceInfo     deviceInfo;       /*!< Device Information   */
 #endif
 #if NDEF_TYPE_RTD_TEXT_SUPPORT
-    NDef_Type_RtdText           text;             /*!< Text                 */
+    NDef_Type_Rtd_Text           text;             /*!< Text                 */
 #endif
 #if NDEF_TYPE_RTD_URI_SUPPORT
-    NDef_Type_RtdUri            uri;              /*!< URI                  */
+    NDef_Type_Rtd_URI            uri;              /*!< URI                  */
 #endif
 #if NDEF_TYPE_RTD_AAR_SUPPORT
-    NDef_Type_RtdAar            aar;              /*!< AAR                  */
+    NDef_Type_Rtd_AAR            aar;              /*!< AAR                  */
 #endif
 #if NDEF_TYPE_RTD_WLC_SUPPORT
-    NDef_Type_RtdWlcCapability  wlcCapability; /*!< WLC Capability          */
-    NDef_Type_RtdWlcStatusInfo  wlcStatusInfo; /*!< WLC Status and Info     */
-    NDef_Type_RtdWlcPollInfo    wlcPollInfo;   /*!< WLC Poll Information    */
-    NDef_Type_RtdWlcListenCtl   wlcListenCtl;  /*!< WLC Listen Control      */
+    NDef_Type_Rtd_WlcCapability  wlcCapability; /*!< WLC Capability          */
+    NDef_Type_Rtd_WlcStatusInfo  wlcStatusInfo; /*!< WLC Status and Info     */
+    NDef_Type_Rtd_WlcPollInfo    wlcPollInfo;   /*!< WLC Poll Information    */
+    NDef_Type_Rtd_WlcListenCtl   wlcListenCtl;  /*!< WLC Listen Control      */
 #endif
 #if NDEF_TYPE_RTD_WPCWLC_SUPPORT
-    NDef_Type_RtdWpcWlc         wpcWlc;           /*!< WPC WLC              */
+    NDef_Type_Rtd_WpcWlc         wpcWlc;           /*!< WPC WLC              */
 #endif
 #if NDEF_TYPE_RTD_TNEP_SUPPORT
-    NDef_Type_RtdTnepServiceParameter tnepServiceParameter; /*!< TNEP Service Parameter */
-    NDef_Type_RtdTnepServiceSelect    tnepServiceSelect;    /*!< TNEP Service Select    */
-    NDef_Type_RtdTnepStatus           tnepStatus;           /*!< TNEP Status            */
+    NDef_Type_Rtd_TnepServiceParameter tnepServiceParameter; /*!< TNEP Service Parameter */
+    NDef_Type_Rtd_TnepServiceSelect    tnepServiceSelect;    /*!< TNEP Service Select    */
+    NDef_Type_Rtd_TnepStatus           tnepStatus;           /*!< TNEP Status            */
 #endif
 #if NDEF_TYPE_MEDIA_SUPPORT
     NDef_Type_Media             media;            /*!< Media                */

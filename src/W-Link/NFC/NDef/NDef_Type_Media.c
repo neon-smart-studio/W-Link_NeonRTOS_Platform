@@ -15,68 +15,50 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_media.h"
-#include "nfc_utils.h"
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_Media.h"
 
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_MEDIA_SUPPORT
 
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
-
-/*
- * Media
- */
-
-
 /*****************************************************************************/
-ReturnCode ndefMediaInit(ndefType *media, const ndefConstBuffer8 *bufType, const ndefConstBuffer *bufPayload)
+NFC_OpResult NDef_MediaInit(NDef_Type *media, const NDef_Const_Buffer_8 *bufType, const NDef_Const_Buffer *bufPayload)
 {
-  ndefTypeMedia *typeMedia;
+  NDef_Type_Media *typeMedia;
 
   if ((media == NULL) || (bufType == NULL) || (bufPayload == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   media->id               = NDEF_TYPE_ID_MEDIA;
   media->getPayloadLength = NULL;
   media->getPayloadItem   = NULL;
-  media->typeToRecord     = ndefMediaToRecord;
+  media->typeToRecord     = NDef_MediaToRecord;
   typeMedia               = &media->data.media;
 
   typeMedia->bufType.buffer    = bufType->buffer;
@@ -84,18 +66,18 @@ ReturnCode ndefMediaInit(ndefType *media, const ndefConstBuffer8 *bufType, const
   typeMedia->bufPayload.buffer = bufPayload->buffer;
   typeMedia->bufPayload.length = bufPayload->length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetMedia(const ndefType *media, ndefConstBuffer8 *bufType, ndefConstBuffer *bufPayload)
+NFC_OpResult NDef_GetMedia(const NDef_Type *media, NDef_Const_Buffer_8 *bufType, NDef_Const_Buffer *bufPayload)
 {
-  const ndefTypeMedia *typeMedia;
+  const NDef_Type_Media *typeMedia;
 
   if ((media   == NULL) || (media->id != NDEF_TYPE_ID_MEDIA) ||
       (bufType == NULL) || (bufPayload == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   typeMedia = &media->data.media;
@@ -106,56 +88,56 @@ ReturnCode ndefGetMedia(const ndefType *media, ndefConstBuffer8 *bufType, ndefCo
   bufPayload->buffer = typeMedia->bufPayload.buffer;
   bufPayload->length = typeMedia->bufPayload.length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToMedia(const ndefRecord *record, ndefType *media)
+NFC_OpResult NDef_RecordToMedia(const NDef_Record *record, NDef_Type *media)
 {
-  const ndefType *type;
-  ndefConstBuffer8 bufType;
+  const NDef_Type *type;
+  NDef_Const_Buffer_8 bufType;
 
   if ((record == NULL) || (media == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (ndefHeaderTNF(record) != NDEF_TNF_MEDIA_TYPE) {
-    return ERR_PROTO;
+  if (NDef_Header_TNF(record) != NDEF_TNF_MEDIA_TYPE) {
+    return NFC_ProtocolError;
   }
 
-  type = ndefRecordGetNdefType(record);
+  type = NDef_RecordGetNdefType(record);
   if ((type != NULL) && (type->id == NDEF_TYPE_ID_MEDIA)) {
-    (void)ST_MEMCPY(media, type, sizeof(ndefType));
-    return ERR_NONE;
+    (void)memcpy(media, type, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
   bufType.buffer = record->type;
   bufType.length = record->typeLength;
 
-  return ndefMediaInit(media, &bufType, &record->bufPayload);
+  return NDef_MediaInit(media, &bufType, &record->bufPayload);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefMediaToRecord(const ndefType *media, ndefRecord *record)
+NFC_OpResult NDef_MediaToRecord(const NDef_Type *media, NDef_Record *record)
 {
-  const ndefTypeMedia *typeMedia;
+  const NDef_Type_Media *typeMedia;
 
   if ((media  == NULL) || (media->id != NDEF_TYPE_ID_MEDIA) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   typeMedia = &media->data.media;
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
-  (void)ndefRecordSetType(record, NDEF_TNF_MEDIA_TYPE, &typeMedia->bufType);
+  (void)NDef_RecordSetType(record, NDEF_TNF_MEDIA_TYPE, &typeMedia->bufType);
 
-  (void)ndefRecordSetPayload(record, &typeMedia->bufPayload);
+  (void)NDef_RecordSetPayload(record, &typeMedia->bufPayload);
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

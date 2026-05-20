@@ -15,28 +15,36 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_text.h"
-#include "nfc_utils.h"
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_Text.h"
 
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_RTD_TEXT_SUPPORT
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
 
 /*! Text defines */
 #define NDEF_RTD_TEXT_STATUS_OFFSET              0U    /*!< Text status offset */
@@ -46,43 +54,15 @@
 
 #define NDEF_RTD_TEXT_PAYLOAD_LENGTH_MIN         (sizeof(uint8_t) + sizeof(uint8_t))   /*!< Minimum Text Payload length */
 
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
 /*! RTD Text Type string */
 static const uint8_t ndefRtdTypeText[]           = "T";               /*!< Text Record Type               {0x54}       */
 
-const ndefConstBuffer8 bufRtdTypeText            = { ndefRtdTypeText,       sizeof(ndefRtdTypeText) - 1U };       /*!< Text Record Type buffer               */
-
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
-
-/*
- * Text
- */
-
+const NDef_Const_Buffer_8 bufRtdTypeText            = { ndefRtdTypeText,       sizeof(ndefRtdTypeText) - 1U };       /*!< Text Record Type buffer               */
 
 /*****************************************************************************/
-static uint32_t ndefRtdTextPayloadGetLength(const ndefType *text)
+static uint32_t NDef_RtdTextPayloadGetLength(const NDef_Type *text)
 {
-  const ndefTypeRtdText *rtdText;
+  const NDef_Type_Rtd_Text *rtdText;
 
   if ((text == NULL) || (text->id != NDEF_TYPE_ID_RTD_TEXT)) {
     return 0;
@@ -95,10 +75,10 @@ static uint32_t ndefRtdTextPayloadGetLength(const ndefType *text)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdTextToPayloadItem(const ndefType *text, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdTextToPayloadItem(const NDef_Type *text, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeRtdText *rtdText;
+  const NDef_Type_Rtd_Text *rtdText;
 
   if ((text    == NULL) || (text->id != NDEF_TYPE_ID_RTD_TEXT) ||
       (bufItem == NULL)) {
@@ -144,28 +124,28 @@ static const uint8_t *ndefRtdTextToPayloadItem(const ndefType *text, ndefConstBu
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdTextInit(ndefType *text, uint8_t utfEncoding, const ndefConstBuffer8 *bufLanguageCode, const ndefConstBuffer *bufSentence)
+NFC_OpResult NDef_RtdTextInit(NDef_Type *text, uint8_t utfEncoding, const NDef_Const_Buffer_8 *bufLanguageCode, const NDef_Const_Buffer *bufSentence)
 {
-  ndefTypeRtdText *rtdText;
+  NDef_Type_Rtd_Text *rtdText;
 
   if ((text            == NULL) ||
       (bufLanguageCode == NULL) || (bufLanguageCode->buffer == NULL) || (bufLanguageCode->length == 0U) ||
       (bufSentence     == NULL) || (bufSentence->buffer     == NULL) || (bufSentence->length     == 0U)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   if (bufLanguageCode->length > NDEF_RTD_TEXT_LANGUAGE_CODE_LEN_MASK) {
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
   if ((utfEncoding != TEXT_ENCODING_UTF8) && (utfEncoding != TEXT_ENCODING_UTF16)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   text->id               = NDEF_TYPE_ID_RTD_TEXT;
-  text->getPayloadLength = ndefRtdTextPayloadGetLength;
-  text->getPayloadItem   = ndefRtdTextToPayloadItem;
-  text->typeToRecord     = ndefRtdTextToRecord;
+  text->getPayloadLength = NDef_RtdTextPayloadGetLength;
+  text->getPayloadItem   = NDef_RtdTextToPayloadItem;
+  text->typeToRecord     = NDef_RtdTextToRecord;
   rtdText                = &text->data.text;
 
   rtdText->status = (utfEncoding << NDEF_TEXT_ENCODING_SHIFT) | (bufLanguageCode->length & NDEF_RTD_TEXT_LANGUAGE_CODE_LEN_MASK);
@@ -176,18 +156,18 @@ ReturnCode ndefRtdTextInit(ndefType *text, uint8_t utfEncoding, const ndefConstB
   rtdText->bufSentence.buffer = bufSentence->buffer;
   rtdText->bufSentence.length = bufSentence->length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdText(const ndefType *text, uint8_t *utfEncoding, ndefConstBuffer8 *bufLanguageCode, ndefConstBuffer *bufSentence)
+NFC_OpResult NDef_GetRtdText(const NDef_Type *text, uint8_t *utfEncoding, NDef_Const_Buffer_8 *bufLanguageCode, NDef_Const_Buffer *bufSentence)
 {
-  const ndefTypeRtdText *rtdText;
+  const NDef_Type_Rtd_Text *rtdText;
 
   if ((text        == NULL) || (text->id != NDEF_TYPE_ID_RTD_TEXT) ||
       (utfEncoding == NULL) || (bufLanguageCode == NULL) || (bufSentence == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   rtdText = &text->data.text;
@@ -200,30 +180,30 @@ ReturnCode ndefGetRtdText(const ndefType *text, uint8_t *utfEncoding, ndefConstB
   bufSentence->buffer     = rtdText->bufSentence.buffer;
   bufSentence->length     = rtdText->bufSentence.length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdText(const ndefConstBuffer *bufText, ndefType *text)
+static NFC_OpResult NDef_PayloadToRtdText(const NDef_Const_Buffer *bufText, NDef_Type *text)
 {
-  ndefTypeRtdText *rtdText;
+  NDef_Type_Rtd_Text *rtdText;
   uint8_t status;
   uint8_t languageCodeLength;
 
   if ((bufText == NULL) || (bufText->buffer == NULL) || (bufText->length == 0U) ||
       (text    == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   if (bufText->length < NDEF_RTD_TEXT_PAYLOAD_LENGTH_MIN) { /* Text Payload Min */
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
   text->id               = NDEF_TYPE_ID_RTD_TEXT;
-  text->getPayloadLength = ndefRtdTextPayloadGetLength;
-  text->getPayloadItem   = ndefRtdTextToPayloadItem;
-  text->typeToRecord     = ndefRtdTextToRecord;
+  text->getPayloadLength = NDef_RtdTextPayloadGetLength;
+  text->getPayloadItem   = NDef_RtdTextToPayloadItem;
+  text->typeToRecord     = NDef_RtdTextToRecord;
   rtdText                = &text->data.text;
 
   /* Extract info from the payload */
@@ -241,51 +221,51 @@ static ReturnCode ndefPayloadToRtdText(const ndefConstBuffer *bufText, ndefType 
   rtdText->bufSentence.buffer = &(bufText->buffer[NDEF_RTD_TEXT_LANGUAGE_OFFSET + languageCodeLength]);
   rtdText->bufSentence.length = bufText->length - sizeof(status) - languageCodeLength;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdText(const ndefRecord *record, ndefType *text)
+NFC_OpResult NDef_RecordToRtdText(const NDef_Record *record, NDef_Type *text)
 {
-  const ndefType *type;
+  const NDef_Type *type;
 
   if ((record == NULL) || (text == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeText)) { /* "T" */
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeText)) { /* "T" */
+    return NFC_ProtocolError;
   }
 
-  type = ndefRecordGetNdefType(record);
+  type = NDef_RecordGetNdefType(record);
   if ((type != NULL) && (type->id == NDEF_TYPE_ID_RTD_TEXT)) {
-    (void)ST_MEMCPY(text, type, sizeof(ndefType));
-    return ERR_NONE;
+    (void)memcpy(text, type, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
-  return ndefPayloadToRtdText(&record->bufPayload, text);
+  return NDef_PayloadToRtdText(&record->bufPayload, text);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdTextToRecord(const ndefType *text, ndefRecord *record)
+NFC_OpResult NDef_RtdTextToRecord(const NDef_Type *text, NDef_Record *record)
 {
   if ((text   == NULL) || (text->id != NDEF_TYPE_ID_RTD_TEXT) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* "T" */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeText);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeText);
 
-  if (ndefRecordSetNdefType(record, text) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, text) < NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

@@ -613,7 +613,7 @@ static NFC_OpResult RFal_NFC_Dep_InitiatorHandleDEP(NFC_OpResult rxRes, uint16_t
     *outActRxLen  = ((uint16_t)nfcDepLen - RFAL_NFCDEP_DEP_HEADER - (uint16_t)optHdrLen);
 
     if ((&gNfcip.rxBuf[gNfcip.rxBufPaylPos] != &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen]) && (*outActRxLen > 0U)) {
-      ST_MEMMOVE(&gNfcip.rxBuf[gNfcip.rxBufPaylPos], &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen], *outActRxLen);
+      memmove(&gNfcip.rxBuf[gNfcip.rxBufPaylPos], &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen], *outActRxLen);
     }
 
     /*******************************************************************************/
@@ -963,7 +963,7 @@ static NFC_OpResult RFal_NFC_Dep_TargetHandleRX(NFC_OpResult rxRes, uint16_t *ou
     nfcipClearCounters();
 
     if ((&gNfcip.rxBuf[gNfcip.rxBufPaylPos] != &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen]) && (*outActRxLen > 0U)) {
-      ST_MEMMOVE(&gNfcip.rxBuf[gNfcip.rxBufPaylPos], &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen], *outActRxLen);
+      memmove(&gNfcip.rxBuf[gNfcip.rxBufPaylPos], &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen], *outActRxLen);
     }
 
 
@@ -1548,7 +1548,7 @@ NFC_OpResult RFal_NFC_Dep_ATR(const RFal_NFC_Dep_AtrParam *param, RFal_NFC_Dep_A
     return NFC_InvalidParameter;
   }
 
-  ST_MEMSET(&cfg, 0x00, sizeof(RFal_NFC_Dep_Configs));
+  memset(&cfg, 0x00, sizeof(RFal_NFC_Dep_Configs));
 
   /*******************************************************************************/
   /* Configure NFC-DEP layer                                                     */

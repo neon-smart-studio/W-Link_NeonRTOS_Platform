@@ -1,7 +1,7 @@
 
 /**
   ******************************************************************************
-  * @file           : ndef_type_uri.cpp
+  * @file           : NDef__type_uri.cpp
   * @brief          : NDEF RTD URI type
   ******************************************************************************
   * @attention
@@ -15,28 +15,36 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_uri.h"
-#include "nfc_utils.h"
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_URI.h"
 
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_RTD_URI_SUPPORT
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
 
 /*! URI defines */
 #define NDEF_RTD_URI_PROTOCOL_LEN        1U                        /*!< URI protocol length */
@@ -46,146 +54,118 @@
 #define NDEF_RTD_URI_ID_CODE_OFFSET      0U    /*!< URI Id code offset */
 #define NDEF_RTD_URI_FIELD_OFFSET        1U    /*!< URI field offset */
 
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
 /*! RTD URI Type string */
-static const uint8_t ndefRtdTypeUri[]            = "U";               /*!< URI Record Type                {0x55}       */
+static const uint8_t NDef_RtdTypeURI[]            = "U";               /*!< URI Record Type                {0x55}       */
 
-const ndefConstBuffer8 bufRtdTypeUri             = { ndefRtdTypeUri,        sizeof(ndefRtdTypeUri) - 1U };        /*!< URI Record Type buffer                */
+const NDef_Const_Buffer_8 bufRtdTypeURI             = { NDef_RtdTypeURI,        sizeof(NDef_RtdTypeURI) - 1U };        /*!< URI Record Type buffer                */
 
 
 /*! URI Type strings */
-static const uint8_t ndefUriPrefixNone[]         = "";
-static const uint8_t ndefUriPrefixHttpWww[]      = "http://www.";
-static const uint8_t ndefUriPrefixHttpsWww[]     = "https://www.";
-static const uint8_t ndefUriPrefixHttp[]         = "http://";
-static const uint8_t ndefUriPrefixHttps[]        = "https://";
-static const uint8_t ndefUriPrefixTel[]          = "tel:";
-static const uint8_t ndefUriPrefixMailto[]       = "mailto:";
-static const uint8_t ndefUriPrefixFtpAnonymous[] = "ftp://anonymous:anonymous@";
-static const uint8_t ndefUriPrefixFtpFtp[]       = "ftp://ftp.";
-static const uint8_t ndefUriPrefixFtps[]         = "ftps://";
-static const uint8_t ndefUriPrefixSftp[]         = "sftp://";
-static const uint8_t ndefUriPrefixSmb[]          = "smb://";
-static const uint8_t ndefUriPrefixNfs[]          = "nfs://";
-static const uint8_t ndefUriPrefixFtp[]          = "ftp://";
-static const uint8_t ndefUriPrefixDav[]          = "dav://";
-static const uint8_t ndefUriPrefixNews[]         = "news:";
-static const uint8_t ndefUriPrefixTelnet[]       = "telnet://";
-static const uint8_t ndefUriPrefixImap[]         = "imap:";
-static const uint8_t ndefUriPrefixRtsp[]         = "rtsp://";
-static const uint8_t ndefUriPrefixUrn[]          = "urn:";
-static const uint8_t ndefUriPrefixPop[]          = "pop:";
-static const uint8_t ndefUriPrefixSip[]          = "sip:";
-static const uint8_t ndefUriPrefixSips[]         = "sips:";
-static const uint8_t ndefUriPrefixTftp[]         = "tftp:";
-static const uint8_t ndefUriPrefixBtspp[]        = "btspp://";
-static const uint8_t ndefUriPrefixBtl2cap[]      = "btl2cap://";
-static const uint8_t ndefUriPrefixBtgoep[]       = "btgoep://";
-static const uint8_t ndefUriPrefixTcpobex[]      = "tcpobex://";
-static const uint8_t ndefUriPrefixIrdaobex[]     = "irdaobex://";
-static const uint8_t ndefUriPrefixFile[]         = "file://";
-static const uint8_t ndefUriPrefixUrnEpcId[]     = "urn:epc:id:";
-static const uint8_t ndefUriPrefixUrnEpcTag[]    = "urn:epc:tag";
-static const uint8_t ndefUriPrefixUrnEpcPat[]    = "urn:epc:pat:";
-static const uint8_t ndefUriPrefixUrnEpcRaw[]    = "urn:epc:raw:";
-static const uint8_t ndefUriPrefixUrnEpe[]       = "urn:epc:";
-static const uint8_t ndefUriPrefixUrnNfc[]       = "urn:nfc:";
-static const uint8_t ndefUriPrefixEmpty[]        = ""; /* Autodetect filler */
+static const uint8_t NDef_URIPrefixNone[]         = "";
+static const uint8_t NDef_URIPrefixHttpWww[]      = "http://www.";
+static const uint8_t NDef_URIPrefixHttpsWww[]     = "https://www.";
+static const uint8_t NDef_URIPrefixHttp[]         = "http://";
+static const uint8_t NDef_URIPrefixHttps[]        = "https://";
+static const uint8_t NDef_URIPrefixTel[]          = "tel:";
+static const uint8_t NDef_URIPrefixMailto[]       = "mailto:";
+static const uint8_t NDef_URIPrefixFtpAnonymous[] = "ftp://anonymous:anonymous@";
+static const uint8_t NDef_URIPrefixFtpFtp[]       = "ftp://ftp.";
+static const uint8_t NDef_URIPrefixFtps[]         = "ftps://";
+static const uint8_t NDef_URIPrefixSftp[]         = "sftp://";
+static const uint8_t NDef_URIPrefixSmb[]          = "smb://";
+static const uint8_t NDef_URIPrefixNfs[]          = "nfs://";
+static const uint8_t NDef_URIPrefixFtp[]          = "ftp://";
+static const uint8_t NDef_URIPrefixDav[]          = "dav://";
+static const uint8_t NDef_URIPrefixNews[]         = "news:";
+static const uint8_t NDef_URIPrefixTelnet[]       = "telnet://";
+static const uint8_t NDef_URIPrefixImap[]         = "imap:";
+static const uint8_t NDef_URIPrefixRtsp[]         = "rtsp://";
+static const uint8_t NDef_URIPrefixUrn[]          = "urn:";
+static const uint8_t NDef_URIPrefixPop[]          = "pop:";
+static const uint8_t NDef_URIPrefixSip[]          = "sip:";
+static const uint8_t NDef_URIPrefixSips[]         = "sips:";
+static const uint8_t NDef_URIPrefixTftp[]         = "tftp:";
+static const uint8_t NDef_URIPrefixBtspp[]        = "btspp://";
+static const uint8_t NDef_URIPrefixBtl2cap[]      = "btl2cap://";
+static const uint8_t NDef_URIPrefixBtgoep[]       = "btgoep://";
+static const uint8_t NDef_URIPrefixTcpobex[]      = "tcpobex://";
+static const uint8_t NDef_URIPrefixIrdaobex[]     = "irdaobex://";
+static const uint8_t NDef_URIPrefixFile[]         = "file://";
+static const uint8_t NDef_URIPrefixUrnEpcId[]     = "urn:epc:id:";
+static const uint8_t NDef_URIPrefixUrnEpcTag[]    = "urn:epc:tag";
+static const uint8_t NDef_URIPrefixUrnEpcPat[]    = "urn:epc:pat:";
+static const uint8_t NDef_URIPrefixUrnEpcRaw[]    = "urn:epc:raw:";
+static const uint8_t NDef_URIPrefixUrnEpe[]       = "urn:epc:";
+static const uint8_t NDef_URIPrefixUrnNfc[]       = "urn:nfc:";
+static const uint8_t NDef_URIPrefixEmpty[]        = ""; /* Autodetect filler */
 
-static const ndefConstBuffer ndefUriPrefix[NDEF_URI_PREFIX_COUNT] = {
-  { ndefUriPrefixNone, sizeof(ndefUriPrefixNone) - 1U },
-  { ndefUriPrefixHttpWww, sizeof(ndefUriPrefixHttpWww) - 1U },
-  { ndefUriPrefixHttpsWww, sizeof(ndefUriPrefixHttpsWww) - 1U },
-  { ndefUriPrefixHttp, sizeof(ndefUriPrefixHttp) - 1U },
-  { ndefUriPrefixHttps, sizeof(ndefUriPrefixHttps) - 1U },
-  { ndefUriPrefixTel, sizeof(ndefUriPrefixTel) - 1U },
-  { ndefUriPrefixMailto, sizeof(ndefUriPrefixMailto) - 1U },
-  { ndefUriPrefixFtpAnonymous, sizeof(ndefUriPrefixFtpAnonymous) - 1U },
-  { ndefUriPrefixFtpFtp, sizeof(ndefUriPrefixFtpFtp) - 1U },
-  { ndefUriPrefixFtps, sizeof(ndefUriPrefixFtps) - 1U },
-  { ndefUriPrefixSftp, sizeof(ndefUriPrefixSftp) - 1U },
-  { ndefUriPrefixSmb, sizeof(ndefUriPrefixSmb) - 1U },
-  { ndefUriPrefixNfs, sizeof(ndefUriPrefixNfs) - 1U },
-  { ndefUriPrefixFtp, sizeof(ndefUriPrefixFtp) - 1U },
-  { ndefUriPrefixDav, sizeof(ndefUriPrefixDav) - 1U },
-  { ndefUriPrefixNews, sizeof(ndefUriPrefixNews) - 1U },
-  { ndefUriPrefixTelnet, sizeof(ndefUriPrefixTelnet) - 1U },
-  { ndefUriPrefixImap, sizeof(ndefUriPrefixImap) - 1U },
-  { ndefUriPrefixRtsp, sizeof(ndefUriPrefixRtsp) - 1U },
-  { ndefUriPrefixUrn, sizeof(ndefUriPrefixUrn) - 1U },
-  { ndefUriPrefixPop, sizeof(ndefUriPrefixPop) - 1U },
-  { ndefUriPrefixSip, sizeof(ndefUriPrefixSip) - 1U },
-  { ndefUriPrefixSips, sizeof(ndefUriPrefixSips) - 1U },
-  { ndefUriPrefixTftp, sizeof(ndefUriPrefixTftp) - 1U },
-  { ndefUriPrefixBtspp, sizeof(ndefUriPrefixBtspp) - 1U },
-  { ndefUriPrefixBtl2cap, sizeof(ndefUriPrefixBtl2cap) - 1U },
-  { ndefUriPrefixBtgoep, sizeof(ndefUriPrefixBtgoep) - 1U },
-  { ndefUriPrefixTcpobex, sizeof(ndefUriPrefixTcpobex) - 1U },
-  { ndefUriPrefixIrdaobex, sizeof(ndefUriPrefixIrdaobex) - 1U },
-  { ndefUriPrefixFile, sizeof(ndefUriPrefixFile) - 1U },
-  { ndefUriPrefixUrnEpcId, sizeof(ndefUriPrefixUrnEpcId) - 1U },
-  { ndefUriPrefixUrnEpcTag, sizeof(ndefUriPrefixUrnEpcTag) - 1U },
-  { ndefUriPrefixUrnEpcPat, sizeof(ndefUriPrefixUrnEpcPat) - 1U },
-  { ndefUriPrefixUrnEpcRaw, sizeof(ndefUriPrefixUrnEpcRaw) - 1U },
-  { ndefUriPrefixUrnEpe, sizeof(ndefUriPrefixUrnEpe) - 1U },
-  { ndefUriPrefixUrnNfc, sizeof(ndefUriPrefixUrnNfc) - 1U },
-  { ndefUriPrefixEmpty, sizeof(ndefUriPrefixEmpty) - 1U }
+static const NDef_Const_Buffer NDef_URIPrefix[NDEF_URI_PREFIX_COUNT] = {
+  { NDef_URIPrefixNone, sizeof(NDef_URIPrefixNone) - 1U },
+  { NDef_URIPrefixHttpWww, sizeof(NDef_URIPrefixHttpWww) - 1U },
+  { NDef_URIPrefixHttpsWww, sizeof(NDef_URIPrefixHttpsWww) - 1U },
+  { NDef_URIPrefixHttp, sizeof(NDef_URIPrefixHttp) - 1U },
+  { NDef_URIPrefixHttps, sizeof(NDef_URIPrefixHttps) - 1U },
+  { NDef_URIPrefixTel, sizeof(NDef_URIPrefixTel) - 1U },
+  { NDef_URIPrefixMailto, sizeof(NDef_URIPrefixMailto) - 1U },
+  { NDef_URIPrefixFtpAnonymous, sizeof(NDef_URIPrefixFtpAnonymous) - 1U },
+  { NDef_URIPrefixFtpFtp, sizeof(NDef_URIPrefixFtpFtp) - 1U },
+  { NDef_URIPrefixFtps, sizeof(NDef_URIPrefixFtps) - 1U },
+  { NDef_URIPrefixSftp, sizeof(NDef_URIPrefixSftp) - 1U },
+  { NDef_URIPrefixSmb, sizeof(NDef_URIPrefixSmb) - 1U },
+  { NDef_URIPrefixNfs, sizeof(NDef_URIPrefixNfs) - 1U },
+  { NDef_URIPrefixFtp, sizeof(NDef_URIPrefixFtp) - 1U },
+  { NDef_URIPrefixDav, sizeof(NDef_URIPrefixDav) - 1U },
+  { NDef_URIPrefixNews, sizeof(NDef_URIPrefixNews) - 1U },
+  { NDef_URIPrefixTelnet, sizeof(NDef_URIPrefixTelnet) - 1U },
+  { NDef_URIPrefixImap, sizeof(NDef_URIPrefixImap) - 1U },
+  { NDef_URIPrefixRtsp, sizeof(NDef_URIPrefixRtsp) - 1U },
+  { NDef_URIPrefixUrn, sizeof(NDef_URIPrefixUrn) - 1U },
+  { NDef_URIPrefixPop, sizeof(NDef_URIPrefixPop) - 1U },
+  { NDef_URIPrefixSip, sizeof(NDef_URIPrefixSip) - 1U },
+  { NDef_URIPrefixSips, sizeof(NDef_URIPrefixSips) - 1U },
+  { NDef_URIPrefixTftp, sizeof(NDef_URIPrefixTftp) - 1U },
+  { NDef_URIPrefixBtspp, sizeof(NDef_URIPrefixBtspp) - 1U },
+  { NDef_URIPrefixBtl2cap, sizeof(NDef_URIPrefixBtl2cap) - 1U },
+  { NDef_URIPrefixBtgoep, sizeof(NDef_URIPrefixBtgoep) - 1U },
+  { NDef_URIPrefixTcpobex, sizeof(NDef_URIPrefixTcpobex) - 1U },
+  { NDef_URIPrefixIrdaobex, sizeof(NDef_URIPrefixIrdaobex) - 1U },
+  { NDef_URIPrefixFile, sizeof(NDef_URIPrefixFile) - 1U },
+  { NDef_URIPrefixUrnEpcId, sizeof(NDef_URIPrefixUrnEpcId) - 1U },
+  { NDef_URIPrefixUrnEpcTag, sizeof(NDef_URIPrefixUrnEpcTag) - 1U },
+  { NDef_URIPrefixUrnEpcPat, sizeof(NDef_URIPrefixUrnEpcPat) - 1U },
+  { NDef_URIPrefixUrnEpcRaw, sizeof(NDef_URIPrefixUrnEpcRaw) - 1U },
+  { NDef_URIPrefixUrnEpe, sizeof(NDef_URIPrefixUrnEpe) - 1U },
+  { NDef_URIPrefixUrnNfc, sizeof(NDef_URIPrefixUrnNfc) - 1U },
+  { NDef_URIPrefixEmpty, sizeof(NDef_URIPrefixEmpty) - 1U }
 };
 
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
-
-/*
- * URI
- */
-
-
 /*****************************************************************************/
-static uint32_t ndefRtdUriPayloadGetLength(const ndefType *uri)
+static uint32_t NDef_RtdURIPayloadGetLength(const NDef_Type *uri)
 {
-  const ndefTypeRtdUri *rtdUri;
+  const NDef_Type_Rtd_URI *rtdURI;
 
   if ((uri == NULL) || (uri->id != NDEF_TYPE_ID_RTD_URI)) {
     return 0;
   }
 
-  rtdUri = &uri->data.uri;
+  rtdURI = &uri->data.uri;
 
-  return sizeof(rtdUri->protocol) + rtdUri->bufUriString.length;
+  return sizeof(rtdURI->protocol) + rtdURI->bufURIString.length;
 }
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdUriToPayloadItem(const ndefType *uri, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdURIToPayloadItem(const NDef_Type *uri, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeRtdUri *rtdUri;
+  const NDef_Type_Rtd_URI *rtdURI;
 
   if ((uri     == NULL) || (uri->id != NDEF_TYPE_ID_RTD_URI) ||
       (bufItem == NULL)) {
     return NULL;
   }
 
-  rtdUri = &uri->data.uri;
+  rtdURI = &uri->data.uri;
 
   if (begin == true) {
     item = 0;
@@ -194,14 +174,14 @@ static const uint8_t *ndefRtdUriToPayloadItem(const ndefType *uri, ndefConstBuff
   switch (item) {
     case 0:
       /* Protocol byte */
-      bufItem->buffer = &rtdUri->protocol;
-      bufItem->length = sizeof(rtdUri->protocol);
+      bufItem->buffer = &rtdURI->protocol;
+      bufItem->length = sizeof(rtdURI->protocol);
       break;
 
     case 1:
       /* URI string */
-      bufItem->buffer = rtdUri->bufUriString.buffer;
-      bufItem->length = rtdUri->bufUriString.length;
+      bufItem->buffer = rtdURI->bufURIString.buffer;
+      bufItem->length = rtdURI->bufURIString.length;
       break;
 
     default:
@@ -218,153 +198,153 @@ static const uint8_t *ndefRtdUriToPayloadItem(const ndefType *uri, ndefConstBuff
 
 
 /*****************************************************************************/
-static ReturnCode ndefRtdUriProtocolAutodetect(uint8_t *protocol, ndefConstBuffer *bufUriString)
+static NFC_OpResult NDef_RtdURIProtocolAutodetect(uint8_t *protocol, NDef_Const_Buffer *bufURIString)
 {
   if ((protocol  == NULL)                       ||
       (*protocol != NDEF_URI_PREFIX_AUTODETECT) ||
-      (bufUriString == NULL)) {
-    return ERR_PARAM;
+      (bufURIString == NULL)) {
+    return NFC_InvalidParameter;
   }
 
   for (uint8_t i = 0; i < NDEF_URI_PREFIX_COUNT; i++) { /* Protocol fits in 1 byte => uint8_t */
-    if (ndefUriPrefix[i].length > 0U) {
-      if (ST_BYTECMP(bufUriString->buffer, ndefUriPrefix[i].buffer, ndefUriPrefix[i].length) == 0) {
+    if (NDef_URIPrefix[i].length > 0U) {
+      if (memcmp(bufURIString->buffer, NDef_URIPrefix[i].buffer, NDef_URIPrefix[i].length) == 0) {
         *protocol = i;
         /* Move after the protocol string */
-        bufUriString->buffer  = &bufUriString->buffer[ndefUriPrefix[i].length];
-        bufUriString->length -= ndefUriPrefix[i].length;
-        return ERR_NONE;
+        bufURIString->buffer  = &bufURIString->buffer[NDef_URIPrefix[i].length];
+        bufURIString->length -= NDef_URIPrefix[i].length;
+        return NFC_OK;
       }
     }
   }
 
   *protocol = NDEF_URI_PREFIX_NONE;
 
-  return ERR_NOTFOUND;
+  return NFC_NotFound;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdUriInit(ndefType *uri, uint8_t protocol, const ndefConstBuffer *bufUriString)
+NFC_OpResult NDef_RtdURIInit(NDef_Type *uri, uint8_t protocol, const NDef_Const_Buffer *bufURIString)
 {
-  ndefTypeRtdUri *rtdUri;
-  ndefConstBuffer bufUri;
+  NDef_Type_Rtd_URI *rtdURI;
+  NDef_Const_Buffer bufURI;
   uint8_t protocolDetect;
 
   if ((uri == NULL) || (protocol >= NDEF_URI_PREFIX_COUNT) ||
-      (bufUriString == NULL) || (bufUriString->buffer == NULL) || (bufUriString->length == 0U)) {
-    return ERR_PARAM;
+      (bufURIString == NULL) || (bufURIString->buffer == NULL) || (bufURIString->length == 0U)) {
+    return NFC_InvalidParameter;
   }
 
   uri->id               = NDEF_TYPE_ID_RTD_URI;
-  uri->getPayloadLength = ndefRtdUriPayloadGetLength;
-  uri->getPayloadItem   = ndefRtdUriToPayloadItem;
-  uri->typeToRecord     = ndefRtdUriToRecord;
-  rtdUri                = &uri->data.uri;
+  uri->getPayloadLength = NDef_RtdURIPayloadGetLength;
+  uri->getPayloadItem   = NDef_RtdURIToPayloadItem;
+  uri->typeToRecord     = NDef_RtdURIToRecord;
+  rtdURI                = &uri->data.uri;
 
-  bufUri.buffer = bufUriString->buffer;
-  bufUri.length = bufUriString->length;
+  bufURI.buffer = bufURIString->buffer;
+  bufURI.length = bufURIString->length;
   protocolDetect = protocol;
   if (protocol == NDEF_URI_PREFIX_AUTODETECT) {
     /* Update protocol and URI buffer */
-    (void)ndefRtdUriProtocolAutodetect(&protocolDetect, &bufUri);
+    (void)NDef_RtdURIProtocolAutodetect(&protocolDetect, &bufURI);
   }
-  rtdUri->protocol = protocolDetect;
+  rtdURI->protocol = protocolDetect;
 
-  rtdUri->bufUriString.buffer = bufUri.buffer;
-  rtdUri->bufUriString.length = bufUri.length;
+  rtdURI->bufURIString.buffer = bufURI.buffer;
+  rtdURI->bufURIString.length = bufURI.length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdUri(const ndefType *uri, ndefConstBuffer *bufProtocol, ndefConstBuffer *bufUriString)
+NFC_OpResult NDef_GetRtdURI(const NDef_Type *uri, NDef_Const_Buffer *bufProtocol, NDef_Const_Buffer *bufURIString)
 {
-  const ndefTypeRtdUri *rtdUri;
+  const NDef_Type_Rtd_URI *rtdURI;
 
   if ((uri         == NULL) || (uri->id != NDEF_TYPE_ID_RTD_URI) ||
-      (bufProtocol == NULL) || (bufUriString == NULL)) {
-    return ERR_PARAM;
+      (bufProtocol == NULL) || (bufURIString == NULL)) {
+    return NFC_InvalidParameter;
   }
 
-  rtdUri = &uri->data.uri;
+  rtdURI = &uri->data.uri;
 
-  bufProtocol->buffer   = ndefUriPrefix[rtdUri->protocol].buffer;
-  bufProtocol->length   = ndefUriPrefix[rtdUri->protocol].length;
+  bufProtocol->buffer   = NDef_URIPrefix[rtdURI->protocol].buffer;
+  bufProtocol->length   = NDef_URIPrefix[rtdURI->protocol].length;
 
-  bufUriString->buffer = rtdUri->bufUriString.buffer;
-  bufUriString->length = rtdUri->bufUriString.length;
+  bufURIString->buffer = rtdURI->bufURIString.buffer;
+  bufURIString->length = rtdURI->bufURIString.length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdUri(const ndefConstBuffer *bufUri, ndefType *uri)
+static NFC_OpResult NDef_PayloadToRtdURI(const NDef_Const_Buffer *bufURI, NDef_Type *uri)
 {
   uint8_t protocol;
 
-  if ((bufUri == NULL) || (bufUri->buffer == NULL) ||
+  if ((bufURI == NULL) || (bufURI->buffer == NULL) ||
       (uri    == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (bufUri->length < NDEF_RTD_URI_PAYLOAD_LENGTH_MIN) {
-    return ERR_PROTO;
+  if (bufURI->length < NDEF_RTD_URI_PAYLOAD_LENGTH_MIN) {
+    return NFC_ProtocolError;
   }
 
   /* Extract info from the payload */
-  protocol = bufUri->buffer[NDEF_RTD_URI_ID_CODE_OFFSET];
+  protocol = bufURI->buffer[NDEF_RTD_URI_ID_CODE_OFFSET];
 
-  ndefConstBuffer bufStringUri;
-  bufStringUri.buffer = &bufUri->buffer[NDEF_RTD_URI_FIELD_OFFSET];
-  bufStringUri.length =  bufUri->length - sizeof(protocol);
+  NDef_Const_Buffer bufStringURI;
+  bufStringURI.buffer = &bufURI->buffer[NDEF_RTD_URI_FIELD_OFFSET];
+  bufStringURI.length =  bufURI->length - sizeof(protocol);
 
-  return ndefRtdUriInit(uri, protocol, &bufStringUri);
+  return NDef_RtdURIInit(uri, protocol, &bufStringURI);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdUri(const ndefRecord *record, ndefType *uri)
+NFC_OpResult NDef_RecordToRtdURI(const NDef_Record *record, NDef_Type *uri)
 {
-  const ndefType *type;
+  const NDef_Type *type;
 
   if ((record == NULL) || (uri == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeUri)) { /* "U" */
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeURI)) { /* "U" */
+    return NFC_ProtocolError;
   }
 
-  type = ndefRecordGetNdefType(record);
+  type = NDef_RecordGetNdefType(record);
   if ((type != NULL) && (type->id == NDEF_TYPE_ID_RTD_URI)) {
-    (void)ST_MEMCPY(uri, type, sizeof(ndefType));
-    return ERR_NONE;
+    (void)memcpy(uri, type, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
-  return ndefPayloadToRtdUri(&record->bufPayload, uri);
+  return NDef_PayloadToRtdURI(&record->bufPayload, uri);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdUriToRecord(const ndefType *uri, ndefRecord *record)
+NFC_OpResult NDef_RtdURIToRecord(const NDef_Type *uri, NDef_Record *record)
 {
   if ((uri    == NULL) || (uri->id != NDEF_TYPE_ID_RTD_URI) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* "U" */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeUri);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeURI);
 
-  if (ndefRecordSetNdefType(record, uri) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, uri) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

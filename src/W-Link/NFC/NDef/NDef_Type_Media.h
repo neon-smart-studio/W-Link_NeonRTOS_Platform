@@ -15,109 +15,43 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
+
 
 #ifndef NDEF_TYPE_MEDIA_H
 #define NDEF_TYPE_MEDIA_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
-
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
-
+#include "NFC/NFC_Def.h"
 
 /*! Media Type */
 typedef struct {
-  ndefConstBuffer8 bufType;    /*!< Media type    */
-  ndefConstBuffer  bufPayload; /*!< Media payload */
-} ndefTypeMedia;
+  NDef_Const_Buffer_8 bufType;    /*!< Media type    */
+  NDef_Const_Buffer  bufPayload; /*!< Media payload */
+} NDef_Type_Media;
 
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/***************
- * Media
- ***************
- */
-
-/*!
- *****************************************************************************
- * Initialize a Media type
- *
- * \param[out] media:      Media type to initialize
- * \param[in]  bufType:    Type buffer
- * \param[in]  bufPayload: Payload buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefMediaInit(ndefType *media, const ndefConstBuffer8 *bufType, const ndefConstBuffer *bufPayload);
-
-
-/*!
- *****************************************************************************
- * Get Media type content
- *
- * \param[in]  media:      Media type to get information from
- * \param[out] bufType:    Type buffer
- * \param[out] bufPayload: Payload buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetMedia(const ndefType *media, ndefConstBuffer8 *bufType, ndefConstBuffer *bufPayload);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a Media type
- *
- * \param[in]  record: Record to convert
- * \param[out] media:  The converted Media type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToMedia(const ndefRecord *record, ndefType *media);
-
-
-/*!
- *****************************************************************************
- * Convert a Media type to an NDEF record
- *
- * \param[in]  media:  Type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefMediaToRecord(const ndefType *media, ndefRecord *record);
-
-
+NFC_OpResult NDef_MediaInit(NDef_Type *media, const NDef_Const_Buffer_8 *bufType, const NDef_Const_Buffer *bufPayload);
+NFC_OpResult NDef_GetMedia(const NDef_Type *media, NDef_Const_Buffer_8 *bufType, NDef_Const_Buffer *bufPayload);
+NFC_OpResult NDef_RecordToMedia(const NDef_Record *record, NDef_Type *media);
+NFC_OpResult NDef_MediaToRecord(const NDef_Type *media, NDef_Record *record);
 
 #endif /* NDEF_TYPE_MEDIA_H */
 

@@ -15,105 +15,37 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
+
 
 
 #ifndef NDEF_TYPE_FLAT_H
 #define NDEF_TYPE_FLAT_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
+#include "NFC/NFC_Def.h"
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/***************
- * Flat type
- ***************
- */
-
-/*!
- *****************************************************************************
- * Initialize a flat payload type
- *
- * \param[out] type:       Type to initialize
- * \param[in]  bufPayload: Payload buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefFlatPayloadTypeInit(ndefType *type, const ndefConstBuffer *bufPayload);
-
-
-/*!
- *****************************************************************************
- * Initialize a flat payload type
- *
- * \param[out] type:       Type to get data from
- * \param[in]  bufPayload: Payload buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetFlatPayloadType(const ndefType *type, ndefConstBuffer *bufPayload);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a flat payload type
- *
- * \param[in]  record: Record to convert
- * \param[out] type:  The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToFlatPayloadType(const ndefRecord *record, ndefType *type);
-
-
-/*!
- *****************************************************************************
- * Convert a flat payload type to an NDEF record
- *
- * \param[in]  type:   Type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefFlatPayloadTypeToRecord(const ndefType *type, ndefRecord *record);
-
-
+NFC_OpResult NDef_FlatPayloadTypeInit(NDef_Type *type, const NDef_Const_Buffer *bufPayload);
+NFC_OpResult NDef_GetFlatPayloadType(const NDef_Type *type, NDef_Const_Buffer *bufPayload);
+NFC_OpResult NDef_RecordToFlatPayloadType(const NDef_Record *record, NDef_Type *type);
+NFC_OpResult NDef_FlatPayloadTypeToRecord(const NDef_Type *type, NDef_Record *record);
 
 #endif /* NDEF_TYPE_FLAT_H */
-
-/**
-  * @}
-  *
-  */

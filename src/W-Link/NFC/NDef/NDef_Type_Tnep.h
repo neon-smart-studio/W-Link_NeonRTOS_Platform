@@ -1,7 +1,7 @@
 
 /**
   ******************************************************************************
-  * @file           : ndef_type_tnep.h
+  * @file           : NDef__type_tnep.h
   * @brief          : NDEF TNEP (Tag NDEF Exchange Protocol record) types header file
   ******************************************************************************
   * @attention
@@ -15,28 +15,31 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #ifndef NDEF_TYPES_TNEP_H
 #define NDEF_TYPES_TNEP_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
-
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
+#include "NFC/NFC_Def.h"
 
 /*! RTD TNEP defines */
 #define TNEP_VERSION_V1_0                       0x10U   /*!< TNEP version                              */
@@ -45,262 +48,47 @@
 #define TNEP_STATUS_TYPE_SUCCESS                0U      /*!< Status type Success                       */
 #define TNEP_STATUS_TYPE_PROTOCOL_ERROR         1U      /*!< Status type Protocol Error                */
 
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
-
-
 /*! RTD TNEP Service Parameter */
 typedef struct {
-  ndefConstBuffer bufServiceNameUri;            /*!< Service Name URI string buffer            */
+  NDef_Const_Buffer bufServiceNameUri;            /*!< Service Name URI string buffer            */
   uint8_t         tnepVersion;                  /*!< TNEP version                              */
   uint8_t         communicationMode;            /*!< TNEP communication mode                   */
   uint8_t         minimumWaitingTime;           /*!< Minimum Waiting Time WT_INT               */
   uint8_t         maximumWaitingTimeExtensions; /*!< Maximum number of waiting time extensions */
   uint8_t         maximumNdefMessageSize[2];    /*!< Maximum NDEF message size (Big Endian)    */
-} ndefTypeRtdTnepServiceParameter;
+} NDef_Type_Rtd_TnepServiceParameter;
 
 
 /*! RTD TNEP Service Select */
 typedef struct {
-  ndefConstBuffer bufServiceNameUri;            /*!< Service Name URI string buffer         */
-} ndefTypeRtdTnepServiceSelect;
+  NDef_Const_Buffer bufServiceNameUri;            /*!< Service Name URI string buffer         */
+} NDef_Type_Rtd_TnepServiceSelect;
 
 
 /*! RTD TNEP Status */
 typedef struct {
   uint8_t         statusType;                   /*!< Status type */
-} ndefTypeRtdTnepStatus;
+} NDef_Type_Rtd_TnepStatus;
 
 
 /*! RTD TNEP Record Type buffers */
-extern const ndefConstBuffer8 bufRtdTypeTnepServiceParameter; /*! TNEP Service Parameter buffer  */
-extern const ndefConstBuffer8 bufRtdTypeTnepServiceSelect;    /*! TNEP Service Select buffer     */
-extern const ndefConstBuffer8 bufRtdTypeTnepStatus;           /*! TNEP Status buffer             */
+extern const NDef_Const_Buffer_8 bufRtdTypeTnepServiceParameter; /*! TNEP Service Parameter buffer  */
+extern const NDef_Const_Buffer_8 bufRtdTypeTnepServiceSelect;    /*! TNEP Service Select buffer     */
+extern const NDef_Const_Buffer_8 bufRtdTypeTnepStatus;           /*! TNEP Status buffer             */
 
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*************************
- * TNEP Service Parameter
- *************************
- */
-
-
-/*!
- *****************************************************************************
- * Computes the TNEP Service Parameter WT_INT from the Twait value (in ms)
- *
- * \param[in] twait: minimum waiting time between last TNEP write and next TNEP read
- *
- * \return WT_INT value corresponding to the Twait
- *****************************************************************************
- */
-uint8_t ndefRtdTnepServiceParameterComputeWtInt(float twait);
-
-
-/*!
- *****************************************************************************
- * Computes the TNEP Service Parameter Twait (in ms) from the WT_INT value
- *
- * \param[in] wtInt: NDEF Record field WT_INT defining the Twait
- *
- * \return Twait minimum waiting time between last TNEP write and next TNEP read
- *****************************************************************************
- */
-float ndefRtdTnepServiceParameterComputeTwait(uint8_t wtInt);
-
-
-/*!
- *****************************************************************************
- * Initialize a TNEP Service Parameter RTD type
- *
- * \param[out] type:           Type to initialize
- * \param[in]  tnepVersion:    TNEP version
- * \param[in]  bufServiceUri:  TNEP Service Name URI string buffer
- * \param[in]  comMode:        TNEP Communication Mode
- * \param[in]  minWaitingTime: Minimum Waiting Time
- * \param[in]  maxExtensions:  Maximum Waiting Time Extensions
- * \param[in]  maxMessageSize: Maximum NDEF Message Size (in bytes)
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdTnepServiceParameterInit(ndefType *type, uint8_t tnepVersion, const ndefConstBuffer *bufServiceUri, uint8_t comMode, uint8_t minWaitingTime, uint8_t maxExtensions, uint16_t maxMessageSize);
-
-
-/*!
- *****************************************************************************
- * Get TNEP Service Parameter RTD type content
- *
- * \param[in]   type:           Type to get information from
- * \param[out]  tnepVersion:    TNEP version
- * \param[out]  bufServiceUri:  TNEP Service Name URI string buffer
- * \param[out]  comMode:        TNEP Communication Mode
- * \param[out]  minWaitingTime: Minimum Waiting Time
- * \param[out]  maxExtensions:  Maximum Waiting Time Extensions
- * \param[out]  maxMessageSize: Maximum NDEF Message Size (in bytes)
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdTnepServiceParameter(const ndefType *type, uint8_t *tnepVersion, ndefConstBuffer *bufServiceUri, uint8_t *comMode, uint8_t *minWaitingTime, uint8_t *maxExtensions, uint16_t *maxMessageSize);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a TNEP Service Parameter RTD type
- *
- * \param[in]  record: Record to convert
- * \param[out] type:   The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdTnepServiceParameter(const ndefRecord *record, ndefType *type);
-
-
-/*!
- *****************************************************************************
- * Convert a TNEP Service Parameter RTD type to an NDEF record
- *
- * \param[in]  type:   Type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdTnepServiceParameterToRecord(const ndefType *type, ndefRecord *record);
-
-
-/**********************
- * TNEP Service Select
- **********************
- */
-
-
-/*!
- *****************************************************************************
- * Initialize a TNEP Service Select RTD type
- *
- * \param[out] type:          Type to initialize
- * \param[in]  bufServiceUri: TNEP Service Name URI string buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdTnepServiceSelectInit(ndefType *type, const ndefConstBuffer *bufServiceUri);
-
-
-/*!
- *****************************************************************************
- * Get TNEP Service Select RTD type content
- *
- * \param[in]   type:          Type to get information from
- * \param[out]  bufServiceUri: TNEP Service Name URI string buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdTnepServiceSelect(const ndefType *type, ndefConstBuffer *bufServiceUri);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a TNEP Service Select RTD type
- *
- * \param[in]  record: Record to convert
- * \param[out] type:   The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdTnepServiceSelect(const ndefRecord *record, ndefType *type);
-
-
-/*!
- *****************************************************************************
- * Convert a TNEP Service Select RTD type to an NDEF record
- *
- * \param[in]  type:   Type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdTnepServiceSelectToRecord(const ndefType *type, ndefRecord *record);
-
-
-/***************
- * TNEP Status
- ***************
- */
-
-
-/*!
- *****************************************************************************
- * Initialize a TNEP Status RTD type
- *
- * \param[out] type:       Type to initialize
- * \param[in]  statusType: TNEP status type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdTnepStatusInit(ndefType *type, uint8_t statusType);
-
-
-/*!
- *****************************************************************************
- * Get TNEP Status RTD type content
- *
- * \param[in]   type:       Type to get information from
- * \param[out]  statusType: TNEP status type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdTnepStatus(const ndefType *type, uint8_t *statusType);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a TNEP Status RTD type
- *
- * \param[in]  record: Record to convert
- * \param[out] type:   The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdTnepStatus(const ndefRecord *record, ndefType *type);
-
-
-/*!
- *****************************************************************************
- * Convert a TNEP Status RTD type to an NDEF record
- *
- * \param[in]  type:   Type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdTnepStatusToRecord(const ndefType *type, ndefRecord *record);
-
-
+uint8_t NDef_RtdTnepServiceParameterComputeWtInt(float twait);
+float NDef_RtdTnepServiceParameterComputeTwait(uint8_t wtInt);
+NFC_OpResult NDef_RtdTnepServiceParameterInit(NDef_Type *type, uint8_t tnepVersion, const NDef_Const_Buffer *bufServiceUri, uint8_t comMode, uint8_t minWaitingTime, uint8_t maxExtensions, uint16_t maxMessageSize);
+NFC_OpResult NDef_GetRtdTnepServiceParameter(const NDef_Type *type, uint8_t *tnepVersion, NDef_Const_Buffer *bufServiceUri, uint8_t *comMode, uint8_t *minWaitingTime, uint8_t *maxExtensions, uint16_t *maxMessageSize);
+NFC_OpResult NDef_RecordToRtdTnepServiceParameter(const NDef_Record *record, NDef_Type *type);
+NFC_OpResult NDef_RtdTnepServiceParameterToRecord(const NDef_Type *type, NDef_Record *record);
+NFC_OpResult NDef_RtdTnepServiceSelectInit(NDef_Type *type, const NDef_Const_Buffer *bufServiceUri);
+NFC_OpResult NDef_GetRtdTnepServiceSelect(const NDef_Type *type, NDef_Const_Buffer *bufServiceUri);
+NFC_OpResult NDef_RecordToRtdTnepServiceSelect(const NDef_Record *record, NDef_Type *type);
+NFC_OpResult NDef_RtdTnepServiceSelectToRecord(const NDef_Type *type, NDef_Record *record);
+NFC_OpResult NDef_RtdTnepStatusInit(NDef_Type *type, uint8_t statusType);
+NFC_OpResult NDef_GetRtdTnepStatus(const NDef_Type *type, uint8_t *statusType);
+NFC_OpResult NDef_RecordToRtdTnepStatus(const NDef_Record *record, NDef_Type *type);
+NFC_OpResult NDef_RtdTnepStatusToRecord(const NDef_Type *type, NDef_Record *record);
 
 #endif /* NDEF_TYPES_TNEP_H */
-
-/**
-  * @}
-  *
-  */

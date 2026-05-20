@@ -15,67 +15,46 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
 #include "NDef_Record.h"
 #include "NDef_Types.h"
 #include "NDef_Type_Empty.h"
 
+#include "NFC/NFC_Def.h"
+
 #if NDEF_TYPE_EMPTY_SUPPORT
 
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
-
-/*
- * Empty record
- */
-
-
 /*****************************************************************************/
-static uint32_t ndefEmptyTypePayloadGetLength(const ndefType *empty)
+static uint32_t NDef_EmptyTypePayloadGetLength(const NDef_Type *empty)
 {
-  NO_WARNING(empty);
-
   return 0;
 }
 
-
 /*****************************************************************************/
-static const uint8_t *ndefEmptyTypePayloadItem(const ndefType *empty, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_EmptyTypePayloadItem(const NDef_Type *empty, NDef_Const_Buffer *bufItem, bool begin)
 {
-  NO_WARNING(begin);
-
   if ((empty == NULL) || (empty->id != NDEF_TYPE_ID_EMPTY)) {
     return NULL;
   }
@@ -90,58 +69,58 @@ static const uint8_t *ndefEmptyTypePayloadItem(const ndefType *empty, ndefConstB
 
 
 /*****************************************************************************/
-ReturnCode ndefEmptyTypeInit(ndefType *empty)
+NFC_OpResult NDef_EmptyTypeInit(NDef_Type *empty)
 {
   if (empty == NULL) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   empty->id               = NDEF_TYPE_ID_EMPTY;
-  empty->getPayloadLength = ndefEmptyTypePayloadGetLength;
-  empty->getPayloadItem   = ndefEmptyTypePayloadItem;
-  empty->typeToRecord     = ndefEmptyTypeToRecord;
+  empty->getPayloadLength = NDef_EmptyTypePayloadGetLength;
+  empty->getPayloadItem   = NDef_EmptyTypePayloadItem;
+  empty->typeToRecord     = NDef_EmptyTypeToRecord;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToEmptyType(const ndefRecord *record, ndefType *empty)
+NFC_OpResult NDef_RecordToEmptyType(const NDef_Record *record, NDef_Type *empty)
 {
-  ndefConstBuffer8 bufEmpty = { NULL, 0 };
+  NDef_Const_Buffer_8 bufEmpty = { NULL, 0 };
 
   if ((record == NULL) || (empty == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_EMPTY, &bufEmpty)) {
-    return ERR_PARAM;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_EMPTY, &bufEmpty)) {
+    return NFC_InvalidParameter;
   }
 
   if ((record->idLength          != 0U) || (record->id                != NULL) ||
       (record->bufPayload.length != 0U) || (record->bufPayload.buffer != NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  return ndefEmptyTypeInit(empty);
+  return NDef_EmptyTypeInit(empty);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefEmptyTypeToRecord(const ndefType *empty, ndefRecord *record)
+NFC_OpResult NDef_EmptyTypeToRecord(const NDef_Type *empty, NDef_Record *record)
 {
   if ((empty  == NULL) || (empty->id != NDEF_TYPE_ID_EMPTY) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
-  if (ndefRecordSetNdefType(record, empty) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, empty) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

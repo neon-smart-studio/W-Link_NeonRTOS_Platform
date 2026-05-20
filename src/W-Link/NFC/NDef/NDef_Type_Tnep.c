@@ -1,7 +1,7 @@
 
 /**
   ******************************************************************************
-  * @file           : ndef_type_uri.cpp
+  * @file           : NDef__type_uri.cpp
   * @brief          : NDEF TNEP (Tag NDEF Exchange Protocol record) types
   ******************************************************************************
   * @attention
@@ -15,28 +15,36 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-#include <math.h>
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_tnep.h"
-#include "nfc_utils.h"
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_Tnep.h"
 
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_RTD_TNEP_SUPPORT
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
 
 /*! TNEP defines */
 #define NDEF_TNEP_SERVICE_NAME_URI_LENGTH_LENGTH            sizeof(uint8_t) /*!< Service Name URI length's length */
@@ -61,46 +69,19 @@
 #define NDEF_RTD_TNEP_STATUS_TYPE_OFFSET                    0U    /*!< TNEP Status Type offset                       */
 #define NDEF_RTD_TNEP_STATUS_MINIMUM_LENGTH                 1U    /*!< TNEP Status minimum length (bytes)            */
 
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
 /*! RTD TNEP Type strings */
-static const uint8_t ndefRtdTypeTnepServiceParameter[] = "Tp";              /*!< Tnep Service Parameter Record Type          */
-static const uint8_t ndefRtdTypeTnepServiceSelect[]    = "Ts";              /*!< Tnep Service Select Record Type             */
-static const uint8_t ndefRtdTypeTnepStatus[]           = "Te";              /*!< Tnep Status Record Type                     */
+static const uint8_t NDef_RtdTypeTnepServiceParameter[] = "Tp";              /*!< Tnep Service Parameter Record Type          */
+static const uint8_t NDef_RtdTypeTnepServiceSelect[]    = "Ts";              /*!< Tnep Service Select Record Type             */
+static const uint8_t NDef_RtdTypeTnepStatus[]           = "Te";              /*!< Tnep Status Record Type                     */
 
-const ndefConstBuffer8 bufRtdTypeTnepServiceParameter = { ndefRtdTypeTnepServiceParameter, sizeof(ndefRtdTypeTnepServiceParameter) - 1U }; /*!< TNEP Service Parameter Type Record buffer       */
-const ndefConstBuffer8 bufRtdTypeTnepServiceSelect    = { ndefRtdTypeTnepServiceSelect,    sizeof(ndefRtdTypeTnepServiceSelect) - 1U };    /*!< TNEP Service Select Type Record buffer       */
-const ndefConstBuffer8 bufRtdTypeTnepStatus           = { ndefRtdTypeTnepStatus,           sizeof(ndefRtdTypeTnepStatus) - 1U };           /*!< TNEP Status Type Record buffer       */
-
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
-
-/*
- * TNEP Service Parameter
- */
+const NDef_Const_Buffer_8 bufRtdTypeTnepServiceParameter = { NDef_RtdTypeTnepServiceParameter, sizeof(NDef_RtdTypeTnepServiceParameter) - 1U }; /*!< TNEP Service Parameter Type Record buffer       */
+const NDef_Const_Buffer_8 bufRtdTypeTnepServiceSelect    = { NDef_RtdTypeTnepServiceSelect,    sizeof(NDef_RtdTypeTnepServiceSelect) - 1U };    /*!< TNEP Service Select Type Record buffer       */
+const NDef_Const_Buffer_8 bufRtdTypeTnepStatus           = { NDef_RtdTypeTnepStatus,           sizeof(NDef_RtdTypeTnepStatus) - 1U };           /*!< TNEP Status Type Record buffer       */
 
 /*****************************************************************************/
-static uint32_t ndefRtdTnepServiceParameterGetPayloadLength(const ndefType *type)
+static uint32_t NDef_RtdTnepServiceParameterGetPayloadLength(const NDef_Type *type)
 {
-  const ndefTypeRtdTnepServiceParameter *rtdServiceParameter;
+  const NDef_Type_Rtd_TnepServiceParameter *rtdServiceParameter;
 
   if ((type == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_SERVICE_PARAMETER)) {
     return 0;
@@ -119,10 +100,10 @@ static uint32_t ndefRtdTnepServiceParameterGetPayloadLength(const ndefType *type
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdTnepServiceParameterToPayloadItem(const ndefType *type, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdTnepServiceParameterToPayloadItem(const NDef_Type *type, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeRtdTnepServiceParameter *rtdServiceParameter;
+  const NDef_Type_Rtd_TnepServiceParameter *rtdServiceParameter;
 
   if ((type    == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_SERVICE_PARAMETER)
       || (bufItem == NULL)) {
@@ -190,38 +171,33 @@ static const uint8_t *ndefRtdTnepServiceParameterToPayloadItem(const ndefType *t
   return bufItem->buffer;
 }
 
-
-#ifdef NDEF_PROVIDE_HELPER_FUNCTIONS
 /*****************************************************************************/
-uint8_t ndefRtdTnepServiceParameterComputeWtInt(float twait)
+uint8_t NDef_RtdTnepServiceParameterComputeWtInt(float twait)
 {
   return ceil(4 * ((log(twait) / 0.69314) + 1));
 }
 
-
 /*****************************************************************************/
-float ndefRtdTnepServiceParameterComputeTwait(uint8_t wtInt)
+float NDef_RtdTnepServiceParameterComputeTwait(uint8_t wtInt)
 {
   return powf(2, (((float)wtInt / 4) - 1));
 }
-#endif
-
 
 /*****************************************************************************/
-ReturnCode ndefRtdTnepServiceParameterInit(ndefType *type, uint8_t tnepVersion, const ndefConstBuffer *bufServiceUri, uint8_t comMode, uint8_t minWaitingTime, uint8_t maxExtensions, uint16_t maxMessageSize)
+NFC_OpResult NDef_RtdTnepServiceParameterInit(NDef_Type *type, uint8_t tnepVersion, const NDef_Const_Buffer *bufServiceUri, uint8_t comMode, uint8_t minWaitingTime, uint8_t maxExtensions, uint16_t maxMessageSize)
 {
-  ndefTypeRtdTnepServiceParameter *rtdServiceParameter;
+  NDef_Type_Rtd_TnepServiceParameter *rtdServiceParameter;
 
   if ((type == NULL)    || (bufServiceUri == NULL)
       || (bufServiceUri->buffer == NULL) || (bufServiceUri->length == 0U)
       || (bufServiceUri->length > (NDEF_RTD_TNEP_SP_SERVICE_URI_LENGTH_MAX))) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_TNEP_SERVICE_PARAMETER;
-  type->getPayloadLength = ndefRtdTnepServiceParameterGetPayloadLength;
-  type->getPayloadItem   = ndefRtdTnepServiceParameterToPayloadItem;
-  type->typeToRecord     = ndefRtdTnepServiceParameterToRecord;
+  type->getPayloadLength = NDef_RtdTnepServiceParameterGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdTnepServiceParameterToPayloadItem;
+  type->typeToRecord     = NDef_RtdTnepServiceParameterToRecord;
   rtdServiceParameter    = &type->data.tnepServiceParameter;
 
   rtdServiceParameter->tnepVersion                  = tnepVersion;
@@ -233,19 +209,19 @@ ReturnCode ndefRtdTnepServiceParameterInit(ndefType *type, uint8_t tnepVersion, 
   rtdServiceParameter->maximumNdefMessageSize[0]    = (uint8_t)(maxMessageSize >> 8U);
   rtdServiceParameter->maximumNdefMessageSize[1]    = (uint8_t)(maxMessageSize & 0xFFU);
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdTnepServiceParameter(const ndefType *type, uint8_t *tnepVersion, ndefConstBuffer *bufServiceUri, uint8_t *comMode, uint8_t *minWaitingTime, uint8_t *maxExtensions, uint16_t *maxMessageSize)
+NFC_OpResult NDef_GetRtdTnepServiceParameter(const NDef_Type *type, uint8_t *tnepVersion, NDef_Const_Buffer *bufServiceUri, uint8_t *comMode, uint8_t *minWaitingTime, uint8_t *maxExtensions, uint16_t *maxMessageSize)
 {
-  const ndefTypeRtdTnepServiceParameter *rtdServiceParameter;
+  const NDef_Type_Rtd_TnepServiceParameter *rtdServiceParameter;
 
   if ((type == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_SERVICE_PARAMETER)
       || (bufServiceUri  == NULL) || (tnepVersion   == NULL) || (comMode        == NULL)
       || (minWaitingTime == NULL) || (maxExtensions == NULL) || (maxMessageSize == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   rtdServiceParameter = &type->data.tnepServiceParameter;
@@ -258,15 +234,15 @@ ReturnCode ndefGetRtdTnepServiceParameter(const ndefType *type, uint8_t *tnepVer
   *maxExtensions        = rtdServiceParameter->maximumWaitingTimeExtensions;
   *maxMessageSize       = GETU16(rtdServiceParameter->maximumNdefMessageSize);
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdTnepServiceParameter(const ndefConstBuffer *bufTnepServiceParameter, ndefType *type)
+static NFC_OpResult NDef_PayloadToRtdTnepServiceParameter(const NDef_Const_Buffer *bufTnepServiceParameter, NDef_Type *type)
 {
   uint8_t tnepVersion;
-  ndefConstBuffer bufServiceUri;
+  NDef_Const_Buffer bufServiceUri;
   uint8_t commMode;
   uint8_t minWaitingTime;
   uint8_t maxWaitingTimeExtensions;
@@ -275,7 +251,7 @@ static ReturnCode ndefPayloadToRtdTnepServiceParameter(const ndefConstBuffer *bu
 
   if ((bufTnepServiceParameter == NULL) || (bufTnepServiceParameter->buffer == NULL) || (bufTnepServiceParameter->length < (NDEF_RTD_TNEP_SP_MINIMUM_LENGTH)) ||
       (type                    == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* Extract info from the payload */
@@ -288,65 +264,59 @@ static ReturnCode ndefPayloadToRtdTnepServiceParameter(const ndefConstBuffer *bu
   maxNdefMessageSizeOffset = NDEF_RTD_TNEP_SP_MAX_MESSAGE_SIZE_OFFSET + bufServiceUri.length;
   maxNdefMessageSize       = GETU16(&bufTnepServiceParameter->buffer[maxNdefMessageSizeOffset]);
 
-  return ndefRtdTnepServiceParameterInit(type, tnepVersion, &bufServiceUri, commMode, minWaitingTime, maxWaitingTimeExtensions, maxNdefMessageSize);
+  return NDef_RtdTnepServiceParameterInit(type, tnepVersion, &bufServiceUri, commMode, minWaitingTime, maxWaitingTimeExtensions, maxNdefMessageSize);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdTnepServiceParameter(const ndefRecord *record, ndefType *type)
+NFC_OpResult NDef_RecordToRtdTnepServiceParameter(const NDef_Record *record, NDef_Type *type)
 {
-  const ndefType *ndefData;
+  const NDef_Type *NDef_Data;
 
   if ((record == NULL) || (type == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter)) { /* "Tp" */
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter)) { /* "Tp" */
+    return NFC_ProtocolError;
   }
 
-  ndefData = ndefRecordGetNdefType(record);
-  if ((ndefData != NULL) && (ndefData->id == NDEF_TYPE_ID_RTD_TNEP_SERVICE_PARAMETER)) {
-    (void)ST_MEMCPY(type, ndefData, sizeof(ndefType));
-    return ERR_NONE;
+  NDef_Data = NDef_RecordGetNdefType(record);
+  if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_TNEP_SERVICE_PARAMETER)) {
+    (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
   if (record->bufPayload.length < NDEF_RTD_TNEP_SP_MINIMUM_LENGTH) {
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
-  return ndefPayloadToRtdTnepServiceParameter(&record->bufPayload, type);
+  return NDef_PayloadToRtdTnepServiceParameter(&record->bufPayload, type);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdTnepServiceParameterToRecord(const ndefType *type, ndefRecord *record)
+NFC_OpResult NDef_RtdTnepServiceParameterToRecord(const NDef_Type *type, NDef_Record *record)
 {
   if ((type   == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_SERVICE_PARAMETER) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* "Tp" */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter);
 
-  (void)ndefRecordSetNdefType(record, type);
+  (void)NDef_RecordSetNdefType(record, type);
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
-
-/*
- * TNEP Service Select
- */
-
-
 /*****************************************************************************/
-static uint32_t ndefRtdTnepServiceSelectGetPayloadLength(const ndefType *type)
+static uint32_t NDef_RtdTnepServiceSelectGetPayloadLength(const NDef_Type *type)
 {
-  const ndefTypeRtdTnepServiceSelect *rtdServiceSelect;
+  const NDef_Type_Rtd_TnepServiceSelect *rtdServiceSelect;
 
   if ((type == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_SERVICE_SELECT)) {
     return 0;
@@ -359,10 +329,10 @@ static uint32_t ndefRtdTnepServiceSelectGetPayloadLength(const ndefType *type)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdTnepServiceSelectToPayloadItem(const ndefType *type, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdTnepServiceSelectToPayloadItem(const NDef_Type *type, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeRtdTnepServiceSelect *rtdServiceSelect;
+  const NDef_Type_Rtd_TnepServiceSelect *rtdServiceSelect;
 
   if ((type    == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_SERVICE_SELECT)
       || (bufItem == NULL)) {
@@ -402,37 +372,37 @@ static const uint8_t *ndefRtdTnepServiceSelectToPayloadItem(const ndefType *type
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdTnepServiceSelectInit(ndefType *type, const ndefConstBuffer *bufServiceUri)
+NFC_OpResult NDef_RtdTnepServiceSelectInit(NDef_Type *type, const NDef_Const_Buffer *bufServiceUri)
 {
-  ndefTypeRtdTnepServiceSelect *rtdServiceSelect;
+  NDef_Type_Rtd_TnepServiceSelect *rtdServiceSelect;
 
   if ((type == NULL)       || (bufServiceUri == NULL)
       || (bufServiceUri->buffer == NULL) || (bufServiceUri->length == 0U)
       || (bufServiceUri->length > (NDEF_RTD_TNEP_SP_SERVICE_URI_LENGTH_MAX))) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_TNEP_SERVICE_SELECT;
-  type->getPayloadLength = ndefRtdTnepServiceSelectGetPayloadLength;
-  type->getPayloadItem   = ndefRtdTnepServiceSelectToPayloadItem;
-  type->typeToRecord     = ndefRtdTnepServiceSelectToRecord;
+  type->getPayloadLength = NDef_RtdTnepServiceSelectGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdTnepServiceSelectToPayloadItem;
+  type->typeToRecord     = NDef_RtdTnepServiceSelectToRecord;
   rtdServiceSelect       = &type->data.tnepServiceSelect;
 
   rtdServiceSelect->bufServiceNameUri.length = bufServiceUri->length;
   rtdServiceSelect->bufServiceNameUri.buffer = bufServiceUri->buffer;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdTnepServiceSelect(const ndefType *type, ndefConstBuffer *bufServiceUri)
+NFC_OpResult NDef_GetRtdTnepServiceSelect(const NDef_Type *type, NDef_Const_Buffer *bufServiceUri)
 {
-  const ndefTypeRtdTnepServiceSelect *rtdServiceSelect;
+  const NDef_Type_Rtd_TnepServiceSelect *rtdServiceSelect;
 
   if ((type          == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_SERVICE_SELECT) ||
       (bufServiceUri == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   rtdServiceSelect = &type->data.tnepServiceSelect;
@@ -440,81 +410,75 @@ ReturnCode ndefGetRtdTnepServiceSelect(const ndefType *type, ndefConstBuffer *bu
   bufServiceUri->buffer  = rtdServiceSelect->bufServiceNameUri.buffer;
   bufServiceUri->length  = rtdServiceSelect->bufServiceNameUri.length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdTnepServiceSelect(const ndefConstBuffer *bufTnepServiceSelect, ndefType *type)
+static NFC_OpResult NDef_PayloadToRtdTnepServiceSelect(const NDef_Const_Buffer *bufTnepServiceSelect, NDef_Type *type)
 {
-  ndefConstBuffer bufServiceUri;
+  NDef_Const_Buffer bufServiceUri;
 
   if ((bufTnepServiceSelect == NULL) || (bufTnepServiceSelect->buffer == NULL) || (bufTnepServiceSelect->length < (NDEF_RTD_TNEP_SS_MINIMUM_LENGTH)) ||
       (type                 == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* Extract info from the payload */
   bufServiceUri.buffer         = &bufTnepServiceSelect->buffer[NDEF_RTD_TNEP_SS_SERVICE_URI_OFFSET];
   bufServiceUri.length         = bufTnepServiceSelect->buffer[NDEF_RTD_TNEP_SS_SERVICE_URI_LENGTH_OFFSET];
 
-  return ndefRtdTnepServiceSelectInit(type, &bufServiceUri);
+  return NDef_RtdTnepServiceSelectInit(type, &bufServiceUri);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdTnepServiceSelect(const ndefRecord *record, ndefType *type)
+NFC_OpResult NDef_RecordToRtdTnepServiceSelect(const NDef_Record *record, NDef_Type *type)
 {
-  const ndefType *ndefData;
+  const NDef_Type *NDef_Data;
 
   if ((record == NULL) || (type == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect)) { /* "Ts" */
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect)) { /* "Ts" */
+    return NFC_ProtocolError;
   }
 
-  ndefData = ndefRecordGetNdefType(record);
-  if ((ndefData != NULL) && (ndefData->id == NDEF_TYPE_ID_RTD_TNEP_SERVICE_SELECT)) {
-    (void)ST_MEMCPY(type, ndefData, sizeof(ndefType));
-    return ERR_NONE;
+  NDef_Data = NDef_RecordGetNdefType(record);
+  if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_TNEP_SERVICE_SELECT)) {
+    (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
   if (record->bufPayload.length < NDEF_RTD_TNEP_SS_MINIMUM_LENGTH) {
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
-  return ndefPayloadToRtdTnepServiceSelect(&record->bufPayload, type);
+  return NDef_PayloadToRtdTnepServiceSelect(&record->bufPayload, type);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdTnepServiceSelectToRecord(const ndefType *type, ndefRecord *record)
+NFC_OpResult NDef_RtdTnepServiceSelectToRecord(const NDef_Type *type, NDef_Record *record)
 {
   if ((type   == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_SERVICE_SELECT) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* "Ts" */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect);
 
-  (void)ndefRecordSetNdefType(record, type);
+  (void)NDef_RecordSetNdefType(record, type);
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
-
-/*
- * TNEP Status
- */
-
-
 /*****************************************************************************/
-static uint32_t ndefRtdTnepStatusGetPayloadLength(const ndefType *type)
+static uint32_t NDef_RtdTnepStatusGetPayloadLength(const NDef_Type *type)
 {
   if ((type == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_STATUS)) {
     return 0;
@@ -525,10 +489,10 @@ static uint32_t ndefRtdTnepStatusGetPayloadLength(const ndefType *type)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefRtdTnepStatusToPayloadItem(const ndefType *type, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_RtdTnepStatusToPayloadItem(const NDef_Type *type, NDef_Const_Buffer *bufItem, bool begin)
 {
   static uint32_t item = 0;
-  const ndefTypeRtdTnepStatus *rtdStatus;
+  const NDef_Type_Rtd_TnepStatus *rtdStatus;
 
   if ((type == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_STATUS)
       || (bufItem == NULL)) {
@@ -561,104 +525,104 @@ static const uint8_t *ndefRtdTnepStatusToPayloadItem(const ndefType *type, ndefC
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdTnepStatusInit(ndefType *type, uint8_t statusType)
+NFC_OpResult NDef_RtdTnepStatusInit(NDef_Type *type, uint8_t statusType)
 {
-  ndefTypeRtdTnepStatus *rtdStatus;
+  NDef_Type_Rtd_TnepStatus *rtdStatus;
 
   if (type == NULL) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_RTD_TNEP_STATUS;
-  type->getPayloadLength = ndefRtdTnepStatusGetPayloadLength;
-  type->getPayloadItem   = ndefRtdTnepStatusToPayloadItem;
-  type->typeToRecord     = ndefRtdTnepStatusToRecord;
+  type->getPayloadLength = NDef_RtdTnepStatusGetPayloadLength;
+  type->getPayloadItem   = NDef_RtdTnepStatusToPayloadItem;
+  type->typeToRecord     = NDef_RtdTnepStatusToRecord;
   rtdStatus              = &type->data.tnepStatus;
 
   rtdStatus->statusType = statusType;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetRtdTnepStatus(const ndefType *type, uint8_t *statusType)
+NFC_OpResult NDef_GetRtdTnepStatus(const NDef_Type *type, uint8_t *statusType)
 {
-  const ndefTypeRtdTnepStatus *rtdStatus;
+  const NDef_Type_Rtd_TnepStatus *rtdStatus;
 
   if ((type       == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_STATUS) ||
       (statusType == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   rtdStatus = &type->data.tnepStatus;
 
   *statusType = rtdStatus->statusType;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-static ReturnCode ndefPayloadToRtdTnepStatus(const ndefConstBuffer *bufTnepStatus, ndefType *type)
+static NFC_OpResult NDef_PayloadToRtdTnepStatus(const NDef_Const_Buffer *bufTnepStatus, NDef_Type *type)
 {
   uint8_t statusType;
 
   if ((bufTnepStatus == NULL) || (bufTnepStatus->buffer == NULL) || (bufTnepStatus->length < (NDEF_RTD_TNEP_STATUS_MINIMUM_LENGTH)) ||
       (type          == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   /* Extract info from the payload */
   statusType = bufTnepStatus->buffer[NDEF_RTD_TNEP_STATUS_TYPE_OFFSET];
 
-  return ndefRtdTnepStatusInit(type, statusType);
+  return NDef_RtdTnepStatusInit(type, statusType);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToRtdTnepStatus(const ndefRecord *record, ndefType *type)
+NFC_OpResult NDef_RecordToRtdTnepStatus(const NDef_Record *record, NDef_Type *type)
 {
-  const ndefType *ndefData;
+  const NDef_Type *NDef_Data;
 
   if ((record == NULL) || (type == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  if (! ndefRecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus)) { /* "Te" */
-    return ERR_PROTO;
+  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus)) { /* "Te" */
+    return NFC_ProtocolError;
   }
 
-  ndefData = ndefRecordGetNdefType(record);
-  if ((ndefData != NULL) && (ndefData->id == NDEF_TYPE_ID_RTD_TNEP_STATUS)) {
-    (void)ST_MEMCPY(type, ndefData, sizeof(ndefType));
-    return ERR_NONE;
+  NDef_Data = NDef_RecordGetNdefType(record);
+  if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_TNEP_STATUS)) {
+    (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
   if (record->bufPayload.length < NDEF_RTD_TNEP_STATUS_MINIMUM_LENGTH) {
-    return ERR_PROTO;
+    return NFC_ProtocolError;
   }
 
-  return ndefPayloadToRtdTnepStatus(&record->bufPayload, type);
+  return NDef_PayloadToRtdTnepStatus(&record->bufPayload, type);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRtdTnepStatusToRecord(const ndefType *type, ndefRecord *record)
+NFC_OpResult NDef_RtdTnepStatusToRecord(const NDef_Type *type, NDef_Record *record)
 {
   if ((type   == NULL) || (type->id != NDEF_TYPE_ID_RTD_TNEP_STATUS) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* "Te" */
-  (void)ndefRecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus);
+  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus);
 
-  (void)ndefRecordSetNdefType(record, type);
+  (void)NDef_RecordSetNdefType(record, type);
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

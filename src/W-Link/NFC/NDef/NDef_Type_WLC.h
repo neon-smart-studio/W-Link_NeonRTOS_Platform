@@ -15,29 +15,33 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
+
 
 
 #ifndef NDEF_TYPE_WLC_H
 #define NDEF_TYPE_WLC_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
-
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
+#include "NFC/NFC_Def.h"
 
 #define NDEF_WLC_STATUSINFO_CONTROLBYTE1_BATTERY_LEVEL_MASK        0x01U /*!< WLC Status and Info Control byte 1: Battery Level mask */
 #define NDEF_WLC_STATUSINFO_CONTROLBYTE1_RECEIVE_POWER_MASK        0x02U /*!< WLC Status and Info Control byte 1: Receive Power mask */
@@ -47,14 +51,6 @@
 #define NDEF_WLC_STATUSINFO_CONTROLBYTE1_TEMPERATURE_WLCL_MASK     0x20U /*!< WLC Status and Info Control byte 1: Temperature WLCL mask */
 #define NDEF_WLC_STATUSINFO_CONTROLBYTE1_RFU_MASK                  0x40U /*!< WLC Status and Info Control byte 1: RFU mask */
 #define NDEF_WLC_STATUSINFO_CONTROLBYTE1_CONTROL_BYTE_2_MASK       0x80U /*!< WLC Status and Info Control byte 1: Control byte 2 mask */
-
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
-
 
 /*! Structure to store WLC Capability */
 typedef struct {
@@ -68,7 +64,7 @@ typedef struct {
   uint8_t ndefRdWt;               /*!< NDEF Rd Wt */
   uint8_t ndefWriteToInt;         /*!< NDEF Write To Int */
   uint8_t ndefWriteWtInt;         /*!< NDEF Write Wt Int */
-} ndefTypeRtdWlcCapability;
+} NDef_Type_Rtd_WlcCapability;
 
 
 /*! Structure to store WLC Status and Info */
@@ -82,7 +78,7 @@ typedef struct {
   uint8_t temperatureWlcl;    /*!< WLCL temperature */
   uint8_t rfu;                /*!< RFU */
   uint8_t controlByte2;       /*!< Control byte 2 */
-} ndefTypeRtdWlcStatusInfo;
+} NDef_Type_Rtd_WlcStatusInfo;
 
 
 /*! Structure to store WLC Poll Information */
@@ -94,7 +90,7 @@ typedef struct {
   uint8_t curPowerStep;      /*!< Current Power Step */
   uint8_t nextMinStepInc;    /*!< Next Min Step Inc */
   uint8_t nextMinStepDec;    /*!< Next Min Step Dec */
-} ndefTypeRtdWlcPollInfo;
+} NDef_Type_Rtd_WlcPollInfo;
 
 
 /*! Structure to store WLC Listen Control */
@@ -112,14 +108,14 @@ typedef struct {
   uint8_t holdOffWtInt;            /*!< Hold off Wt Int */
   uint8_t errorInfoError;          /*!< [Error info]* if ERROR_FLG set: WLC_INFO_ERROR */
   uint8_t errorInfoTemperature;    /*!< [Error info]* if ERROR_FLG set: TEMPERATURE_ERROR */
-} ndefTypeRtdWlcListenCtl;
+} NDef_Type_Rtd_WlcListenCtl;
 
 
 /*! WLC Record Type buffers */
-extern const ndefConstBuffer8 bufTypeRtdWlcCapability; /*!< WLC Capability Type Record buffer             */
-extern const ndefConstBuffer8 bufTypeRtdWlcStatusInfo; /*!< WLC Status and Information Type Record buffer */
-extern const ndefConstBuffer8 bufTypeRtdWlcPollInfo;   /*!< WLC Poll Information Type Record buffer       */
-extern const ndefConstBuffer8 bufTypeRtdWlcListenCtl;  /*!< WLC Listen Control Type Record buffer         */
+extern const NDef_Const_Buffer_8 bufTypeRtdWlcCapability; /*!< WLC Capability Type Record buffer             */
+extern const NDef_Const_Buffer_8 bufTypeRtdWlcStatusInfo; /*!< WLC Status and Information Type Record buffer */
+extern const NDef_Const_Buffer_8 bufTypeRtdWlcPollInfo;   /*!< WLC Poll Information Type Record buffer       */
+extern const NDef_Const_Buffer_8 bufTypeRtdWlcListenCtl;  /*!< WLC Listen Control Type Record buffer         */
 
 
 /*! WLC MODE_REQ */
@@ -128,246 +124,23 @@ typedef enum {
   NDEF_RTD_WLC_CAPABILITY_MODE_NEGOTIATED,
   NDEF_RTD_WLC_CAPABILITY_MODE_BATTERY_FULL,
   NDEF_RTD_WLC_CAPABILITY_MODE_RFU
-} ndefRtdWlcReqMode;
+} NDef_RtdWlcReqMode;
 
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/***************************
- * WLC - Wireless Charging
- ***************************
- */
-
-
-/* WLC Capability */
-
-
-/*!
- *****************************************************************************
- * Initialize a WLC Capability type
- *
- * \param[out] type:          NDEF type to initialize
- * \param[in]  wlcCapability: WLC Capability
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWlcCapabilityInit(ndefType *type, const ndefTypeRtdWlcCapability *wlcCapability);
-
-
-/*!
- *****************************************************************************
- * Get WLC Capability type content
- *
- * \param[in]  type:          NDEF type to get information from
- * \param[out] wlcCapability: WLC Capability
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdWlcCapability(const ndefType *type, ndefTypeRtdWlcCapability *wlcCapability);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a WLC Capability type
- *
- * \param[in]  record: Record to convert
- * \param[out] type:   The converted NDEF type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdWlcCapability(const ndefRecord *record, ndefType *type);
-
-
-/*!
- *****************************************************************************
- * Convert a WLC Capability type to an NDEF record
- *
- * \param[in]  type:   NDEF type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWlcCapabilityToRecord(const ndefType *type, ndefRecord *record);
-
-
-/* WLC Status and Information */
-
-
-/*!
- *****************************************************************************
- * Initialize a WLC Status and Information type
- *
- * \param[out] type:          NDEF type to initialize
- * \param[in]  wlcStatusInfo: WLC Status and Information
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWlcStatusInfoInit(ndefType *type, const ndefTypeRtdWlcStatusInfo *wlcStatusInfo);
-
-
-/*!
- *****************************************************************************
- * Get WLC Status and Information type content
- *
- * \param[in]  type:          NDEF type to get information from
- * \param[out] wlcStatusInfo: WLC Status and Information
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdWlcStatusInfo(const ndefType *type, ndefTypeRtdWlcStatusInfo *wlcStatusInfo);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a WLC Status and Information type
- *
- * \param[in]  record: Record to convert
- * \param[out] type:   The converted NDEF type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdWlcStatusInfo(const ndefRecord *record, ndefType *type);
-
-
-/*!
- *****************************************************************************
- * Convert a WLC Status and Information type to an NDEF record
- *
- * \param[in]  type:   NDEF type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWlcStatusInfoToRecord(const ndefType *type, ndefRecord *record);
-
-
-/* WLC Poll Information */
-
-
-/*!
- *****************************************************************************
- * Initialize a WLC Poll Information type
- *
- * \param[out] type:        NDEF type to initialize
- * \param[in]  wlcPollInfo: WLC Poll Info
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWlcPollInfoInit(ndefType *type, const ndefTypeRtdWlcPollInfo *wlcPollInfo);
-
-
-/*!
- *****************************************************************************
- * Get WLC Poll type content
- *
- * \param[in]  type:        NDEF type to get information from
- * \param[out] wlcPollInfo: WLC Poll Info
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdWlcPollInfo(const ndefType *type, ndefTypeRtdWlcPollInfo *wlcPollInfo);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a WLC Poll Info type
- *
- * \param[in]  record: Record to convert
- * \param[out] type:   The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdWlcPollInfo(const ndefRecord *record, ndefType *type);
-
-
-/*!
- *****************************************************************************
- * Convert a WLC Poll Info type to an NDEF record
- *
- * \param[in]  type:   NDEF Type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWlcPollInfoToRecord(const ndefType *type, ndefRecord *record);
-
-
-/* WLC Listen Control */
-
-
-/*!
- *****************************************************************************
- * Initialize a WLC Listen Control type
- *
- * \param[out] type:         NDEF Type to initialize
- * \param[in]  wlcListenCtl: WLC Listen Control
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWlcListenCtlInit(ndefType *type, const ndefTypeRtdWlcListenCtl *wlcListenCtl);
-
-
-/*!
- *****************************************************************************
- * Get WLC Listen Control type content
- *
- * \param[in]  type:         NDEF type to get information from
- * \param[out] wlcListenCtl: WLC Listen Control
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdWlcListenCtl(const ndefType *type, ndefTypeRtdWlcListenCtl *wlcListenCtl);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a WLC Listen Control type
- *
- * \param[in]  record: Record to convert
- * \param[out] type:   The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdWlcListenCtl(const ndefRecord *record, ndefType *type);
-
-
-/*!
- *****************************************************************************
- * Convert a WLC Listen Control type to an NDEF record
- *
- * \param[in]  type:   NDEF type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdWlcListenCtlToRecord(const ndefType *type, ndefRecord *record);
-
-
+NFC_OpResult NDef_RtdWlcCapabilityInit(NDef_Type *type, const NDef_Type_Rtd_WlcCapability *wlcCapability);
+NFC_OpResult NDef_GetRtdWlcCapability(const NDef_Type *type, NDef_Type_Rtd_WlcCapability *wlcCapability);
+NFC_OpResult NDef_RecordToRtdWlcCapability(const NDef_Record *record, NDef_Type *type);
+NFC_OpResult NDef_RtdWlcCapabilityToRecord(const NDef_Type *type, NDef_Record *record);
+NFC_OpResult NDef_RtdWlcStatusInfoInit(NDef_Type *type, const NDef_Type_Rtd_WlcStatusInfo *wlcStatusInfo);
+NFC_OpResult NDef_GetRtdWlcStatusInfo(const NDef_Type *type, NDef_Type_Rtd_WlcStatusInfo *wlcStatusInfo);
+NFC_OpResult NDef_RecordToRtdWlcStatusInfo(const NDef_Record *record, NDef_Type *type);
+NFC_OpResult NDef_RtdWlcStatusInfoToRecord(const NDef_Type *type, NDef_Record *record);
+NFC_OpResult NDef_RtdWlcPollInfoInit(NDef_Type *type, const NDef_Type_Rtd_WlcPollInfo *wlcPollInfo);
+NFC_OpResult NDef_GetRtdWlcPollInfo(const NDef_Type *type, NDef_Type_Rtd_WlcPollInfo *wlcPollInfo);
+NFC_OpResult NDef_RecordToRtdWlcPollInfo(const NDef_Record *record, NDef_Type *type);
+NFC_OpResult NDef_RtdWlcPollInfoToRecord(const NDef_Type *type, NDef_Record *record);
+NFC_OpResult NDef_RtdWlcListenCtlInit(NDef_Type *type, const NDef_Type_Rtd_WlcListenCtl *wlcListenCtl);
+NFC_OpResult NDef_GetRtdWlcListenCtl(const NDef_Type *type, NDef_Type_Rtd_WlcListenCtl *wlcListenCtl);
+NFC_OpResult NDef_RecordToRtdWlcListenCtl(const NDef_Record *record, NDef_Type *type);
+NFC_OpResult NDef_RtdWlcListenCtlToRecord(const NDef_Type *type, NDef_Record *record);
 
 #endif
-
-/**
-  * @}
-  *
-  */

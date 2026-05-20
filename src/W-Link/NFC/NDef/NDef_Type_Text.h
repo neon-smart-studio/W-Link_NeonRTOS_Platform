@@ -15,38 +15,35 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
+
 
 #ifndef NDEF_TYPE_RTD_TEXT_H
 #define NDEF_TYPE_RTD_TEXT_H
 
+#include "NDef_Record.h"
+#include "NDef_Buffer.h"
 
-
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
-
-#include "ndef_record.h"
-#include "ndef_buffer.h"
-
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL TYPES
- ******************************************************************************
- */
+#include "NFC/NFC_Def.h"
 
 /*! RTD Text Record Type buffer */
-extern const ndefConstBuffer8 bufRtdTypeText;       /*! Text Record Type buffer                             */
-
+extern const NDef_Const_Buffer_8 bufRtdTypeText;       /*! Text Record Type buffer                             */
 
 /*! RTD Type Text Encoding */
 #define TEXT_ENCODING_UTF8               0U    /*!< UTF8  text encoding           */
@@ -59,84 +56,13 @@ extern const ndefConstBuffer8 bufRtdTypeText;       /*! Text Record Type buffer 
 /*! RTD Type Text */
 typedef struct {
   uint8_t          status;          /*!< Status byte                   */
-  ndefConstBuffer8 bufLanguageCode; /*!< ISO/IANA language code buffer */
-  ndefConstBuffer  bufSentence;     /*!< Sentence buffer               */
-} ndefTypeRtdText;
+  NDef_Const_Buffer_8 bufLanguageCode; /*!< ISO/IANA language code buffer */
+  NDef_Const_Buffer  bufSentence;     /*!< Sentence buffer               */
+} NDef_Type_Rtd_Text;
 
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/***************
- * Text
- ***************
- */
-
-
-/*!
- *****************************************************************************
- * Initialize a Text RTD type
- *
- * \param[out] text:            Type to initialize
- * \param[out] utfEncoding:     UTF-8/UTF-16
- * \param[in]  bufLanguageCode: ISO/IANA language code buffer
- * \param[in]  bufSentence:     Actual text buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdTextInit(ndefType *text, uint8_t utfEncoding, const ndefConstBuffer8 *bufLanguageCode, const ndefConstBuffer *bufSentence);
-
-
-/*!
- *****************************************************************************
- * Get RTD Text type content
- *
- * \param[in]  text:            Type to get information from
- * \param[out] utfEncoding:     UTF-8/UTF-16
- * \param[out] bufLanguageCode: ISO/IANA language code buffer
- * \param[out] bufSentence:     Actual text buffer
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefGetRtdText(const ndefType *text, uint8_t *utfEncoding, ndefConstBuffer8 *bufLanguageCode, ndefConstBuffer *bufSentence);
-
-
-/*!
- *****************************************************************************
- * Convert an NDEF record to a Text type
- *
- * \param[in]  record: Record to convert
- * \param[out] text:   The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRecordToRtdText(const ndefRecord *record, ndefType *text);
-
-
-/*!
- *****************************************************************************
- * Convert a Text RTD type to an NDEF record
- *
- * \param[in]  text:   Type to convert
- * \param[out] record: The converted type
- *
- * \return ERR_NONE if successful or a standard error code
- *****************************************************************************
- */
-ReturnCode ndefRtdTextToRecord(const ndefType *text, ndefRecord *record);
-
-
+NFC_OpResult NDef_RtdTextInit(NDef_Type *text, uint8_t utfEncoding, const NDef_Const_Buffer_8 *bufLanguageCode, const NDef_Const_Buffer *bufSentence);
+NFC_OpResult NDef_GetRtdText(const NDef_Type *text, uint8_t *utfEncoding, NDef_Const_Buffer_8 *bufLanguageCode, NDef_Const_Buffer *bufSentence);
+NFC_OpResult NDef_RecordToRtdText(const NDef_Record *record, NDef_Type *text);
+NFC_OpResult NDef_RtdTextToRecord(const NDef_Type *text, NDef_Record *record);
 
 #endif /* NDEF_TYPE_RTD_TEXT_H */
-
-/**
-  * @}
-  *
-  */

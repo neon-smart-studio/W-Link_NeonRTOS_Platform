@@ -537,7 +537,7 @@ NFC_OpResult RFal_NFC_DataExchangeStart(uint8_t *txData, uint16_t txDataLen, uin
           }
 
           if (txDataLen > 0U) {
-            ST_MEMCPY((uint8_t *)gNfcDev.txBuf.isoDepBuf.apdu, txData, txDataLen);
+            memcpy((uint8_t *)gNfcDev.txBuf.isoDepBuf.apdu, txData, txDataLen);
           }
 
           isoDepTxRx.DID       = RFAL_ISODEP_NO_DID;
@@ -567,7 +567,7 @@ NFC_OpResult RFal_NFC_DataExchangeStart(uint8_t *txData, uint16_t txDataLen, uin
             return NFC_MemoryError;
           }
           if (txDataLen > 0U) {
-            ST_MEMCPY((uint8_t *)gNfcDev.txBuf.nfcDepBuf.pdu, txData, txDataLen);
+            memcpy((uint8_t *)gNfcDev.txBuf.nfcDepBuf.pdu, txData, txDataLen);
           }
 
           nfcDepTxRx.DID       = RFAL_NFCDEP_DID_KEEP;
@@ -1844,7 +1844,7 @@ NFC_OpResult RFal_NFC_Dep_Activate(RFal_NFC_Device *device, RFal_NFC_Dep_CommMod
     RFal_NFC_Dep_ListenActvParam   actvParams;
     RFal_NFC_Dep_TargetParam       targetParam;
 
-    ST_MEMCPY(targetParam.nfcid3, (uint8_t *)gNfcDev.disc.nfcid3, RFAL_NFCDEP_NFCID3_LEN);
+    memcpy(targetParam.nfcid3, (uint8_t *)gNfcDev.disc.nfcid3, RFAL_NFCDEP_NFCID3_LEN);
     targetParam.bst       = RFAL_NFCDEP_Bx_NO_HIGH_BR;
     targetParam.brt       = RFAL_NFCDEP_Bx_NO_HIGH_BR;
     targetParam.to        = RFAL_NFCDEP_WT_TRG_MAX_L13; /* [LLCP] 1.3 6.2.1 */
@@ -1854,7 +1854,7 @@ NFC_OpResult RFal_NFC_Dep_Activate(RFal_NFC_Device *device, RFal_NFC_Dep_CommMod
     }
     targetParam.GBtLen    = gNfcDev.disc.GBLen;
     if (gNfcDev.disc.GBLen > 0U) {
-      ST_MEMCPY(targetParam.GBt, gNfcDev.disc.GB, gNfcDev.disc.GBLen);
+      memcpy(targetParam.GBt, gNfcDev.disc.GB, gNfcDev.disc.GBLen);
     }
     targetParam.operParam = (RFAL_NFCDEP_OPER_FULL_MI_EN | RFAL_NFCDEP_OPER_EMPTY_DEP_DIS | RFAL_NFCDEP_OPER_ATN_EN | RFAL_NFCDEP_OPER_RTOX_REQ_EN);
     targetParam.commMode  = commMode;

@@ -185,11 +185,11 @@ static NFC_OpResult RFal_ST25XV_PollerGenericWriteMessage(uint8_t cmd, uint8_t f
   txBuf[msgIt++] = RFAL_NFCV_ST_IC_MFG_CODE;
 
   if (uid != NULL) {
-    ST_MEMCPY(&txBuf[msgIt], uid, RFAL_NFCV_UID_LEN);
+    memcpy(&txBuf[msgIt], uid, RFAL_NFCV_UID_LEN);
     msgIt += RFAL_NFCV_UID_LEN;
   }
   txBuf[msgIt++] = msgLen;
-  ST_MEMCPY(&txBuf[msgIt], msgData, (uint16_t)(msgLen + (uint16_t)1U));   /* Message Data contains (MSGLength + 1) bytes */
+  memcpy(&txBuf[msgIt], msgData, (uint16_t)(msgLen + (uint16_t)1U));   /* Message Data contains (MSGLength + 1) bytes */
   msgIt += (uint16_t)(msgLen + (uint16_t)1U);
 
   /* Transceive Command */
@@ -251,7 +251,7 @@ NFC_OpResult RFal_ST25XV_PollerM24LRWriteSingleBlock(uint8_t flags, const uint8_
   /* Compute Request Data */
   data[dataLen++] = (uint8_t)blockNum;         /* Set M24LR Block Number (16 bits) LSB */
   data[dataLen++] = (uint8_t)(blockNum >> 8U); /* Set M24LR Block Number (16 bits) MSB */
-  ST_MEMCPY(&data[dataLen], wrData, blockLen);   /* Append Block data to write       */
+  memcpy(&data[dataLen], wrData, blockLen);   /* Append Block data to write       */
   dataLen += blockLen;
 
   return RFal_NFCV_PollerTransceiveReq(RFAL_NFCV_CMD_WRITE_SINGLE_BLOCK, (flags | (uint8_t)RFAL_NFCV_REQ_FLAG_PROTOCOL_EXT), RFAL_NFCV_PARAM_SKIP, uid, data, dataLen, (uint8_t *)&res, sizeof(RFal_NFCV_GenericRes), &rcvLen);
@@ -412,7 +412,7 @@ NFC_OpResult RFal_ST25XV_PollerPresentPassword(uint8_t flags, const uint8_t *uid
   dataLen = 0U;
   data[dataLen++] = pwdNum;;
   if (pwdLen > 0U) {
-    ST_MEMCPY(&data[dataLen], pwd, pwdLen);
+    memcpy(&data[dataLen], pwd, pwdLen);
   }
   dataLen += pwdLen;
 
@@ -435,7 +435,7 @@ NFC_OpResult RFal_ST25XV_PollerWritePassword(uint8_t flags, const uint8_t *uid, 
   dataLen = 0U;
   data[dataLen++] = pwdNum;
   if (pwdLen > 0U) {
-    ST_MEMCPY(&data[dataLen], pwd, pwdLen);
+    memcpy(&data[dataLen], pwd, pwdLen);
   }
   dataLen += pwdLen;
 

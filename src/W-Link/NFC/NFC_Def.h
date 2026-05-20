@@ -15,6 +15,7 @@ typedef enum {
     NFC_Busy = -6,
     NFC_Again = -7,
     NFC_Ignore = -8,
+    NFC_NotFound = -8,
     NFC_Hw_Mismatch = -9,
     NFC_Hw_OverRun = -10,
     NFC_System = -11,

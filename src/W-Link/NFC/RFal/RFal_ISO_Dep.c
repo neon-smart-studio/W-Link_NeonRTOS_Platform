@@ -697,7 +697,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
             /* remove ISO DEP header, check is necessary to move the INF data on the buffer */
             *outActRxLen -= gIsoDep.hdrLen;
             if ((gIsoDep.hdrLen != gIsoDep.rxBufInfPos) && (*outActRxLen > 0U)) {
-              ST_MEMMOVE(&gIsoDep.rxBuf[gIsoDep.rxBufInfPos], &gIsoDep.rxBuf[gIsoDep.hdrLen], *outActRxLen);
+              memmove(&gIsoDep.rxBuf[gIsoDep.rxBufInfPos], &gIsoDep.rxBuf[gIsoDep.hdrLen], *outActRxLen);
             }
 
             isoDepClearCounters();
@@ -725,7 +725,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
           /* remove ISO DEP header, check is necessary to move the INF data on the buffer */
           *outActRxLen -= gIsoDep.hdrLen;
           if ((gIsoDep.hdrLen != gIsoDep.rxBufInfPos) && (*outActRxLen > 0U)) {
-            ST_MEMMOVE(&gIsoDep.rxBuf[gIsoDep.rxBufInfPos], &gIsoDep.rxBuf[gIsoDep.hdrLen], *outActRxLen);
+            memmove(&gIsoDep.rxBuf[gIsoDep.rxBufInfPos], &gIsoDep.rxBuf[gIsoDep.hdrLen], *outActRxLen);
           }
 
           gIsoDep.state = ISODEP_ST_IDLE;
@@ -1535,7 +1535,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
       /* remove ISO DEP header, check is necessary to move the INF data on the buffer */
       *gIsoDep.rxLen -= gIsoDep.hdrLen;
       if ((gIsoDep.hdrLen != gIsoDep.rxBufInfPos) && (*gIsoDep.rxLen > 0U)) {
-        ST_MEMMOVE(&gIsoDep.rxBuf[gIsoDep.rxBufInfPos], &gIsoDep.rxBuf[gIsoDep.hdrLen], *gIsoDep.rxLen);
+        memmove(&gIsoDep.rxBuf[gIsoDep.rxBufInfPos], &gIsoDep.rxBuf[gIsoDep.hdrLen], *gIsoDep.rxLen);
       }
       return NFC_Again; /* Send Again signalling to run again, but some chaining data has arrived*/
     }
@@ -1548,7 +1548,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
     /* remove ISO DEP header, check is necessary to move the INF data on the buffer */
     *gIsoDep.rxLen -= gIsoDep.hdrLen;
     if ((gIsoDep.hdrLen != gIsoDep.rxBufInfPos) && (*gIsoDep.rxLen > 0U)) {
-      ST_MEMMOVE(&gIsoDep.rxBuf[gIsoDep.rxBufInfPos], &gIsoDep.rxBuf[gIsoDep.hdrLen], *gIsoDep.rxLen);
+      memmove(&gIsoDep.rxBuf[gIsoDep.rxBufInfPos], &gIsoDep.rxBuf[gIsoDep.hdrLen], *gIsoDep.rxLen);
     }
 
     /*******************************************************************************/

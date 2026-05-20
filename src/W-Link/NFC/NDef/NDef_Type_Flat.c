@@ -15,57 +15,39 @@
   *
   ******************************************************************************
   */
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
-#include "ndef_record.h"
-#include "ndef_types.h"
-#include "ndef_type_flat.h"
-#include "nfc_utils.h"
+#include "NDef_Record.h"
+#include "NDef_Types.h"
+#include "NDef_Type_Flat.h"
 
+#include "NFC/NFC_Def.h"
 
 #if NDEF_TYPE_FLAT_SUPPORT
 
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * LOCAL VARIABLES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * LOCAL FUNCTION PROTOTYPES
- ******************************************************************************
- */
-
-
-/*
- ******************************************************************************
- * GLOBAL FUNCTIONS
- ******************************************************************************
- */
-
-
-/*
- * Flat payload record
- */
-
-
 /*****************************************************************************/
-static uint32_t ndefFlatPayloadTypePayloadGetLength(const ndefType *type)
+static uint32_t NDef_FlatPayloadTypePayloadGetLength(const NDef_Type *type)
 {
   if ((type == NULL) || (type->id != NDEF_TYPE_ID_FLAT)) {
     return 0;
@@ -76,7 +58,7 @@ static uint32_t ndefFlatPayloadTypePayloadGetLength(const ndefType *type)
 
 
 /*****************************************************************************/
-static const uint8_t *ndefFlatPayloadTypePayloadItem(const ndefType *type, ndefConstBuffer *bufItem, bool begin)
+static const uint8_t *NDef_FlatPayloadTypePayloadItem(const NDef_Type *type, NDef_Const_Buffer *bufItem, bool begin)
 {
   if ((type == NULL) || (type->id != NDEF_TYPE_ID_FLAT)) {
     return NULL;
@@ -94,81 +76,81 @@ static const uint8_t *ndefFlatPayloadTypePayloadItem(const ndefType *type, ndefC
 
 
 /*****************************************************************************/
-ReturnCode ndefFlatPayloadTypeInit(ndefType *type, const ndefConstBuffer *bufPayload)
+NFC_OpResult NDef_FlatPayloadTypeInit(NDef_Type *type, const NDef_Const_Buffer *bufPayload)
 {
   if ((type == NULL) || (bufPayload == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   type->id               = NDEF_TYPE_ID_FLAT;
-  type->getPayloadLength = ndefFlatPayloadTypePayloadGetLength;
-  type->getPayloadItem   = ndefFlatPayloadTypePayloadItem;
-  type->typeToRecord     = ndefFlatPayloadTypeToRecord;
+  type->getPayloadLength = NDef_FlatPayloadTypePayloadGetLength;
+  type->getPayloadItem   = NDef_FlatPayloadTypePayloadItem;
+  type->typeToRecord     = NDef_FlatPayloadTypeToRecord;
 
   type->data.bufPayload.buffer = bufPayload->buffer;
   type->data.bufPayload.length = bufPayload->length;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefGetFlatPayloadType(const ndefType *type, ndefConstBuffer *bufPayload)
+NFC_OpResult NDef_GetFlatPayloadType(const NDef_Type *type, NDef_Const_Buffer *bufPayload)
 {
   if ((type     == NULL) || (type->id != NDEF_TYPE_ID_FLAT) ||
       (bufPayload == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
   bufPayload->buffer = type->data.bufPayload.buffer ;
   bufPayload->length = type->data.bufPayload.length ;
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefRecordToFlatPayloadType(const ndefRecord *record, ndefType *type)
+NFC_OpResult NDef_RecordToFlatPayloadType(const NDef_Record *record, NDef_Type *type)
 {
-  const ndefType *ndefData;
+  const NDef_Type *ndefData;
 
   if ((record == NULL) || (type == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  ndefData = ndefRecordGetNdefType(record);
+  ndefData = NDef_RecordGetNdefType(record);
   if ((ndefData != NULL) && (ndefData->id == NDEF_TYPE_ID_FLAT)) {
-    (void)ST_MEMCPY(type, ndefData, sizeof(ndefType));
-    return ERR_NONE;
+    (void)memcpy(type, ndefData, sizeof(NDef_Type));
+    return NFC_OK;
   }
 
-  ndefConstBuffer bufPayload;
-  ReturnCode err = ndefRecordGetPayload(record, &bufPayload);
-  if (err != ERR_NONE) {
+  NDef_Const_Buffer bufPayload;
+  NFC_OpResult err = NDef_RecordGetPayload(record, &bufPayload);
+  if (err != NFC_OK) {
     return err;
   }
 
-  return ndefFlatPayloadTypeInit(type, &bufPayload);
+  return NDef_FlatPayloadTypeInit(type, &bufPayload);
 }
 
 
 /*****************************************************************************/
-ReturnCode ndefFlatPayloadTypeToRecord(const ndefType *type, ndefRecord *record)
+NFC_OpResult NDef_FlatPayloadTypeToRecord(const NDef_Type *type, NDef_Record *record)
 {
   if ((type   == NULL) || (type->id != NDEF_TYPE_ID_FLAT) ||
       (record == NULL)) {
-    return ERR_PARAM;
+    return NFC_InvalidParameter;
   }
 
-  (void)ndefRecordReset(record);
+  (void)NDef_RecordReset(record);
 
   /* Do not initialize Type string */
 
-  if (ndefRecordSetNdefType(record, type) != ERR_NONE) {
-    return ERR_PARAM;
+  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+    return NFC_InvalidParameter;
   }
 
-  return ERR_NONE;
+  return NFC_OK;
 }
 
 #endif

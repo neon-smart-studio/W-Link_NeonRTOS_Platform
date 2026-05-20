@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "GPIO/GPIO.h"
 #include "SPI/SPI_Master.h"
@@ -354,7 +355,7 @@ NFC_OpResult ST25R95_ISO15693_VICCDecode(const uint8_t *inBuf,
   mp = 5; /* 5 bits were SOF, now manchester starts: 2 bits per payload bit */
   bp = 0;
 
-  ST_MEMSET(outBuf, 0, outBufLen);
+  memset(outBuf, 0, outBufLen);
 
   if (inBufLen == 0U) {
     return NFC_CRC_Error;

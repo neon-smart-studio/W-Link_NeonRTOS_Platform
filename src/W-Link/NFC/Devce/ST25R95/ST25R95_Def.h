@@ -84,36 +84,9 @@
 #define ST25R95_ECHO_RESPONSE_BUFLEN                             (3)      /*!< Echo response buffer len */
 #define ST25R95_SEND_RESPONSE_BUFLEN                             (0  + 2) /*!< Send response buffer len */
 
-#define ST25R95_IDLE_WUPERIOD_OFFSET                    (0x09U) /*!< WUPeriod offset in Idle Command  */
-#define ST25R95_IDLE_DACDATAL_OFFSET                    (0x0CU) /*!< DacDataL offset in Idle Command  */
-#define ST25R95_IDLE_DACDATAH_OFFSET                    (0x0DU) /*!< DacDataH offset in Idle Command  */
-#define ST25R95_DACDATA_MAX                             (0xFCU) /*!< DacData max value (6 bits MSB)   */
-#define ST25R95_IDLE_WKUP_TIMEOUT                       (0x01U) /*!< Idle wakeup source: timeout      */
-#define ST25R95_IDLE_WKUP_TAGDETECT                     (0x02U) /*!< Idle wakeup source: Tag Detected */
-
-/*! ST25R95 transceive flags */
-#define ST25R95_TXRX_FLAGS_CRC_TX_AUTO       (0U << 0) /*!< CRC will be generated automatic upon transmission                                     */
-#define ST25R95_TXRX_FLAGS_CRC_TX_MANUAL     (1U << 0) /*!< CRC was calculated manually, included in txBuffer                                     */
-#define ST25R95_TXRX_FLAGS_CRC_RX_KEEP       (1U << 1) /*!< Upon Reception keep the CRC in rxBuffer (reflected on rcvd length)                    */
-#define ST25R95_TXRX_FLAGS_CRC_RX_REMV       (0U << 1) /*!< Remove the CRC from rxBuffer                                                          */
-#define ST25R95_TXRX_FLAGS_NFCIP1_ON         (1U << 2) /*!< Enable NFCIP1 mode: Add SB(F0) and LEN bytes during Tx and skip SB(F0) byte during Rx */
-#define ST25R95_TXRX_FLAGS_NFCIP1_OFF        (0U << 2) /*!< Disable NFCIP1 mode: do not append protocol bytes while Tx nor skip while Rx          */
-#define ST25R95_TXRX_FLAGS_AGC_OFF           (1U << 3) /*!< Disable Automatic Gain Control, improving multiple devices collision detection. \b DEPRECATED: flag is deprecated, usage of Anticollision APIs based on Analog Config table with ST25R95_ANALOG_CONFIG_ANTICOL settings */
-#define ST25R95_TXRX_FLAGS_AGC_ON            (0U << 3) /*!< Enable Automatic Gain Control, improving single device reception                \b DEPRECATED: flag is deprecated, usage of Anticollision APIs based on Analog Config table with ST25R95_ANALOG_CONFIG_ANTICOL settings */
-#define ST25R95_TXRX_FLAGS_PAR_RX_KEEP       (1U << 4) /*!< Disable Parity check and keep the Parity and CRC bits in the received buffer          */
-#define ST25R95_TXRX_FLAGS_PAR_RX_REMV       (0U << 4) /*!< Enable Parity check and remove the parity bits from the received buffer               */
-#define ST25R95_TXRX_FLAGS_PAR_TX_NONE       (1U << 5) /*!< Disable automatic Parity generation (ISO14443A) and use the one provided in the buffer*/
-#define ST25R95_TXRX_FLAGS_PAR_TX_AUTO       (0U << 5) /*!< Enable automatic Parity generation (ISO14443A)                                        */
-#define ST25R95_TXRX_FLAGS_NFCV_FLAG_MANUAL  (1U << 6) /*!< Disable automatic adaption of flag byte (ISO15693) according to current comm params   */
-#define ST25R95_TXRX_FLAGS_NFCV_FLAG_AUTO    (0U << 6) /*!< Enable automatic adaption of flag byte (ISO115693) according to current comm params   */
-#define ST25R95_TXRX_FLAGS_CRC_RX_MANUAL     (1U << 7) /*!< Disable automatic CRC check                                                           */
-#define ST25R95_TXRX_FLAGS_CRC_RX_AUTO       (0U << 7) /*!< Enable automatic CRC check                                                            */
-
 #define ST25R95_REG_ARC_B                                0x6801 /*!< ARC_B register address */
 #define ST25R95_REG_ACC_A                                0x6804 /*!< ACC_A register address */
 #define ST25R95_REG_TIMERW                               0x3A00 /*!< TIMER register address */
-
-#define ST25R95_NFCF_LENGTH_LEN                     1U      /*!< LEN field length                                  */
 
 typedef enum{
     ST25R95_Protocol_FieldOff       = 0x00U, /*!< Field OFF */

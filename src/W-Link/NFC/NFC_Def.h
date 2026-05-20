@@ -10,8 +10,10 @@ typedef enum {
     NFC_MutexTimeout = -4,
     NFC_SlaveTimeout = -5,
     NFC_IO_Error = -6,
+    NFC_Syntax = -6,
     NFC_Busy = -6,
     NFC_Again = -7,
+    NFC_Ignore = -7,
     NFC_Hw_Mismatch = -8,
     NFC_Hw_OverRun = -9,
     NFC_System = -10,
@@ -26,7 +28,11 @@ typedef enum {
     NFC_InternalError = -19,
     NFC_RequestError = -20,
     NFC_ImcompleteByte = -21,
-    NFC_Unsupport = -22
+    NFC_ProtocolError = -22,
+    NFC_WriteFailed = -22,
+    NFC_SleepRequest = -22,
+    NFC_ReleaseRequest = -22,
+    NFC_Unsupport = -23
 } NFC_OpResult;
 
 #endif // NFC_DEF_H

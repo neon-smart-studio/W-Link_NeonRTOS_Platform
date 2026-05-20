@@ -727,7 +727,6 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
         }
 
         rcvdLen = len;
-
         if (len != 0) {
             if (protocol == ST25R95_Protocol_ISO18092) {
                 spi_op_status = SPI_Master_Stream_Read(ST25R95_SPI_INDEX, &rxBuf[ST25R95_NFCF_LENGTH_LEN], len);

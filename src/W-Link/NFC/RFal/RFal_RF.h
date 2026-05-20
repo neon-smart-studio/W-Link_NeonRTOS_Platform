@@ -18,6 +18,23 @@
   * limitations under the License.
   *
 ******************************************************************************/
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #ifndef RFAL_RF_H
 #define RFAL_RF_H
@@ -43,8 +60,6 @@
 /*! Default TxRx flags: Tx CRC automatic, Rx CRC removed, NFCIP1 mode off, AGC On, Tx Parity automatic, Rx Parity removed */
 #define RFAL_TXRX_FLAGS_DEFAULT                    ( (uint32_t)RFAL_TXRX_FLAGS_CRC_TX_AUTO | (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_NFCIP1_OFF | (uint32_t)RFAL_TXRX_FLAGS_AGC_ON | (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO | (uint32_t)RFAL_TXRX_FLAGS_NFCV_FLAG_AUTO)
 
-
-
 #define RFAL_LM_MASK_NFCA                          ((uint32_t)1U<<(uint8_t)RFAL_MODE_LISTEN_NFCA)        /*!< Bitmask for Listen Mode enabling NFCA    */
 #define RFAL_LM_MASK_NFCB                          ((uint32_t)1U<<(uint8_t)RFAL_MODE_LISTEN_NFCB)        /*!< Bitmask for Listen Mode enabling NFCB    */
 #define RFAL_LM_MASK_NFCF                          ((uint32_t)1U<<(uint8_t)RFAL_MODE_LISTEN_NFCF)        /*!< Bitmask for Listen Mode enabling NFCF    */
@@ -61,12 +76,6 @@
 #define RFAL_NFCID1_DOUBLE_LEN                     7U                                           /*!< NFCID1 length                                     */
 #define RFAL_NFCID1_SINGLE_LEN                     4U                                           /*!< NFCID1 length                                     */
 
-
-/*
-******************************************************************************
-* GLOBAL MACROS
-******************************************************************************
-*/
 
 /*! Returns the maximum supported bit rate for RW mode. Caller must check if mode is supported before, as even if mode is not supported will return the min  */
 #define RFAL_GetMaxBrRW()                     ( ((RFAL_SUPPORT_BR_RW_6780)  ? RFAL_BR_6780 : ((RFAL_SUPPORT_BR_RW_3390)  ? RFAL_BR_3390 : ((RFAL_SUPPORT_BR_RW_1695)  ? RFAL_BR_1695 : ((RFAL_SUPPORT_BR_RW_848)  ? RFAL_BR_848 : ((RFAL_SUPPORT_BR_RW_424)  ? RFAL_BR_424 : ((RFAL_SUPPORT_BR_RW_212)  ? RFAL_BR_212 : RFAL_BR_106 ) ) ) ) ) ) )
@@ -164,13 +173,6 @@
 #define RFAL_LogW(...)
 #define RFAL_LogI(...)
 #define RFAL_LogD(...)
-
-
-/*
-******************************************************************************
-* GLOBAL ENUMS
-******************************************************************************
-*/
 
 /* RFAL Guard Time (GT) default values                 */
 #define    RFAL_GT_NFCA                      RFAL_ConvMsTo1fc(5U)     /*!< GTA  Digital 2.0  6.10.4.1 & B.2                                                                 */

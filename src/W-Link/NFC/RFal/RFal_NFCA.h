@@ -18,15 +18,27 @@
   * limitations under the License.
   *
 ******************************************************************************/
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #ifndef RFAL_NFCA_H
 #define RFAL_NFCA_H
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
 #include "RFal_RF.h"
 #include "RFal_T1T.h"
 
@@ -69,12 +81,6 @@
 
 /*! Checks if a NFC-A listener device supports multiple protocols (ISO-DEP and NFC-DEP) */
 #define RFal_NFCA_LisDevIsMultiProto( lisDev )     (((RFal_NFCA_ListenDevice*)(lisDev))->type == RFAL_NFCA_T4T_NFCDEP )
-
-/*
-******************************************************************************
-* GLOBAL TYPES
-******************************************************************************
-*/
 
 /*! NFC-A Listen device types */
 typedef enum {

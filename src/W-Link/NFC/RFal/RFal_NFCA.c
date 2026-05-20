@@ -18,6 +18,23 @@
   * limitations under the License.
   *
 ******************************************************************************/
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -29,12 +46,6 @@
 #include "RFal.h"
 
 #include "NFC/NFC_Def.h"
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
 
 #define RFAL_NFCA_SLP_FWT           rfalConvMsTo1fc(1)    /*!< Check 1ms for any modulation  ISO14443-3 6.4.3   */
 #define RFAL_NFCA_SLP_CMD           0x50U                 /*!< SLP cmd (byte1)    Digital 1.1  6.9.1 & Table 20 */

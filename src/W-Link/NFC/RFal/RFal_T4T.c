@@ -18,21 +18,23 @@
   * limitations under the License.
   *
 ******************************************************************************/
-
-/*! \file
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
  *
- *  \author SRA
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
  *
- *  \brief Provides convenience methods and definitions for T4T (ISO7816-4)
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
  *
- *  This module provides an interface to exchange T4T APDUs according to
- *  NFC Forum T4T and ISO7816-4
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
  *
- *  This implementation was based on the following specs:
- *    - ISO/IEC 7816-4  3rd Edition 2013-04-15
- *    - NFC Forum T4T Technical Specification 1.0 2017-08-28
- *
- */
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #include <stdbool.h>
 #include <stdint.h>

@@ -7,6 +7,7 @@ typedef enum {
     NFC_NotInit = -1,
     NFC_InvalidParameter = -2,
     NFC_MemoryError = -3,
+    NFC_MemoryCorrupt = -3,
     NFC_MutexTimeout = -4,
     NFC_SlaveTimeout = -5,
     NFC_IO_Error = -6,

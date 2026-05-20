@@ -18,25 +18,31 @@
   * limitations under the License.
   *
 ******************************************************************************/
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
 
 #ifndef RFAL_T4T_H
 #define RFAL_T4T_H
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
 #include "RFal_RF.h"
 #include "RFal_ISO_Dep.h"
 
 #include "NFC/NFC_Def.h"
-
-/*
- ******************************************************************************
- * GLOBAL DEFINES
- ******************************************************************************
- */
 
 #define RFAL_T4T_MAX_CAPDU_PROLOGUE_LEN                          4U                          /*!< Command-APDU prologue length (CLA INS P1 P2)                    */
 #define RFAL_T4T_LE_LEN                                          1U                          /*!< Le Expected Response Length (short field coding)                */

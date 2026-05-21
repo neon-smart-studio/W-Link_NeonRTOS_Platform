@@ -57,6 +57,8 @@ static uint8_t Idle[] = {ST25R95_COMMAND_IDLE, 0x0E, 0x0A, 0x21, 0x00, 0x38, 0x0
 static ST25R95_BitRate ioCurrenTxBitRate = ST25R95_BitRate_KEEP;
 static ST25R95_BitRate ioCurrenRxBitRate = ST25R95_BitRate_KEEP;
 
+ST25R95_IO_SPIRxContext st25r95SPIRxCtx;
+
 static NFC_OpResult NFC_ST25R95_Map_GPIO_Error_Code(hwGPIO_OpResult error_code)
 {
     switch (error_code)
@@ -552,7 +554,20 @@ NFC_OpResult ST25R95_IO_SPI_Send_Data(uint8_t *buf, uint8_t bufLen, ST25R95_Prot
     return NFC_OK;
 }
 
-NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes)
+NFC_OpResult ST25R95_IO_SPI_PrepareRx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes)
+{
+    st25r95SPIRxCtx.protocol            = protocol;
+    st25r95SPIRxCtx.rxBuf               = rxBuf;
+    st25r95SPIRxCtx.rxBufLen            = rxBufLen;
+    st25r95SPIRxCtx.rxRcvdLen           = rxRcvdLen;
+    st25r95SPIRxCtx.rmvCRC              = ((flags & ST25R95_TXRX_FLAGS_CRC_RX_KEEP) != ST25R95_TXRX_FLAGS_CRC_RX_KEEP);
+    st25r95SPIRxCtx.NFCIP1              = ((protocol == ST25R95_Protocol_ISO14443A) && ((flags & ST25R95_TXRX_FLAGS_NFCIP1_ON) == ST25R95_TXRX_FLAGS_NFCIP1_ON));
+    st25r95SPIRxCtx.additionalRespBytes = additionalRespBytes;
+
+    return NFC_OK;
+}
+
+NFC_OpResult ST25R95_IO_SPI_Complete_Rx()
 {
     hwGPIO_OpResult gpio_op_status;
     hwSPI_OpResult spi_op_status;
@@ -563,9 +578,6 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
     uint16_t len;
     uint16_t rcvdLen;
     uint16_t additionalRespBytesNb = 1;
-
-   bool rmvCRC = ((flags & ST25R95_TXRX_FLAGS_CRC_RX_KEEP) != ST25R95_TXRX_FLAGS_CRC_RX_KEEP);
-   bool NFCIP1 = ((protocol == ST25R95_Protocol_ISO14443A) && ((flags & ST25R95_TXRX_FLAGS_NFCIP1_ON) == ST25R95_TXRX_FLAGS_NFCIP1_ON));
 
    uint8_t BufCRC[2];                   /*!< BufCRC                          */
    uint8_t NFCIP1_SoD[1];               /*!< NFCIP1_SoD                      */
@@ -654,7 +666,7 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
     }
 
     /* In ISO14443A 106kbps 2 additional bytes of collision information are provided */
-    if ((protocol == ST25R95_Protocol_ISO14443A) && (ioCurrenRxBitRate == ST25R95_BitRate_106)) {
+    if ((st25r95SPIRxCtx.protocol == ST25R95_Protocol_ISO14443A) && (ioCurrenRxBitRate == ST25R95_BitRate_106)) {
       additionalRespBytesNb += 2;
     }
 
@@ -679,11 +691,11 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
 
         len -= additionalRespBytesNb;
 
-        if ((Result == ST25R95_ERRCODE_RESULTSRESIDUAL) && (protocol == ST25R95_Protocol_ISO14443A)) {
-          rmvCRC = false;
+        if ((Result == ST25R95_ERRCODE_RESULTSRESIDUAL) && (st25r95SPIRxCtx.protocol == ST25R95_Protocol_ISO14443A)) {
+          st25r95SPIRxCtx.rmvCRC = false;
         }
 
-        if ((rmvCRC) && (protocol != ST25R95_Protocol_ISO18092)) {
+        if ((st25r95SPIRxCtx.rmvCRC) && (st25r95SPIRxCtx.protocol != ST25R95_Protocol_ISO18092)) {
           if (len < 2) {
             /* Flush ST25R95 fifo */
             spi_op_status = SPI_Master_DummyBytes(ST25R95_SPI_INDEX, ST25R95_COMMUNICATION_BUFFER_SIZE);
@@ -699,7 +711,7 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
           len -= 2;
         }
 
-        if ((NFCIP1) && (len >= 1)) {
+        if ((st25r95SPIRxCtx.NFCIP1) && (len >= 1)) {
             spi_op_status = SPI_Master_ReadByte(ST25R95_SPI_INDEX, NFCIP1_SoD);
             if(spi_op_status < hwSPI_OK)
             {
@@ -709,9 +721,9 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
             len -= 1;
         }
 
-        if ((len > rxBufLen) ||
-            ((protocol == ST25R95_Protocol_ISO18092) && ((len + 1U) > rxBufLen)) || /* Need one extra byte room to prepend Len byte in rxBuf in case of Felica */
-            ((!rmvCRC) && (protocol == ST25R95_Protocol_ISO18092) && ((len + 3U) > rxBufLen)))
+        if ((len > st25r95SPIRxCtx.rxBufLen) ||
+            ((st25r95SPIRxCtx.protocol == ST25R95_Protocol_ISO18092) && ((len + 1U) > st25r95SPIRxCtx.rxBufLen)) || /* Need one extra byte room to prepend Len byte in rxBuf in case of Felica */
+            ((!st25r95SPIRxCtx.rmvCRC) && (st25r95SPIRxCtx.protocol == ST25R95_Protocol_ISO18092) && ((len + 3U) > st25r95SPIRxCtx.rxBufLen)))
             {
                 /* same + 2 extra bytes room to append CRC */
               /* Flush ST25R95 fifo */
@@ -728,8 +740,8 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
 
         rcvdLen = len;
         if (len != 0) {
-            if (protocol == ST25R95_Protocol_ISO18092) {
-                spi_op_status = SPI_Master_Stream_Read(ST25R95_SPI_INDEX, &rxBuf[ST25R95_NFCF_LENGTH_LEN], len);
+            if (st25r95SPIRxCtx.protocol == ST25R95_Protocol_ISO18092) {
+                spi_op_status = SPI_Master_Stream_Read(ST25R95_SPI_INDEX, &st25r95SPIRxCtx.rxBuf[ST25R95_NFCF_LENGTH_LEN], len);
                 if(spi_op_status < hwSPI_OK)
                 {
                     GPIO_Pin_Write(ST25R95_GPIO_CS_PIN, 1);
@@ -737,9 +749,9 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
                 }
                 rcvdLen += ST25R95_NFCF_LENGTH_LEN;
                 len += ST25R95_NFCF_LENGTH_LEN;
-                rxBuf[0] = (uint8_t)(rcvdLen & 0xFFU);
+                st25r95SPIRxCtx.rxBuf[0] = (uint8_t)(rcvdLen & 0xFFU);
             } else {
-                spi_op_status = SPI_Master_Stream_Read(ST25R95_SPI_INDEX, rxBuf, len);
+                spi_op_status = SPI_Master_Stream_Read(ST25R95_SPI_INDEX, st25r95SPIRxCtx.rxBuf, len);
                 if(spi_op_status < hwSPI_OK)
                 {
                     GPIO_Pin_Write(ST25R95_GPIO_CS_PIN, 1);
@@ -748,7 +760,7 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
             }
         }
 
-        if ((rmvCRC) && (protocol != ST25R95_Protocol_ISO18092)) {
+        if ((st25r95SPIRxCtx.rmvCRC) && (st25r95SPIRxCtx.protocol != ST25R95_Protocol_ISO18092)) {
             spi_op_status = SPI_Master_Stream_Read(ST25R95_SPI_INDEX, BufCRC, 2);
             if(spi_op_status < hwSPI_OK)
             {
@@ -757,7 +769,7 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
             }
         }
 
-        spi_op_status = SPI_Master_Stream_Read(ST25R95_SPI_INDEX, additionalRespBytes, additionalRespBytesNb);
+        spi_op_status = SPI_Master_Stream_Read(ST25R95_SPI_INDEX, st25r95SPIRxCtx.additionalRespBytes, additionalRespBytesNb);
         if(spi_op_status < hwSPI_OK)
         {
             GPIO_Pin_Write(ST25R95_GPIO_CS_PIN, 1);
@@ -765,13 +777,13 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
         }
 
         /* check collision and CRC error */
-        switch (protocol) {
+        switch (st25r95SPIRxCtx.protocol) {
           case (ST25R95_Protocol_ISO15693):
-            if (ST25R95_IS_PROT_ISO15693_COLLISION_ERR(additionalRespBytes[0]))
+            if (ST25R95_IS_PROT_ISO15693_COLLISION_ERR(st25r95SPIRxCtx.additionalRespBytes[0]))
             {
                 op_status = NFC_RF_Collision;
             }
-            else if (ST25R95_IS_PROT_ISO15693_CRC_ERR(additionalRespBytes[0]))
+            else if (ST25R95_IS_PROT_ISO15693_CRC_ERR(st25r95SPIRxCtx.additionalRespBytes[0]))
             {
                 op_status = NFC_CRC_Error;
             }
@@ -779,7 +791,7 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
           case (ST25R95_Protocol_ISO14443A):
             if (Result == ST25R95_ERRCODE_RESULTSRESIDUAL)
             {
-                uint8_t errno = ST25R95_ERR_INCOMPLETE_BYTE + ((additionalRespBytes[0] & 0xFU) % 8U);
+                uint8_t errno = ST25R95_ERR_INCOMPLETE_BYTE + ((st25r95SPIRxCtx.additionalRespBytes[0] & 0xFU) % 8U);
 
                 switch(errno)
                 {
@@ -795,26 +807,26 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
                     break;
                 }
             }
-            else if (ST25R95_IS_PROT_ISO14443A_COLLISION_ERR(additionalRespBytes[0]))
+            else if (ST25R95_IS_PROT_ISO14443A_COLLISION_ERR(st25r95SPIRxCtx.additionalRespBytes[0]))
             {
                 op_status = NFC_RF_Collision;
             }
-            else if (ST25R95_IS_PROT_ISO14443A_PARITY_ERR(additionalRespBytes[0]))
+            else if (ST25R95_IS_PROT_ISO14443A_PARITY_ERR(st25r95SPIRxCtx.additionalRespBytes[0]))
             {
                 op_status = NFC_ParityError;   // 你的 enum 目前還沒有這個
             }
-            else if (ST25R95_IS_PROT_ISO14443A_CRC_ERR(additionalRespBytes[0]))
+            else if (ST25R95_IS_PROT_ISO14443A_CRC_ERR(st25r95SPIRxCtx.additionalRespBytes[0]))
             {
                 op_status = NFC_CRC_Error;
             }
             break;
           case (ST25R95_Protocol_ISO14443B):
-            if (ST25R95_IS_PROT_ISO14443B_CRC_ERR(additionalRespBytes[0])) {
+            if (ST25R95_IS_PROT_ISO14443B_CRC_ERR(st25r95SPIRxCtx.additionalRespBytes[0])) {
               op_status = NFC_CRC_Error;
             }
             break;
           case (ST25R95_Protocol_ISO18092):
-            if (ST25R95_IS_PROT_ISO18092_CRC_ERR(additionalRespBytes[0])) {
+            if (ST25R95_IS_PROT_ISO18092_CRC_ERR(st25r95SPIRxCtx.additionalRespBytes[0])) {
               op_status = NFC_CRC_Error;
             }
             break;
@@ -829,15 +841,15 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBu
         return NFC_ST25R95_Map_GPIO_Error_Code(gpio_op_status);
     }
 
-    if ((!rmvCRC) && (protocol == ST25R95_Protocol_ISO18092) && (rcvdLen == len)) {
+    if ((!st25r95SPIRxCtx.rmvCRC) && (st25r95SPIRxCtx.protocol == ST25R95_Protocol_ISO18092) && (rcvdLen == len)) {
       /* increase room for CRC*/
-      rxBuf[rcvdLen++] = 0x00;
-      rxBuf[rcvdLen++] = 0x00;
+      st25r95SPIRxCtx.rxBuf[rcvdLen++] = 0x00;
+      st25r95SPIRxCtx.rxBuf[rcvdLen++] = 0x00;
     }
 
     /* update *rxRcvdLen if not null pointer */
-    if (rxRcvdLen != NULL) {
-      (*rxRcvdLen) = rcvdLen;
+    if (st25r95SPIRxCtx.rxRcvdLen != NULL) {
+      (*st25r95SPIRxCtx.rxRcvdLen) = rcvdLen;
     }
     
     return op_status;
@@ -1123,12 +1135,6 @@ NFC_OpResult ST25R95_IO_Init(void)
     /* Check expected chip: ST25R95 */
     if (!ST25R95_CheckChipID()) {
       return NFC_Hw_Mismatch;
-    }
-
-    op_status = ST25R95_AnalogConfig_Init(); /* Initialize Analog Configs */
-    if(op_status < NFC_OK)
-    {
-        return op_status;
     }
 
     return NFC_OK;

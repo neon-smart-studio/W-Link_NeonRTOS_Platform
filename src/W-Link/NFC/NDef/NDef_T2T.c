@@ -175,7 +175,7 @@ NFC_OpResult NDef_T2T_Poller_ReadBytes(NDef_Context *ctx, uint32_t offset, uint3
       le = (lvLen < NDEF_T2T_READ_RESP_SIZE) ? (uint8_t)lvLen : (uint8_t)NDEF_T2T_READ_RESP_SIZE;
       if (((uint32_t)(uint8_t)blockAddr + (NDEF_T2T_READ_RESP_SIZE / NDEF_T2T_BLOCK_SIZE)) > NDEF_T2T_BLOCKS_PER_SECTOR) {
         numOfValidBlocks = (uint8_t)(NDEF_T2T_BLOCKS_PER_SECTOR - (uint8_t)blockAddr);
-        le = MIN(le, numOfValidBlocks * NDEF_T2T_BLOCK_SIZE);
+        le = (le < numOfValidBlocks * NDEF_T2T_BLOCK_SIZE) ? le : numOfValidBlocks * NDEF_T2T_BLOCK_SIZE;
         //NDef_T2T_LogD("NDef_T2T_Poller_ReadBytes blockAddr: 0x%4.4x numofValidBlock: %d le: %d \r\n", blockAddr, numOfValidBlocks, le);
       } else {
         numOfValidBlocks = NDEF_T2T_READ_RESP_SIZE / NDEF_T2T_BLOCK_SIZE;
@@ -309,7 +309,7 @@ static NFC_OpResult NDef_T2T_ReadLField(NDef_Context *ctx)
       return ret;
     }
     offset += 2U;
-    lenTLV = GETU16(&data[0]);
+    lenTLV = (((uint16_t)(&data[0])[0] << 8) | (uint16_t)(&data[0])[1]);
   }
   ctx->messageLen    = lenTLV;
   ctx->messageOffset = offset;
@@ -393,8 +393,8 @@ NFC_OpResult NDef_T2T_Poller_NdefDetect(NDef_Context *ctx, NDef_Info *info)
     return ret;
   }
   ctx->cc.t2t.magicNumber  = ctx->ccBuf[NDEF_T2T_CC_0];
-  ctx->cc.t2t.majorVersion = ndefMajorVersion(ctx->ccBuf[NDEF_T2T_CC_1]);
-  ctx->cc.t2t.minorVersion = ndefMinorVersion(ctx->ccBuf[NDEF_T2T_CC_1]);
+  ctx->cc.t2t.majorVersion = NDef_MajorVersion(ctx->ccBuf[NDEF_T2T_CC_1]);
+  ctx->cc.t2t.minorVersion = NDef_MinorVersion(ctx->ccBuf[NDEF_T2T_CC_1]);
   ctx->cc.t2t.size         = ctx->ccBuf[NDEF_T2T_CC_2];
   ctx->cc.t2t.readAccess   = (uint8_t)(ctx->ccBuf[NDEF_T2T_CC_3] >> 4U);
   ctx->cc.t2t.writeAccess  = (uint8_t)(ctx->ccBuf[NDEF_T2T_CC_3] & 0xFU);
@@ -408,7 +408,7 @@ NFC_OpResult NDef_T2T_Poller_NdefDetect(NDef_Context *ctx, NDef_Info *info)
   ctx->subCtx.t2t.dynLockNbrBytes          = (ctx->subCtx.t2t.dynLockNbrLockBits + 7U) / 8U;
   ctx->subCtx.t2t.nbrRsvdAreas             = 0U;
   /* Check version number TS T2T v1.0 7.5.1.2 */
-  if ((ctx->cc.t2t.magicNumber != NDEF_T2T_MAGIC) || (ctx->cc.t2t.majorVersion > ndefMajorVersion(NDEF_T2T_VERSION_1_0))) {
+  if ((ctx->cc.t2t.magicNumber != NDEF_T2T_MAGIC) || (ctx->cc.t2t.majorVersion > NDef_MajorVersion(NDEF_T2T_VERSION_1_0))) {
     /* Conclude procedure TS T2T v1.0 7.5.1.2 */
     return NFC_RequestError;
   }
@@ -446,7 +446,7 @@ NFC_OpResult NDef_T2T_Poller_NdefDetect(NDef_Context *ctx, NDef_Info *info)
         return ret;
       }
       offset += 2U;
-      lenTLV = GETU16(&data[0]);
+      lenTLV = (((uint16_t)(&data[0])[0] << 8) | (uint16_t)(&data[0])[1]);
     }
     if (typeTLV == NDEF_T2T_TLV_LOCK_CTRL) {
       if (lenTLV != NDEF_T2T_LOCK_CTRL_LEN) {

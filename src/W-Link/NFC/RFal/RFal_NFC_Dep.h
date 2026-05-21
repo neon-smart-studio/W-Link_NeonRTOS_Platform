@@ -139,7 +139,7 @@
 #define RFal_NFC_Dep_LR2PP( LRx )         ( ((uint8_t)(LRx) << RFAL_NFCDEP_PP_LR_SHIFT) & RFAL_NFCDEP_PP_LR_MASK)   /*!< Returns the PP byte with the given LRx value  */
 
 /*! Returns the Frame size value from the given LRx value  */
-#define RFal_NFC_Dep_LR2FS( LRx )         (uint16_t)(MIN( (RFAL_NFCDEP_FS_VAL_MIN * ((uint16_t)(LRx) + 1U) ), RFAL_NFCDEP_FRAME_SIZE_MAX_LEN ))
+#define RFal_NFC_Dep_LR2FS( LRx )         (uint16_t)(( (RFAL_NFCDEP_FS_VAL_MIN * ((uint16_t)(LRx) + 1U) ) > RFAL_NFCDEP_FRAME_SIZE_MAX_LEN ) ? RFAL_NFCDEP_FRAME_SIZE_MAX_LEN : (RFAL_NFCDEP_FS_VAL_MIN * ((uint16_t)(LRx) + 1U) ) )
 
 /*!
  *  Despite DIGITAL 1.0 14.6.2.1 stating that the last two bytes may filled with
@@ -491,6 +491,8 @@ extern "C" {
 void RFal_NFC_Dep_Init(void);
 void RFal_NFC_Dep_SetDeactivatingCallback(RFal_NFC_Dep_DeactCallback pFunc);
 uint32_t RFal_NFC_Dep_CalculateRWT(uint8_t wt);
+NFC_OpResult RFal_NFC_Dep_DataTx(uint8_t *txBuf, uint16_t txBufLen, uint32_t fwt);
+NFC_OpResult RFal_NFC_Dep_DataRx(bool blocking);
 NFC_OpResult RFal_NFC_Dep_ATR(const RFal_NFC_Dep_AtrParam *param, RFal_NFC_Dep_AtrRes *atrRes, uint8_t *atrResLen);
 NFC_OpResult RFal_NFC_Dep_PSL(uint8_t BRS, uint8_t FSL);
 NFC_OpResult RFal_NFC_Dep_DSL(void);

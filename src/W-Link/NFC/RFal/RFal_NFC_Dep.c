@@ -67,7 +67,7 @@
 
 #define NFCIP_DSLRES_MAX_LEN            (3U + RFAL_NFCDEP_LEN_LEN)      /*!< Maximum length for a DSL RES (incl LEN)               */
 #define NFCIP_RLSRES_MAX_LEN            (3U + RFAL_NFCDEP_LEN_LEN)      /*!< Minimum length for a RLS RES (incl LEN)               */
-#define NFCIP_TARGET_RES_MAX            ( MAX( NFCIP_RLSRES_MAX_LEN, NFCIP_DSLRES_MAX_LEN) ) /*!< Max target control res length    */
+#define NFCIP_TARGET_RES_MAX            ( ( NFCIP_RLSRES_MAX_LEN > NFCIP_DSLRES_MAX_LEN) ? NFCIP_RLSRES_MAX_LEN : NFCIP_DSLRES_MAX_LEN ) /*!< Max target control res length    */
 
 
 
@@ -146,7 +146,7 @@
 #define nfcipIsTransmissionError(e)    ( ((e) == NFC_CRC_Error) || ((e) == NFC_FramingError) || ((e) == NFC_ParityError) ) /*!< Checks if is a Transmission error */
 
 
-#define nfcipConv1FcToMs( v )          (rfalConv1fcToMs((v)) + 1U)                                     /*!< Converts value v 1fc into milliseconds (fc=13.56)     */
+#define nfcipConv1FcToMs( v )          (RFal_Conv1fcToMs((v)) + 1U)                                     /*!< Converts value v 1fc into milliseconds (fc=13.56)     */
 
 #define nfcipCmdIsReq( cmd )           (((uint8_t)(cmd) % 2U) == 0U)                                    /*!< Checks if the nfcip cmd is a REQ                      */
 
@@ -185,8 +185,8 @@
 
 #define nfcip_PPwGB( lr )              ( RFal_NFC_Dep_LR2PP( lr ) | NFCIP_PP_GB_MASK)                      /*!< Returns a PP byte containing the given PP value indicating GB                  */
 
-#define nfcip_DIDMax( did )            ( MIN( (did), RFAL_NFCDEP_DID_MAX) )                             /*!< Ensures that the given did has proper value  Digital 14.6.2.3 DID [0 14]       */
-#define nfcip_RTOXTargMax( wt )        (uint8_t)( MIN( (RFAL_NFCDEP_RWT_TRG_MAX / RFal_NFC_Dep_WT2RWT(wt)), NFCIP_TARG_MAX_RTOX) )/*!< Calculates the Maximum RTOX value for the given wt as a Target */
+#define nfcip_DIDMax( did )            ( ( (did) < RFAL_NFCDEP_DID_MAX) ? (did) : RFAL_NFCDEP_DID_MAX )                             /*!< Ensures that the given did has proper value  Digital 14.6.2.3 DID [0 14]       */
+#define nfcip_RTOXTargMax( wt )        (uint8_t)( ( (RFAL_NFCDEP_RWT_TRG_MAX / RFal_NFC_Dep_WT2RWT(wt)) < NFCIP_TARG_MAX_RTOX) ? (RFAL_NFCDEP_RWT_TRG_MAX / RFal_NFC_Dep_WT2RWT(wt)) : NFCIP_TARG_MAX_RTOX )/*!< Calculates the Maximum RTOX value for the given wt as a Target */
 
 #define nfcipIsInitiator( st )         ( ((st) >= NFCIP_ST_INIT_IDLE) && ((st) <= NFCIP_ST_INIT_RLS) )  /*!< Checks if module is set as Initiator                                           */
 #define nfcipIsTarget( st )            (!nfcipIsInitiator(st))                                          /*!< Checks if module is set as Target                                              */
@@ -232,7 +232,7 @@ static bool RFal_NFC_Dep_DxIsSupported(uint8_t Dx, uint8_t BRx, uint8_t BSx)
   uint8_t Bx;
 
   /* Take the min of the possible bit rates, we'll use one for both directions */
-  Bx = MIN(BRx, BSx);
+  Bx = (BRx < BSx) ? BRx : BSx;
 
   /* Lower bit rates must be supported for P2P */
   if ((Dx <= (uint8_t)RFAL_NFCDEP_Dx_04_424)) {
@@ -244,758 +244,6 @@ static bool RFal_NFC_Dep_DxIsSupported(uint8_t Dx, uint8_t BRx, uint8_t BSx)
   }
 
   return false;
-}
-
-
-/*******************************************************************************/
-static NFC_OpResult RFal_NFC_Dep_TxRx(RFal_NFC_Dep_Cmd cmd, uint8_t *txBuf, uint32_t fwt, uint8_t *paylBuf, uint8_t paylBufLen, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxActLen)
-{
-  NFC_OpResult ret;
-
-  if ((cmd == NFCIP_CMD_DEP_REQ) || (cmd == NFCIP_CMD_DEP_RES)) { /* this method cannot be used for DEPs */
-    return NFC_InvalidParameter;
-  }
-
-  /* Assign the global params for this TxRx */
-  gNfcip.rxBuf       = rxBuf;
-  gNfcip.rxBufLen    = rxBufLen;
-  gNfcip.rxRcvdLen   = rxActLen;
-
-
-  /*******************************************************************************/
-  /* Transmission                                                                */
-  /*******************************************************************************/
-  if (txBuf != NULL) {                                           /* if nothing to Tx, just do Rx */
-    EXIT_ON_ERR(ret, nfcipTx(cmd, txBuf, paylBuf, paylBufLen, 0, fwt));
-  }
-
-  /*******************************************************************************/
-  /* Reception                                                                   */
-  /*******************************************************************************/
-  ret = nfcipDataRx(true);
-  if (ret != NFC_OK) {
-    return ret;
-  }
-
-  /*******************************************************************************/
-  *rxActLen = *rxBuf;                                         /* Use LEN byte instead due to with/without CRC modes */
-  return NFC_OK;                                            /* Tx and Rx completed successfully                   */
-}
-
-
-/*******************************************************************************/
-static NFC_OpResult RFal_NFC_Dep_DEPControlMsg(uint8_t pfb, uint8_t RTOX)
-{
-  uint8_t        ctrlMsg[20];
-  uint32_t       fwt;
-
-
-  /*******************************************************************************/
-  /* Calculate Cmd and fwt to be used                                            */
-  /*******************************************************************************/
-  const RFal_NFC_Dep_Cmd depCmd = ((gNfcip.cfg.role == RFAL_NFCDEP_ROLE_TARGET) ? NFCIP_CMD_DEP_RES : NFCIP_CMD_DEP_REQ);
-  fwt    = ((gNfcip.cfg.role == RFAL_NFCDEP_ROLE_TARGET) ? NFCIP_NO_FWT : (nfcip_PFBisSTO(pfb) ? ((RTOX * gNfcip.cfg.fwt) + gNfcip.cfg.dFwt) : (gNfcip.cfg.fwt + gNfcip.cfg.dFwt)));
-
-  if (nfcip_PFBisSTO(pfb)) {
-    ctrlMsg[RFAL_NFCDEP_DEPREQ_HEADER_LEN] = RTOX;
-    return nfcipTx(depCmd, ctrlMsg, &ctrlMsg[RFAL_NFCDEP_DEPREQ_HEADER_LEN], sizeof(uint8_t), pfb, fwt);
-  } else {
-    return nfcipTx(depCmd, ctrlMsg, NULL, 0, pfb, fwt);
-  }
-}
-
-/*******************************************************************************/
-static void RFal_NFC_Dep_ClearCounters(void)
-{
-  gNfcip.cntATNRetrys  = 0;
-  gNfcip.cntNACKRetrys = 0;
-  gNfcip.cntTORetrys   = 0;
-  gNfcip.cntTxRetrys   = 0;
-  gNfcip.cntRTOXRetrys = 0;
-}
-
-/*******************************************************************************/
-static NFC_OpResult RFal_NFC_Dep_InitiatorHandleDEP(NFC_OpResult rxRes, uint16_t rxLen, uint16_t *outActRxLen, bool *outIsChaining)
-{
-  NFC_OpResult ret;
-  uint8_t    nfcDepLen;
-  uint8_t    rxMsgIt;
-  uint8_t    rxPFB;
-  uint8_t    rxRTOX;
-  uint8_t    optHdrLen;
-
-  ret        = NFC_InternalError;
-  rxMsgIt    = 0;
-  optHdrLen  = 0;
-
-  *outActRxLen    = 0;
-  *outIsChaining  = false;
-
-
-  /*******************************************************************************/
-  /* Handle reception errors                                                     */
-  /*******************************************************************************/
-  switch (rxRes) {
-    /*******************************************************************************/
-    /* Timeout ->  Digital 1.0 14.15.5.6 */
-    case NFC_SlaveTimeout:
-
-      nfcipLogI(" NFCIP(I) TIMEOUT  TORetrys:%d \r\n", gNfcip.cntTORetrys);
-
-      /* Digital 1.0 14.15.5.6 - If nTO >= Max raise protocol error */
-      if (gNfcip.cntTORetrys++ >= RFAL_NFCDEP_TO_RETRYS) {
-        return NFC_ProtocolError;
-      }
-
-      /*******************************************************************************/
-      /* Upon Timeout error, if Deactivation is pending, no more error recovery
-       * will be done #54.
-       * This is used to address the issue some devices that have a big TO.
-       * Normally LLCP layer has timeout already, and NFCIP layer is still
-       * running error handling, retrying ATN/NACKs                                  */
-      /*******************************************************************************/
-      if (nfcipIsDeactivationPending()) {
-        nfcipLogI(" skipping error recovery due deactivation pending \r\n");
-        return NFC_SlaveTimeout;
-      }
-
-      /* Digital 1.0 14.15.5.6 1)  If last PDU was NACK */
-      if (nfcip_PFBisRNACK(gNfcip.lastPFB)) {
-        /* Digital 1.0 14.15.5.6 2)  if NACKs failed raise protocol error  */
-        if (gNfcip.cntNACKRetrys++ >= RFAL_NFCDEP_MAX_NACK_RETRYS) {
-          return NFC_ProtocolError;
-        }
-
-        /* Send NACK */
-        nfcipLogI(" NFCIP(I) Sending NACK retry: %d \r\n", gNfcip.cntNACKRetrys);
-        EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBRPDU_NACK(gNfcip.pni), 0));
-        return NFC_Busy;
-      }
-
-      nfcipLogI(" NFCIP(I) Checking if to send ATN  ATNRetrys: %d \r\n", gNfcip.cntATNRetrys);
-
-      /* Digital 1.0 14.15.5.6 3)  Otherwise send ATN */
-      if (gNfcip.cntATNRetrys++ >= RFAL_NFCDEP_MAX_ATN_RETRYS) {
-        return NFC_ProtocolError;
-      }
-
-      /* Send ATN */
-      nfcipLogI(" NFCIP(I) Sending ATN \r\n");
-      EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBSPDU_ATN(), 0));
-      return NFC_Busy;
-
-    /*******************************************************************************/
-    /* Data rcvd with error ->  Digital 1.0 14.12.5.4 */
-    case NFC_CRC_Error:
-    case NFC_ParityError:
-    case NFC_FramingError:
-    case NFC_RF_Collision:
-
-      nfcipLogI(" NFCIP(I) rx Error: %d \r\n", rxRes);
-
-      /* Digital 1.0 14.12.5.4 Tx Error with data, ignore */
-      if (rxLen < NFCIP_MIN_TXERROR_LEN) {
-        nfcipLogI(" NFCIP(I) Transmission error w data  \r\n");
-#if 0
-        if (gNfcip.cfg.commMode == RFAL_NFCDEP_COMM_PASSIVE) {
-          nfcipLogI(" NFCIP(I) Transmission error w data -> reEnabling Rx \r\n");
-          nfcipReEnableRxTout(NFCIP_TRECOV);
-          return NFC_Busy;
-        }
-#endif /* 0 */
-      }
-
-      /* Digital 1.1 16.12.5.4  if NACKs failed raise Transmission error  */
-      if (gNfcip.cntNACKRetrys++ >= RFAL_NFCDEP_MAX_NACK_RETRYS) {
-        return NFC_FramingError;
-      }
-
-      /* Send NACK */
-      nfcipLogI(" NFCIP(I) Sending NACK  \r\n");
-      EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBRPDU_NACK(gNfcip.pni), 0));
-      return NFC_Busy;
-
-    case NFC_OK:
-      break;
-
-    case NFC_Busy:
-      return NFC_Busy;  /* Debug purposes */
-
-    default:
-      nfcipLogW(" NFCIP(I) Error: %d \r\n", rxRes);
-      return rxRes;
-  }
-
-  /*******************************************************************************/
-  /* Rx OK check if valid DEP PDU                                                */
-  /*******************************************************************************/
-
-  if (gNfcip.rxBuf == NULL) {
-    return NFC_IO_Error;
-  }
-
-  /* Due to different modes on ST25R391x (with/without CRC) use NFC-DEP LEN instead of bytes retrieved */
-  nfcDepLen = gNfcip.rxBuf[rxMsgIt++];
-
-  nfcipLogD(" NFCIP(I) rx OK: %d bytes \r\n", nfcDepLen);
-
-  /* Digital 1.0 14.15.5.5 Protocol Error  */
-  if (gNfcip.rxBuf[rxMsgIt++] != NFCIP_RES) {
-    nfcipLogW(" NFCIP(I) error %02X instead of %02X \r\n", gNfcip.rxBuf[(rxMsgIt - 1U)], NFCIP_RES);
-    return NFC_ProtocolError;
-  }
-
-  /* Digital 1.0 14.15.5.5 Protocol Error  */
-  if (gNfcip.rxBuf[rxMsgIt++] != (uint8_t)NFCIP_CMD_DEP_RES) {
-    nfcipLogW(" NFCIP(I) error %02X instead of %02X \r\n", gNfcip.rxBuf[(rxMsgIt - 1U)], NFCIP_CMD_DEP_RES);
-    return NFC_ProtocolError;
-  }
-
-  rxPFB = gNfcip.rxBuf[rxMsgIt++];
-
-  /*******************************************************************************/
-  /* Check for valid PFB type                                                    */
-  if (!(nfcip_PFBisSPDU(rxPFB) || nfcip_PFBisRPDU(rxPFB) || nfcip_PFBisIPDU(rxPFB))) {
-    return NFC_ProtocolError;
-  }
-
-  /*******************************************************************************/
-  /* Digital 1.0 14.8.2.1  check if DID is expected and match -> Protocol Error  */
-  if (gNfcip.cfg.did != RFAL_NFCDEP_DID_NO) {
-    if ((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) || (!nfcip_PFBhasDID(rxPFB))) {
-      return NFC_ProtocolError;
-    }
-    optHdrLen++;                                    /* Inc header optional field cnt*/
-  } else if (nfcip_PFBhasDID(rxPFB)) {                /* DID not expected but rcv */
-    return NFC_ProtocolError;
-  } else {
-    /* MISRA 15.7 - Empty else */
-  }
-
-  /*******************************************************************************/
-  /* Digital 1.0 14.6.2.8 & 14.6.3.11 NAD must not be used  */
-  if (gNfcip.cfg.nad != RFAL_NFCDEP_NAD_NO) {
-    if ((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.nad) || (!nfcip_PFBhasNAD(rxPFB))) {
-      return NFC_ProtocolError;
-    }
-    optHdrLen++;                                    /* Inc header optional field cnt*/
-  } else if (nfcip_PFBhasNAD(rxPFB)) {                /* NAD not expected but rcv */
-    return NFC_ProtocolError;
-  } else {
-    /* MISRA 15.7 - Empty else */
-  }
-
-  /*******************************************************************************/
-  /* Process R-PDU                                                               */
-  /*******************************************************************************/
-  if (nfcip_PFBisRPDU(rxPFB)) {
-    /*******************************************************************************/
-    /* R ACK                                                                       */
-    /*******************************************************************************/
-    if (nfcip_PFBisRACK(rxPFB)) {
-      nfcipLogI(" NFCIP(I) Rcvd ACK  \r\n");
-      if (gNfcip.pni == nfcip_PBF_PNI(rxPFB)) {
-        /* 14.12.3.3 R-ACK with correct PNI -> Increment */
-        gNfcip.pni = nfcip_PNIInc(gNfcip.pni);
-
-        /* R-ACK while not performing chaining -> Protocol error*/
-        if (!gNfcip.isTxChaining) {
-          return NFC_ProtocolError;
-        }
-
-        nfcipClearCounters();
-        gNfcip.state = NFCIP_ST_INIT_DEP_IDLE;
-        return NFC_OK;                            /* This block has been transmitted */
-      } else { /* Digital 1.0 14.12.4.5 ACK with wrong PNI Initiator may retransmit */
-        if (gNfcip.cntTxRetrys++ >= RFAL_NFCDEP_MAX_TX_RETRYS) {
-          return NFC_ProtocolError;
-        }
-
-        /* Extended the MAY in Digital 1.0 14.12.4.5 to only reTransmit if the ACK
-         * is for the previous DEP, otherwise raise Protocol immediately
-         * If the PNI difference is more than 1 it is worthless to reTransmit 3x
-         * and after raise the error                                              */
-
-        if (nfcip_PNIDec(gNfcip.pni) ==  nfcip_PBF_PNI(rxPFB)) {
-          /* ReTransmit */
-          nfcipLogI(" NFCIP(I) Rcvd ACK prev PNI -> reTx \r\n");
-          gNfcip.state = NFCIP_ST_INIT_DEP_TX;
-          return NFC_Busy;
-        }
-
-        nfcipLogI(" NFCIP(I) Rcvd ACK unexpected far PNI -> Error \r\n");
-        return NFC_ProtocolError;
-      }
-    } else { /* Digital 1.0 - 14.12.5.2 Target must never send NACK  */
-      return NFC_ProtocolError;
-    }
-  }
-
-  /*******************************************************************************/
-  /* Process S-PDU                                                               */
-  /*******************************************************************************/
-  if (nfcip_PFBisSPDU(rxPFB)) {
-    nfcipLogI(" NFCIP(I) Rcvd S-PDU  \r\n");
-    /*******************************************************************************/
-    /* S ATN                                                                       */
-    /*******************************************************************************/
-    if (nfcip_PFBisSATN(rxPFB)) {                          /* If is a S-ATN        */
-      nfcipLogI(" NFCIP(I) Rcvd ATN  \r\n");
-      if (nfcip_PFBisSATN(gNfcip.lastPFB)) {             /* Check if is expected */
-        gNfcip.cntATNRetrys = 0;                       /* Clear ATN counter    */
-
-        /* Although spec is not clear NFC Forum Digital test is expecting to
-         * retransmit upon receiving ATN_RES */
-        if (nfcip_PFBisSTO(gNfcip.lastPFBnATN)) {
-          nfcipLogI(" NFCIP(I) Rcvd ATN  -> reTx RTOX_RES \r\n");
-          EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBSPDU_TO(), gNfcip.lastRTOX));
-        } else {
-          /* ReTransmit ? */
-          if (gNfcip.cntTxRetrys++ >= RFAL_NFCDEP_MAX_TX_RETRYS) {
-            return NFC_ProtocolError;
-          }
-
-          nfcipLogI(" NFCIP(I) Rcvd ATN  -> reTx  PNI: %d \r\n", gNfcip.pni);
-          gNfcip.state = NFCIP_ST_INIT_DEP_TX;
-        }
-
-        return NFC_Busy;
-      } else {                                           /* Digital 1.0  14.12.4.4 & 14.12.4.8 */
-        return NFC_ProtocolError;
-      }
-    }
-    /*******************************************************************************/
-    /* S TO                                                                        */
-    /*******************************************************************************/
-    else if (nfcip_PFBisSTO(rxPFB)) {                      /* If is a S-TO (RTOX)  */
-      nfcipLogI(" NFCIP(I) Rcvd TO  \r\n");
-
-      rxRTOX = gNfcip.rxBuf[rxMsgIt++];
-
-      /* Digital 1.1 16.12.4.3 - Initiator MAY stop accepting subsequent RTOX Req   *
-       *                       - RTOX request to an ATN -> Protocol error           */
-      if ((gNfcip.cntRTOXRetrys++ > RFAL_NFCDEP_MAX_RTOX_RETRYS) || nfcip_PFBisSATN(gNfcip.lastPFB)) {
-        return NFC_ProtocolError;
-      }
-
-      /* Digital 1.1 16.8.4.1 RTOX must be between [1,59] */
-      if ((rxRTOX < NFCIP_INIT_MIN_RTOX) || (rxRTOX > NFCIP_INIT_MAX_RTOX)) {
-        return NFC_ProtocolError;
-      }
-
-      EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBSPDU_TO(), rxRTOX));
-      gNfcip.lastRTOX = rxRTOX;
-
-      return NFC_Busy;
-    } else {
-      /* Unexpected S-PDU */
-      return NFC_ProtocolError;                       /*  PRQA S  2880 # MISRA 2.1 - Guard code to prevent unexpected behavior */
-    }
-  }
-
-  /*******************************************************************************/
-  /* Process I-PDU                                                               */
-  /*******************************************************************************/
-  if (nfcip_PFBisIPDU(rxPFB)) {
-    if (gNfcip.pni != nfcip_PBF_PNI(rxPFB)) {
-      nfcipLogI(" NFCIP(I) Rcvd IPDU wrong PNI     curPNI: %d rxPNI: %d \r\n", gNfcip.pni, nfcip_PBF_PNI(rxPFB));
-      return NFC_ProtocolError;
-    }
-
-    nfcipLogD(" NFCIP(I) Rcvd IPDU OK    PNI: %d \r\n", gNfcip.pni);
-
-    /* 14.12.3.3 I-PDU with correct PNI -> Increment */
-    gNfcip.pni = nfcip_PNIInc(gNfcip.pni);
-
-
-    /* Successful data Exchange */
-    nfcipClearCounters();
-    *outActRxLen  = ((uint16_t)nfcDepLen - RFAL_NFCDEP_DEP_HEADER - (uint16_t)optHdrLen);
-
-    if ((&gNfcip.rxBuf[gNfcip.rxBufPaylPos] != &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen]) && (*outActRxLen > 0U)) {
-      memmove(&gNfcip.rxBuf[gNfcip.rxBufPaylPos], &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen], *outActRxLen);
-    }
-
-    /*******************************************************************************/
-    /* Check if target is indicating chaining MI                                   */
-    /*******************************************************************************/
-    if (nfcip_PFBisIMI(rxPFB)) {
-      gNfcip.isRxChaining = true;
-      *outIsChaining      = true;
-
-      nfcipLogD(" NFCIP(I) Rcvd IPDU OK w MI -> ACK \r\n");
-      EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBRPDU_ACK(gNfcip.pni), gNfcip.rxBuf[rxMsgIt++]));
-
-      return NFC_Again;  /* Send Again signalling to run again, but some chaining data has arrived*/
-    } else {
-      gNfcip.isRxChaining = false;
-      gNfcip.state        = NFCIP_ST_INIT_DEP_IDLE;
-
-      ret = NFC_OK;    /* Data exchange done */
-    }
-  }
-  return ret;
-}
-
-
-/*******************************************************************************/
-static NFC_OpResult RFal_NFC_Dep_TargetHandleRX(NFC_OpResult rxRes, uint16_t *outActRxLen, bool *outIsChaining)
-{
-  NFC_OpResult ret;
-  uint8_t    nfcDepLen;
-  uint8_t    rxMsgIt;
-  uint8_t    rxPFB;
-  uint8_t    optHdrLen;
-  uint8_t    resBuf[RFAL_NFCDEP_HEADER_PAD + NFCIP_TARGET_RES_MAX];
-
-
-  ret        = NFC_InternalError;
-  rxMsgIt    = 0;
-  optHdrLen  = 0;
-
-  *outActRxLen    = 0;
-  *outIsChaining  = false;
-
-
-  /*******************************************************************************/
-  /* Handle reception errors                                                     */
-  /*******************************************************************************/
-  switch (rxRes) {
-    /*******************************************************************************/
-    case NFC_OK:
-      break;
-
-    case NFC_LinkLoss:
-      nfcipLogW(" NFCIP(T) Error: %d \r\n", rxRes);
-      return rxRes;
-
-    case NFC_Busy:
-      return NFC_Busy;  /* Debug purposes */
-
-    case NFC_SlaveTimeout:
-    case NFC_CRC_Error:
-    case NFC_ParityError:
-    case NFC_FramingError:
-    case NFC_ProtocolError:
-    default:
-      /* Digital 1.1  16.12.5.2 The Target MUST NOT attempt any error recovery.      *
-       * The Target MUST always stay in receive mode when a                          *
-       * Transmission Error or a Protocol Error occurs.                              *
-       *                                                                             *
-       * Do not push Transmission/Protocol Errors to upper layer in Listen Mode #766 */
-
-      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-      return NFC_Busy;
-  }
-
-  /*******************************************************************************/
-  /* Rx OK check if valid DEP PDU                                                */
-  /*******************************************************************************/
-  if (gNfcip.rxBuf == NULL) {
-    return NFC_IO_Error;
-  }
-
-  /* Due to different modes on ST25R391x (with/without CRC) use NFC-DEP LEN instead of bytes retrieved */
-  nfcDepLen = gNfcip.rxBuf[rxMsgIt++];
-
-  nfcipLogD(" NFCIP(T) rx OK: %d bytes \r\n", nfcDepLen);
-
-  if (gNfcip.rxBuf[rxMsgIt++] != NFCIP_REQ) {
-    nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-    return NFC_Busy; /* NFC_ProtocolError - Ignore bad request */
-  }
-
-
-  /*******************************************************************************/
-  /* Check whether target rcvd a normal DEP or deactivation request              */
-  /*******************************************************************************/
-  switch (gNfcip.rxBuf[rxMsgIt++]) {
-    /*******************************************************************************/
-    case (uint8_t)NFCIP_CMD_DEP_REQ:
-      break;                                /* Continue to normal DEP processing */
-
-    /*******************************************************************************/
-    case (uint8_t)NFCIP_CMD_DSL_REQ:
-
-      nfcipLogI(" NFCIP(T) rx DSL \r\n");
-
-      /* Digital 1.0  14.9.1.2 If DID is used and incorrect ignore it */
-      /* [Digital 1.0, 16.9.1.2]: If DID == 0, Target SHALL ignore DSL_REQ with DID */
-      if ((((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) || (nfcDepLen != RFAL_NFCDEP_DSL_RLS_LEN_DID)) && (gNfcip.cfg.did != RFAL_NFCDEP_DID_NO))
-          || ((gNfcip.cfg.did == RFAL_NFCDEP_DID_NO) && (nfcDepLen != RFAL_NFCDEP_DSL_RLS_LEN_NO_DID))
-         ) {
-        nfcipLogI(" NFCIP(T) DSL wrong DID, ignoring \r\n");
-        return NFC_Busy;
-      }
-
-      nfcipTx(NFCIP_CMD_DSL_RES, resBuf, NULL, 0, 0, NFCIP_NO_FWT);
-
-      gNfcip.state = NFCIP_ST_TARG_DEP_SLEEP;
-      return NFC_SleepRequest;
-
-    /*******************************************************************************/
-    case (uint8_t)NFCIP_CMD_RLS_REQ:
-
-      nfcipLogI(" NFCIP(T) rx RLS \r\n");
-
-      /* Digital 1.0  14.10.1.2 If DID is used and incorrect ignore it */
-      /* [Digital 1.0, 16.10.2.2]: If DID == 0, Target SHALL ignore DSL_REQ with DID */
-      if ((((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) || (nfcDepLen != RFAL_NFCDEP_DSL_RLS_LEN_DID)) && (gNfcip.cfg.did != RFAL_NFCDEP_DID_NO))
-          || ((gNfcip.cfg.did == RFAL_NFCDEP_DID_NO) && (nfcDepLen > RFAL_NFCDEP_DSL_RLS_LEN_NO_DID))
-         ) {
-        nfcipLogI(" NFCIP(T) RLS wrong DID, ignoring \r\n");
-        return NFC_Busy;
-      }
-
-      nfcipTx(NFCIP_CMD_RLS_RES, resBuf, NULL, 0, 0, NFCIP_NO_FWT);
-
-      gNfcip.state = NFCIP_ST_TARG_DEP_IDLE;
-      return NFC_ReleaseRequest;
-
-    /*******************************************************************************/
-    /*case NFCIP_CMD_PSL_REQ:              PSL must be handled in Activation only */
-    /*case NFCIP_CMD_WUP_REQ:              WUP not in NFC Forum Digital 1.0       */
-    default:
-
-      /* Don't go to NFCIP_ST_TARG_DEP_IDLE state as it needs to ignore this    *
-       * invalid frame, and keep waiting for more frames                        */
-
-      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-      return NFC_Busy; /* NFC_ProtocolError - Ignore bad frame */
-  }
-
-  /*******************************************************************************/
-
-  rxPFB = gNfcip.rxBuf[rxMsgIt++];                    /* Store rcvd PFB  */
-
-  /*******************************************************************************/
-  /* Check for valid PFB type                                                    */
-  if (!(nfcip_PFBisSPDU(rxPFB) || nfcip_PFBisRPDU(rxPFB) || nfcip_PFBisIPDU(rxPFB))) {
-    nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-    return NFC_Busy; /* NFC_ProtocolError - Ignore invalid PFB  */
-  }
-
-  /*******************************************************************************/
-  if (gNfcip.cfg.did != RFAL_NFCDEP_DID_NO) {
-    if (!nfcip_PFBhasDID(rxPFB)) {
-      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-      return NFC_Busy; /* NFC_ProtocolError - Ignore bad/missing DID  */
-    }
-    if (gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) { /* MISRA 13.5 */
-      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-      return NFC_Busy; /* NFC_ProtocolError - Ignore bad/missing DID  */
-    }
-    optHdrLen++;                                    /* Inc header optional field cnt*/
-  } else if (nfcip_PFBhasDID(rxPFB)) {                /* DID not expected but rcv     */
-    nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-    return NFC_Busy; /* NFC_ProtocolError - Ignore unexpected DID  */
-  } else {
-    /* MISRA 15.7 - Empty else */
-  }
-
-
-  /*******************************************************************************/
-  if (gNfcip.cfg.nad != RFAL_NFCDEP_NAD_NO) {
-    if ((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) || !nfcip_PFBhasDID(rxPFB)) {
-      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-      return NFC_Busy;                            /* NFC_ProtocolError - Ignore bad/missing DID  */
-    }
-    optHdrLen++;                                    /* Inc header optional field cnt*/
-  } else if (nfcip_PFBhasNAD(rxPFB)) {                /* NAD not expected but rcv */
-    nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-    return NFC_Busy;                                /* NFC_ProtocolError - Ignore unexpected NAD  */
-  } else {
-    /* MISRA 15.7 - Empty else */
-  }
-
-
-  /*******************************************************************************/
-  /* Process R-PDU                                                               */
-  /*******************************************************************************/
-  if (nfcip_PFBisRPDU(rxPFB)) {
-    nfcipLogD(" NFCIP(T) Rcvd R-PDU  \r\n");
-    /*******************************************************************************/
-    /* R ACK                                                                       */
-    /*******************************************************************************/
-    if (nfcip_PFBisRACK(rxPFB)) {
-      nfcipLogI(" NFCIP(T) Rcvd ACK  \r\n");
-      if (gNfcip.pni == nfcip_PBF_PNI(rxPFB)) {
-        /* R-ACK while not performing chaining -> Protocol error */
-        if (!gNfcip.isTxChaining) {
-          nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-          return NFC_Busy;                    /* NFC_ProtocolError - Ignore unexpected ACK  */
-        }
-
-        /* This block has been transmitted and acknowledged, perform RTOX until next data is provided  */
-
-        /* Digital 1.1  16.12.4.7 - If ACK rcvd continue with chaining or an RTOX */
-        nfcipTimerStart(gNfcip.RTOXTimer, nfcipRTOXAdjust(nfcipConv1FcToMs(RFal_NFC_Dep_WT2RWT(gNfcip.cfg.to))));
-        gNfcip.state = NFCIP_ST_TARG_DEP_RTOX;
-
-        return NFC_OK;                        /* This block has been transmitted */
-      }
-
-      /* Digital 1.0 14.12.3.4 - If last send was ATN and rx PNI is minus 1 */
-      else if (nfcip_PFBisSATN(gNfcip.lastPFB) && (nfcip_PNIDec(gNfcip.pni) == nfcip_PBF_PNI(rxPFB))) {
-        nfcipLogI(" NFCIP(T) wrong PNI, last was ATN reTx  \r\n");
-        /* Spec says to leave current PNI as is, but will be Inc after Tx, remaining the same */
-        gNfcip.pni = nfcip_PNIDec(gNfcip.pni);
-
-        gNfcip.state = NFCIP_ST_TARG_DEP_TX;
-        return NFC_Busy;
-      } else {
-        /* MISRA 15.7 - Empty else */
-      }
-    }
-    /*******************************************************************************/
-    /* R NACK                                                                      */
-    /*******************************************************************************/
-    /* ISO 18092 12.6.1.3.3 When rcv NACK if PNI = prev PNI sent ->  reTx          */
-    else if (nfcip_PFBisRNACK(rxPFB) && (nfcip_PNIDec(gNfcip.pni) == nfcip_PBF_PNI(rxPFB))) {
-      nfcipLogI(" NFCIP(T) Rcvd NACK  \r\n");
-
-      gNfcip.pni = nfcip_PNIDec(gNfcip.pni);     /* Dec so that has the prev PNI */
-
-      gNfcip.state = NFCIP_ST_TARG_DEP_TX;
-      return NFC_Busy;
-    } else {
-      nfcipLogI(" NFCIP(T) Unexpected R-PDU \r\n");
-
-      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-      return NFC_Busy; /* NFC_ProtocolError - Ignore unexpected R-PDU  */
-    }
-  }
-
-  /*******************************************************************************/
-  /* Process S-PDU                                                               */
-  /*******************************************************************************/
-  if (nfcip_PFBisSPDU(rxPFB)) {
-    nfcipLogD(" NFCIP(T) Rcvd S-PDU  \r\n");
-
-    /*******************************************************************************/
-    /* S ATN                                                                       */
-    /*******************************************************************************/
-    /* ISO 18092 12.6.3 Attention                                                  */
-    if (nfcip_PFBisSATN(rxPFB)) {                          /*    If is a S-ATN     */
-      nfcipLogI(" NFCIP(T) Rcvd ATN  curPNI: %d \r\n", gNfcip.pni);
-      EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBSPDU_ATN(), 0));
-      return NFC_Busy;
-    }
-
-    /*******************************************************************************/
-    /* S TO                                                                        */
-    /*******************************************************************************/
-    else if (nfcip_PFBisSTO(rxPFB)) {                      /* If is a S-TO (RTOX)  */
-      if (nfcip_PFBisSTO(gNfcip.lastPFBnATN)) {
-        nfcipLogI(" NFCIP(T) Rcvd TO  \r\n");
-
-        /* Digital 1.1  16.8.4.6  RTOX value in RES different that in REQ -> Protocol Error */
-        if (gNfcip.lastRTOX != gNfcip.rxBuf[rxMsgIt++]) {
-          nfcipLogI(" NFCIP(T) Mismatched RTOX value \r\n");
-
-          nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-          return NFC_Busy; /* NFC_ProtocolError - Ignore unexpected RTOX value  */
-        }
-
-        /* Clear waiting for RTOX Ack Flag */
-        gNfcip.isWait4RTOX = false;
-
-        /* Check if a Tx is already pending */
-        if (gNfcip.isTxPending) {
-          nfcipLogW(" NFCIP(T) Tx pending, go immediately to TX \r\n");
-
-          gNfcip.state = NFCIP_ST_TARG_DEP_TX;
-          return NFC_Busy;
-        }
-
-        /* Start RTOX timer and change to check state  */
-        nfcipTimerStart(gNfcip.RTOXTimer, nfcipRTOXAdjust(nfcipConv1FcToMs(gNfcip.lastRTOX * RFal_NFC_Dep_WT2RWT(gNfcip.cfg.to))));
-        gNfcip.state = NFCIP_ST_TARG_DEP_RTOX;
-
-        return NFC_Busy;
-      }
-    } else {
-      /* Unexpected S-PDU */
-      nfcipLogI(" NFCIP(T) Unexpected S-PDU \r\n");           /*  PRQA S  2880 # MISRA 2.1 - Guard code to prevent unexpected behavior */
-
-      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-      return NFC_Busy; /* NFC_ProtocolError - Ignore unexpected S-PDU  */
-    }
-  }
-
-  /*******************************************************************************/
-  /* Process I-PDU                                                               */
-  /*******************************************************************************/
-  if (nfcip_PFBisIPDU(rxPFB)) {
-    if (gNfcip.pni != nfcip_PBF_PNI(rxPFB)) {
-      nfcipLogI(" NFCIP(T) Rcvd IPDU wrong PNI     curPNI: %d rxPNI: %d \r\n", gNfcip.pni, nfcip_PBF_PNI(rxPFB));
-
-      /* Digital 1.1 16.12.3.4 - If last send was ATN and rx PNI is minus 1 */
-      if (nfcip_PFBisSATN(gNfcip.lastPFB) && (nfcip_PNIDec(gNfcip.pni) == nfcip_PBF_PNI(rxPFB))) {
-        /* Spec says to leave current PNI as is, but will be Inc after Data Tx, remaining the same */
-        gNfcip.pni = nfcip_PNIDec(gNfcip.pni);
-
-        if (nfcip_PFBisIMI(rxPFB)) {
-          nfcipLogI(" NFCIP(T) PNI = prevPNI && ATN before && chaining -> send ACK  \r\n");
-          EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBRPDU_ACK(gNfcip.pni), gNfcip.rxBuf[rxMsgIt++]));
-
-          /* Digital 1.1 16.12.3.4 (...) leave the current PNI unchanged afterwards */
-          gNfcip.pni = nfcip_PNIInc(gNfcip.pni);
-        } else {
-          nfcipLogI(" NFCIP(T) PNI = prevPNI && ATN before -> reTx last I-PDU  \r\n");
-          gNfcip.state = NFCIP_ST_TARG_DEP_TX;
-        }
-
-        return NFC_Busy;
-      }
-
-      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
-      return NFC_Busy;            /* NFC_ProtocolError - Ignore bad PNI value  */
-    }
-
-    nfcipLogD(" NFCIP(T) Rcvd IPDU OK PNI: %d  \r\n", gNfcip.pni);
-
-    /*******************************************************************************/
-    /* Successful data exchange                                                    */
-    /*******************************************************************************/
-    *outActRxLen  = ((uint16_t)nfcDepLen - RFAL_NFCDEP_DEP_HEADER - (uint16_t)optHdrLen);
-
-    nfcipClearCounters();
-
-    if ((&gNfcip.rxBuf[gNfcip.rxBufPaylPos] != &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen]) && (*outActRxLen > 0U)) {
-      memmove(&gNfcip.rxBuf[gNfcip.rxBufPaylPos], &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen], *outActRxLen);
-    }
-
-
-    /*******************************************************************************/
-    /* Check if Initiator is indicating chaining MI                                */
-    /*******************************************************************************/
-    if (nfcip_PFBisIMI(rxPFB)) {
-      gNfcip.isRxChaining = true;
-      *outIsChaining      = true;
-
-      nfcipLogD(" NFCIP(T) Rcvd IPDU OK w MI -> ACK \r\n");
-      EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBRPDU_ACK(gNfcip.pni), gNfcip.rxBuf[rxMsgIt++]));
-
-      gNfcip.pni = nfcip_PNIInc(gNfcip.pni);
-
-      return NFC_Again;  /* Send Again signalling to run again, but some chaining data has arrived*/
-    } else {
-      if (gNfcip.isRxChaining) {
-        nfcipLogI(" NFCIP(T) Rcvd last IPDU chaining finished \r\n");
-      }
-
-      /*******************************************************************************/
-      /* Reception done, send to DH and start RTOX timer                             */
-      /*******************************************************************************/
-      nfcipTimerStart(gNfcip.RTOXTimer, nfcipRTOXAdjust(nfcipConv1FcToMs(RFal_NFC_Dep_WT2RWT(gNfcip.cfg.to))));
-      gNfcip.state = NFCIP_ST_TARG_DEP_RTOX;
-
-      gNfcip.isRxChaining = false;
-      ret = NFC_OK;                            /* Data exchange done */
-    }
-  }
-  return ret;
 }
 
 
@@ -1152,7 +400,802 @@ static NFC_OpResult RFal_NFC_Dep_Tx(RFal_NFC_Dep_Cmd cmd, uint8_t *txBuf, uint8_
   }
 
   /*******************************************************************************/
-  return nfcipDataTx(txBlock, txBufIt, fwt);
+  return RFal_NFC_Dep_DataTx(txBlock, txBufIt, fwt);
+}
+
+/*******************************************************************************/
+static NFC_OpResult RFal_NFC_Dep_TxRx(RFal_NFC_Dep_Cmd cmd, uint8_t *txBuf, uint32_t fwt, uint8_t *paylBuf, uint8_t paylBufLen, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxActLen)
+{
+  NFC_OpResult ret;
+
+  if ((cmd == NFCIP_CMD_DEP_REQ) || (cmd == NFCIP_CMD_DEP_RES)) { /* this method cannot be used for DEPs */
+    return NFC_InvalidParameter;
+  }
+
+  /* Assign the global params for this TxRx */
+  gNfcip.rxBuf       = rxBuf;
+  gNfcip.rxBufLen    = rxBufLen;
+  gNfcip.rxRcvdLen   = rxActLen;
+
+
+  /*******************************************************************************/
+  /* Transmission                                                                */
+  /*******************************************************************************/
+  if (txBuf != NULL) {                                           /* if nothing to Tx, just do Rx */
+    ret = RFal_NFC_Dep_Tx(cmd, txBuf, paylBuf, paylBufLen, 0, fwt);
+    if(ret < NFC_OK)
+    {
+      return ret;
+    }
+  }
+
+  /*******************************************************************************/
+  /* Reception                                                                   */
+  /*******************************************************************************/
+  ret = RFal_NFC_Dep_DataRx(true);
+  if (ret != NFC_OK) {
+    return ret;
+  }
+
+  /*******************************************************************************/
+  *rxActLen = *rxBuf;                                         /* Use LEN byte instead due to with/without CRC modes */
+  return NFC_OK;                                            /* Tx and Rx completed successfully                   */
+}
+
+
+/*******************************************************************************/
+static NFC_OpResult RFal_NFC_Dep_ControlMsg(uint8_t pfb, uint8_t RTOX)
+{
+  uint8_t        ctrlMsg[20];
+  uint32_t       fwt;
+
+
+  /*******************************************************************************/
+  /* Calculate Cmd and fwt to be used                                            */
+  /*******************************************************************************/
+  const RFal_NFC_Dep_Cmd depCmd = ((gNfcip.cfg.role == RFAL_NFCDEP_ROLE_TARGET) ? NFCIP_CMD_DEP_RES : NFCIP_CMD_DEP_REQ);
+  fwt    = ((gNfcip.cfg.role == RFAL_NFCDEP_ROLE_TARGET) ? NFCIP_NO_FWT : (nfcip_PFBisSTO(pfb) ? ((RTOX * gNfcip.cfg.fwt) + gNfcip.cfg.dFwt) : (gNfcip.cfg.fwt + gNfcip.cfg.dFwt)));
+
+  if (nfcip_PFBisSTO(pfb)) {
+    ctrlMsg[RFAL_NFCDEP_DEPREQ_HEADER_LEN] = RTOX;
+    return RFal_NFC_Dep_Tx(depCmd, ctrlMsg, &ctrlMsg[RFAL_NFCDEP_DEPREQ_HEADER_LEN], sizeof(uint8_t), pfb, fwt);
+  } else {
+    return RFal_NFC_Dep_Tx(depCmd, ctrlMsg, NULL, 0, pfb, fwt);
+  }
+}
+
+/*******************************************************************************/
+static void RFal_NFC_Dep_ClearCounters(void)
+{
+  gNfcip.cntATNRetrys  = 0;
+  gNfcip.cntNACKRetrys = 0;
+  gNfcip.cntTORetrys   = 0;
+  gNfcip.cntTxRetrys   = 0;
+  gNfcip.cntRTOXRetrys = 0;
+}
+
+/*******************************************************************************/
+static NFC_OpResult RFal_NFC_Dep_InitiatorHandle(NFC_OpResult rxRes, uint16_t rxLen, uint16_t *outActRxLen, bool *outIsChaining)
+{
+  NFC_OpResult ret;
+  uint8_t    nfcDepLen;
+  uint8_t    rxMsgIt;
+  uint8_t    rxPFB;
+  uint8_t    rxRTOX;
+  uint8_t    optHdrLen;
+
+  ret        = NFC_InternalError;
+  rxMsgIt    = 0;
+  optHdrLen  = 0;
+
+  *outActRxLen    = 0;
+  *outIsChaining  = false;
+
+
+  /*******************************************************************************/
+  /* Handle reception errors                                                     */
+  /*******************************************************************************/
+  switch (rxRes) {
+    /*******************************************************************************/
+    /* Timeout ->  Digital 1.0 14.15.5.6 */
+    case NFC_SlaveTimeout:
+
+      nfcipLogI(" NFCIP(I) TIMEOUT  TORetrys:%d \r\n", gNfcip.cntTORetrys);
+
+      /* Digital 1.0 14.15.5.6 - If nTO >= Max raise protocol error */
+      if (gNfcip.cntTORetrys++ >= RFAL_NFCDEP_TO_RETRYS) {
+        return NFC_ProtocolError;
+      }
+
+      /*******************************************************************************/
+      /* Upon Timeout error, if Deactivation is pending, no more error recovery
+       * will be done #54.
+       * This is used to address the issue some devices that have a big TO.
+       * Normally LLCP layer has timeout already, and NFCIP layer is still
+       * running error handling, retrying ATN/NACKs                                  */
+      /*******************************************************************************/
+      if (nfcipIsDeactivationPending()) {
+        nfcipLogI(" skipping error recovery due deactivation pending \r\n");
+        return NFC_SlaveTimeout;
+      }
+
+      /* Digital 1.0 14.15.5.6 1)  If last PDU was NACK */
+      if (nfcip_PFBisRNACK(gNfcip.lastPFB)) {
+        /* Digital 1.0 14.15.5.6 2)  if NACKs failed raise protocol error  */
+        if (gNfcip.cntNACKRetrys++ >= RFAL_NFCDEP_MAX_NACK_RETRYS) {
+          return NFC_ProtocolError;
+        }
+
+        /* Send NACK */
+        nfcipLogI(" NFCIP(I) Sending NACK retry: %d \r\n", gNfcip.cntNACKRetrys);
+        ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBRPDU_NACK(gNfcip.pni), 0);
+        if(ret < NFC_OK)
+        {
+          return ret;
+        }
+        return NFC_Busy;
+      }
+
+      nfcipLogI(" NFCIP(I) Checking if to send ATN  ATNRetrys: %d \r\n", gNfcip.cntATNRetrys);
+
+      /* Digital 1.0 14.15.5.6 3)  Otherwise send ATN */
+      if (gNfcip.cntATNRetrys++ >= RFAL_NFCDEP_MAX_ATN_RETRYS) {
+        return NFC_ProtocolError;
+      }
+
+      /* Send ATN */
+      nfcipLogI(" NFCIP(I) Sending ATN \r\n");
+      ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBSPDU_ATN(), 0);
+      if(ret < NFC_OK)
+      {
+        return ret;
+      }
+
+      return NFC_Busy;
+
+    /*******************************************************************************/
+    /* Data rcvd with error ->  Digital 1.0 14.12.5.4 */
+    case NFC_CRC_Error:
+    case NFC_ParityError:
+    case NFC_FramingError:
+    case NFC_RF_Collision:
+
+      nfcipLogI(" NFCIP(I) rx Error: %d \r\n", rxRes);
+
+      /* Digital 1.0 14.12.5.4 Tx Error with data, ignore */
+      if (rxLen < NFCIP_MIN_TXERROR_LEN) {
+        nfcipLogI(" NFCIP(I) Transmission error w data  \r\n");
+#if 0
+        if (gNfcip.cfg.commMode == RFAL_NFCDEP_COMM_PASSIVE) {
+          nfcipLogI(" NFCIP(I) Transmission error w data -> reEnabling Rx \r\n");
+          nfcipReEnableRxTout(NFCIP_TRECOV);
+          return NFC_Busy;
+        }
+#endif /* 0 */
+      }
+
+      /* Digital 1.1 16.12.5.4  if NACKs failed raise Transmission error  */
+      if (gNfcip.cntNACKRetrys++ >= RFAL_NFCDEP_MAX_NACK_RETRYS) {
+        return NFC_FramingError;
+      }
+
+      /* Send NACK */
+      nfcipLogI(" NFCIP(I) Sending NACK  \r\n");
+      ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBRPDU_NACK(gNfcip.pni), 0);
+      if(ret < NFC_OK)
+      {
+        return ret;
+      }
+
+      return NFC_Busy;
+
+    case NFC_OK:
+      break;
+
+    case NFC_Busy:
+      return NFC_Busy;  /* Debug purposes */
+
+    default:
+      nfcipLogW(" NFCIP(I) Error: %d \r\n", rxRes);
+      return rxRes;
+  }
+
+  /*******************************************************************************/
+  /* Rx OK check if valid DEP PDU                                                */
+  /*******************************************************************************/
+
+  if (gNfcip.rxBuf == NULL) {
+    return NFC_IO_Error;
+  }
+
+  /* Due to different modes on ST25R391x (with/without CRC) use NFC-DEP LEN instead of bytes retrieved */
+  nfcDepLen = gNfcip.rxBuf[rxMsgIt++];
+
+  nfcipLogD(" NFCIP(I) rx OK: %d bytes \r\n", nfcDepLen);
+
+  /* Digital 1.0 14.15.5.5 Protocol Error  */
+  if (gNfcip.rxBuf[rxMsgIt++] != NFCIP_RES) {
+    nfcipLogW(" NFCIP(I) error %02X instead of %02X \r\n", gNfcip.rxBuf[(rxMsgIt - 1U)], NFCIP_RES);
+    return NFC_ProtocolError;
+  }
+
+  /* Digital 1.0 14.15.5.5 Protocol Error  */
+  if (gNfcip.rxBuf[rxMsgIt++] != (uint8_t)NFCIP_CMD_DEP_RES) {
+    nfcipLogW(" NFCIP(I) error %02X instead of %02X \r\n", gNfcip.rxBuf[(rxMsgIt - 1U)], NFCIP_CMD_DEP_RES);
+    return NFC_ProtocolError;
+  }
+
+  rxPFB = gNfcip.rxBuf[rxMsgIt++];
+
+  /*******************************************************************************/
+  /* Check for valid PFB type                                                    */
+  if (!(nfcip_PFBisSPDU(rxPFB) || nfcip_PFBisRPDU(rxPFB) || nfcip_PFBisIPDU(rxPFB))) {
+    return NFC_ProtocolError;
+  }
+
+  /*******************************************************************************/
+  /* Digital 1.0 14.8.2.1  check if DID is expected and match -> Protocol Error  */
+  if (gNfcip.cfg.did != RFAL_NFCDEP_DID_NO) {
+    if ((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) || (!nfcip_PFBhasDID(rxPFB))) {
+      return NFC_ProtocolError;
+    }
+    optHdrLen++;                                    /* Inc header optional field cnt*/
+  } else if (nfcip_PFBhasDID(rxPFB)) {                /* DID not expected but rcv */
+    return NFC_ProtocolError;
+  } else {
+    /* MISRA 15.7 - Empty else */
+  }
+
+  /*******************************************************************************/
+  /* Digital 1.0 14.6.2.8 & 14.6.3.11 NAD must not be used  */
+  if (gNfcip.cfg.nad != RFAL_NFCDEP_NAD_NO) {
+    if ((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.nad) || (!nfcip_PFBhasNAD(rxPFB))) {
+      return NFC_ProtocolError;
+    }
+    optHdrLen++;                                    /* Inc header optional field cnt*/
+  } else if (nfcip_PFBhasNAD(rxPFB)) {                /* NAD not expected but rcv */
+    return NFC_ProtocolError;
+  } else {
+    /* MISRA 15.7 - Empty else */
+  }
+
+  /*******************************************************************************/
+  /* Process R-PDU                                                               */
+  /*******************************************************************************/
+  if (nfcip_PFBisRPDU(rxPFB)) {
+    /*******************************************************************************/
+    /* R ACK                                                                       */
+    /*******************************************************************************/
+    if (nfcip_PFBisRACK(rxPFB)) {
+      nfcipLogI(" NFCIP(I) Rcvd ACK  \r\n");
+      if (gNfcip.pni == nfcip_PBF_PNI(rxPFB)) {
+        /* 14.12.3.3 R-ACK with correct PNI -> Increment */
+        gNfcip.pni = nfcip_PNIInc(gNfcip.pni);
+
+        /* R-ACK while not performing chaining -> Protocol error*/
+        if (!gNfcip.isTxChaining) {
+          return NFC_ProtocolError;
+        }
+
+        RFal_NFC_Dep_ClearCounters();
+        gNfcip.state = NFCIP_ST_INIT_DEP_IDLE;
+        return NFC_OK;                            /* This block has been transmitted */
+      } else { /* Digital 1.0 14.12.4.5 ACK with wrong PNI Initiator may retransmit */
+        if (gNfcip.cntTxRetrys++ >= RFAL_NFCDEP_MAX_TX_RETRYS) {
+          return NFC_ProtocolError;
+        }
+
+        /* Extended the MAY in Digital 1.0 14.12.4.5 to only reTransmit if the ACK
+         * is for the previous DEP, otherwise raise Protocol immediately
+         * If the PNI difference is more than 1 it is worthless to reTransmit 3x
+         * and after raise the error                                              */
+
+        if (nfcip_PNIDec(gNfcip.pni) ==  nfcip_PBF_PNI(rxPFB)) {
+          /* ReTransmit */
+          nfcipLogI(" NFCIP(I) Rcvd ACK prev PNI -> reTx \r\n");
+          gNfcip.state = NFCIP_ST_INIT_DEP_TX;
+          return NFC_Busy;
+        }
+
+        nfcipLogI(" NFCIP(I) Rcvd ACK unexpected far PNI -> Error \r\n");
+        return NFC_ProtocolError;
+      }
+    } else { /* Digital 1.0 - 14.12.5.2 Target must never send NACK  */
+      return NFC_ProtocolError;
+    }
+  }
+
+  /*******************************************************************************/
+  /* Process S-PDU                                                               */
+  /*******************************************************************************/
+  if (nfcip_PFBisSPDU(rxPFB)) {
+    nfcipLogI(" NFCIP(I) Rcvd S-PDU  \r\n");
+    /*******************************************************************************/
+    /* S ATN                                                                       */
+    /*******************************************************************************/
+    if (nfcip_PFBisSATN(rxPFB)) {                          /* If is a S-ATN        */
+      nfcipLogI(" NFCIP(I) Rcvd ATN  \r\n");
+      if (nfcip_PFBisSATN(gNfcip.lastPFB)) {             /* Check if is expected */
+        gNfcip.cntATNRetrys = 0;                       /* Clear ATN counter    */
+
+        /* Although spec is not clear NFC Forum Digital test is expecting to
+         * retransmit upon receiving ATN_RES */
+        if (nfcip_PFBisSTO(gNfcip.lastPFBnATN)) {
+          nfcipLogI(" NFCIP(I) Rcvd ATN  -> reTx RTOX_RES \r\n");
+          ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBSPDU_TO(), gNfcip.lastRTOX);
+          if(ret < NFC_OK)
+          {
+            return ret;
+          }
+        } else {
+          /* ReTransmit ? */
+          if (gNfcip.cntTxRetrys++ >= RFAL_NFCDEP_MAX_TX_RETRYS) {
+            return NFC_ProtocolError;
+          }
+
+          nfcipLogI(" NFCIP(I) Rcvd ATN  -> reTx  PNI: %d \r\n", gNfcip.pni);
+          gNfcip.state = NFCIP_ST_INIT_DEP_TX;
+        }
+
+        return NFC_Busy;
+      } else {                                           /* Digital 1.0  14.12.4.4 & 14.12.4.8 */
+        return NFC_ProtocolError;
+      }
+    }
+    /*******************************************************************************/
+    /* S TO                                                                        */
+    /*******************************************************************************/
+    else if (nfcip_PFBisSTO(rxPFB)) {                      /* If is a S-TO (RTOX)  */
+      nfcipLogI(" NFCIP(I) Rcvd TO  \r\n");
+
+      rxRTOX = gNfcip.rxBuf[rxMsgIt++];
+
+      /* Digital 1.1 16.12.4.3 - Initiator MAY stop accepting subsequent RTOX Req   *
+       *                       - RTOX request to an ATN -> Protocol error           */
+      if ((gNfcip.cntRTOXRetrys++ > RFAL_NFCDEP_MAX_RTOX_RETRYS) || nfcip_PFBisSATN(gNfcip.lastPFB)) {
+        return NFC_ProtocolError;
+      }
+
+      /* Digital 1.1 16.8.4.1 RTOX must be between [1,59] */
+      if ((rxRTOX < NFCIP_INIT_MIN_RTOX) || (rxRTOX > NFCIP_INIT_MAX_RTOX)) {
+        return NFC_ProtocolError;
+      }
+
+      ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBSPDU_TO(), rxRTOX);
+      if(ret < NFC_OK)
+      {
+        return ret;
+      }
+
+      gNfcip.lastRTOX = rxRTOX;
+
+      return NFC_Busy;
+    } else {
+      /* Unexpected S-PDU */
+      return NFC_ProtocolError;                       /*  PRQA S  2880 # MISRA 2.1 - Guard code to prevent unexpected behavior */
+    }
+  }
+
+  /*******************************************************************************/
+  /* Process I-PDU                                                               */
+  /*******************************************************************************/
+  if (nfcip_PFBisIPDU(rxPFB)) {
+    if (gNfcip.pni != nfcip_PBF_PNI(rxPFB)) {
+      nfcipLogI(" NFCIP(I) Rcvd IPDU wrong PNI     curPNI: %d rxPNI: %d \r\n", gNfcip.pni, nfcip_PBF_PNI(rxPFB));
+      return NFC_ProtocolError;
+    }
+
+    nfcipLogD(" NFCIP(I) Rcvd IPDU OK    PNI: %d \r\n", gNfcip.pni);
+
+    /* 14.12.3.3 I-PDU with correct PNI -> Increment */
+    gNfcip.pni = nfcip_PNIInc(gNfcip.pni);
+
+
+    /* Successful data Exchange */
+    RFal_NFC_Dep_ClearCounters();
+    *outActRxLen  = ((uint16_t)nfcDepLen - RFAL_NFCDEP_DEP_HEADER - (uint16_t)optHdrLen);
+
+    if ((&gNfcip.rxBuf[gNfcip.rxBufPaylPos] != &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen]) && (*outActRxLen > 0U)) {
+      memmove(&gNfcip.rxBuf[gNfcip.rxBufPaylPos], &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen], *outActRxLen);
+    }
+
+    /*******************************************************************************/
+    /* Check if target is indicating chaining MI                                   */
+    /*******************************************************************************/
+    if (nfcip_PFBisIMI(rxPFB)) {
+      gNfcip.isRxChaining = true;
+      *outIsChaining      = true;
+
+      nfcipLogD(" NFCIP(I) Rcvd IPDU OK w MI -> ACK \r\n");
+      ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBRPDU_ACK(gNfcip.pni), gNfcip.rxBuf[rxMsgIt++]);
+      if(ret < NFC_OK)
+      {
+        return ret;
+      }
+
+      return NFC_Again;  /* Send Again signalling to run again, but some chaining data has arrived*/
+    } else {
+      gNfcip.isRxChaining = false;
+      gNfcip.state        = NFCIP_ST_INIT_DEP_IDLE;
+
+      ret = NFC_OK;    /* Data exchange done */
+    }
+  }
+  return ret;
+}
+
+
+/*******************************************************************************/
+static NFC_OpResult RFal_NFC_Dep_TargetHandleRX(NFC_OpResult rxRes, uint16_t *outActRxLen, bool *outIsChaining)
+{
+  NFC_OpResult ret;
+  uint8_t    nfcDepLen;
+  uint8_t    rxMsgIt;
+  uint8_t    rxPFB;
+  uint8_t    optHdrLen;
+  uint8_t    resBuf[RFAL_NFCDEP_HEADER_PAD + NFCIP_TARGET_RES_MAX];
+
+
+  ret        = NFC_InternalError;
+  rxMsgIt    = 0;
+  optHdrLen  = 0;
+
+  *outActRxLen    = 0;
+  *outIsChaining  = false;
+
+
+  /*******************************************************************************/
+  /* Handle reception errors                                                     */
+  /*******************************************************************************/
+  switch (rxRes) {
+    /*******************************************************************************/
+    case NFC_OK:
+      break;
+
+    case NFC_LinkLoss:
+      nfcipLogW(" NFCIP(T) Error: %d \r\n", rxRes);
+      return rxRes;
+
+    case NFC_Busy:
+      return NFC_Busy;  /* Debug purposes */
+
+    case NFC_SlaveTimeout:
+    case NFC_CRC_Error:
+    case NFC_ParityError:
+    case NFC_FramingError:
+    case NFC_ProtocolError:
+    default:
+      /* Digital 1.1  16.12.5.2 The Target MUST NOT attempt any error recovery.      *
+       * The Target MUST always stay in receive mode when a                          *
+       * Transmission Error or a Protocol Error occurs.                              *
+       *                                                                             *
+       * Do not push Transmission/Protocol Errors to upper layer in Listen Mode #766 */
+
+      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+      return NFC_Busy;
+  }
+
+  /*******************************************************************************/
+  /* Rx OK check if valid DEP PDU                                                */
+  /*******************************************************************************/
+  if (gNfcip.rxBuf == NULL) {
+    return NFC_IO_Error;
+  }
+
+  /* Due to different modes on ST25R391x (with/without CRC) use NFC-DEP LEN instead of bytes retrieved */
+  nfcDepLen = gNfcip.rxBuf[rxMsgIt++];
+
+  nfcipLogD(" NFCIP(T) rx OK: %d bytes \r\n", nfcDepLen);
+
+  if (gNfcip.rxBuf[rxMsgIt++] != NFCIP_REQ) {
+    nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+    return NFC_Busy; /* NFC_ProtocolError - Ignore bad request */
+  }
+
+
+  /*******************************************************************************/
+  /* Check whether target rcvd a normal DEP or deactivation request              */
+  /*******************************************************************************/
+  switch (gNfcip.rxBuf[rxMsgIt++]) {
+    /*******************************************************************************/
+    case (uint8_t)NFCIP_CMD_DEP_REQ:
+      break;                                /* Continue to normal DEP processing */
+
+    /*******************************************************************************/
+    case (uint8_t)NFCIP_CMD_DSL_REQ:
+
+      nfcipLogI(" NFCIP(T) rx DSL \r\n");
+
+      /* Digital 1.0  14.9.1.2 If DID is used and incorrect ignore it */
+      /* [Digital 1.0, 16.9.1.2]: If DID == 0, Target SHALL ignore DSL_REQ with DID */
+      if ((((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) || (nfcDepLen != RFAL_NFCDEP_DSL_RLS_LEN_DID)) && (gNfcip.cfg.did != RFAL_NFCDEP_DID_NO))
+          || ((gNfcip.cfg.did == RFAL_NFCDEP_DID_NO) && (nfcDepLen != RFAL_NFCDEP_DSL_RLS_LEN_NO_DID))
+         ) {
+        nfcipLogI(" NFCIP(T) DSL wrong DID, ignoring \r\n");
+        return NFC_Busy;
+      }
+
+      RFal_NFC_Dep_Tx(NFCIP_CMD_DSL_RES, resBuf, NULL, 0, 0, NFCIP_NO_FWT);
+
+      gNfcip.state = NFCIP_ST_TARG_DEP_SLEEP;
+      return NFC_SleepRequest;
+
+    /*******************************************************************************/
+    case (uint8_t)NFCIP_CMD_RLS_REQ:
+
+      nfcipLogI(" NFCIP(T) rx RLS \r\n");
+
+      /* Digital 1.0  14.10.1.2 If DID is used and incorrect ignore it */
+      /* [Digital 1.0, 16.10.2.2]: If DID == 0, Target SHALL ignore DSL_REQ with DID */
+      if ((((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) || (nfcDepLen != RFAL_NFCDEP_DSL_RLS_LEN_DID)) && (gNfcip.cfg.did != RFAL_NFCDEP_DID_NO))
+          || ((gNfcip.cfg.did == RFAL_NFCDEP_DID_NO) && (nfcDepLen > RFAL_NFCDEP_DSL_RLS_LEN_NO_DID))
+         ) {
+        nfcipLogI(" NFCIP(T) RLS wrong DID, ignoring \r\n");
+        return NFC_Busy;
+      }
+
+      RFal_NFC_Dep_Tx(NFCIP_CMD_RLS_RES, resBuf, NULL, 0, 0, NFCIP_NO_FWT);
+
+      gNfcip.state = NFCIP_ST_TARG_DEP_IDLE;
+      return NFC_ReleaseRequest;
+
+    /*******************************************************************************/
+    /*case NFCIP_CMD_PSL_REQ:              PSL must be handled in Activation only */
+    /*case NFCIP_CMD_WUP_REQ:              WUP not in NFC Forum Digital 1.0       */
+    default:
+
+      /* Don't go to NFCIP_ST_TARG_DEP_IDLE state as it needs to ignore this    *
+       * invalid frame, and keep waiting for more frames                        */
+
+      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+      return NFC_Busy; /* NFC_ProtocolError - Ignore bad frame */
+  }
+
+  /*******************************************************************************/
+
+  rxPFB = gNfcip.rxBuf[rxMsgIt++];                    /* Store rcvd PFB  */
+
+  /*******************************************************************************/
+  /* Check for valid PFB type                                                    */
+  if (!(nfcip_PFBisSPDU(rxPFB) || nfcip_PFBisRPDU(rxPFB) || nfcip_PFBisIPDU(rxPFB))) {
+    nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+    return NFC_Busy; /* NFC_ProtocolError - Ignore invalid PFB  */
+  }
+
+  /*******************************************************************************/
+  if (gNfcip.cfg.did != RFAL_NFCDEP_DID_NO) {
+    if (!nfcip_PFBhasDID(rxPFB)) {
+      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+      return NFC_Busy; /* NFC_ProtocolError - Ignore bad/missing DID  */
+    }
+    if (gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) { /* MISRA 13.5 */
+      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+      return NFC_Busy; /* NFC_ProtocolError - Ignore bad/missing DID  */
+    }
+    optHdrLen++;                                    /* Inc header optional field cnt*/
+  } else if (nfcip_PFBhasDID(rxPFB)) {                /* DID not expected but rcv     */
+    nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+    return NFC_Busy; /* NFC_ProtocolError - Ignore unexpected DID  */
+  } else {
+    /* MISRA 15.7 - Empty else */
+  }
+
+
+  /*******************************************************************************/
+  if (gNfcip.cfg.nad != RFAL_NFCDEP_NAD_NO) {
+    if ((gNfcip.rxBuf[rxMsgIt++] != gNfcip.cfg.did) || !nfcip_PFBhasDID(rxPFB)) {
+      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+      return NFC_Busy;                            /* NFC_ProtocolError - Ignore bad/missing DID  */
+    }
+    optHdrLen++;                                    /* Inc header optional field cnt*/
+  } else if (nfcip_PFBhasNAD(rxPFB)) {                /* NAD not expected but rcv */
+    nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+    return NFC_Busy;                                /* NFC_ProtocolError - Ignore unexpected NAD  */
+  } else {
+    /* MISRA 15.7 - Empty else */
+  }
+
+
+  /*******************************************************************************/
+  /* Process R-PDU                                                               */
+  /*******************************************************************************/
+  if (nfcip_PFBisRPDU(rxPFB)) {
+    nfcipLogD(" NFCIP(T) Rcvd R-PDU  \r\n");
+    /*******************************************************************************/
+    /* R ACK                                                                       */
+    /*******************************************************************************/
+    if (nfcip_PFBisRACK(rxPFB)) {
+      nfcipLogI(" NFCIP(T) Rcvd ACK  \r\n");
+      if (gNfcip.pni == nfcip_PBF_PNI(rxPFB)) {
+        /* R-ACK while not performing chaining -> Protocol error */
+        if (!gNfcip.isTxChaining) {
+          nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+          return NFC_Busy;                    /* NFC_ProtocolError - Ignore unexpected ACK  */
+        }
+
+        /* This block has been transmitted and acknowledged, perform RTOX until next data is provided  */
+
+        /* Digital 1.1  16.12.4.7 - If ACK rcvd continue with chaining or an RTOX */
+        nfcipTimerStart(gNfcip.RTOXTimer, nfcipRTOXAdjust(nfcipConv1FcToMs(RFal_NFC_Dep_WT2RWT(gNfcip.cfg.to))));
+        gNfcip.state = NFCIP_ST_TARG_DEP_RTOX;
+
+        return NFC_OK;                        /* This block has been transmitted */
+      }
+
+      /* Digital 1.0 14.12.3.4 - If last send was ATN and rx PNI is minus 1 */
+      else if (nfcip_PFBisSATN(gNfcip.lastPFB) && (nfcip_PNIDec(gNfcip.pni) == nfcip_PBF_PNI(rxPFB))) {
+        nfcipLogI(" NFCIP(T) wrong PNI, last was ATN reTx  \r\n");
+        /* Spec says to leave current PNI as is, but will be Inc after Tx, remaining the same */
+        gNfcip.pni = nfcip_PNIDec(gNfcip.pni);
+
+        gNfcip.state = NFCIP_ST_TARG_DEP_TX;
+        return NFC_Busy;
+      } else {
+        /* MISRA 15.7 - Empty else */
+      }
+    }
+    /*******************************************************************************/
+    /* R NACK                                                                      */
+    /*******************************************************************************/
+    /* ISO 18092 12.6.1.3.3 When rcv NACK if PNI = prev PNI sent ->  reTx          */
+    else if (nfcip_PFBisRNACK(rxPFB) && (nfcip_PNIDec(gNfcip.pni) == nfcip_PBF_PNI(rxPFB))) {
+      nfcipLogI(" NFCIP(T) Rcvd NACK  \r\n");
+
+      gNfcip.pni = nfcip_PNIDec(gNfcip.pni);     /* Dec so that has the prev PNI */
+
+      gNfcip.state = NFCIP_ST_TARG_DEP_TX;
+      return NFC_Busy;
+    } else {
+      nfcipLogI(" NFCIP(T) Unexpected R-PDU \r\n");
+
+      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+      return NFC_Busy; /* NFC_ProtocolError - Ignore unexpected R-PDU  */
+    }
+  }
+
+  /*******************************************************************************/
+  /* Process S-PDU                                                               */
+  /*******************************************************************************/
+  if (nfcip_PFBisSPDU(rxPFB)) {
+    nfcipLogD(" NFCIP(T) Rcvd S-PDU  \r\n");
+
+    /*******************************************************************************/
+    /* S ATN                                                                       */
+    /*******************************************************************************/
+    /* ISO 18092 12.6.3 Attention                                                  */
+    if (nfcip_PFBisSATN(rxPFB)) {                          /*    If is a S-ATN     */
+      nfcipLogI(" NFCIP(T) Rcvd ATN  curPNI: %d \r\n", gNfcip.pni);
+      ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBSPDU_ATN(), 0);
+      if(ret < NFC_OK)
+      {
+        return ret;
+      }
+      
+      return NFC_Busy;
+    }
+
+    /*******************************************************************************/
+    /* S TO                                                                        */
+    /*******************************************************************************/
+    else if (nfcip_PFBisSTO(rxPFB)) {                      /* If is a S-TO (RTOX)  */
+      if (nfcip_PFBisSTO(gNfcip.lastPFBnATN)) {
+        nfcipLogI(" NFCIP(T) Rcvd TO  \r\n");
+
+        /* Digital 1.1  16.8.4.6  RTOX value in RES different that in REQ -> Protocol Error */
+        if (gNfcip.lastRTOX != gNfcip.rxBuf[rxMsgIt++]) {
+          nfcipLogI(" NFCIP(T) Mismatched RTOX value \r\n");
+
+          nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+          return NFC_Busy; /* NFC_ProtocolError - Ignore unexpected RTOX value  */
+        }
+
+        /* Clear waiting for RTOX Ack Flag */
+        gNfcip.isWait4RTOX = false;
+
+        /* Check if a Tx is already pending */
+        if (gNfcip.isTxPending) {
+          nfcipLogW(" NFCIP(T) Tx pending, go immediately to TX \r\n");
+
+          gNfcip.state = NFCIP_ST_TARG_DEP_TX;
+          return NFC_Busy;
+        }
+
+        /* Start RTOX timer and change to check state  */
+        nfcipTimerStart(gNfcip.RTOXTimer, nfcipRTOXAdjust(nfcipConv1FcToMs(gNfcip.lastRTOX * RFal_NFC_Dep_WT2RWT(gNfcip.cfg.to))));
+        gNfcip.state = NFCIP_ST_TARG_DEP_RTOX;
+
+        return NFC_Busy;
+      }
+    } else {
+      /* Unexpected S-PDU */
+      nfcipLogI(" NFCIP(T) Unexpected S-PDU \r\n");           /*  PRQA S  2880 # MISRA 2.1 - Guard code to prevent unexpected behavior */
+
+      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+      return NFC_Busy; /* NFC_ProtocolError - Ignore unexpected S-PDU  */
+    }
+  }
+
+  /*******************************************************************************/
+  /* Process I-PDU                                                               */
+  /*******************************************************************************/
+  if (nfcip_PFBisIPDU(rxPFB)) {
+    if (gNfcip.pni != nfcip_PBF_PNI(rxPFB)) {
+      nfcipLogI(" NFCIP(T) Rcvd IPDU wrong PNI     curPNI: %d rxPNI: %d \r\n", gNfcip.pni, nfcip_PBF_PNI(rxPFB));
+
+      /* Digital 1.1 16.12.3.4 - If last send was ATN and rx PNI is minus 1 */
+      if (nfcip_PFBisSATN(gNfcip.lastPFB) && (nfcip_PNIDec(gNfcip.pni) == nfcip_PBF_PNI(rxPFB))) {
+        /* Spec says to leave current PNI as is, but will be Inc after Data Tx, remaining the same */
+        gNfcip.pni = nfcip_PNIDec(gNfcip.pni);
+
+        if (nfcip_PFBisIMI(rxPFB)) {
+          nfcipLogI(" NFCIP(T) PNI = prevPNI && ATN before && chaining -> send ACK  \r\n");
+          ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBRPDU_ACK(gNfcip.pni), gNfcip.rxBuf[rxMsgIt++]);
+          if(ret < NFC_OK)
+          {
+            return ret;
+          }
+
+          /* Digital 1.1 16.12.3.4 (...) leave the current PNI unchanged afterwards */
+          gNfcip.pni = nfcip_PNIInc(gNfcip.pni);
+        } else {
+          nfcipLogI(" NFCIP(T) PNI = prevPNI && ATN before -> reTx last I-PDU  \r\n");
+          gNfcip.state = NFCIP_ST_TARG_DEP_TX;
+        }
+
+        return NFC_Busy;
+      }
+
+      nfcDepReEnableRx(gNfcip.rxBuf, gNfcip.rxBufLen, gNfcip.rxRcvdLen);
+      return NFC_Busy;            /* NFC_ProtocolError - Ignore bad PNI value  */
+    }
+
+    nfcipLogD(" NFCIP(T) Rcvd IPDU OK PNI: %d  \r\n", gNfcip.pni);
+
+    /*******************************************************************************/
+    /* Successful data exchange                                                    */
+    /*******************************************************************************/
+    *outActRxLen  = ((uint16_t)nfcDepLen - RFAL_NFCDEP_DEP_HEADER - (uint16_t)optHdrLen);
+
+    RFal_NFC_Dep_ClearCounters();
+
+    if ((&gNfcip.rxBuf[gNfcip.rxBufPaylPos] != &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen]) && (*outActRxLen > 0U)) {
+      memmove(&gNfcip.rxBuf[gNfcip.rxBufPaylPos], &gNfcip.rxBuf[RFAL_NFCDEP_DEP_HEADER + optHdrLen], *outActRxLen);
+    }
+
+
+    /*******************************************************************************/
+    /* Check if Initiator is indicating chaining MI                                */
+    /*******************************************************************************/
+    if (nfcip_PFBisIMI(rxPFB)) {
+      gNfcip.isRxChaining = true;
+      *outIsChaining      = true;
+
+      nfcipLogD(" NFCIP(T) Rcvd IPDU OK w MI -> ACK \r\n");
+      ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBRPDU_ACK(gNfcip.pni), gNfcip.rxBuf[rxMsgIt++]);
+      if(ret < NFC_OK)
+      {
+        return ret;
+      }
+
+      gNfcip.pni = nfcip_PNIInc(gNfcip.pni);
+
+      return NFC_Again;  /* Send Again signalling to run again, but some chaining data has arrived*/
+    } else {
+      if (gNfcip.isRxChaining) {
+        nfcipLogI(" NFCIP(T) Rcvd last IPDU chaining finished \r\n");
+      }
+
+      /*******************************************************************************/
+      /* Reception done, send to DH and start RTOX timer                             */
+      /*******************************************************************************/
+      nfcipTimerStart(gNfcip.RTOXTimer, nfcipRTOXAdjust(nfcipConv1FcToMs(RFal_NFC_Dep_WT2RWT(gNfcip.cfg.to))));
+      gNfcip.state = NFCIP_ST_TARG_DEP_RTOX;
+
+      gNfcip.isRxChaining = false;
+      ret = NFC_OK;                            /* Data exchange done */
+    }
+  }
+  return ret;
 }
 
 void RFal_NFC_Dep_Config(const RFal_NFC_Dep_Configs *cfg)
@@ -1163,7 +1206,7 @@ void RFal_NFC_Dep_Config(const RFal_NFC_Dep_Configs *cfg)
 
   memcpy(&gNfcip.cfg, cfg, sizeof(RFal_NFC_Dep_Configs));          /* Copy given config to local       */
 
-  gNfcip.cfg.to   = MIN(RFAL_NFCDEP_WT_TRG_MAX, gNfcip.cfg.to);    /* Ensure proper WT value           */
+  gNfcip.cfg.to   = (RFAL_NFCDEP_WT_TRG_MAX < gNfcip.cfg.to) ? RFAL_NFCDEP_WT_TRG_MAX : gNfcip.cfg.to;    /* Ensure proper WT value           */
   gNfcip.cfg.did  = nfcip_DIDMax(gNfcip.cfg.did);                  /* Ensure proper DID value          */
   gNfcip.fsc      = RFal_NFC_Dep_LR2FS(gNfcip.cfg.lr);                /* Calculate FSC based on given LR  */
 
@@ -1190,7 +1233,7 @@ NFC_OpResult RFal_NFC_Dep_Run(uint16_t *outActRxLen, bool *outIsChaining)
     case NFCIP_ST_INIT_DEP_TX:
 
       nfcipLogD(" NFCIP(I) Tx PNI: %d txLen: %d \r\n", gNfcip.pni, gNfcip.txBufLen);
-      ret = nfcipTx(NFCIP_CMD_DEP_REQ, gNfcip.txBuf, &gNfcip.txBuf[gNfcip.txBufPaylPos], gNfcip.txBufLen, nfcip_PFBIPDU(gNfcip.pni), (gNfcip.cfg.fwt + gNfcip.cfg.dFwt));
+      ret = RFal_NFC_Dep_Tx(NFCIP_CMD_DEP_REQ, gNfcip.txBuf, &gNfcip.txBuf[gNfcip.txBufPaylPos], gNfcip.txBufLen, nfcip_PFBIPDU(gNfcip.pni), (gNfcip.cfg.fwt + gNfcip.cfg.dFwt));
 
       switch (ret) {
         case NFC_OK:
@@ -1208,10 +1251,10 @@ NFC_OpResult RFal_NFC_Dep_Run(uint16_t *outActRxLen, bool *outIsChaining)
     /*******************************************************************************/
     case NFCIP_ST_INIT_DEP_RX:          /*  PRQA S 2003 # MISRA 16.3 - Intentional fall through */
 
-      ret = nfcipDataRx(false);
+      ret = RFal_NFC_Dep_DataRx(false);
 
       if (ret != NFC_Busy) {
-        ret = nfcipInitiatorHandleDEP(ret, ((gNfcip.rxRcvdLen != NULL) ? *gNfcip.rxRcvdLen : 0U), outActRxLen, outIsChaining);
+        ret = RFal_NFC_Dep_InitiatorHandle(ret, ((gNfcip.rxRcvdLen != NULL) ? *gNfcip.rxRcvdLen : 0U), outActRxLen, outIsChaining);
       }
 
       break;
@@ -1239,7 +1282,11 @@ NFC_OpResult RFal_NFC_Dep_Run(uint16_t *outActRxLen, bool *outIsChaining)
       nfcipLogI(" NFCIP(T) RTOX sent \r\n");
 
       gNfcip.lastRTOX = nfcip_RTOXTargMax(gNfcip.cfg.to);               /* Calculate requested RTOX value, and send it */
-      EXIT_ON_ERR(ret, nfcipDEPControlMsg(nfcip_PFBSPDU_TO(), gNfcip.lastRTOX));
+      ret = RFal_NFC_Dep_ControlMsg(nfcip_PFBSPDU_TO(), gNfcip.lastRTOX);
+      if(ret < NFC_OK)
+      {
+        return ret;
+      }
 
       /* Set waiting for RTOX Ack Flag */
       gNfcip.isWait4RTOX = true;
@@ -1251,7 +1298,7 @@ NFC_OpResult RFal_NFC_Dep_Run(uint16_t *outActRxLen, bool *outIsChaining)
     case NFCIP_ST_TARG_DEP_TX:
 
       nfcipLogD(" NFCIP(T) Tx PNI: %d txLen: %d \r\n", gNfcip.pni, gNfcip.txBufLen);
-      ret = nfcipTx(NFCIP_CMD_DEP_RES, gNfcip.txBuf, &gNfcip.txBuf[gNfcip.txBufPaylPos], gNfcip.txBufLen, nfcip_PFBIPDU(gNfcip.pni), NFCIP_NO_FWT);
+      ret = RFal_NFC_Dep_Tx(NFCIP_CMD_DEP_RES, gNfcip.txBuf, &gNfcip.txBuf[gNfcip.txBufPaylPos], gNfcip.txBufLen, nfcip_PFBIPDU(gNfcip.pni), NFCIP_NO_FWT);
 
       /* Clear flags */
       gNfcip.isTxPending = false;
@@ -1280,11 +1327,11 @@ NFC_OpResult RFal_NFC_Dep_Run(uint16_t *outActRxLen, bool *outIsChaining)
         gNfcip.isReqPending = false;
         ret = NFC_OK;
       } else {
-        ret = nfcipDataRx(false);
+        ret = RFal_NFC_Dep_DataRx(false);
       }
 
       if (ret != NFC_Busy) {
-        ret = nfcipTargetHandleRX(ret, outActRxLen, outIsChaining);
+        ret = RFal_NFC_Dep_TargetHandleRX(ret, outActRxLen, outIsChaining);
       }
 
       break;
@@ -1341,7 +1388,7 @@ void RFal_NFC_Dep_Init(void)
   gNfcip.PDUParam.rxBuf = NULL;
   gNfcip.PDUParam.txBuf = NULL;
 
-  nfcipClearCounters();
+  RFal_NFC_Dep_ClearCounters();
 }
 
 void RFal_NFC_Dep_SetDEPParams(RFal_NFC_Dep_DEPParams *DEPParams)
@@ -1384,7 +1431,7 @@ void RFal_NFC_Dep_SetDEPParams(RFal_NFC_Dep_DEPParams *DEPParams)
   }
 
   /* New data TxRx request clear previous error counters for consecutive TxRx without resetting communication/protocol layer*/
-  nfcipClearCounters();
+  RFal_NFC_Dep_ClearCounters();
 
   gNfcip.state = NFCIP_ST_INIT_DEP_TX;
 }
@@ -1448,7 +1495,7 @@ NFC_OpResult RFal_NFC_Dep_TargetHandleActivation(RFal_NFC_Dep_Device *nfcDepDev,
   /*******************************************************************************/
   /*  Wait and process incoming cmd (PSL / DEP)                                  */
   /*******************************************************************************/
-  ret = nfcipDataRx(false);
+  ret = RFal_NFC_Dep_DataRx(false);
 
   if (ret != NFC_OK) {
     return ret;
@@ -1500,7 +1547,11 @@ NFC_OpResult RFal_NFC_Dep_TargetHandleActivation(RFal_NFC_Dep_Device *nfcDepDev,
     }
     RFal_SetBitRate(RFAL_BR_KEEP, gNfcip.nfcDepDev->info.DSI);
 
-    EXIT_ON_ERR(ret, nfcipTx(NFCIP_CMD_PSL_RES, txBuf, NULL, 0, 0, NFCIP_NO_FWT));
+    ret = RFal_NFC_Dep_Tx(NFCIP_CMD_PSL_RES, txBuf, NULL, 0, 0, NFCIP_NO_FWT);
+    if(ret < NFC_OK)
+    {
+      return ret;
+    }
   } else {
     if (gNfcip.rxBuf[msgIt] == (uint8_t)NFCIP_CMD_DEP_REQ) {
       msgIt++;
@@ -1578,14 +1629,18 @@ NFC_OpResult RFal_NFC_Dep_ATR(const RFal_NFC_Dep_AtrParam *param, RFal_NFC_Dep_A
   cfg.oper     = param->operParam;
   cfg.commMode = param->commMode;
 
-  RFal_NFC_Dep_Initialize();
-  nfcipConfig(&cfg);
+  RFal_NFC_Dep_Init();
+  RFal_NFC_Dep_Config(&cfg);
 
   /*******************************************************************************/
   /* Send ATR_REQ                                                                */
   /*******************************************************************************/
 
-  EXIT_ON_ERR(ret, nfcipTxRx(NFCIP_CMD_ATR_REQ, txBuf, nfcipRWTActivation(), NULL, 0, rxBuf, NFCIP_ATRRES_BUF_LEN, &rxLen));
+  ret = RFal_NFC_Dep_TxRx(NFCIP_CMD_ATR_REQ, txBuf, nfcipRWTActivation(), NULL, 0, rxBuf, NFCIP_ATRRES_BUF_LEN, &rxLen);
+  if(ret < NFC_OK)
+  {
+    return ret;
+  }
 
 
   /*******************************************************************************/
@@ -1630,7 +1685,11 @@ NFC_OpResult RFal_NFC_Dep_PSL(uint8_t BRS, uint8_t FSL)
   /*******************************************************************************/
   /* Send PSL REQ and wait for response                                          */
   /*******************************************************************************/
-  EXIT_ON_ERR(ret, nfcipTxRx(NFCIP_CMD_PSL_REQ, txBuf, (gNfcip.cfg.fwt + gNfcip.cfg.dFwt), &txBuf[NFCIP_PSLREQ_LEN], (msgIt - NFCIP_PSLREQ_LEN), rxBuf, NFCIP_PSLRES_LEN, &rxLen));
+  ret = RFal_NFC_Dep_TxRx(NFCIP_CMD_PSL_REQ, txBuf, (gNfcip.cfg.fwt + gNfcip.cfg.dFwt), &txBuf[NFCIP_PSLREQ_LEN], (msgIt - NFCIP_PSLREQ_LEN), rxBuf, NFCIP_PSLRES_LEN, &rxLen);
+  if(ret < NFC_OK)
+  {
+    return ret;
+  }
 
 
   /*******************************************************************************/
@@ -1673,7 +1732,11 @@ NFC_OpResult RFal_NFC_Dep_DSL(void)
   }
 
   /* Repeating a DSL REQ is optional, not doing it */
-  EXIT_ON_ERR(ret, nfcipTxRx(NFCIP_CMD_DSL_REQ, txBuf, (gNfcip.cfg.fwt + gNfcip.cfg.dFwt), NULL, 0, rxBuf, (uint16_t)sizeof(rxBuf), &rxLen));
+  ret = RFal_NFC_Dep_TxRx(NFCIP_CMD_DSL_REQ, txBuf, (gNfcip.cfg.fwt + gNfcip.cfg.dFwt), NULL, 0, rxBuf, (uint16_t)sizeof(rxBuf), &rxLen);
+  if(ret < NFC_OK)
+  {
+    return ret;
+  }
 
   /*******************************************************************************/
   rxMsgIt = 0;
@@ -1714,7 +1777,11 @@ NFC_OpResult RFal_NFC_Dep_RLS(void)
   }
 
   /* Repeating a RLS REQ is optional, not doing it */
-  EXIT_ON_ERR(ret, nfcipTxRx(NFCIP_CMD_RLS_REQ, txBuf, (gNfcip.cfg.fwt + gNfcip.cfg.dFwt), NULL, 0, rxBuf, (uint16_t)sizeof(rxBuf), &rxLen));
+  ret = RFal_NFC_Dep_TxRx(NFCIP_CMD_RLS_REQ, txBuf, (gNfcip.cfg.fwt + gNfcip.cfg.dFwt), NULL, 0, rxBuf, (uint16_t)sizeof(rxBuf), &rxLen);
+  if(ret < NFC_OK)
+  {
+    return ret;
+  }
 
   /*******************************************************************************/
   rxMsgIt = 0;
@@ -1813,7 +1880,7 @@ NFC_OpResult RFal_NFC_Dep_InitiatorHandleActivation(RFal_NFC_Dep_AtrParam *param
   if (gNfcip.cfg.lr < nfcDepDev->info.LR) { /* If our Length reduction is smaller */
     sendPSL = true;
 
-    nfcDepDev->info.LR   = MIN(nfcDepDev->info.LR, gNfcip.cfg.lr);
+    nfcDepDev->info.LR   = (nfcDepDev->info.LR < gNfcip.cfg.lr) ? nfcDepDev->info.LR : gNfcip.cfg.lr;
 
     gNfcip.cfg.lr = nfcDepDev->info.LR;                /* Update nfcip LR  to be used */
     gNfcip.fsc    = RFal_NFC_Dep_LR2FS(gNfcip.cfg.lr);    /* Update nfcip FSC to be used */
@@ -1829,7 +1896,7 @@ NFC_OpResult RFal_NFC_Dep_InitiatorHandleActivation(RFal_NFC_Dep_AtrParam *param
   /* Check Baud rates                                                            */
   /*******************************************************************************/
   if ((nfcDepDev->info.DSI != desiredBR) && (desiredBR != RFAL_BR_KEEP)) {     /* if desired BR is different    */
-    if (nfcipDxIsSupported((uint8_t)desiredBR, nfcDepDev->activation.Target.ATR_RES.BRt, nfcDepDev->activation.Target.ATR_RES.BSt)) {
+    if (RFal_NFC_Dep_DxIsSupported((uint8_t)desiredBR, nfcDepDev->activation.Target.ATR_RES.BRt, nfcDepDev->activation.Target.ATR_RES.BSt)) {
       /* if desired BR is supported     */
       /* MISRA 13.5 */
       sendPSL = true;
@@ -1848,14 +1915,18 @@ NFC_OpResult RFal_NFC_Dep_InitiatorHandleActivation(RFal_NFC_Dep_AtrParam *param
     /*******************************************************************************/
     /* Send PSL REQ and wait for response                                          */
     /*******************************************************************************/
-    EXIT_ON_ERR(ret, RFal_NFC_Dep_PSL(PSL_BRS, PSL_FSL));
+    ret = RFal_NFC_Dep_PSL(PSL_BRS, PSL_FSL);
+    if(ret < NFC_OK)
+    {
+      return ret;
+    }
 
     /* Check if bit rate has been changed */
     if (nfcDepDev->info.DSI != desiredBR) {
       /* Check if device was in Passive NFC-A and went to higher bit rates, use NFC-F */
       if ((nfcDepDev->info.DSI == RFAL_BR_106) && (gNfcip.cfg.commMode == RFAL_NFCDEP_COMM_PASSIVE)) {
         /* If Passive initialize NFC-F module */
-        RFal_NFCF_PollerInitialize(desiredBR);
+        RFal_NFCF_PollerInit(desiredBR);
       }
 
       nfcDepDev->info.DRI  = desiredBR;  /* DSI Bit Rate coding from Initiator  to Target  */
@@ -1877,7 +1948,7 @@ uint32_t RFal_NFC_Dep_CalculateRWT(uint8_t wt)
 {
   /* Digital 1.0  14.6.3.8  &  Digital 1.1  16.6.3.9     */
   /* Digital 1.1  16.6.3.9 treat all RFU values as WT=14 */
-  const uint8_t responseWaitTime = MIN(RFAL_NFCDEP_WT_INI_MAX, wt);
+  const uint8_t responseWaitTime = (RFAL_NFCDEP_WT_INI_MAX < wt) ? RFAL_NFCDEP_WT_INI_MAX : wt;
 
   return (uint32_t)RFal_NFC_Dep_WT2RWT(responseWaitTime);
 }
@@ -1900,7 +1971,7 @@ NFC_OpResult RFal_NFC_Dep_DataRx(bool blocking)
 
   if (ret != NFC_Busy) {
     if (gNfcip.rxRcvdLen != NULL) {
-      (*gNfcip.rxRcvdLen) = rfalConvBitsToBytes(*gNfcip.rxRcvdLen);
+      (*gNfcip.rxRcvdLen) = RFal_ConvBitsToBytes(*gNfcip.rxRcvdLen);
 
       if ((ret == NFC_OK) && (gNfcip.rxBuf != NULL)) {
         /* Digital 1.1  16.4.1.3 - Length byte LEN SHALL have a value between 3 and 255 -> otherwise treat as Transmission Error *
@@ -1981,8 +2052,8 @@ NFC_OpResult RFal_NFC_Dep_ListenStartActivation(const RFal_NFC_Dep_TargetParam *
   cfg.oper     = param->operParam;
   cfg.commMode = param->commMode;
 
-  RFal_NFC_Dep_Initialize();
-  nfcipConfig(&cfg);
+  RFal_NFC_Dep_Init();
+  RFal_NFC_Dep_Config(&cfg);
 
 
   /*******************************************************************************/
@@ -1995,7 +2066,11 @@ NFC_OpResult RFal_NFC_Dep_ListenStartActivation(const RFal_NFC_Dep_TargetParam *
   gNfcip.isChaining   = rxParam.isRxChaining;
   gNfcip.txBufPaylPos = RFAL_NFCDEP_DEPREQ_HEADER_LEN;
 
-  EXIT_ON_ERR(ret, nfcipTx(NFCIP_CMD_ATR_RES, (uint8_t *) gNfcip.rxBuf, NULL, 0, 0, NFCIP_NO_FWT));
+  ret = RFal_NFC_Dep_Tx(NFCIP_CMD_ATR_RES, (uint8_t *) gNfcip.rxBuf, NULL, 0, 0, NFCIP_NO_FWT);
+  if(ret < NFC_OK)
+  {
+    return ret;
+  }
 
   gNfcip.state = NFCIP_ST_TARG_WAIT_ACTV;
 
@@ -2011,7 +2086,7 @@ NFC_OpResult RFal_NFC_Dep_ListenGetActivationStatus(void)
 
   BRS = RFAL_NFCDEP_BRS_MAINTAIN;
 
-  err = nfcipTargetHandleActivation(gNfcip.nfcDepDev, &BRS);
+  err = RFal_NFC_Dep_TargetHandleActivation(gNfcip.nfcDepDev, &BRS);
 
   switch (err) {
     case NFC_OK:
@@ -2021,9 +2096,13 @@ NFC_OpResult RFal_NFC_Dep_ListenGetActivationStatus(void)
         /* DRI codes the bit rate from Target to Initiator */
 
         if (gNfcip.cfg.commMode == RFAL_NFCDEP_COMM_ACTIVE) {
-          EXIT_ON_ERR(err, RFal_SetMode(RFAL_MODE_LISTEN_ACTIVE_P2P, gNfcip.nfcDepDev->info.DRI, gNfcip.nfcDepDev->info.DSI));
+          err = RFal_SetMode(RFAL_MODE_LISTEN_ACTIVE_P2P, gNfcip.nfcDepDev->info.DRI, gNfcip.nfcDepDev->info.DSI);
         } else {
-          EXIT_ON_ERR(err, RFal_SetMode(((RFAL_BR_106 == gNfcip.nfcDepDev->info.DRI) ? RFAL_MODE_LISTEN_NFCA : RFAL_MODE_LISTEN_NFCF), gNfcip.nfcDepDev->info.DRI, gNfcip.nfcDepDev->info.DSI));
+          err = RFal_SetMode(((RFAL_BR_106 == gNfcip.nfcDepDev->info.DRI) ? RFAL_MODE_LISTEN_NFCA : RFAL_MODE_LISTEN_NFCF), gNfcip.nfcDepDev->info.DRI, gNfcip.nfcDepDev->info.DSI);
+        }
+        if(err < NFC_OK)
+        {
+          return err;
         }
       }
       break;
@@ -2063,7 +2142,7 @@ NFC_OpResult RFal_NFC_Dep_StartTransceive(const RFal_NFC_Dep_TxRxParam *param)
   gNfcip.rxRcvdLen          = param->rxLen;
   gNfcip.isChaining         = param->isRxChaining;
 
-  nfcipSetDEPParams(&nfcDepParams);
+  RFal_NFC_Dep_SetDEPParams(&nfcDepParams);
 
   return NFC_OK;
 }
@@ -2072,15 +2151,13 @@ NFC_OpResult RFal_NFC_Dep_StartTransceive(const RFal_NFC_Dep_TxRxParam *param)
 /*******************************************************************************/
 NFC_OpResult RFal_NFC_Dep_GetTransceiveStatus(void)
 {
-  return nfcipRun(gNfcip.rxRcvdLen, gNfcip.isChaining);
+  return RFal_NFC_Dep_Run(gNfcip.rxRcvdLen, gNfcip.isChaining);
 }
 
 /*******************************************************************************/
 void RFal_NFC_Dep_Pdu2BLockParam(RFal_NFC_Dep_PduTxRxParam pduParam, RFal_NFC_Dep_TxRxParam *blockParam, uint16_t txPos, uint16_t rxPos)
 {
   uint16_t maxInfLen;
-
-  NO_WARNING(rxPos); /* Keep this param for future use */
 
   blockParam->DID    = pduParam.DID;
   blockParam->FSx    = pduParam.FSx;
@@ -2149,7 +2226,12 @@ NFC_OpResult RFal_NFC_Dep_GetPduTransceiveStatus(void)
           memcpy(gNfcip.PDUParam.txBuf->pdu, &gNfcip.PDUParam.txBuf->pdu[gNfcip.PDUTxPos], txRxParam.txBufLen);
         }
 
-        EXIT_ON_ERR(ret, RFal_NFC_Dep_StartTransceive(&txRxParam));
+        ret = RFal_NFC_Dep_StartTransceive(&txRxParam);
+        if(ret < NFC_OK)
+        {
+          return ret;
+        }
+
         return NFC_Busy;
       }
 

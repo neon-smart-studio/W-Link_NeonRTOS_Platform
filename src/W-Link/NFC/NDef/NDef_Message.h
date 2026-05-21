@@ -52,10 +52,10 @@ typedef struct {
 
 
 /*! NDEF message */
-struct NDef_Message_Struct {
+typedef struct NDef_Message_Struct {
   NDef_Record     *record; /*!< Pointer to a record */
   NDef_Message_Info info;   /*!< Message information, e.g. length in bytes, record count */
-};
+}NDef_Message;
 
 NFC_OpResult NDef_Message_Init(NDef_Message *message);
 NFC_OpResult NDef_Message_GetInfo(const NDef_Message *message, NDef_Message_Info *info);

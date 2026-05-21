@@ -143,7 +143,7 @@ static NFC_OpResult Ndef_T4T_ReadNlen(NDef_Context *ctx)
   uint8_t             *nLen;
 
   ctx->state = NDEF_STATE_INVALID;
-  nlenLen = (ndefMajorVersion(ctx->cc.t4t.vNo) == ndefMajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) ? NDEF_T4T_ENLEN_LEN : NDEF_T4T_NLEN_LEN;
+  nlenLen = (NDef_MajorVersion(ctx->cc.t4t.vNo) == NDef_MajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) ? NDEF_T4T_ENLEN_LEN : NDEF_T4T_NLEN_LEN;
 
   /* Read NLEN/ENLEN TS T4T v1.0 7.2.1.11 */
   ret = NDef_T4T_Poller_ReadBinary(ctx, 0U, nlenLen);
@@ -152,7 +152,7 @@ static NFC_OpResult Ndef_T4T_ReadNlen(NDef_Context *ctx)
     return ret;
   }
   nLen = ctx->subCtx.t4t.rApduBuf.apdu;
-  ctx->messageLen    = (nlenLen == NDEF_T4T_ENLEN_LEN) ?  GETU32(&nLen[0]) : (uint32_t)ndefBytes2Uint16(nLen[0], nLen[1]);
+  ctx->messageLen = (nlenLen == NDEF_T4T_ENLEN_LEN) ?  (((uint32_t)(&nLen[0])[0] << 24) | ((uint32_t)(&nLen[0])[1] << 16) | ((uint32_t)(&nLen[0])[2] << 8) | ((uint32_t)(&nLen[0])[3])) : (uint32_t)NDef_Bytes2Uint16(nLen[0], nLen[1]);
 
   if ((ctx->messageLen > (ctx->cc.t4t.fileSize - nlenLen)) || ((ctx->messageLen > 0U) && (ctx->messageLen < NDEF_T4T_MIN_NLEN))) {
     /* Conclude procedure TS T4T v1.0 7.2.1.11 */
@@ -195,13 +195,13 @@ static NFC_OpResult Ndef_T4T_ReadAndParseCCFile(NDef_Context *ctx)
   }
   (void)memcpy(ctx->ccBuf, ctx->subCtx.t4t.rApduBuf.apdu, NDEF_T4T_CCFILEV2_LEN);
   dataIt = 0;
-  ctx->cc.t4t.ccLen = GETU16(&ctx->ccBuf[dataIt]);
+  ctx->cc.t4t.ccLen = (((uint16_t)(&ctx->ccBuf[dataIt])[0] << 8) | (uint16_t)(&ctx->ccBuf[dataIt])[1]);
   dataIt += (uint8_t)sizeof(uint16_t);
   ctx->cc.t4t.vNo   = ctx->ccBuf[dataIt];
   dataIt++;
-  ctx->cc.t4t.mLe   = GETU16(&ctx->ccBuf[dataIt]);
+  ctx->cc.t4t.mLe   = (((uint16_t)(&ctx->ccBuf[dataIt])[0] << 8) | (uint16_t)(&ctx->ccBuf[dataIt])[1]);
   dataIt += (uint8_t)sizeof(uint16_t);
-  ctx->cc.t4t.mLc   = GETU16(&ctx->ccBuf[dataIt]);
+  ctx->cc.t4t.mLc   = (((uint16_t)(&ctx->ccBuf[dataIt])[0] << 8) | (uint16_t)(&ctx->ccBuf[dataIt])[1]);
   dataIt += (uint8_t)sizeof(uint16_t);
 
   /* TS T4T v1.0 7.2.1.7 verify MLe and MLc are within the valid range */
@@ -210,15 +210,15 @@ static NFC_OpResult Ndef_T4T_ReadAndParseCCFile(NDef_Context *ctx)
     return NFC_RequestError;
   }
 
-  ctx->subCtx.t4t.curMLe   = (uint8_t)MIN(ctx->cc.t4t.mLe, NDEF_T4T_MAX_MLE); /* Only short field codind supported */
-  ctx->subCtx.t4t.curMLc   = (uint8_t)MIN(ctx->cc.t4t.mLc, NDEF_T4T_MAX_MLC); /* Only short field codind supported */
+  ctx->subCtx.t4t.curMLe   = (uint8_t)((ctx->cc.t4t.mLe < NDEF_T4T_MAX_MLE) ? ctx->cc.t4t.mLe : NDEF_T4T_MAX_MLE); /* Only short field codind supported */
+  ctx->subCtx.t4t.curMLc   = (uint8_t)((ctx->cc.t4t.mLc < NDEF_T4T_MAX_MLC) ? ctx->cc.t4t.mLc : NDEF_T4T_MAX_MLC); /* Only short field codind supported */
 
   /* TS T4T v1.0 7.2.1.7 and 4.3.2.4 verify support of mapping version */
-  if (ndefMajorVersion(ctx->cc.t4t.vNo) > ndefMajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) {
+  if (NDef_MajorVersion(ctx->cc.t4t.vNo) > NDef_MajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) {
     /* Conclude procedure TS T4T v1.0 7.2.1.8 */
     return NFC_RequestError;
   }
-  if (ndefMajorVersion(ctx->cc.t4t.vNo) == ndefMajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) {
+  if (NDef_MajorVersion(ctx->cc.t4t.vNo) == NDef_MajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) {
     /* V3 found: read remainng bytes */
     ret = NDef_T4T_Poller_ReadBinary(ctx, NDEF_T4T_CCFILEV2_LEN, NDEF_T4T_CCFILEV3_LEN - NDEF_T4T_CCFILEV2_LEN);
     if (ret != NFC_OK) {
@@ -242,7 +242,7 @@ static NFC_OpResult Ndef_T4T_ReadAndParseCCFile(NDef_Context *ctx)
     dataIt++;
     ctx->cc.t4t.fileId[1U]   = ctx->ccBuf[dataIt];
     dataIt++;
-    ctx->cc.t4t.fileSize    = GETU32(&ctx->ccBuf[dataIt]);
+    ctx->cc.t4t.fileSize    = (((uint32_t)(&ctx->ccBuf[dataIt])[0] << 24) | ((uint32_t)(&ctx->ccBuf[dataIt])[1] << 16) | ((uint32_t)(&ctx->ccBuf[dataIt])[2] << 8) | ((uint32_t)(&ctx->ccBuf[dataIt])[3]));
     dataIt += (uint8_t)sizeof(uint32_t);
     ctx->cc.t4t.readAccess  = ctx->ccBuf[dataIt];
     dataIt++;
@@ -261,7 +261,7 @@ static NFC_OpResult Ndef_T4T_ReadAndParseCCFile(NDef_Context *ctx)
     dataIt++;
     ctx->cc.t4t.fileId[1U]   = ctx->ccBuf[dataIt];
     dataIt++;
-    ctx->cc.t4t.fileSize    = ndefBytes2Uint16(ctx->ccBuf[dataIt], ctx->ccBuf[dataIt + 1U]);
+    ctx->cc.t4t.fileSize    = NDef_Bytes2Uint16(ctx->ccBuf[dataIt], ctx->ccBuf[dataIt + 1U]);
     dataIt += (uint8_t)sizeof(uint16_t);
     ctx->cc.t4t.readAccess  = ctx->ccBuf[dataIt];
     dataIt++;
@@ -465,7 +465,7 @@ NFC_OpResult NDef_T4T_Poller_NdefDetect(NDef_Context *ctx, NDef_Info *info)
   if (ret != NFC_OK) {
     return ret;
   }
-  nlenLen = (ndefMajorVersion(ctx->cc.t4t.vNo) == ndefMajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) ? NDEF_T4T_ENLEN_LEN : NDEF_T4T_NLEN_LEN;
+  nlenLen = (NDef_MajorVersion(ctx->cc.t4t.vNo) == NDef_MajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) ? NDEF_T4T_ENLEN_LEN : NDEF_T4T_NLEN_LEN;
 
   /* TS T4T v1.0 7.2.1.7 verify file READ access */
   if (!(Ndef_T4T_IsReadAccessGranted(ctx->cc.t4t.readAccess))) {
@@ -494,8 +494,8 @@ NFC_OpResult NDef_T4T_Poller_NdefDetect(NDef_Context *ctx, NDef_Info *info)
 
   if (info != NULL) {
     info->state                = ctx->state;
-    info->majorVersion         = ndefMajorVersion(ctx->cc.t4t.vNo);
-    info->minorVersion         = ndefMinorVersion(ctx->cc.t4t.vNo);
+    info->majorVersion         = NDef_MajorVersion(ctx->cc.t4t.vNo);
+    info->minorVersion         = NDef_MinorVersion(ctx->cc.t4t.vNo);
     info->areaLen              = ctx->areaLen;
     info->areaAvalableSpaceLen = ctx->areaLen - ctx->messageOffset;
     info->messageLen           = ctx->messageLen;
@@ -625,7 +625,7 @@ NFC_OpResult NDef_T4T_Poller_WriteRawMessageLen(NDef_Context *ctx, uint32_t rawM
   }
 
   dataIt = 0U;
-  if (ndefMajorVersion(ctx->cc.t4t.vNo) == ndefMajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) {
+  if (NDef_MajorVersion(ctx->cc.t4t.vNo) == NDef_MajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) {
     buf[dataIt] = (uint8_t)(rawMessageLen >> 24U);
     dataIt++;
     buf[dataIt] = (uint8_t)(rawMessageLen >> 16U);
@@ -728,7 +728,7 @@ NFC_OpResult NDef_T4T_Poller_TagFormat(NDef_Context *ctx, const NDef_CapabilityC
     return ret;
   }
   (void)memset(buf, 0x00, sizeof(buf));
-  ret = NDef_T4T_Poller_WriteBytes(ctx, 0U, buf, (ndefMajorVersion(ctx->cc.t4t.vNo) == ndefMajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) ? NDEF_T4T_ENLEN_LEN : NDEF_T4T_NLEN_LEN, false, false);
+  ret = NDef_T4T_Poller_WriteBytes(ctx, 0U, buf, (NDef_MajorVersion(ctx->cc.t4t.vNo) == NDef_MajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) ? NDEF_T4T_ENLEN_LEN : NDEF_T4T_NLEN_LEN, false, false);
   return ret;
 }
 
@@ -772,7 +772,7 @@ NFC_OpResult NDef_T4T_Poller_CheckAvailableSpace(const NDef_Context *ctx, uint32
     return NFC_WrongState;
   }
 
-  nlenLen = (ndefMajorVersion(ctx->cc.t4t.vNo) == ndefMajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) ? NDEF_T4T_ENLEN_LEN : NDEF_T4T_NLEN_LEN;
+  nlenLen = (NDef_MajorVersion(ctx->cc.t4t.vNo) == NDef_MajorVersion(NDEF_T4T_MAPPING_VERSION_3_0)) ? NDEF_T4T_ENLEN_LEN : NDEF_T4T_NLEN_LEN;
   if ((messageLen + (uint32_t)nlenLen) > ctx->cc.t4t.fileSize) {
     return NFC_MemoryError;
   }

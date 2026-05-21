@@ -114,18 +114,6 @@
     ((dp))->techs2Bail = RFAL_NFC_TECH_NONE;               \
   }
 
-/*
-******************************************************************************
-* GLOBAL ENUMS
-******************************************************************************
-*/
-
-/*
-******************************************************************************
-* GLOBAL TYPES
-******************************************************************************
-*/
-
 /*! Main state                                                                       */
 typedef enum {
   RFAL_NFC_STATE_NOTINIT                  =  0,   /*!< Not Initialized state       */
@@ -315,7 +303,8 @@ NFC_OpResult RFal_NFC_PollTechDetection(void);
 NFC_OpResult RFal_NFC_PollCollResolution(void);
 NFC_OpResult RFal_NFC_PollActivation(uint8_t devIt);
 NFC_OpResult RFal_NFC_ListenActivation(void);
-NFC_OpResult RFal_NFC_Deactivation(void);
+NFC_OpResult RFal_NFC_Dep_Activate(RFal_NFC_Device *device, RFal_NFC_Dep_CommMode commMode, const uint8_t *atrReq, uint16_t atrReqLen);
+NFC_OpResult RFal_NFC_DeActivation(void);
 
 uint32_t timerCalculateTimer(uint16_t time);
 bool timerIsExpired(uint32_t timer);

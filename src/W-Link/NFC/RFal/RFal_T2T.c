@@ -48,9 +48,9 @@
 
 #include "NFC/NFC_Def.h"
 
-#define RFAL_FDT_POLL_READ_MAX                 rfalConvMsTo1fc(5U)  /*!< Maximum Wait time for Read command as defined in TS T2T 1.0 table 18   */
-#define RFAL_FDT_POLL_WRITE_MAX                rfalConvMsTo1fc(10U) /*!< Maximum Wait time for Write command as defined in TS T2T 1.0 table 18  */
-#define RFAL_FDT_POLL_SL_MAX                   rfalConvMsTo1fc(1U)  /*!< Maximum Wait time for Sector Select as defined in TS T2T 1.0 table 18  */
+#define RFAL_FDT_POLL_READ_MAX                 RFal_ConvMsTo1fc(5U)  /*!< Maximum Wait time for Read command as defined in TS T2T 1.0 table 18   */
+#define RFAL_FDT_POLL_WRITE_MAX                RFal_ConvMsTo1fc(10U) /*!< Maximum Wait time for Write command as defined in TS T2T 1.0 table 18  */
+#define RFAL_FDT_POLL_SL_MAX                   RFal_ConvMsTo1fc(1U)  /*!< Maximum Wait time for Sector Select as defined in TS T2T 1.0 table 18  */
 #define RFAL_T2T_ACK_NACK_LEN                  1U                   /*!< Len of NACK in bytes (4 bits)                                          */
 #define RFAL_T2T_ACK                           0x0AU                /*!< ACK value                                                              */
 #define RFAL_T2T_ACK_MASK                      0x0FU                /*!< ACK value                                                              */

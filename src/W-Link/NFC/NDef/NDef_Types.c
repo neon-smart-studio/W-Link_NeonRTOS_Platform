@@ -129,7 +129,7 @@ NFC_OpResult NDef_RecordToType(const NDef_Record *record, NDef_Type *type)
   }
 
 #if NDEF_TYPE_FLAT_SUPPORT
-  return NDef_Record_ToFlatPayloadType(record, type);
+  return NDef_RecordToFlatPayloadType(record, type);
 #else
   return NFC_Unsupport;
 #endif
@@ -169,7 +169,7 @@ NFC_OpResult NDef_RecordSetNDefType(NDef_Record *record, const NDef_Type *type)
   record->ndeftype = type;
 
   /* Set Short Record bit accordingly */
-  payloadLength = NDef_RecordGetPayloadLength(record);
+  payloadLength = NDef_Record_GetPayloadLength(record);
   NDef_Header_SetValueSR(record, (payloadLength <= NDEF_SHORT_RECORD_LENGTH_MAX) ? 1 : 0);
 
   return NFC_OK;

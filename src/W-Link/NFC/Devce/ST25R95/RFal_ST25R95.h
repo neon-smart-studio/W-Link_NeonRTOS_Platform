@@ -50,13 +50,13 @@
 
 #ifdef NFC_READER_DEVICE_ST25R95
 
-#define RFAL_ST25R95_GPT_MAX_1FC         RFAL_Conv8fcTo1fc(0xFFFF)                     /*!< Max GPT steps in 1fc (0xFFFF steps of 8/fc    => 0xFFFF * 590ns  = 38,7ms)      */
-#define RFAL_ST25R95_NRT_MAX_1FC         RFAL_Conv4096fcTo1fc(0xFFFF)                  /*!< Max NRT steps in 1fc (0xFFFF steps of 4096/fc => 0xFFFF * 302us  = 19.8s)       */
+#define RFAL_ST25R95_GPT_MAX_1FC         RFal_Conv8fcTo1fc(0xFFFF)                     /*!< Max GPT steps in 1fc (0xFFFF steps of 8/fc    => 0xFFFF * 590ns  = 38,7ms)      */
+#define RFAL_ST25R95_NRT_MAX_1FC         RFal_Conv4096fcTo1fc(0xFFFF)                  /*!< Max NRT steps in 1fc (0xFFFF steps of 4096/fc => 0xFFFF * 302us  = 19.8s)       */
 #define RFAL_ST25R95_NRT_DISABLED        0                                            /*!< NRT Disabled: All 0 No-response timer is not started, wait forever              */
-#define RFAL_ST25R95_MRT_MAX_1FC         RFAL_Conv64fcTo1fc(0x00FF)                    /*!< Max MRT steps in 1fc (0x00FF steps of 64/fc   => 0x00FF * 4.72us = 1.2ms)       */
-#define RFAL_ST25R95_MRT_MIN_1FC         RFAL_Conv64fcTo1fc(0x0004)                    /*!< Min MRT steps in 1fc (0<=mrt<=4 ; 4 (64/fc)  => 0x0004 * 4.72us = 18.88us)      */
-#define RFAL_ST25R95_GT_MAX_1FC          RFAL_ConvMsTo1fc(5000)                        /*!< Max GT value allowed in 1/fc                                                    */
-#define RFAL_ST25R95_GT_MIN_1FC          RFAL_ConvMsTo1fc(RFAL_ST25R95_SW_TMR_MIN_1MS) /*!< Min GT value allowed in 1/fc                                                    */
+#define RFAL_ST25R95_MRT_MAX_1FC         RFal_Conv64fcTo1fc(0x00FF)                    /*!< Max MRT steps in 1fc (0x00FF steps of 64/fc   => 0x00FF * 4.72us = 1.2ms)       */
+#define RFAL_ST25R95_MRT_MIN_1FC         RFal_Conv64fcTo1fc(0x0004)                    /*!< Min MRT steps in 1fc (0<=mrt<=4 ; 4 (64/fc)  => 0x0004 * 4.72us = 18.88us)      */
+#define RFAL_ST25R95_GT_MAX_1FC          RFal_ConvMsTo1fc(5000)                        /*!< Max GT value allowed in 1/fc                                                    */
+#define RFAL_ST25R95_GT_MIN_1FC          RFal_ConvMsTo1fc(RFAL_ST25R95_SW_TMR_MIN_1MS) /*!< Min GT value allowed in 1/fc                                                    */
 #define RFAL_ST25R95_SW_TMR_MIN_1MS      1
 
 #define RFAL_FELICA_POLL_DELAY_TIME     512                                           /*!<  FeliCa Poll Processing time is 2.417 ms ~512*64/fc Digital 1.1 A4              */

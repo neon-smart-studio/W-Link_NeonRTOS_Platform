@@ -171,7 +171,10 @@ NFC_OpResult RFal_NFCB_PollerCheckPresence(RFal_NFCB_SensCmd cmd, RFal_NFCB_Slot
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_NFCB_PollerGetCheckPresenceStatus());
+  do{ 
+    ret = RFal_NFCB_PollerGetCheckPresenceStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -215,7 +218,7 @@ NFC_OpResult RFal_NFCB_PollerGetCheckPresenceStatus(void)
   }
 
   /* Convert bits to bytes (u8) */
-  (*gRfalNfcb.DT.sensbResLen) = (uint8_t)rfalConvBitsToBytes(gRfalNfcb.DT.rxLen);
+  (*gRfalNfcb.DT.sensbResLen) = (uint8_t)RFal_ConvBitsToBytes(gRfalNfcb.DT.rxLen);
 
   /*  Check if a transmission error was detected */
   if ((ret == NFC_CRC_Error) || (ret == NFC_FramingError)) {
@@ -272,7 +275,10 @@ NFC_OpResult RFal_NFCB_PollerSlotMarker(uint8_t slotCode, RFal_NFCB_SensbRes *se
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_NFCB_PollerGetSlotMarkerStatus());
+  do{ 
+    ret = RFal_NFCB_PollerGetSlotMarkerStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -309,7 +315,7 @@ NFC_OpResult RFal_NFCB_PollerGetSlotMarkerStatus(void)
   }
 
   /* Convert bits to bytes (u8) */
-  (*gRfalNfcb.DT.sensbResLen) = (uint8_t)rfalConvBitsToBytes(gRfalNfcb.DT.rxLen);
+  (*gRfalNfcb.DT.sensbResLen) = (uint8_t)RFal_ConvBitsToBytes(gRfalNfcb.DT.rxLen);
 
   /*  Check if a transmission error was detected */
   if ((ret == NFC_CRC_Error) || (ret == NFC_FramingError)) {
@@ -352,7 +358,10 @@ NFC_OpResult RFal_NFCB_PollerCollisionResolution(RFal_ComplianceMode compMode, u
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_NFCB_PollerGetCollisionResolutionStatus());
+  do{ 
+    ret = RFal_NFCB_PollerGetCollisionResolutionStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -368,7 +377,10 @@ NFC_OpResult RFal_NFCB_PollerSlottedCollisionResolution(RFal_ComplianceMode comp
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_NFCB_PollerGetCollisionResolutionStatus());
+  do{ 
+    ret = RFal_NFCB_PollerGetCollisionResolutionStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -497,7 +509,7 @@ NFC_OpResult RFal_NFCB_PollerGetCollisionResolutionStatus(void)
               RFal_NFCB_PollerSleepTx(gRfalNfcb.CR.nfcbDevList[(*gRfalNfcb.CR.devCnt) - (uint8_t)1U].sensbRes.nfcid0);
               gRfalNfcb.CR.nfcbDevList[(*gRfalNfcb.CR.devCnt) - (uint8_t)1U].isSleep = true;
 
-              nfcbTimerStart(gRfalNfcb.CR.tmr, (uint16_t)rfalConv1fcToMs(RFAL_NFCB_ACTIVATION_FWT));
+              nfcbTimerStart(gRfalNfcb.CR.tmr, (uint16_t)RFal_Conv1fcToMs(RFAL_NFCB_ACTIVATION_FWT));
               ret = NFC_Busy;
             }
 
@@ -559,7 +571,7 @@ NFC_OpResult RFal_NFCB_PollerGetCollisionResolutionStatus(void)
         RFal_NFCB_PollerSleepTx(gRfalNfcb.CR.nfcbDevList[((*gRfalNfcb.CR.devCnt) - (uint8_t)1U)].sensbRes.nfcid0);
         gRfalNfcb.CR.nfcbDevList[((*gRfalNfcb.CR.devCnt) - (uint8_t)1U)].isSleep = true;
 
-        nfcbTimerStart(gRfalNfcb.CR.tmr, (uint16_t) rfalConv1fcToMs(RFAL_NFCB_ACTIVATION_FWT));
+        nfcbTimerStart(gRfalNfcb.CR.tmr, (uint16_t) RFal_Conv1fcToMs(RFAL_NFCB_ACTIVATION_FWT));
       }
 
       /* Activity 2.1  9.3.5.6  -  Symbol 5 */

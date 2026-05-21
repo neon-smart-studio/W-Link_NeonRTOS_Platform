@@ -293,7 +293,7 @@ NFC_OpResult NDef_Record_Decode(const NDef_Const_Buffer *bufPayload, NDef_Record
     if ((offset + sizeof(uint32_t)) > bufPayload->length) {
       return NFC_ProtocolError;
     }
-    record->bufPayload.length = GETU32(&bufPayload->buffer[offset]);
+    record->bufPayload.length = (((uint32_t)(&bufPayload->buffer[offset])[0] << 24) | ((uint32_t)(&bufPayload->buffer[offset])[1] << 16) | ((uint32_t)(&bufPayload->buffer[offset])[2] << 8) | ((uint32_t)(&bufPayload->buffer[offset])[3]));
     offset += sizeof(uint32_t);
   }
 

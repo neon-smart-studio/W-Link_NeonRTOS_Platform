@@ -741,7 +741,7 @@ static NFC_OpResult NDef_T5T_ReadLField(NDef_Context *ctx)
       return ret;
     }
     offset += 2U;
-    lenTLV = GETU16(&data[0]);
+    lenTLV = (((uint16_t)(&data[0])[0] << 8) | (uint16_t)(&data[0])[1]);
   }
   ctx->messageLen    = lenTLV;
   ctx->messageOffset = offset;
@@ -1239,7 +1239,7 @@ NFC_OpResult NDef_T5T_Poller_TagFormat(NDef_Context *ctx, const NDef_CapabilityC
   if (result != NFC_OK) {
     /* If write fails, try to use special frame if not yet used */
     if (!ctx->cc.t5t.specialFrame) {
-      delay(20U); /* Wait to be sure that previous command has ended */
+      NeonRTOS_Sleep(20U); /* Wait to be sure that previous command has ended */
       ctx->cc.t5t.specialFrame = true; /* Add option flag */
       result = NDef_T5T_WriteCC(ctx);
       if (result != NFC_OK) {

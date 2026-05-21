@@ -52,8 +52,6 @@
 
 #include "ST25R95.h"
 
-#include "ST25R95_AnalogConfig.h"
-
 #include "ST25R95_ISO15693.h"
 
 /*

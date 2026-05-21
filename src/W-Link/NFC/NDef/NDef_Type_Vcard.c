@@ -136,7 +136,7 @@ static NFC_OpResult NDef_VCardGetPropertyType(const NDef_Const_Buffer *bufProper
   uint32_t semicolonOffset;
   err = NDef_BufferFind(bufProperty, &bufSemicolon, &semicolonOffset);
   if (err == NFC_OK) {
-    bufType->length = MIN(semicolonOffset, colonOffset); /* Type is ahead ";" or ":" */
+    bufType->length = (semicolonOffset < colonOffset) ? semicolonOffset : colonOffset; /* Type is ahead ";" or ":" */
   }
 
   return NFC_OK;
@@ -290,7 +290,7 @@ NFC_OpResult NDef_VCardSetProperty(NDef_Type_VCard *vCard, const NDef_Const_Buff
     return err;
   }
 
-  for (uint32_t i = 0; i < (uint32_t)SIZEOF_ARRAY(vCard->propertyBuffer); i++) {
+  for (uint32_t i = 0; i < (uint32_t)(sizeof(vCard->propertyBuffer)/sizeof(vCard->propertyBuffer[0])); i++) {
     /* Find first free property */
     if (vCard->propertyBuffer[i] == NULL) {
       /* Append it */
@@ -331,7 +331,7 @@ NFC_OpResult NDef_VCardGetProperty(const NDef_Type_VCard *vCard, const NDef_Cons
     return NFC_InvalidParameter;
   }
 
-  for (uint32_t i = 0; i < SIZEOF_ARRAY(vCard->propertyBuffer); i++) {
+  for (uint32_t i = 0; i < sizeof(vCard->propertyBuffer)/sizeof(vCard->propertyBuffer[0]); i++) {
     NDef_Const_Buffer bufLine;
     bufLine.buffer = vCard->propertyBuffer[i];
     bufLine.length = vCard->propertyLength[i];
@@ -367,7 +367,7 @@ static uint32_t NDef_VCardPayloadGetLength(const NDef_Type *type)
   NDef_Data = &type->data.vCard;
 
   uint32_t payloadLength = 0;
-  for (uint32_t i = 0; i < SIZEOF_ARRAY(NDef_Data->propertyBuffer); i++) {
+  for (uint32_t i = 0; i < sizeof(NDef_Data->propertyBuffer)/sizeof(NDef_Data->propertyBuffer[0]); i++) {
     payloadLength += NDef_Data->propertyLength[i];
   }
 
@@ -383,7 +383,7 @@ NFC_OpResult NDef_VCardReset(NDef_Type_VCard *vCard)
   }
 
   /* Initialize every property */
-  for (uint32_t i = 0; i < (uint32_t)SIZEOF_ARRAY(vCard->propertyBuffer); i++) {
+  for (uint32_t i = 0; i < (uint32_t)sizeof(vCard->propertyBuffer)/sizeof(vCard->propertyBuffer[0]); i++) {
     vCard->propertyBuffer[i] = NULL;
     vCard->propertyLength[i] = 0;
   }
@@ -413,7 +413,7 @@ static const uint8_t *NDef_VCardToPayloadItem(const NDef_Type *type, NDef_Const_
     item = 0;
   }
 
-  while (item < (uint32_t)SIZEOF_ARRAY(NDef_Data->propertyBuffer)) {
+  while (item < (uint32_t)sizeof(NDef_Data->propertyBuffer)/sizeof(NDef_Data->propertyBuffer[0])) {
     bufItem->buffer = NDef_Data->propertyBuffer[item];
     bufItem->length = NDef_Data->propertyLength[item];
 
@@ -583,11 +583,11 @@ NFC_OpResult NDef_RecordToVCard(const NDef_Record *record, NDef_Type *type)
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeVCard)) { /* "text/x-vCard" */
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeVCard)) { /* "text/x-vCard" */
     return NFC_ProtocolError;
   }
 
-  NDef_Data = NDef_RecordGetNdefType(record);
+  NDef_Data = NDef_RecordGetNDefType(record);
   if ((NDef_Data != NULL) && (type->id == NDEF_TYPE_ID_MEDIA_VCARD)) {
     (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
     return NFC_OK;
@@ -605,11 +605,11 @@ NFC_OpResult NDef_VCardToRecord(const NDef_Type *type, NDef_Record *record)
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
-  (void)NDef_RecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeVCard);
+  (void)NDef_Record_SetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeVCard);
 
-  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, type) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 

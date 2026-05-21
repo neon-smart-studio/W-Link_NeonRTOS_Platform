@@ -93,7 +93,7 @@ NFC_OpResult NDef_RecordToEmptyType(const NDef_Record *record, NDef_Type *empty)
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_EMPTY, &bufEmpty)) {
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_EMPTY, &bufEmpty)) {
     return NFC_InvalidParameter;
   }
 
@@ -114,9 +114,9 @@ NFC_OpResult NDef_EmptyTypeToRecord(const NDef_Type *empty, NDef_Record *record)
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
-  if (NDef_RecordSetNdefType(record, empty) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, empty) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 

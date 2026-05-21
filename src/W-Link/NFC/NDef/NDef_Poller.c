@@ -49,7 +49,7 @@
 
 #include "NFC/NFC_Def.h"
 
-static NDef_Device_Type NDef_GetDeviceType(const RFal_NFC_Device *dev)
+NDef_Device_Type NDef_GetDeviceType(const RFal_NFC_Device *dev)
 {
   NDef_Device_Type type = NDEF_DEV_NONE;
 
@@ -317,7 +317,7 @@ NFC_OpResult NDef_Poller_ContextInitialization(NDef_Context *ctx, const RFal_NFC
 
   type = NDef_GetDeviceType(dev);
 
-  if ((type == NDEF_DEV_NONE) || (type >= SIZEOF_ARRAY(NDef_Poller_Wrappers))) {
+  if ((type == NDEF_DEV_NONE) || (type >= sizeof(NDef_Poller_Wrappers)/sizeof(NDef_Poller_Wrappers[0]))) {
     return NFC_InvalidParameter;
   }
 

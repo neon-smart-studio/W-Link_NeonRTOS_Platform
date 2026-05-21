@@ -47,7 +47,7 @@
 
 #include "NFC/NFC_Def.h"
 
-#define RFAL_NFCA_SLP_FWT           rfalConvMsTo1fc(1)    /*!< Check 1ms for any modulation  ISO14443-3 6.4.3   */
+#define RFAL_NFCA_SLP_FWT           RFal_ConvMsTo1fc(1)    /*!< Check 1ms for any modulation  ISO14443-3 6.4.3   */
 #define RFAL_NFCA_SLP_CMD           0x50U                 /*!< SLP cmd (byte1)    Digital 1.1  6.9.1 & Table 20 */
 #define RFAL_NFCA_SLP_BYTE2         0x00U                 /*!< SLP byte2          Digital 1.1  6.9.1 & Table 20 */
 #define RFAL_NFCA_SLP_CMD_POS       0U                    /*!< SLP cmd position   Digital 1.1  6.9.1 & Table 20 */
@@ -308,7 +308,7 @@ static NFC_OpResult RFal_NFCA_PollerGetSingleCollisionResolutionStatus(void)
       }
 
       /* Convert rxLen into bytes */
-      gNfca.CR.rxLen = rfalConvBitsToBytes(gNfca.CR.rxLen);
+      gNfca.CR.rxLen = RFal_ConvBitsToBytes(gNfca.CR.rxLen);
 
 
       if ((ret == NFC_SlaveTimeout)
@@ -435,7 +435,7 @@ static NFC_OpResult RFal_NFCA_PollerGetSingleCollisionResolutionStatus(void)
         return ret;
       }
 
-      gNfca.CR.rxLen = rfalConvBitsToBytes(gNfca.CR.rxLen);
+      gNfca.CR.rxLen = RFal_ConvBitsToBytes(gNfca.CR.rxLen);
 
       /* Ensure proper response length */
       if (gNfca.CR.rxLen != sizeof(RFal_NFCA_SelRes)) {
@@ -503,7 +503,7 @@ NFC_OpResult RFal_NFCA_PollerCheckPresence(RFal_14443AShortFrameCmd cmd, RFal_NF
   /* Digital 1.1 6.10.1.3  For Commands ALL_REQ, SENS_REQ, SDD_REQ, and SEL_REQ, the NFC Forum Device      *
    *              MUST treat receipt of a Listen Frame at a time after FDT(Listen, min) as a Timeour Error */
 
-  ret = RFal_ISO14443ATransceiveShortFrame(cmd, (uint8_t *)sensRes, (uint8_t)rfalConvBytesToBits(sizeof(RFal_NFCA_SensRes)), &rcvLen, RFAL_NFCA_FDTMIN);
+  ret = RFal_ISO14443ATransceiveShortFrame(cmd, (uint8_t *)sensRes, (uint8_t)RFal_ConvBytesToBits(sizeof(RFal_NFCA_SensRes)), &rcvLen, RFAL_NFCA_FDTMIN);
   if ((ret == NFC_RF_Collision) || (ret == NFC_CRC_Error)  || (ret == NFC_MemoryError) || (ret == NFC_FramingError) || (ret == NFC_ParityError) || (ret == NFC_ImcompleteByte)) {
     ret = NFC_OK;
   }
@@ -523,7 +523,10 @@ NFC_OpResult RFal_NFCA_PollerTechnologyDetection(RFal_ComplianceMode compMode, R
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_NFCA_PollerGetTechnologyDetectionStatus());
+  do{ 
+    ret = RFal_NFCA_PollerGetTechnologyDetectionStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -576,7 +579,10 @@ NFC_OpResult RFal_NFCA_PollerSingleCollisionResolution(uint8_t devLimit, bool *c
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_NFCA_PollerGetSingleCollisionResolutionStatus());
+  do{ 
+    ret = RFal_NFCA_PollerGetSingleCollisionResolutionStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -598,7 +604,7 @@ NFC_OpResult RFal_NFCA_PollerStartFullCollisionResolution(RFal_ComplianceMode co
   /*******************************************************************************/
   /* Send ALL_REQ before Anticollision if a Sleep was sent before  Activity 1.1  9.3.4.1 and EMVco 2.6  9.3.2.1 */
   if (compMode != RFAL_COMPLIANCE_MODE_ISO) {
-    ret = RFal_ISO14443ATransceiveShortFrame(RFAL_14443A_SHORTFRAME_CMD_WUPA, (uint8_t *)&nfcaDevList->sensRes, (uint8_t)rfalConvBytesToBits(sizeof(RFal_NFCA_SensRes)), &rcvLen, RFAL_NFCA_FDTMIN);
+    ret = RFal_ISO14443ATransceiveShortFrame(RFAL_14443A_SHORTFRAME_CMD_WUPA, (uint8_t *)&nfcaDevList->sensRes, (uint8_t)RFal_ConvBytesToBits(sizeof(RFal_NFCA_SensRes)), &rcvLen, RFAL_NFCA_FDTMIN);
     if (ret != NFC_OK) {
       if ((compMode == RFAL_COMPLIANCE_MODE_EMV) || ((ret != NFC_RF_Collision) && (ret != NFC_CRC_Error) && (ret != NFC_FramingError) && (ret != NFC_ParityError) && (ret != NFC_ImcompleteByte))) {
         return ret;
@@ -606,7 +612,7 @@ NFC_OpResult RFal_NFCA_PollerStartFullCollisionResolution(RFal_ComplianceMode co
     }
 
     /* Check proper SENS_RES/ATQA size */
-    if ((ret == NFC_OK) && (rfalConvBytesToBits(sizeof(RFal_NFCA_SensRes)) != rcvLen)) {
+    if ((ret == NFC_OK) && (RFal_ConvBytesToBits(sizeof(RFal_NFCA_SensRes)) != rcvLen)) {
       return NFC_ProtocolError;
     }
   }
@@ -783,7 +789,10 @@ NFC_OpResult RFal_NFCA_PollerFullCollisionResolution(RFal_ComplianceMode compMod
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_NFCA_PollerGetFullCollisionResolutionStatus());
+  do{ 
+    ret = RFal_NFCA_PollerGetFullCollisionResolutionStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 
@@ -845,7 +854,10 @@ NFC_OpResult RFal_NFCA_PollerSelect(const uint8_t *nfcid1, uint8_t nfcidLen, RFa
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_NFCA_PollerGetSelectStatus());
+  do{ 
+    ret = RFal_NFCA_PollerGetSelectStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -918,7 +930,7 @@ NFC_OpResult RFal_NFCA_PollerGetSelectStatus(void)
     }
 
     /* Ensure proper response length */
-    if (rfalConvBitsToBytes(gNfca.SEL.rxLen) != sizeof(RFal_NFCA_SelRes)) {
+    if (RFal_ConvBitsToBytes(gNfca.SEL.rxLen) != sizeof(RFal_NFCA_SelRes)) {
       return NFC_ProtocolError;
     }
 
@@ -948,7 +960,10 @@ NFC_OpResult RFal_NFCA_PollerSleep(void)
       return ret;
   }
   
-  rfalRunBlocking(ret, RFal_NFCA_PollerGetSleepStatus());
+  do{ 
+    ret = RFal_NFCA_PollerGetSleepStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -961,7 +976,7 @@ NFC_OpResult RFal_NFCA_PollerStartSleep(void)
   gNfca.slpReq.frame[RFAL_NFCA_SLP_CMD_POS]   = RFAL_NFCA_SLP_CMD;
   gNfca.slpReq.frame[RFAL_NFCA_SLP_BYTE2_POS] = RFAL_NFCA_SLP_BYTE2;
 
-  rfalCreateByteFlagsTxRxContext(ctx, (uint8_t *)&gNfca.slpReq, sizeof(RFal_NFCA_SlpReq), (uint8_t *)&gNfca.slpReq, sizeof(gNfca.slpReq), NULL, RFAL_TXRX_FLAGS_DEFAULT, RFAL_NFCA_SLP_FWT);
+  RFAL_CreateByteFlagsTxRxContext(ctx, (uint8_t *)&gNfca.slpReq, sizeof(RFal_NFCA_SlpReq), (uint8_t *)&gNfca.slpReq, sizeof(gNfca.slpReq), NULL, RFAL_TXRX_FLAGS_DEFAULT, RFAL_NFCA_SLP_FWT);
   
   return RFal_StartTransceive(&ctx);
 }

@@ -95,12 +95,12 @@ NFC_OpResult ST25R95_Field_On(ST25R95_Protocol protocol)
   if (protocol == ST25R95_Protocol_FieldOff) {
     protocol = ST25R95_Protocol_ISO15693;
   }
-  return (ST25R95_ProtocolSelect(protocol));
+  return (ST25R95_Protocol_Select(protocol));
 }
 
 NFC_OpResult ST25R95_Field_Off(void)
 {
-  return (ST25R95_ProtocolSelect(ST25R95_Protocol_FieldOff));
+  return (ST25R95_Protocol_Select(ST25R95_Protocol_FieldOff));
 }
 
 NFC_OpResult ST25R95_Set_BitRate(ST25R95_Protocol protocol, ST25R95_BitRate txBR, ST25R95_BitRate rxBR)
@@ -304,7 +304,7 @@ NFC_OpResult ST25R95_Set_FWT(ST25R95_Protocol protocol, uint32_t fwt)
           ProtocolSelectCommandISO14443A[5] = (uint8_t)MM;
           ProtocolSelectCommandISO14443A[6] = (uint8_t)DD;
 
-          return (ST25R95_ProtocolSelect(protocol));
+          return (ST25R95_Protocol_Select(protocol));
         }
         break;
 
@@ -317,7 +317,7 @@ NFC_OpResult ST25R95_Set_FWT(ST25R95_Protocol protocol, uint32_t fwt)
           ProtocolSelectCommandISO14443B[5] = (uint8_t)MM;
           ProtocolSelectCommandISO14443B[6] = (uint8_t)DD;
 
-          return (ST25R95_ProtocolSelect(protocol));
+          return (ST25R95_Protocol_Select(protocol));
         }
         break;
 
@@ -330,7 +330,7 @@ NFC_OpResult ST25R95_Set_FWT(ST25R95_Protocol protocol, uint32_t fwt)
           ProtocolSelectCommandISO18092[6] = (uint8_t)MM;
           ProtocolSelectCommandISO18092[7] = (uint8_t)DD;
 
-          return (ST25R95_ProtocolSelect(protocol));
+          return (ST25R95_Protocol_Select(protocol));
         }
         break;
 

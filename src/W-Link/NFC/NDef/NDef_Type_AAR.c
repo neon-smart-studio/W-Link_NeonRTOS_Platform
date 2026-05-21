@@ -101,7 +101,7 @@ NFC_OpResult NDef_RecordToRtdAAR(const NDef_Record *record, NDef_Type *aar)
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeAAR)) { /* "android.com:pkg" */
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeAAR)) { /* "android.com:pkg" */
     return NFC_ProtocolError;
   }
 
@@ -123,12 +123,12 @@ NFC_OpResult NDef_RtdAARToRecord(const NDef_Type *aar, NDef_Record *record)
 
   rtdAar = &aar->data.aar;
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* "android.com:pkg" */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeAAR);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeAAR);
 
-  (void)NDef_RecordSetPayload(record, &rtdAar->bufPayload);
+  (void)NDef_Record_SetPayload(record, &rtdAar->bufPayload);
 
   return NFC_OK;
 }

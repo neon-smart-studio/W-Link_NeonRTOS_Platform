@@ -44,7 +44,6 @@
 #include "RFal.h"
 #include "RFal_NFC.h"
 #include "RFal_NFCV.h"
-#include "RFal.h"
 
 #include "NFC/NFC_Def.h"
 
@@ -82,7 +81,7 @@
  *                    ISO15693 2009 10.4.2                 : <20ms
  *                    NFC Forum defines Digital 2.3  9.7.4 : FDTV,EOF = [10 ; 20]ms
  */
-#define RFAL_NFCV_FDT_EOF               rfalConvMsTo1fc(16)
+#define RFAL_NFCV_FDT_EOF               RFal_ConvMsTo1fc(16)
 
 
 
@@ -94,7 +93,7 @@
 
 
 /*! Checks if a valid INVENTORY_RES is valid    Digital 2.2  9.6.2.1 & 9.6.2.3  */
-#define RFal_NFCV_CheckInvRes( f, l )     (((l)==rfalConvBytesToBits(RFAL_NFCV_INV_RES_LEN + RFAL_NFCV_CRC_LEN)) && ((f)==RFAL_NFCV_RES_FLAG_NOERROR))
+#define RFal_NFCV_CheckInvRes( f, l )     (((l)==RFal_ConvBytesToBits(RFAL_NFCV_INV_RES_LEN + RFAL_NFCV_CRC_LEN)) && ((f)==RFAL_NFCV_RES_FLAG_NOERROR))
 
 /*! NFC-V INVENTORY_REQ format   Digital 2.0 9.6.1 */
 typedef struct {
@@ -143,7 +142,12 @@ NFC_OpResult RFal_NFCV_PollerInit(void)
 {
   NFC_OpResult ret;
 
-  EXIT_ON_ERR(ret, RFal_SetMode(RFAL_MODE_POLL_NFCV, RFAL_BR_26p48, RFAL_BR_26p48));
+  ret = RFal_SetMode(RFAL_MODE_POLL_NFCV, RFAL_BR_26p48, RFAL_BR_26p48);
+  if(ret < NFC_OK)
+  {
+      return ret;
+  }
+
   RFal_SetErrorHandling(ERRORHANDLING_NONE);
 
   RFal_SetGT(RFAL_GT_NFCV);
@@ -182,13 +186,15 @@ NFC_OpResult RFal_NFCV_PollerInventory(RFal_NFCV_NumSlots nSlots, uint8_t maskLe
 
   invReq.INV_FLAG = (RFAL_NFCV_INV_REQ_FLAG | (uint8_t)nSlots);
   invReq.CMD      = RFAL_NFCV_CMD_INVENTORY;
-  invReq.MASK_LEN = (uint8_t)MIN(maskLen, ((nSlots == RFAL_NFCV_NUM_SLOTS_1) ? RFAL_NFCV_MASKVAL_MAX_1SLOT_LEN : RFAL_NFCV_MASKVAL_MAX_16SLOT_LEN));     /* Digital 2.0  9.6.1.6 */
 
-  if ((rfalConvBitsToBytes(invReq.MASK_LEN) > 0U) && (maskVal != NULL)) {   /* MISRA 21.18 & 1.3 */
-    memcpy(invReq.MASK_VALUE, maskVal, rfalConvBitsToBytes(invReq.MASK_LEN));
+  uint8_t slot_len = ((nSlots == RFAL_NFCV_NUM_SLOTS_1) ? RFAL_NFCV_MASKVAL_MAX_1SLOT_LEN : RFAL_NFCV_MASKVAL_MAX_16SLOT_LEN);
+  invReq.MASK_LEN = (uint8_t)(maskLen < slot_len) ? maskLen : slot_len;     /* Digital 2.0  9.6.1.6 */
+
+  if ((RFal_ConvBitsToBytes(invReq.MASK_LEN) > 0U) && (maskVal != NULL)) {   /* MISRA 21.18 & 1.3 */
+    memcpy(invReq.MASK_VALUE, maskVal, RFal_ConvBitsToBytes(invReq.MASK_LEN));
   }
 
-  ret = RFal_ISO15693TransceiveAnticollisionFrame((uint8_t *)&invReq, (uint8_t)(RFAL_NFCV_INV_REQ_HEADER_LEN + rfalConvBitsToBytes(invReq.MASK_LEN)), (uint8_t *)invRes, sizeof(RFal_NFCV_InventoryRes), &rxLen);
+  ret = RFal_ISO15693TransceiveAnticollisionFrame((uint8_t *)&invReq, (uint8_t)(RFAL_NFCV_INV_REQ_HEADER_LEN + RFal_ConvBitsToBytes(invReq.MASK_LEN)), (uint8_t *)invRes, sizeof(RFal_NFCV_InventoryRes), &rxLen);
 
   /* Check for optional output parameter */
   if (rcvdLen != NULL) {
@@ -286,7 +292,7 @@ NFC_OpResult RFal_NFCV_PollerCollisionResolution(RFal_ComplianceMode compMode, u
 
       /*******************************************************************************/
       if (ret != NFC_SlaveTimeout) {
-        if (rcvdLen < rfalConvBytesToBits(RFAL_NFCV_INV_RES_LEN + RFAL_NFCV_CRC_LEN)) {
+        if (rcvdLen < RFal_ConvBytesToBits(RFAL_NFCV_INV_RES_LEN + RFAL_NFCV_CRC_LEN)) {
           /* If only a partial frame was received make sure the FDT_V_INVENT_NORES is fulfilled */
           NeonRTOS_Sleep(RFAL_NFCV_FDT_V_INVENT_NORES);
         }

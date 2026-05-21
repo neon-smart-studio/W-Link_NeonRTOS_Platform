@@ -331,11 +331,11 @@ NFC_OpResult NDef_RecordToRtdWlcCapability(const NDef_Record *record, NDef_Type 
   }
 
   /* NDEF TNF and String type */
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability)) {
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability)) {
     return NFC_ProtocolError;
   }
 
-  NDef_Data = NDef_RecordGetNdefType(record);
+  NDef_Data = NDef_RecordGetNDefType(record);
   if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_WLCCAP)) {
     (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
     return NFC_OK;
@@ -353,12 +353,12 @@ NFC_OpResult NDef_RtdWlcCapabilityToRecord(const NDef_Type *type, NDef_Record *r
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* String type */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcCapability);
 
-  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, type) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 
@@ -611,11 +611,11 @@ NFC_OpResult NDef_RecordToRtdWlcStatusInfo(const NDef_Record *record, NDef_Type 
   }
 
   /* NDEF TNF and String type */
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo)) {
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo)) {
     return NFC_ProtocolError;
   }
 
-  NDef_Data = NDef_RecordGetNdefType(record);
+  NDef_Data = NDef_RecordGetNDefType(record);
   if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_WLCSTAI)) {
     (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
     return NFC_OK;
@@ -633,12 +633,12 @@ NFC_OpResult NDef_RtdWlcStatusInfoToRecord(const NDef_Type *type, NDef_Record *r
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* String type */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcStatusInfo);
 
-  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, type) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 
@@ -803,11 +803,11 @@ NFC_OpResult NDef_RecordToRtdWlcPollInfo(const NDef_Record *record, NDef_Type *t
   }
 
   /* NDEF TNF and String type */
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo)) {
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo)) {
     return NFC_ProtocolError;
   }
 
-  NDef_Data = NDef_RecordGetNdefType(record);
+  NDef_Data = NDef_RecordGetNDefType(record);
   if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_WLCINFO)) {
     (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
     return NFC_OK;
@@ -825,12 +825,12 @@ NFC_OpResult NDef_RtdWlcPollInfoToRecord(const NDef_Type *type, NDef_Record *rec
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* String type */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcPollInfo);
 
-  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, type) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 
@@ -1045,11 +1045,11 @@ NFC_OpResult NDef_RecordToRtdWlcListenCtl(const NDef_Record *record, NDef_Type *
   }
 
   /* NDEF TNF and String type */
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl)) {
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl)) {
     return NFC_ProtocolError;
   }
 
-  NDef_Data = NDef_RecordGetNdefType(record);
+  NDef_Data = NDef_RecordGetNDefType(record);
   if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_WLCCTL)) {
     (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
     return NFC_OK;
@@ -1067,12 +1067,12 @@ NFC_OpResult NDef_RtdWlcListenCtlToRecord(const NDef_Type *type, NDef_Record *re
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* String type */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufTypeRtdWlcListenCtl);
 
-  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, type) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 

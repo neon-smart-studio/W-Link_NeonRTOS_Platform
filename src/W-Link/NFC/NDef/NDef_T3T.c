@@ -148,7 +148,7 @@ NFC_OpResult NDef_T3T_Poller_ReadBytes(NDef_Context *ctx, uint32_t offset, uint3
     return NFC_InvalidParameter;
   }
   if (ctx->state != NDEF_STATE_INVALID) {
-    nbBlocks = MIN(ctx->cc.t3t.nbR, NDEF_T3T_MAX_NB_BLOCKS);
+    nbBlocks = (ctx->cc.t3t.nbR < NDEF_T3T_MAX_NB_BLOCKS) ? ctx->cc.t3t.nbR : NDEF_T3T_MAX_NB_BLOCKS;
   }
 
   if (startOffset != 0U) {
@@ -324,7 +324,7 @@ NFC_OpResult NDef_T3T_Poller_NdefDetect(NDef_Context *ctx, NDef_Info *info)
   }
 
   /* TS T3T v1.0 7.4.1.6 The Reader/Writer SHALL check if it supports the NDEF mapping version number based on the rules given in Section 7.3. */
-  if (ctx->cc.t3t.majorVersion != ndefMajorVersion(NDEF_T3T_ATTRIB_INFO_VERSION_1_0)) {
+  if (ctx->cc.t3t.majorVersion != NDef_MajorVersion(NDEF_T3T_ATTRIB_INFO_VERSION_1_0)) {
     return NFC_RequestError;
   }
 
@@ -460,7 +460,7 @@ NFC_OpResult NDef_T3T_Poller_WriteBytes(NDef_Context *ctx, uint32_t offset, cons
     return NFC_InvalidParameter;
   }
   if (ctx->state != NDEF_STATE_INVALID) {
-    nbBlocks = MIN(ctx->cc.t3t.nbW, NDEF_T3T_MAX_NB_BLOCKS);
+    nbBlocks = (ctx->cc.t3t.nbW < NDEF_T3T_MAX_NB_BLOCKS) ? ctx->cc.t3t.nbW : NDEF_T3T_MAX_NB_BLOCKS;
   }
 
   if (startOffset != 0U) {

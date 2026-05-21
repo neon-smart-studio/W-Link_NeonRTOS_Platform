@@ -72,10 +72,10 @@
  ******************************************************************************
  */
 
-#define NDefBytes2Uint16(hiB, loB)          ((uint16_t)((((uint32_t)(hiB)) << 8U) | ((uint32_t)(loB))))                                                  /*!< convert 2 bytes to a u16 */
+#define NDef_Bytes2Uint16(hiB, loB)          ((uint16_t)((((uint32_t)(hiB)) << 8U) | ((uint32_t)(loB))))                                                  /*!< convert 2 bytes to a u16 */
 
-#define NDefMajorVersion(V)                 ((uint8_t)((V) >>  4U))    /*!< Get major version */
-#define NDefMinorVersion(V)                 ((uint8_t)((V) & 0xFU))    /*!< Get minor version */
+#define NDef_MajorVersion(V)                 ((uint8_t)((V) >>  4U))    /*!< Get major version */
+#define NDef_MinorVersion(V)                 ((uint8_t)((V) & 0xFU))    /*!< Get minor version */
 
 
 /*
@@ -184,7 +184,7 @@ typedef union {
 /*! NDEF T1T sub context structure */
 typedef struct {
   void *rfu;                                                 /*!< RFU                                                */
-} NDefT1TContext;
+} NDef_T1TContext;
 
 /*! NDEF T2T sub context structure */
 typedef struct {
@@ -199,7 +199,7 @@ typedef struct {
   uint32_t                     offsetNdefTLV;                                  /*!< NDEF TLV message offset                        */
   uint32_t                     dynLockFirstByteAddr;                           /*!< Address of the first byte of the DynLock_Area  */
   uint32_t                     rsvdAreaFirstByteAddr[NDEF_T2T_MAX_RSVD_AREAS]; /*!< Addresses of reserved areas                    */
-} NDefT2TContext;
+} NDef_T2TContext;
 
 /*! NDEF T3T sub context structure */
 typedef struct {
@@ -207,7 +207,7 @@ typedef struct {
   uint8_t                      txbuf[NDEF_T3T_MAX_TX_SIZE];         /*!< Tx buffer dedicated for T3T internal operations         */
   uint8_t                      rxbuf[NDEF_T3T_MAX_RX_SIZE];         /*!< Rx buffer dedicated for T3T internal operations         */
   RFal_NFCF_BlockListElem      listBlocks[NDEF_T3T_MAX_NB_BLOCKS];  /*!< block number list for T3T internal operations           */
-} NDefT3TContext;
+} NDef_T3TContext;
 
 /*! NDEF T4T sub context structure */
 typedef struct {
@@ -223,7 +223,7 @@ typedef struct {
   uint32_t                     dFWT;                         /*!< Delta Frame Waiting Time (1/fc)                    */
   uint16_t                     FSx;                          /*!< Frame Size Device/Card (FSD or FSC)                */
   uint8_t                      DID;                          /*!< Device ID                                          */
-} NDefT4TContext;
+} NDef_T4TContext;
 
 /*! NFCV (Extended) System Information  */
 typedef struct {
@@ -235,7 +235,7 @@ typedef struct {
   uint8_t     AFI;                              /*!< AFI Value                                          */
   uint8_t     blockSize;                        /*!< Block Size Value                                   */
   uint8_t     ICRef;                            /*!< IC Reference                                       */
-} NDefSystemInformation;
+} NDef_SystemInformation;
 
 /*! NDEF T5T sub context structure */
 typedef struct {
@@ -243,7 +243,7 @@ typedef struct {
   uint8_t                      flags;                        /*!< Command flags                                      */
   uint32_t                     TlvNDEFOffset;                /*!< NDEF TLV message offset                            */
   uint8_t                      blockLen;                     /*!< T5T BLEN parameter                                 */
-  NDefSystemInformation        sysInfo;                      /*!< System Information (when supported)                */
+  NDef_SystemInformation       sysInfo;                      /*!< System Information (when supported)                */
   bool                         sysInfoSupported;             /*!< System Information Supported flag                  */
   bool                         legacySTHighDensity;          /*!< Legacy ST High Density flag                        */
   uint8_t                      txrxBuf[NDEF_T5T_TxRx_BUFF_SIZE];/*!< Tx Rx Buffer                                    */
@@ -251,7 +251,7 @@ typedef struct {
   uint32_t                     cacheBlock;                   /*!< Block number of cached buffer                      */
   bool                         useMultipleBlockRead;         /*!< Access multiple block read                         */
   bool                         stDevice;                     /*!< ST device                                          */
-} NDefT5TContext;
+} NDef_T5TContext;
 
 /*! NDEF context structure */
 typedef struct {
@@ -266,11 +266,11 @@ typedef struct {
   const struct NDef_Poller_WrapperStruct *
     NDefPollWrapper;              /*!< pointer to array of function for wrapper           */
   union {
-    NDefT1TContext t1t;                                    /*!< T1T context                                        */
-    NDefT2TContext t2t;                                    /*!< T2T context                                        */
-    NDefT3TContext t3t;                                    /*!< T3T context                                        */
-    NDefT4TContext t4t;                                    /*!< T4T context                                        */
-    NDefT5TContext t5t;                                    /*!< T5T context                                        */
+    NDef_T1TContext t1t;                                    /*!< T1T context                                        */
+    NDef_T2TContext t2t;                                    /*!< T2T context                                        */
+    NDef_T3TContext t3t;                                    /*!< T3T context                                        */
+    NDef_T4TContext t4t;                                    /*!< T4T context                                        */
+    NDef_T5TContext t5t;                                    /*!< T5T context                                        */
   } subCtx;                                                  /*!< Sub-context union                                  */
 } NDef_Context;
 
@@ -291,7 +291,7 @@ typedef struct NDef_Poller_WrapperStruct {
   NFC_OpResult(* pollerSetReadOnly)(NDef_Context *ctx);                                                                                    /*!< SetReadOnly function pointer                           */
 } NDef_Poller_Wrapper;
 
-NDef_Device_Type NDefGetDeviceType(const RFal_NFC_Device *dev);
+NDef_Device_Type NDef_GetDeviceType(const RFal_NFC_Device *dev);
 NFC_OpResult NDef_Poller_ContextInitialization(NDef_Context *ctx, const RFal_NFC_Device *dev);
 NFC_OpResult NDef_Poller_NdefDetect(NDef_Context *ctx, NDef_Info *info);
 NFC_OpResult NDef_Poller_ReadBytes(NDef_Context *ctx, uint32_t offset, uint32_t len, uint8_t *buf, uint32_t *rcvdLen);

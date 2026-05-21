@@ -308,17 +308,17 @@ NFC_OpResult NDef_RecordToRtdDeviceInfo(const NDef_Record *record, NDef_Type *de
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo)) { /* "Di" */
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo)) { /* "Di" */
     return NFC_ProtocolError;
   }
 
-  type = NDef_RecordGetNdefType(record);
+  type = NDef_RecordGetNDefType(record);
   if ((type != NULL) && (type->id == NDEF_TYPE_ID_RTD_DEVICE_INFO)) {
     (void)memcpy(devInfo, type, sizeof(NDef_Type));
     return NFC_OK;
   }
 
-  return ndefPayloadToRtdDeviceInfo(&record->bufPayload, devInfo);
+  return NDef_PayloadToRtdDeviceInfo(&record->bufPayload, devInfo);
 }
 
 
@@ -330,12 +330,12 @@ NFC_OpResult NDef_RtdDeviceInfoToRecord(const NDef_Type *devInfo, NDef_Record *r
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* "Di" */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeDeviceInfo);
 
-  if (NDef_RecordSetNdefType(record, devInfo) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, devInfo) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 

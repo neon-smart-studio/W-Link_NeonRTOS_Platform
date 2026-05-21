@@ -48,6 +48,8 @@
 
 #include "NFC/NFC_Def.h"
 
+#include "NeonRTOS.h"
+
 #define ISODEP_CRC_LEN RFAL_CRC_LEN /*!< ISO1443 CRC Length */
 
 #define ISODEP_PCB_POS (0U)      /*!< PCB position on message header*/
@@ -127,7 +129,7 @@
 
 /**********************************************************************************************************************/
 /**********************************************************************************************************************/
-#define RFAL_ISODEP_NO_PARAM (0U) /*!< No parameter flag for isoDepHandleControlMsg()     */
+#define RFAL_ISODEP_NO_PARAM (0U) /*!< No parameter flag for RFal_ISO_Dep_HandleControlMsg()     */
 
 #define RFAL_ISODEP_CMD_RATS (0xE0U) /*!< RATS command   Digital 1.1  13.6.1                 */
 
@@ -194,7 +196,7 @@
 #define RFAL_ISODEP_PPS1_DxI_MASK (0x03U)         /*!< PPS1 byte DSI/DRS mask bits                          */
 
 /*! Delta Time for polling during Activation (ATS) : 20ms    Digital 1.0 11.7.1.1 & A.7    */
-#define RFAL_ISODEP_T4T_DTIME_POLL_10 rfalConvMsTo1fc(20)
+#define RFAL_ISODEP_T4T_DTIME_POLL_10 RFal_ConvMsTo1fc(20)
 
 /*! Delta Time for polling during Activation (ATS) : 16.4ms  Digital 1.1 13.8.1.1 & A.6
  *  Use 16 ms as testcase T4AT_BI_10_03 sends a frame exactly at the border */
@@ -249,7 +251,7 @@
 #define isoDep_GetWTXM(inf) ((uint8_t)((inf) & ISODEP_SWTX_WTXM_MASK))                        /*!< Returns the WTX value from the given inf byte    */
 #define isoDep_isWTXMValid(wtxm) (((wtxm) >= ISODEP_WTXM_MIN) && ((wtxm) <= ISODEP_WTXM_MAX)) /*!< Checks if the given wtxm is valid                */
 
-#define isoDep_WTXMListenerMax(fwt) (MIN((uint8_t)(ISODEP_FWT_LIS_MAX / (fwt)), ISODEP_WTXM_MAX)) /*!< Calculates the Max WTXM value for the given fwt as a Listener    */
+#define isoDep_WTXMListenerMax(fwt) (((uint8_t)(ISODEP_FWT_LIS_MAX / (fwt)) < ISODEP_WTXM_MAX) ? (uint8_t)(ISODEP_FWT_LIS_MAX / (fwt)) : ISODEP_WTXM_MAX) /*!< Calculates the Max WTXM value for the given fwt as a Listener    */
 
 #define isoDepCalcdSGFT(s) (384U * ((uint32_t)1U << (s))) /*!< Calculates the dSFGT with given SFGI  Digital 1.1  13.8.2.1 & A.6*/
 #define isoDepCalcSGFT(s) (4096U * ((uint32_t)1U << (s))) /*!< Calculates the SFGT with given SFGI  Digital 1.1  13.8.2         */
@@ -267,6 +269,16 @@
 #define isoDepTimerisExpired(timer) timerIsExpired(timer)                                   /*!< Checks WTX timer has expired         */
 
 static RFal_ISO_Dep gIsoDep;    /*!< ISO-DEP Module instance               */
+
+/*******************************************************************************/
+void RFal_ISO_Dep_ClearCounters(void)
+{
+  gIsoDep.cntIRetrys = 0;
+  gIsoDep.cntRRetrys = 0;
+  gIsoDep.cntSDslRetrys = 0;
+  gIsoDep.cntSWtxRetrys = 0;
+  gIsoDep.cntSWtxNack = 0;
+}
 
 /*******************************************************************************/
 NFC_OpResult RFal_ISO_Dep_Tx(uint8_t pcb, const uint8_t *txBuf, uint8_t *infBuf, uint16_t infLen, uint32_t fwt)
@@ -319,7 +331,7 @@ NFC_OpResult RFal_ISO_Dep_Tx(uint8_t pcb, const uint8_t *txBuf, uint8_t *infBuf,
     return NFC_Unsupport;
   }
 
-  rfalCreateByteFlagsTxRxContext(ctx, txBlock, txBufLen, gIsoDep.rxBuf, gIsoDep.rxBufLen, gIsoDep.rxLen, RFAL_TXRX_FLAGS_DEFAULT, ((gIsoDep.role == ISODEP_ROLE_PICC) ? RFAL_FWT_NONE : fwt));
+  RFAL_CreateByteFlagsTxRxContext(ctx, txBlock, txBufLen, gIsoDep.rxBuf, gIsoDep.rxBufLen, gIsoDep.rxLen, RFAL_TXRX_FLAGS_DEFAULT, ((gIsoDep.role == ISODEP_ROLE_PICC) ? RFAL_FWT_NONE : fwt));
   return RFal_StartTransceive(&ctx);
 }
 
@@ -370,7 +382,7 @@ NFC_OpResult RFal_ISO_Dep_HandleControlMsg(RFal_ISO_Dep_ControlMsg controlMsg, u
       if (gIsoDep.role == ISODEP_ROLE_PCD) {
         /* Calculate temp Wait Time eXtension */
         fwtTemp = (gIsoDep.fwt * param);
-        fwtTemp = MIN(RFAL_ISODEP_MAX_FWT, fwtTemp);
+        fwtTemp = (RFAL_ISODEP_MAX_FWT < fwtTemp) ? RFAL_ISODEP_MAX_FWT : fwtTemp;
         fwtTemp += gIsoDep.dFwt;
       }
 
@@ -397,26 +409,26 @@ NFC_OpResult RFal_ISO_Dep_HandleControlMsg(RFal_ISO_Dep_ControlMsg controlMsg, u
       return NFC_InternalError;
   }
 
-  return isoDepTx(pcb, gIsoDep.ctrlBuf, &gIsoDep.ctrlBuf[RFAL_ISODEP_PCB_LEN + RFAL_ISODEP_DID_LEN], infLen, fwtTemp);
+  return RFal_ISO_Dep_Tx(pcb, gIsoDep.ctrlBuf, &gIsoDep.ctrlBuf[RFAL_ISODEP_PCB_LEN + RFAL_ISODEP_DID_LEN], infLen, fwtTemp);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ISO_Dep_ReSendControlMsg(void)
 {
   if (isoDep_PCBisRACK(gIsoDep.lastPCB)) {
-    return isoDepHandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
+    return RFal_ISO_Dep_HandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
   }
 
   if (isoDep_PCBisRNAK(gIsoDep.lastPCB)) {
-    return isoDepHandleControlMsg(ISODEP_R_NAK, RFAL_ISODEP_NO_PARAM);
+    return RFal_ISO_Dep_HandleControlMsg(ISODEP_R_NAK, RFAL_ISODEP_NO_PARAM);
   }
 
   if (isoDep_PCBisSDeselect(gIsoDep.lastPCB)) {
-    return isoDepHandleControlMsg(ISODEP_S_DSL, RFAL_ISODEP_NO_PARAM);
+    return RFal_ISO_Dep_HandleControlMsg(ISODEP_S_DSL, RFAL_ISODEP_NO_PARAM);
   }
 
   if (isoDep_PCBisSWTX(gIsoDep.lastPCB)) {
-    return isoDepHandleControlMsg(ISODEP_S_WTX, gIsoDep.lastWTXM);
+    return RFal_ISO_Dep_HandleControlMsg(ISODEP_S_WTX, gIsoDep.lastWTXM);
   }
 
   return NFC_WrongState;
@@ -462,7 +474,7 @@ void RFal_ISO_Dep_Init(void)
   gIsoDep.APDUParam.rxBuf = NULL;
   gIsoDep.APDUParam.txBuf = NULL;
 
-  isoDepClearCounters();
+  RFal_ISO_Dep_ClearCounters();
 }
 
 /*******************************************************************************/
@@ -514,7 +526,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
 
     /*******************************************************************************/
     case ISODEP_ST_PCD_TX:
-      ret = isoDepTx(isoDep_PCBIBlock(gIsoDep.blockNumber), gIsoDep.txBuf, &gIsoDep.txBuf[gIsoDep.txBufInfPos], gIsoDep.txBufLen, (gIsoDep.fwt + gIsoDep.dFwt));
+      ret = RFal_ISO_Dep_Tx(isoDep_PCBIBlock(gIsoDep.blockNumber), gIsoDep.txBuf, &gIsoDep.txBuf[gIsoDep.txBufInfPos], gIsoDep.txBufLen, (gIsoDep.fwt + gIsoDep.dFwt));
       switch (ret) {
         case NFC_OK:
           gIsoDep.state = ISODEP_ST_PCD_RX;
@@ -540,21 +552,21 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
 
           if (gIsoDep.isRxChaining) {
             /* Rule 5 - In PICC chaining when a invalid/timeout occurs -> R-ACK */
-            ret = isoDepHandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
+            ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
             if(ret < NFC_OK)
             {
                 return ret;
             }
           } else if (gIsoDep.state == ISODEP_ST_PCD_WAIT_DSL) {
             /* Rule 8 - If s-Deselect response fails MAY retransmit */
-            ret = isoDepHandleControlMsg(ISODEP_S_DSL, RFAL_ISODEP_NO_PARAM);
+            ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_S_DSL, RFAL_ISODEP_NO_PARAM);
             if(ret < NFC_OK)
             {
                 return ret;
             }
           } else {
             /* Rule 4 - When a invalid block or timeout occurs -> R-NACK */
-            ret = isoDepHandleControlMsg(ISODEP_R_NAK, RFAL_ISODEP_NO_PARAM);
+            ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_R_NAK, RFAL_ISODEP_NO_PARAM);
             if(ret < NFC_OK)
             {
                 return ret;
@@ -576,7 +588,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
       /* No error, process incoming msg                                              */
       /*******************************************************************************/
 
-      (*outActRxLen) = rfalConvBitsToBytes(*outActRxLen);
+      (*outActRxLen) = RFal_ConvBitsToBytes(*outActRxLen);
 
       /* Check rcvd msg length, cannot be less then the expected header */
       if (((*outActRxLen) < gIsoDep.hdrLen) || ((*outActRxLen) >= gIsoDep.ourFsx)) {
@@ -610,7 +622,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
             gIsoDep.cntSWtxNack = 0; /* Reset R(NACK)->S(WTX) counter */
           }
           /* Rule 3 - respond to S-block: get 1st INF byte S(STW): Power + WTXM */
-          ret = isoDepHandleControlMsg(ISODEP_S_WTX, isoDep_GetWTXM(gIsoDep.rxBuf[gIsoDep.hdrLen]));
+          ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_S_WTX, isoDep_GetWTXM(gIsoDep.rxBuf[gIsoDep.hdrLen]));
           if(ret < NFC_OK)
           {
               return ret;
@@ -622,7 +634,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
         /* Check if is a deselect response */
         if (isoDep_PCBisSDeselect(rxPCB)) {
           if (gIsoDep.state == ISODEP_ST_PCD_WAIT_DSL) {
-            RFal_ISO_Dep_Initialize(); /* Session finished reInit vars */
+            RFal_ISO_Dep_Init(); /* Session finished reInit vars */
             return NFC_OK;
           }
 
@@ -650,7 +662,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
             }
 
             /* Rule 7 - Chaining transaction done, continue chaining */
-            isoDepClearCounters();
+            RFal_ISO_Dep_ClearCounters();
             return NFC_OK; /* This block has been transmitted */
           } else {
             /* Rule 6 - R-ACK with wrong block number retransmit */
@@ -683,10 +695,10 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
             /* Rule B - ACK with correct block number -> Increase Block number */
             isoDep_ToggleBN(gIsoDep.blockNumber);
 
-            isoDepClearCounters(); /* Clear counters in case R counter is already at max */
+            RFal_ISO_Dep_ClearCounters(); /* Clear counters in case R counter is already at max */
 
             /* Rule 2 - Send ACK */
-            ret = isoDepHandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
+            ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
             if(ret < NFC_OK)
             {
                 return ret;
@@ -700,11 +712,11 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
               memmove(&gIsoDep.rxBuf[gIsoDep.rxBufInfPos], &gIsoDep.rxBuf[gIsoDep.hdrLen], *outActRxLen);
             }
 
-            isoDepClearCounters();
+            RFal_ISO_Dep_ClearCounters();
             return NFC_Again; /* Send Again signalling to run again, but some chaining data has arrived */
           } else {
             /* Rule 5 - PICC chaining invalid I-Block -> R-ACK */
-            ret = isoDepHandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
+            ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
             if(ret < NFC_OK)
             {
                 return ret;
@@ -729,7 +741,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
           }
 
           gIsoDep.state = ISODEP_ST_IDLE;
-          isoDepClearCounters();
+          RFal_ISO_Dep_ClearCounters();
           return NFC_OK;
         } else {
           if ((gIsoDep.compMode != RFAL_COMPLIANCE_MODE_ISO)) {
@@ -738,7 +750,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePCD(uint16_t *outActRxLen, bool *outIsChai
           }
 
           /* Rule 4 - Invalid Block -> R-NAK */
-          ret = isoDepHandleControlMsg(ISODEP_R_NAK, RFAL_ISODEP_NO_PARAM);
+          ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_R_NAK, RFAL_ISODEP_NO_PARAM);
           if(ret < NFC_OK)
           {
               return ret;
@@ -772,7 +784,10 @@ NFC_OpResult RFal_ISO_Dep_Deselect(void)
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_ISO_Dep_GetDeselectStatus());
+  do{ 
+    ret = RFal_ISO_Dep_GetDeselectStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -793,7 +808,7 @@ NFC_OpResult RFal_ISO_Dep_StartDeselect(void)
   }
 
   /* Send DSL request */
-  return isoDepHandleControlMsg(ISODEP_S_DSL, RFAL_ISODEP_NO_PARAM);
+  return RFal_ISO_Dep_HandleControlMsg(ISODEP_S_DSL, RFAL_ISODEP_NO_PARAM);
 }
 
 /*******************************************************************************/
@@ -802,13 +817,13 @@ NFC_OpResult RFal_ISO_Dep_GetDeselectStatus(void)
   NFC_OpResult ret;
   bool dummyB;
 
-  ret = isoDepDataExchangePCD(gIsoDep.rxLen, &dummyB);
+  ret = RFal_ISO_Dep_DataExchangePCD(gIsoDep.rxLen, &dummyB);
   if(ret == NFC_Busy)
   {
       return NFC_Busy;
   }
 
-  RFal_ISO_Dep_Initialize();
+  RFal_ISO_Dep_Init();
   return ret;
 }
 
@@ -831,7 +846,7 @@ uint32_t RFal_ISO_Dep_FWI2FWT(uint8_t fwi)
   /* FWT = (256 x 16/fC) x 2^FWI => 2^(FWI+12)  Digital 1.1  13.8.1 & 7.9.1 */
 
   result = ((uint32_t)1U << (tmpFWI + 12U));
-  result = MIN(RFAL_ISODEP_MAX_FWT, result); /* Maximum Frame Waiting Time must be fulfilled */
+  result = (RFAL_ISODEP_MAX_FWT < result) ? RFAL_ISODEP_MAX_FWT : result; /* Maximum Frame Waiting Time must be fulfilled */
 
   return result;
 }
@@ -843,7 +858,7 @@ uint16_t RFal_ISO_Dep_FSxI2FSx(uint8_t FSxI)
   uint8_t fsi;
 
   /* Enforce maximum FSxI/FSx allowed - NFC Forum and EMVCo differ */
-  fsi = ((gIsoDep.compMode == RFAL_COMPLIANCE_MODE_EMV) ? MIN(FSxI, RFAL_ISODEP_FSDI_MAX_EMV) : MIN(FSxI, RFAL_ISODEP_FSDI_MAX_NFC));
+  fsi = ((gIsoDep.compMode == RFAL_COMPLIANCE_MODE_EMV) ? ((FSxI < RFAL_ISODEP_FSDI_MAX_EMV) ? FSxI : RFAL_ISODEP_FSDI_MAX_EMV) : ((FSxI < RFAL_ISODEP_FSDI_MAX_NFC) ? FSxI : RFAL_ISODEP_FSDI_MAX_NFC));
 
   switch (fsi) {
     case (uint8_t)RFAL_ISODEP_FSXI_16:
@@ -981,7 +996,7 @@ NFC_OpResult RFal_ISO_Dep_ListenStartActivation(RFal_ISO_Dep_AtsParam *atsParam,
     gIsoDep.ourFsx = RFal_ISO_Dep_FSxI2FSx(atsParam->fsci);
 
     /* Ensure proper/maximum Historical Bytes length  */
-    atsParam->hbLen = MIN(RFAL_ISODEP_ATS_HB_MAX_LEN, atsParam->hbLen);
+    atsParam->hbLen = (RFAL_ISODEP_ATS_HB_MAX_LEN < atsParam->hbLen) ? RFAL_ISODEP_ATS_HB_MAX_LEN : atsParam->hbLen;
 
     /*******************************************************************************/
     /* Compute ATS                                                                 */
@@ -1204,7 +1219,7 @@ NFC_OpResult RFal_ISO_Dep_StartTransceive(RFal_ISO_Dep_TxRxParam param)
 
   /* Clear inner control params for next dataExchange */
   gIsoDep.isRxChaining = false;
-  isoDepClearCounters();
+  RFal_ISO_Dep_ClearCounters();
 
   if (gIsoDep.role == ISODEP_ROLE_PICC) {
     if (gIsoDep.txBufLen > 0U) {
@@ -1231,17 +1246,9 @@ NFC_OpResult RFal_ISO_Dep_StartTransceive(RFal_ISO_Dep_TxRxParam param)
 NFC_OpResult RFal_ISO_Dep_GetTransceiveStatus(void)
 {
   if (gIsoDep.role == ISODEP_ROLE_PICC) {
-#if RFAL_FEATURE_ISO_DEP_LISTEN
     return RFal_ISO_Dep_DataExchangePICC();
-#else
-    return NFC_Unsupport;
-#endif /* RFAL_FEATURE_ISO_DEP_LISTEN */
   } else {
-#if RFAL_FEATURE_ISO_DEP_POLL
-    return isoDepDataExchangePCD(gIsoDep.rxLen, gIsoDep.rxChaining);
-#else
-    return NFC_Unsupport;
-#endif /* RFAL_FEATURE_ISO_DEP_POLL */
+    return RFal_ISO_Dep_DataExchangePCD(gIsoDep.rxLen, gIsoDep.rxChaining);
   }
 }
 
@@ -1259,7 +1266,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
     /*******************************************************************************/
     case ISODEP_ST_PICC_TX:
 
-      ret = isoDepTx(isoDep_PCBIBlock(gIsoDep.blockNumber), gIsoDep.txBuf, &gIsoDep.txBuf[gIsoDep.txBufInfPos], gIsoDep.txBufLen, RFAL_FWT_NONE);
+      ret = RFal_ISO_Dep_Tx(isoDep_PCBIBlock(gIsoDep.blockNumber), gIsoDep.txBuf, &gIsoDep.txBuf[gIsoDep.txBufInfPos], gIsoDep.txBufLen, RFAL_FWT_NONE);
 
       /* Clear pending Tx flag */
       gIsoDep.isTxPending = false;
@@ -1301,7 +1308,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
 
         /*******************************************************************************/
         case NFC_OK:
-          *gIsoDep.rxLen = rfalConvBitsToBytes(*gIsoDep.rxLen);
+          *gIsoDep.rxLen = RFal_ConvBitsToBytes(*gIsoDep.rxLen);
           break;
 
         /*******************************************************************************/
@@ -1322,7 +1329,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
 
       /* Digital 1.1  15.2.2.9 - Calculate the WTXM such that FWTtemp <= FWTmax */
       gIsoDep.lastWTXM = (uint8_t)isoDep_WTXMListenerMax(gIsoDep.fwt);
-      ret = isoDepHandleControlMsg(ISODEP_S_WTX, gIsoDep.lastWTXM);
+      ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_S_WTX, gIsoDep.lastWTXM);
       if(ret < NFC_OK)
       {
           return ret;
@@ -1335,7 +1342,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
     case ISODEP_ST_PICC_SDSL:
 
       if (!(RFal_IsTransceiveInTx())) { /* Wait until DSL response has been sent */
-        RFal_ISO_Dep_Initialize(); /* Session finished reInit vars, go back to ISODEP_ST_IDLE */
+        RFal_ISO_Dep_Init(); /* Session finished reInit vars, go back to ISODEP_ST_IDLE */
         return NFC_SleepRequest;   /* Notify Deselect request      */
       }
       return NFC_Busy;
@@ -1346,7 +1353,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
   }
 
   /* ISO 14443-4 7.5.6.2 CE SHALL NOT attempt error recovery -> clear counters */
-  isoDepClearCounters();
+  RFal_ISO_Dep_ClearCounters();
 
   /*******************************************************************************/
   /* No error, process incoming msg                                              */
@@ -1414,7 +1421,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
           }
 
           /* Set WTX timer */
-          isoDepTimerStart(gIsoDep.WTXTimer, isoDep_WTXAdjust((gIsoDep.lastWTXM * rfalConv1fcToMs(gIsoDep.fwt))));
+          isoDepTimerStart(gIsoDep.WTXTimer, isoDep_WTXAdjust((gIsoDep.lastWTXM * RFal_Conv1fcToMs(gIsoDep.fwt))));
 
           gIsoDep.state = ISODEP_ST_PICC_SWTX;
           return NFC_Busy;
@@ -1425,7 +1432,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
 
     /* Check if is a Deselect request */
     if (isoDep_PCBisSDeselect(rxPCB) && ((*gIsoDep.rxLen - gIsoDep.hdrLen) == ISODEP_SDSL_INF_LEN)) {
-      ret = isoDepHandleControlMsg(ISODEP_S_DSL, RFAL_ISODEP_NO_PARAM);
+      ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_S_DSL, RFAL_ISODEP_NO_PARAM);
       if(ret < NFC_OK)
       {
           return ret;
@@ -1466,7 +1473,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
         /* This block has been transmitted and acknowledged, perform WTX until next data is provided  */
 
         /* Rule 9 - PICC is allowed to send an S(WTX) instead of an I-block or an R(ACK) */
-        isoDepTimerStart(gIsoDep.WTXTimer, isoDep_WTXAdjust(rfalConv1fcToMs(gIsoDep.fwt)));
+        isoDepTimerStart(gIsoDep.WTXTimer, isoDep_WTXAdjust(RFal_Conv1fcToMs(gIsoDep.fwt)));
         gIsoDep.state = ISODEP_ST_PICC_SWTX;
 
         /* Rule 13 - R(ACK) with not current bn -> continue chaining */
@@ -1484,7 +1491,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
         return NFC_Busy;
       } else {
         /* Rule 12 - R(NAK) with not current bn -> R(ACK) */
-        ret = isoDepHandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
+        ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
         if(ret < NFC_OK)
         {
             return ret;
@@ -1524,7 +1531,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
       gIsoDep.isRxChaining = true;
       *gIsoDep.rxChaining = true; /* Output Parameter*/
 
-      ret = isoDepHandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
+      ret = RFal_ISO_Dep_HandleControlMsg(ISODEP_R_ACK, RFAL_ISODEP_NO_PARAM);
       if(ret < NFC_OK)
       {
           return ret;
@@ -1553,7 +1560,7 @@ NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void)
 
     /*******************************************************************************/
     /* Reception done, send data back and start WTX timer                          */
-    isoDepTimerStart(gIsoDep.WTXTimer, isoDep_WTXAdjust(rfalConv1fcToMs(gIsoDep.fwt)));
+    isoDepTimerStart(gIsoDep.WTXTimer, isoDep_WTXAdjust(RFal_Conv1fcToMs(gIsoDep.fwt)));
 
     gIsoDep.state = ISODEP_ST_PICC_SWTX;
     return NFC_OK;
@@ -1586,7 +1593,7 @@ NFC_OpResult RFal_ISO_Dep_StartRATS(RFal_ISO_Dep_FSxI FSDI, uint8_t DID, RFal_IS
   gIsoDep.actv.ratsReq.CMD = RFAL_ISODEP_CMD_RATS;
   gIsoDep.actv.ratsReq.PARAM = (((uint8_t)FSDI << RFAL_ISODEP_RATS_PARAM_FSDI_SHIFT) & RFAL_ISODEP_RATS_PARAM_FSDI_MASK) | (DID & RFAL_ISODEP_RATS_PARAM_DID_MASK);
 
-  rfalCreateByteFlagsTxRxContext(ctx, (uint8_t *)&gIsoDep.actv.ratsReq, sizeof(RFal_ISO_Dep_Rats), (uint8_t *)ats, sizeof(RFal_ISO_Dep_Ats), &gIsoDep.rxBufLen, RFAL_TXRX_FLAGS_DEFAULT, RFAL_ISODEP_T4T_FWT_ACTIVATION);
+  RFAL_CreateByteFlagsTxRxContext(ctx, (uint8_t *)&gIsoDep.actv.ratsReq, sizeof(RFal_ISO_Dep_Rats), (uint8_t *)ats, sizeof(RFal_ISO_Dep_Ats), &gIsoDep.rxBufLen, RFAL_TXRX_FLAGS_DEFAULT, RFAL_ISODEP_T4T_FWT_ACTIVATION);
   return RFal_StartTransceive(&ctx);
 }
 
@@ -1597,7 +1604,7 @@ NFC_OpResult RFal_ISO_Dep_GetRATSStatus(void)
 
   ret = RFal_GetTransceiveStatus();
   if (ret == NFC_OK) {
-    gIsoDep.rxBufLen = rfalConvBitsToBytes(gIsoDep.rxBufLen);
+    gIsoDep.rxBufLen = RFal_ConvBitsToBytes(gIsoDep.rxBufLen);
 
     /* Check for valid ATS length  Digital 1.1  13.6.2.1 & 13.6.2.3 */
     if ((gIsoDep.rxBufLen < RFAL_ISODEP_ATS_MIN_LEN) || (gIsoDep.rxBufLen > RFAL_ISODEP_ATS_MAX_LEN) || (gIsoDep.rxBuf[RFAL_ISODEP_ATS_TL_POS] != gIsoDep.rxBufLen)) {
@@ -1627,7 +1634,10 @@ NFC_OpResult RFal_ISO_Dep_RATS(RFal_ISO_Dep_FSxI FSDI, uint8_t DID, RFal_ISO_Dep
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_ISO_Dep_GetRATSStatus());
+  do{ 
+    ret = RFal_ISO_Dep_GetRATSStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -1649,7 +1659,7 @@ NFC_OpResult RFal_ISO_Dep_StartPPS(uint8_t DID, RFal_BitRate DSI, RFal_BitRate D
   gIsoDep.actv.ppsReq.PPS0 = RFAL_ISODEP_PPS_PPS0_PPS1_PRESENT;
   gIsoDep.actv.ppsReq.PPS1 = (RFAL_ISODEP_PPS_PPS1 | ((((uint8_t)DSI << RFAL_ISODEP_PPS_PPS1_DSI_SHIFT) | (uint8_t)DRI) & RFAL_ISODEP_PPS_PPS1_DXI_MASK));
 
-  rfalCreateByteFlagsTxRxContext(ctx, (uint8_t *)&gIsoDep.actv.ppsReq, sizeof(RFal_ISO_Dep_PpsReq), (uint8_t *)ppsRes, sizeof(RFal_ISO_Dep_PpsRes), &gIsoDep.rxBufLen, RFAL_TXRX_FLAGS_DEFAULT, RFAL_ISODEP_T4T_FWT_ACTIVATION);
+  RFAL_CreateByteFlagsTxRxContext(ctx, (uint8_t *)&gIsoDep.actv.ppsReq, sizeof(RFal_ISO_Dep_PpsReq), (uint8_t *)ppsRes, sizeof(RFal_ISO_Dep_PpsRes), &gIsoDep.rxBufLen, RFAL_TXRX_FLAGS_DEFAULT, RFAL_ISODEP_T4T_FWT_ACTIVATION);
   return RFal_StartTransceive(&ctx);
 }
 
@@ -1660,7 +1670,7 @@ NFC_OpResult RFal_ISO_Dep_GetPPSSTatus(void)
 
   ret = RFal_GetTransceiveStatus();
   if (ret == NFC_OK) {
-    gIsoDep.rxBufLen = rfalConvBitsToBytes(gIsoDep.rxBufLen);
+    gIsoDep.rxBufLen = RFal_ConvBitsToBytes(gIsoDep.rxBufLen);
 
     /* Check for valid PPS Response   */
     if ((gIsoDep.rxBufLen != RFAL_ISODEP_PPS_RES_LEN) || (*gIsoDep.rxBuf != gIsoDep.actv.ppsReq.PPSS)) {
@@ -1681,7 +1691,10 @@ NFC_OpResult RFal_ISO_Dep_PPS(uint8_t DID, RFal_BitRate DSI, RFal_BitRate DRI, R
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_ISO_Dep_GetPPSSTatus());
+  do{ 
+    ret = RFal_ISO_Dep_GetPPSSTatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -1709,10 +1722,10 @@ NFC_OpResult RFal_ISO_Dep_StartATTRIB(const uint8_t *nfcid0, uint8_t PARAM1, RFa
 
   /* Append the Higher layer Info if provided */
   if ((HLInfo != NULL) && (HLInfoLen > 0U)) {
-    memcpy(gIsoDep.actv.attribReq.HLInfo, HLInfo, MIN(HLInfoLen, RFAL_ISODEP_ATTRIB_HLINFO_LEN));
+    memcpy(gIsoDep.actv.attribReq.HLInfo, HLInfo, (HLInfoLen < RFAL_ISODEP_ATTRIB_HLINFO_LEN) ? HLInfoLen : RFAL_ISODEP_ATTRIB_HLINFO_LEN);
   }
 
-  rfalCreateByteFlagsTxRxContext(ctx, (uint8_t *)&gIsoDep.actv.attribReq, (uint16_t)(RFAL_ISODEP_ATTRIB_HDR_LEN + MIN((uint16_t)HLInfoLen, RFAL_ISODEP_ATTRIB_HLINFO_LEN)), (uint8_t *)gIsoDep.rxBuf, sizeof(RFal_ISO_Dep_AttribRes), &gIsoDep.rxBufLen, RFAL_TXRX_FLAGS_DEFAULT, fwt);
+  RFAL_CreateByteFlagsTxRxContext(ctx, (uint8_t *)&gIsoDep.actv.attribReq, (uint16_t)(RFAL_ISODEP_ATTRIB_HDR_LEN + ((uint16_t)HLInfoLen < RFAL_ISODEP_ATTRIB_HLINFO_LEN)) ? HLInfoLen : RFAL_ISODEP_ATTRIB_HLINFO_LEN, (uint8_t *)gIsoDep.rxBuf, sizeof(RFal_ISO_Dep_AttribRes), &gIsoDep.rxBufLen, RFAL_TXRX_FLAGS_DEFAULT, fwt);
   return RFal_StartTransceive(&ctx);
 }
 
@@ -1723,7 +1736,7 @@ NFC_OpResult RFal_ISO_Dep_GetATTRIBStatus(void)
 
   ret = RFal_GetTransceiveStatus();
   if (ret == NFC_OK) {
-    gIsoDep.rxBufLen = rfalConvBitsToBytes(gIsoDep.rxBufLen);
+    gIsoDep.rxBufLen = RFal_ConvBitsToBytes(gIsoDep.rxBufLen);
 
     /* Check for valid ATTRIB Response Digital 2.3  15.6.2.1 */
     if ((gIsoDep.rxBufLen < RFAL_ISODEP_ATTRIB_RES_HDR_LEN)) {
@@ -1751,7 +1764,10 @@ NFC_OpResult RFal_ISO_Dep_ATTRIB(const uint8_t *nfcid0, uint8_t PARAM1, RFal_Bit
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_ISO_Dep_GetATTRIBStatus());
+  do{ 
+    ret = RFal_ISO_Dep_GetATTRIBStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -1767,7 +1783,10 @@ NFC_OpResult RFal_ISO_Dep_PollAHandleActivation(RFal_ISO_Dep_FSxI FSDI, uint8_t 
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_ISO_Dep_PollAGetActivationStatus());
+  do{ 
+    ret = RFal_ISO_Dep_PollAGetActivationStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -1902,7 +1921,7 @@ NFC_OpResult RFal_ISO_Dep_PollAGetActivationStatus(void)
           gIsoDep.actvDev->info.SFGT = RFal_ISO_Dep_SFGI2SFGT((uint8_t)gIsoDep.actvDev->info.SFGI);
 
           /* Ensure SFGT before following frame (reuse RFAL GT timer) */
-          RFal_SetGT(rfalConvMsTo1fc(gIsoDep.actvDev->info.SFGT));
+          RFal_SetGT(RFal_ConvMsTo1fc(gIsoDep.actvDev->info.SFGT));
           RFal_FieldOnAndStartGT();
 
           gIsoDep.actvDev->info.FWT = RFal_ISO_Dep_FWI2FWT(gIsoDep.actvDev->info.FWI);
@@ -1982,7 +2001,10 @@ NFC_OpResult RFal_ISO_Dep_PollBHandleActivation(RFal_ISO_Dep_FSxI FSDI, uint8_t 
       return ret;
   }
 
-  rfalRunBlocking(ret, RFal_ISO_Dep_PollBGetActivationStatus());
+  do{ 
+    ret = RFal_ISO_Dep_PollBGetActivationStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -2020,10 +2042,10 @@ NFC_OpResult RFal_ISO_Dep_PollBStartActivation(RFal_ISO_Dep_FSxI FSDI, uint8_t D
     /* Disregard Minimum TR2 returned by PICC, always use FDTb MIN   EMVCo 3.0  6.3.2.10  */
     RFal_SetFDTPoll(RFAL_FDT_POLL_NFCB_POLLER);
   } else {
-    tr2 = rfalNfcbTR2ToFDT(((nfcbDev->sensbRes.protInfo.FsciProType >> RFAL_NFCB_SENSB_RES_PROTO_TR2_SHIFT) & RFAL_NFCB_SENSB_RES_PROTO_TR2_MASK));
+    tr2 = RFal_NFCB_TR2ToFDT(((nfcbDev->sensbRes.protInfo.FsciProType >> RFAL_NFCB_SENSB_RES_PROTO_TR2_SHIFT) & RFAL_NFCB_SENSB_RES_PROTO_TR2_MASK));
     if ((RFal_GetFDTPoll()) < tr2) {
       /* In case TR2 is longer than the one currently running, ensure it's fulfilled (max: 9472/fc => 700us)  */
-      delay(1);
+      NeonRTOS_Sleep(1);
     }
 
     /* Apply minimum TR2 from SENSB_RES   Digital 2.1  7.6.2.23 */
@@ -2087,7 +2109,7 @@ NFC_OpResult RFal_ISO_Dep_PollBGetActivationStatus(void)
       /* REMARK: SoF EoF TR0 and TR1 are not passed on to RF layer */
 
       /* Start the SFGT timer (reuse RFAL GT timer) */
-      RFal_SetGT(rfalConvMsTo1fc(gIsoDep.actvDev->info.SFGT));
+      RFal_SetGT(RFal_ConvMsTo1fc(gIsoDep.actvDev->info.SFGT));
       RFal_FieldOnAndStartGT();
     } else {
       gIsoDep.actvDev->info.DSI = RFAL_BR_106;
@@ -2276,7 +2298,7 @@ void RFal_ISO_Dep_CalcBitRate(RFal_BitRate maxAllowedBR, uint8_t piccBRCapabilit
 
     /* Digital 1.0 Table 67: if b8=1b, then only the same bit rate divisor for both directions is supported */
     if ((piccBRCapability & RFAL_ISODEP_SAME_BITRATE_MASK) != 0U) {
-      (*dsi) = MIN((*dsi), (*dri));
+      (*dsi) = ((*dsi) < (*dri)) ? (*dsi) : (*dri);
       (*dri) = (*dsi);
       /* Check that the baudrate is supported */
       if ((RFAL_BR_106 != (*dsi)) && (!(((dsiMask & (0x10U << ((uint8_t)(*dsi) - 1U))) != 0U) && ((driMask & (0x01U << ((uint8_t)(*dri) - 1U))) != 0U)))) {
@@ -2309,7 +2331,7 @@ uint32_t RFal_ISO_Dep_SFGI2SFGT(uint8_t sfgi)
   }
 
   /* Convert carrier cycles to milli seconds */
-  return (rfalConv1fcToMs(sfgt) + 1U);
+  return (RFal_Conv1fcToMs(sfgt) + 1U);
 }
 
 

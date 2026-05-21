@@ -232,7 +232,7 @@ NFC_OpResult NDef_GetRtdTnepServiceParameter(const NDef_Type *type, uint8_t *tne
   *comMode              = rtdServiceParameter->communicationMode;
   *minWaitingTime       = rtdServiceParameter->minimumWaitingTime;
   *maxExtensions        = rtdServiceParameter->maximumWaitingTimeExtensions;
-  *maxMessageSize       = GETU16(rtdServiceParameter->maximumNdefMessageSize);
+  *maxMessageSize       = (((uint16_t)(rtdServiceParameter->maximumNdefMessageSize)[0] << 8) | (uint16_t)(rtdServiceParameter->maximumNdefMessageSize)[1]);
 
   return NFC_OK;
 }
@@ -262,7 +262,7 @@ static NFC_OpResult NDef_PayloadToRtdTnepServiceParameter(const NDef_Const_Buffe
   minWaitingTime           = bufTnepServiceParameter->buffer[NDEF_RTD_TNEP_SP_MIN_WAITING_TIME_OFFSET + bufServiceUri.length];
   maxWaitingTimeExtensions = bufTnepServiceParameter->buffer[NDEF_RTD_TNEP_SP_MAX_WT_EXTENSIONS_OFFSET + bufServiceUri.length];
   maxNdefMessageSizeOffset = NDEF_RTD_TNEP_SP_MAX_MESSAGE_SIZE_OFFSET + bufServiceUri.length;
-  maxNdefMessageSize       = GETU16(&bufTnepServiceParameter->buffer[maxNdefMessageSizeOffset]);
+  maxNdefMessageSize       = (((uint16_t)(&bufTnepServiceParameter->buffer[maxNdefMessageSizeOffset])[0] << 8) | (uint16_t)(&bufTnepServiceParameter->buffer[maxNdefMessageSizeOffset])[1]);
 
   return NDef_RtdTnepServiceParameterInit(type, tnepVersion, &bufServiceUri, commMode, minWaitingTime, maxWaitingTimeExtensions, maxNdefMessageSize);
 }
@@ -277,11 +277,11 @@ NFC_OpResult NDef_RecordToRtdTnepServiceParameter(const NDef_Record *record, NDe
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter)) { /* "Tp" */
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter)) { /* "Tp" */
     return NFC_ProtocolError;
   }
 
-  NDef_Data = NDef_RecordGetNdefType(record);
+  NDef_Data = NDef_RecordGetNDefType(record);
   if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_TNEP_SERVICE_PARAMETER)) {
     (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
     return NFC_OK;
@@ -303,12 +303,12 @@ NFC_OpResult NDef_RtdTnepServiceParameterToRecord(const NDef_Type *type, NDef_Re
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* "Tp" */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceParameter);
 
-  (void)NDef_RecordSetNdefType(record, type);
+  (void)NDef_RecordSetNDefType(record, type);
 
   return NFC_OK;
 }
@@ -441,11 +441,11 @@ NFC_OpResult NDef_RecordToRtdTnepServiceSelect(const NDef_Record *record, NDef_T
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect)) { /* "Ts" */
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect)) { /* "Ts" */
     return NFC_ProtocolError;
   }
 
-  NDef_Data = NDef_RecordGetNdefType(record);
+  NDef_Data = NDef_RecordGetNDefType(record);
   if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_TNEP_SERVICE_SELECT)) {
     (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
     return NFC_OK;
@@ -467,12 +467,12 @@ NFC_OpResult NDef_RtdTnepServiceSelectToRecord(const NDef_Type *type, NDef_Recor
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* "Ts" */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepServiceSelect);
 
-  (void)NDef_RecordSetNdefType(record, type);
+  (void)NDef_RecordSetNDefType(record, type);
 
   return NFC_OK;
 }
@@ -589,11 +589,11 @@ NFC_OpResult NDef_RecordToRtdTnepStatus(const NDef_Record *record, NDef_Type *ty
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus)) { /* "Te" */
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus)) { /* "Te" */
     return NFC_ProtocolError;
   }
 
-  NDef_Data = NDef_RecordGetNdefType(record);
+  NDef_Data = NDef_RecordGetNDefType(record);
   if ((NDef_Data != NULL) && (NDef_Data->id == NDEF_TYPE_ID_RTD_TNEP_STATUS)) {
     (void)memcpy(type, NDef_Data, sizeof(NDef_Type));
     return NFC_OK;
@@ -615,12 +615,12 @@ NFC_OpResult NDef_RtdTnepStatusToRecord(const NDef_Type *type, NDef_Record *reco
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* "Te" */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeTnepStatus);
 
-  (void)NDef_RecordSetNdefType(record, type);
+  (void)NDef_RecordSetNDefType(record, type);
 
   return NFC_OK;
 }

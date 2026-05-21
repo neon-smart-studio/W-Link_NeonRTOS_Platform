@@ -313,11 +313,11 @@ NFC_OpResult NDef_RecordToRtdURI(const NDef_Record *record, NDef_Type *uri)
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeURI)) { /* "U" */
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeURI)) { /* "U" */
     return NFC_ProtocolError;
   }
 
-  type = NDef_RecordGetNdefType(record);
+  type = NDef_RecordGetNDefType(record);
   if ((type != NULL) && (type->id == NDEF_TYPE_ID_RTD_URI)) {
     (void)memcpy(uri, type, sizeof(NDef_Type));
     return NFC_OK;
@@ -335,12 +335,12 @@ NFC_OpResult NDef_RtdURIToRecord(const NDef_Type *uri, NDef_Record *record)
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* "U" */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeURI);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_WELL_KNOWN_TYPE, &bufRtdTypeURI);
 
-  if (NDef_RecordSetNdefType(record, uri) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, uri) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 

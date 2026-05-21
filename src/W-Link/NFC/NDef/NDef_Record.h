@@ -96,7 +96,6 @@
 
 
 typedef struct NDef_Type_Struct NDef_Type;       /*!< Forward declaration */
-typedef struct NDef_Message_Struct NDef_Message; /*!< Forward declaration */
 
 /*! Record type */
 typedef struct NDef_Record_Struct {

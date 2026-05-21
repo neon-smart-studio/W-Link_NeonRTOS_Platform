@@ -78,56 +78,53 @@
 
 
 /*! Returns the maximum supported bit rate for RW mode. Caller must check if mode is supported before, as even if mode is not supported will return the min  */
-#define RFAL_GetMaxBrRW()                     ( ((RFAL_SUPPORT_BR_RW_6780)  ? RFAL_BR_6780 : ((RFAL_SUPPORT_BR_RW_3390)  ? RFAL_BR_3390 : ((RFAL_SUPPORT_BR_RW_1695)  ? RFAL_BR_1695 : ((RFAL_SUPPORT_BR_RW_848)  ? RFAL_BR_848 : ((RFAL_SUPPORT_BR_RW_424)  ? RFAL_BR_424 : ((RFAL_SUPPORT_BR_RW_212)  ? RFAL_BR_212 : RFAL_BR_106 ) ) ) ) ) ) )
+#define RFal_GetMaxBrRW()                     ( ((RFAL_SUPPORT_BR_RW_6780)  ? RFAL_BR_6780 : ((RFAL_SUPPORT_BR_RW_3390)  ? RFAL_BR_3390 : ((RFAL_SUPPORT_BR_RW_1695)  ? RFAL_BR_1695 : ((RFAL_SUPPORT_BR_RW_848)  ? RFAL_BR_848 : ((RFAL_SUPPORT_BR_RW_424)  ? RFAL_BR_424 : ((RFAL_SUPPORT_BR_RW_212)  ? RFAL_BR_212 : RFAL_BR_106 ) ) ) ) ) ) )
 
 /*! Returns the maximum supported bit rate for AP2P mode. Caller must check if mode is supported before, as even if mode is not supported will return the min  */
-#define RFAL_GetMaxBrAP2P()                   ( ((RFAL_SUPPORT_BR_AP2P_848) ? RFAL_BR_848  : ((RFAL_SUPPORT_BR_AP2P_424) ? RFAL_BR_424  : ((RFAL_SUPPORT_BR_AP2P_212) ? RFAL_BR_212  : RFAL_BR_106 ) ) ) )
+#define RFal_GetMaxBrAP2P()                   ( ((RFAL_SUPPORT_BR_AP2P_848) ? RFAL_BR_848  : ((RFAL_SUPPORT_BR_AP2P_424) ? RFAL_BR_424  : ((RFAL_SUPPORT_BR_AP2P_212) ? RFAL_BR_212  : RFAL_BR_106 ) ) ) )
 
 /*! Returns the maximum supported bit rate for CE-A mode. Caller must check if mode is supported before, as even if mode is not supported will return the min  */
-#define RFAL_GetMaxBrCEA()                    ( ((RFAL_SUPPORT_BR_CE_A_848) ? RFAL_BR_848  : ((RFAL_SUPPORT_BR_CE_A_424) ? RFAL_BR_424  : ((RFAL_SUPPORT_BR_CE_A_212) ? RFAL_BR_212  : RFAL_BR_106 ) ) ) )
+#define RFal_GetMaxBrCEA()                    ( ((RFAL_SUPPORT_BR_CE_A_848) ? RFAL_BR_848  : ((RFAL_SUPPORT_BR_CE_A_424) ? RFAL_BR_424  : ((RFAL_SUPPORT_BR_CE_A_212) ? RFAL_BR_212  : RFAL_BR_106 ) ) ) )
 
 /*! Returns the maximum supported bit rate for CE-B mode. Caller must check if mode is supported before, as even if mode is not supported will return the min  */
-#define RFAL_GetMaxBrCEB()                    ( ((RFAL_SUPPORT_BR_CE_B_848) ? RFAL_BR_848  : ((RFAL_SUPPORT_BR_CE_B_424) ? RFAL_BR_424  : ((RFAL_SUPPORT_BR_CE_B_212) ? RFAL_BR_212  : RFAL_BR_106 ) ) ) )
+#define RFal_GetMaxBrCEB()                    ( ((RFAL_SUPPORT_BR_CE_B_848) ? RFAL_BR_848  : ((RFAL_SUPPORT_BR_CE_B_424) ? RFAL_BR_424  : ((RFAL_SUPPORT_BR_CE_B_212) ? RFAL_BR_212  : RFAL_BR_106 ) ) ) )
 
 /*! Returns the maximum supported bit rate for CE-F mode. Caller must check if mode is supported before, as even if mode is not supported will return the min  */
-#define RFAL_GetMaxBrCEF()                    ( ((RFAL_SUPPORT_BR_CE_F_424) ? RFAL_BR_424  : RFAL_BR_212 ) )
+#define RFal_GetMaxBrCEF()                    ( ((RFAL_SUPPORT_BR_CE_F_424) ? RFAL_BR_424  : RFAL_BR_212 ) )
 
 
-#define RFAL_IsModeActiveComm( md )           ( ((md) == RFAL_MODE_POLL_ACTIVE_P2P) || ((md) == RFAL_MODE_LISTEN_ACTIVE_P2P) )                          /*!< Checks if mode md is Active Communication  */
-#define RFAL_IsModePassiveComm( md )          ( !RFAL_IsModeActiveComm(md) )                                                                             /*!< Checks if mode md is Passive Communication */
-#define RFAL_IsModePassiveListen( md )        ( ((md) == RFAL_MODE_LISTEN_NFCA) || ((md) == RFAL_MODE_LISTEN_NFCB) || ((md) == RFAL_MODE_LISTEN_NFCF) ) /*!< Checks if mode md is Passive Listen        */
-#define RFAL_IsModePassivePoll( md )          ( RFAL_IsModePassiveComm(md) && (!RFAL_IsModePassiveListen(md)) )                                           /*!< Checks if mode md is Passive Poll          */
+#define RFal_IsModeActiveComm( md )           ( ((md) == RFAL_MODE_POLL_ACTIVE_P2P) || ((md) == RFAL_MODE_LISTEN_ACTIVE_P2P) )                          /*!< Checks if mode md is Active Communication  */
+#define RFal_IsModePassiveComm( md )          ( !RFal_IsModeActiveComm(md) )                                                                             /*!< Checks if mode md is Passive Communication */
+#define RFal_IsModePassiveListen( md )        ( ((md) == RFAL_MODE_LISTEN_NFCA) || ((md) == RFAL_MODE_LISTEN_NFCB) || ((md) == RFAL_MODE_LISTEN_NFCF) ) /*!< Checks if mode md is Passive Listen        */
+#define RFal_IsModePassivePoll( md )          ( RFal_IsModePassiveComm(md) && (!RFal_IsModePassiveListen(md)) )                                           /*!< Checks if mode md is Passive Poll          */
 
 
-#define RFAL_Conv1fcTo8fc( t )                (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_8FC )                               /*!< Converts the given t from 1/fc to 8/fc     */
-#define RFAL_Conv8fcTo1fc( t )                (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_8FC )                               /*!< Converts the given t from 8/fc to 1/fc     */
+#define RFal_Conv1fcTo8fc( t )                (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_8FC )                               /*!< Converts the given t from 1/fc to 8/fc     */
+#define RFal_Conv8fcTo1fc( t )                (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_8FC )                               /*!< Converts the given t from 8/fc to 1/fc     */
 
-#define RFAL_Conv1fcTo64fc( t )               (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_64FC )                              /*!< Converts the given t from 1/fc  to 64/fc   */
-#define RFAL_Conv64fcTo1fc( t )               (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_64FC )                              /*!< Converts the given t from 64/fc to 1/fc    */
+#define RFal_Conv1fcTo64fc( t )               (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_64FC )                              /*!< Converts the given t from 1/fc  to 64/fc   */
+#define RFal_Conv64fcTo1fc( t )               (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_64FC )                              /*!< Converts the given t from 64/fc to 1/fc    */
 
-#define RFAL_Conv1fcTo512fc( t )              (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_512FC )                             /*!< Converts the given t from 1/fc  to 512/fc  */
-#define RFAL_Conv512fcTo1fc( t )              (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_512FC )                             /*!< Converts the given t from 512/fc to 1/fc   */
+#define RFal_Conv1fcTo512fc( t )              (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_512FC )                             /*!< Converts the given t from 1/fc  to 512/fc  */
+#define RFal_Conv512fcTo1fc( t )              (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_512FC )                             /*!< Converts the given t from 512/fc to 1/fc   */
 
-#define RFAL_Conv1fcTo2018fc( t )             (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_2048FC )                            /*!< Converts the given t from 1/fc to 2048/fc  */
-#define RFAL_Conv2048fcTo1fc( t )             (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_2048FC )                            /*!< Converts the given t from 2048/fc to 1/fc  */
+#define RFal_Conv1fcTo2018fc( t )             (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_2048FC )                            /*!< Converts the given t from 1/fc to 2048/fc  */
+#define RFal_Conv2048fcTo1fc( t )             (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_2048FC )                            /*!< Converts the given t from 2048/fc to 1/fc  */
 
-#define RFAL_Conv1fcTo4096fc( t )             (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_4096FC )                            /*!< Converts the given t from 1/fc to 4096/fc  */
-#define RFAL_Conv4096fcTo1fc( t )             (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_4096FC )                            /*!< Converts the given t from 4096/fc to 1/fc  */
+#define RFal_Conv1fcTo4096fc( t )             (uint32_t)( (uint32_t)(t) / RFAL_1FC_IN_4096FC )                            /*!< Converts the given t from 1/fc to 4096/fc  */
+#define RFal_Conv4096fcTo1fc( t )             (uint32_t)( (uint32_t)(t) * RFAL_1FC_IN_4096FC )                            /*!< Converts the given t from 4096/fc to 1/fc  */
 
-#define RFAL_Conv1fcToMs( t )                 (uint32_t)( (uint32_t)(t) / RFAL_1MS_IN_1FC )                               /*!< Converts the given t from 1/fc to ms       */
-#define RFAL_ConvMsTo1fc( t )                 (uint32_t)( (uint32_t)(t) * RFAL_1MS_IN_1FC )                               /*!< Converts the given t from ms to 1/fc       */
+#define RFal_Conv1fcToMs( t )                 (uint32_t)( (uint32_t)(t) / RFAL_1MS_IN_1FC )                               /*!< Converts the given t from 1/fc to ms       */
+#define RFal_ConvMsTo1fc( t )                 (uint32_t)( (uint32_t)(t) * RFAL_1MS_IN_1FC )                               /*!< Converts the given t from ms to 1/fc       */
 
-#define RFAL_Conv1fcToUs( t )                 (uint32_t)( ((uint32_t)(t) * RFAL_US_IN_MS) / RFAL_1MS_IN_1FC)              /*!< Converts the given t from 1/fc to us       */
-#define RFAL_ConvUsTo1fc( t )                 (uint32_t)( ((uint32_t)(t) * RFAL_1MS_IN_1FC) / RFAL_US_IN_MS)              /*!< Converts the given t from us to 1/fc       */
+#define RFal_Conv1fcToUs( t )                 (uint32_t)( ((uint32_t)(t) * RFAL_US_IN_MS) / RFAL_1MS_IN_1FC)              /*!< Converts the given t from 1/fc to us       */
+#define RFal_ConvUsTo1fc( t )                 (uint32_t)( ((uint32_t)(t) * RFAL_1MS_IN_1FC) / RFAL_US_IN_MS)              /*!< Converts the given t from us to 1/fc       */
 
-#define RFAL_Conv64fcToMs( t )                (uint32_t)( (uint32_t)(t) / (RFAL_1MS_IN_1FC / RFAL_1FC_IN_64FC) )          /*!< Converts the given t from 64/fc to ms      */
-#define RFAL_ConvMsTo64fc( t )                (uint32_t)( (uint32_t)(t) * (RFAL_1MS_IN_1FC / RFAL_1FC_IN_64FC) )          /*!< Converts the given t from ms to 64/fc      */
+#define RFal_Conv64fcToMs( t )                (uint32_t)( (uint32_t)(t) / (RFAL_1MS_IN_1FC / RFAL_1FC_IN_64FC) )          /*!< Converts the given t from 64/fc to ms      */
+#define RFal_ConvMsTo64fc( t )                (uint32_t)( (uint32_t)(t) * (RFAL_1MS_IN_1FC / RFAL_1FC_IN_64FC) )          /*!< Converts the given t from ms to 64/fc      */
 
-#define RFAL_ConvBitsToBytes( n )             (uint16_t)( ((uint16_t)(n)+(RFAL_BITS_IN_BYTE-1U)) / (RFAL_BITS_IN_BYTE) )  /*!< Converts the given n from bits to bytes    */
-#define RFAL_ConvBytesToBits( n )             (uint32_t)( (uint32_t)(n) * (RFAL_BITS_IN_BYTE) )                           /*!< Converts the given n from bytes to bits    */
-
-#define RFAL_RunBlocking( e, fn )              do{ (e)=(fn);  RFAL_RfDev->RFAL_Worker(); }while( (e) == ERR_BUSY )                      /*!< Macro used for the blocking methods        */
-
+#define RFal_ConvBitsToBytes( n )             (uint16_t)( ((uint16_t)(n)+(RFAL_BITS_IN_BYTE-1U)) / (RFAL_BITS_IN_BYTE) )  /*!< Converts the given n from bits to bytes    */
+#define RFal_ConvBytesToBits( n )             (uint32_t)( (uint32_t)(n) * (RFAL_BITS_IN_BYTE) )                           /*!< Converts the given n from bytes to bits    */
 
 /*! Computes a Transceive context \a ctx with default flags and the lengths
  * in bytes with the given arguments
@@ -141,9 +138,9 @@
  */
 #define RFAL_CreateByteTxRxContext( ctx, tB, tBL, rB, rBL, rdL, t ) \
     (ctx).txBuf     = (uint8_t*)(tB);                                      \
-    (ctx).txBufLen  = (uint16_t)RFAL_ConvBytesToBits(tBL);                  \
+    (ctx).txBufLen  = (uint16_t)RFal_ConvBytesToBits(tBL);                  \
     (ctx).rxBuf     = (uint8_t*)(rB);                                      \
-    (ctx).rxBufLen  = (uint16_t)RFAL_ConvBytesToBits(rBL);                  \
+    (ctx).rxBufLen  = (uint16_t)RFal_ConvBytesToBits(rBL);                  \
     (ctx).rxRcvdLen = (uint16_t*)(rdL);                                    \
     (ctx).flags     = (uint32_t)RFAL_TXRX_FLAGS_DEFAULT;                   \
     (ctx).fwt       = (uint32_t)(t);
@@ -161,9 +158,9 @@
  */
 #define RFAL_CreateByteFlagsTxRxContext( ctx, tB, tBL, rB, rBL, rdL, fl, t ) \
     (ctx).txBuf     = (uint8_t*)(tB);                                       \
-    (ctx).txBufLen  = (uint16_t)RFAL_ConvBytesToBits(tBL);                   \
+    (ctx).txBufLen  = (uint16_t)RFal_ConvBytesToBits(tBL);                   \
     (ctx).rxBuf     = (uint8_t*)(rB);                                       \
-    (ctx).rxBufLen  = (uint16_t)RFAL_ConvBytesToBits(rBL);                   \
+    (ctx).rxBufLen  = (uint16_t)RFal_ConvBytesToBits(rBL);                   \
     (ctx).rxRcvdLen = (uint16_t*)(rdL);                                     \
     (ctx).flags     = (uint32_t)(fl);                                       \
     (ctx).fwt       = (uint32_t)(t);
@@ -175,13 +172,13 @@
 #define RFAL_LogD(...)
 
 /* RFAL Guard Time (GT) default values                 */
-#define    RFAL_GT_NFCA                      RFAL_ConvMsTo1fc(5U)     /*!< GTA  Digital 2.0  6.10.4.1 & B.2                                                                 */
-#define    RFAL_GT_NFCB                      RFAL_ConvMsTo1fc(5U)     /*!< GTB  Digital 2.0  7.9.4.1  & B.3                                                                 */
-#define    RFAL_GT_NFCF                      RFAL_ConvMsTo1fc(20U)    /*!< GTF  Digital 2.0  8.7.4.1  & B.4                                                                 */
-#define    RFAL_GT_NFCV                      RFAL_ConvMsTo1fc(5U)     /*!< GTV  Digital 2.0  9.7.5.1  & B.5                                                                 */
-#define    RFAL_GT_PICOPASS                  RFAL_ConvMsTo1fc(1U)     /*!< GT Picopass                                                                                      */
-#define    RFAL_GT_AP2P                      RFAL_ConvMsTo1fc(5U)     /*!< TIRFG  Ecma 340  11.1.1                                                                          */
-#define    RFAL_GT_AP2P_ADJUSTED             RFAL_ConvMsTo1fc(5U+25U) /*!< Adjusted GT for greater interoperability (Sony XPERIA P, Nokia N9, Huawei P2)                    */
+#define    RFAL_GT_NFCA                      RFal_ConvMsTo1fc(5U)     /*!< GTA  Digital 2.0  6.10.4.1 & B.2                                                                 */
+#define    RFAL_GT_NFCB                      RFal_ConvMsTo1fc(5U)     /*!< GTB  Digital 2.0  7.9.4.1  & B.3                                                                 */
+#define    RFAL_GT_NFCF                      RFal_ConvMsTo1fc(20U)    /*!< GTF  Digital 2.0  8.7.4.1  & B.4                                                                 */
+#define    RFAL_GT_NFCV                      RFal_ConvMsTo1fc(5U)     /*!< GTV  Digital 2.0  9.7.5.1  & B.5                                                                 */
+#define    RFAL_GT_PICOPASS                  RFal_ConvMsTo1fc(1U)     /*!< GT Picopass                                                                                      */
+#define    RFAL_GT_AP2P                      RFal_ConvMsTo1fc(5U)     /*!< TIRFG  Ecma 340  11.1.1                                                                          */
+#define    RFAL_GT_AP2P_ADJUSTED             RFal_ConvMsTo1fc(5U+25U) /*!< Adjusted GT for greater interoperability (Sony XPERIA P, Nokia N9, Huawei P2)                    */
 
 /* RFAL Frame Delay Time (FDT) Listen default values   */
 #define    RFAL_FDT_LISTEN_NFCA_POLLER       1172U    /*!< FDTA,LISTEN,MIN (n=9) Last bit: Logic "1" - tnn,min/2 Digital 1.1  6.10 ;  EMV CCP Spec Book D v2.01  4.8.1.3   */

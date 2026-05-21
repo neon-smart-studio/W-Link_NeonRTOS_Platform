@@ -443,11 +443,11 @@ NFC_OpResult NDef_RecordToWifi(const NDef_Record *record, NDef_Type *wifi)
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeWifi)) { /* "application/vnd.wfa.wsc" */
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeWifi)) { /* "application/vnd.wfa.wsc" */
     return NFC_ProtocolError;
   }
 
-  type = NDef_RecordGetNdefType(record);
+  type = NDef_RecordGetNDefType(record);
   if ((type != NULL) && (type->id == NDEF_TYPE_ID_MEDIA_WIFI)) {
     (void)memcpy(wifi, type, sizeof(NDef_Type));
     return NFC_OK;
@@ -465,11 +465,11 @@ NFC_OpResult NDef_WifiToRecord(const NDef_Type *wifi, NDef_Record *record)
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
-  (void)NDef_RecordSetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeWifi);
+  (void)NDef_Record_SetType(record, NDEF_TNF_MEDIA_TYPE, &bufMediaTypeWifi);
 
-  if (NDef_RecordSetNdefType(record, wifi) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, wifi) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 

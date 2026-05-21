@@ -49,19 +49,20 @@
 
 #include "ST25R95.h"
 
-#include "ST25R95_AnalogConfig.h"
-
+#include "RFal_ST25R95_AnalogConfig.h"
 #include "RFal_ST25R95.h"
 
 #include "NFC/RFal/RFal.h"
+
+#include "NFC_Config.h"
 
 #ifdef NFC_READER_DEVICE_ST25R95
 
 #define RFal_CreateByteFlagsTxRxContext( ctx, tB, tBL, rB, rBL, rdL, fl, t ) \
     (ctx).txBuf     = (uint8_t*)(tB);                                       \
-    (ctx).txBufLen  = (uint16_t)rfalConvBytesToBits(tBL);                   \
+    (ctx).txBufLen  = (uint16_t)RFal_ConvBytesToBits(tBL);                   \
     (ctx).rxBuf     = (uint8_t*)(rB);                                       \
-    (ctx).rxBufLen  = (uint16_t)rfalConvBytesToBits(rBL);                   \
+    (ctx).rxBufLen  = (uint16_t)RFal_ConvBytesToBits(rBL);                   \
     (ctx).rxRcvdLen = (uint16_t*)(rdL);                                     \
     (ctx).flags     = (uint32_t)(fl);                                       \
     (ctx).fwt       = (uint32_t)(t);
@@ -72,11 +73,118 @@ static NFC_OpResult RFal_RunListenModeWorker(void);
 static NFC_OpResult RFal_RunWakeUpModeWorker(void);
 static NFC_OpResult RFal_RunTransceiveWorker(void);
 
+
+static bool    gST25R95ListenRunning = false;
+static uint8_t gST25R95ACState       = ST25R95_ACSTATE_IDLE;
+
+static RFal_LmState ST25R95_MapACStateToLmState(uint8_t acState)
+{
+    switch (acState) {
+        case ST25R95_ACSTATE_IDLE:
+            return RFAL_LM_STATE_IDLE;
+
+        case ST25R95_ACSTATE_READYA:
+            return RFAL_LM_STATE_READY_A;
+
+        case ST25R95_ACSTATE_READYAX:
+            return RFAL_LM_STATE_READY_Ax;
+
+        case ST25R95_ACSTATE_ACTIVE:
+            return RFAL_LM_STATE_ACTIVE_A;
+
+        case ST25R95_ACSTATE_ACTIVEX:
+            return RFAL_LM_STATE_ACTIVE_Ax;
+
+        case ST25R95_ACSTATE_HALT:
+            return RFAL_LM_STATE_SLEEP_A;
+
+        default:
+            return RFAL_LM_STATE_NOT_INIT;
+    }
+}
+
+NFC_OpResult ST25R95_SetACFilter(const RFal_LmConfPA *confA)
+{
+    if (confA == NULL) {
+        return NFC_InvalidParameter;
+    }
+
+    /*
+     * 最小可編譯版本：
+     * 目前先只保存 RFAL Listen state。
+     *
+     * 若你的 ST25R95.c / ST25R95_IO.c 已經有真正的 AC Filter command，
+     * 可以在這裡接：
+     *
+     * return ST25R95_Set_ACFilter(confA);
+     */
+    gST25R95ACState = ST25R95_ACSTATE_IDLE;
+    return NFC_OK;
+}
+
+
+bool ST25R95_IsInListen(void)
+{
+    return gST25R95ListenRunning;
+}
+
+
+NFC_OpResult ST25R95_Listen(void)
+{
+    /*
+     * ST25R95 Listen command 的真正啟動點。
+     *
+     * 如果你底層已有 Listen command，這裡應接到底層：
+     *
+     * ret = ST25R95_IO_SPI_Listen(...);
+     *
+     * 目前先做 RFAL 狀態 glue，避免 linker fail。
+     */
+    gST25R95ListenRunning = true;
+    return NFC_OK;
+}
+
+
+NFC_OpResult ST25R95_RearmListen(void)
+{
+    gST25R95ListenRunning = false;
+    return ST25R95_Listen();
+}
+
+
+RFal_LmState ST25R95_GetLmState(void)
+{
+    return ST25R95_MapACStateToLmState(gST25R95ACState);
+}
+
+
+NFC_OpResult ST25R95_SetACState(uint8_t acState)
+{
+    switch (acState) {
+        case ST25R95_ACSTATE_IDLE:
+        case ST25R95_ACSTATE_READYA:
+        case ST25R95_ACSTATE_READYAX:
+        case ST25R95_ACSTATE_ACTIVE:
+        case ST25R95_ACSTATE_ACTIVEX:
+        case ST25R95_ACSTATE_HALT:
+            gST25R95ACState = acState;
+            return NFC_OK;
+
+        default:
+            return NFC_InvalidParameter;
+    }
+}
+
 /*******************************************************************************/
 NFC_OpResult RFal_Init(void)
 {
   /* Initialize chip */
   if (ST25R95_IO_Init() != NFC_OK) {
+    return (NFC_System);
+  }
+
+  /* Initialize Analog Configs */
+  if (RFal_AnalogConfig_Init() != NFC_OK) {
     return (NFC_System);
   }
 
@@ -217,28 +325,28 @@ NFC_OpResult RFal_SetMode(RFal_Mode mode, RFal_BitRate txBR, RFal_BitRate rxBR)
     case RFAL_MODE_POLL_NFCA_T1T:
       gRFAL.protocol = ST25R95_Protocol_ISO14443A;
       gRFAL.nfcaData.NfcaSplitFrame = false;
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_POLL | ST25R95_ANALOG_CONFIG_TECH_NFCA | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_TX));
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_POLL | ST25R95_ANALOG_CONFIG_TECH_NFCA | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_RX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_POLL | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCA | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_TX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_POLL | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCA | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_RX));
       break;
     case RFAL_MODE_POLL_NFCB:
       gRFAL.protocol = ST25R95_Protocol_ISO14443B;
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_POLL | ST25R95_ANALOG_CONFIG_TECH_NFCB | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_TX));
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_POLL | ST25R95_ANALOG_CONFIG_TECH_NFCB | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_RX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_POLL | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCB | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_TX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_POLL | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCB | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_RX));
       break;
     case RFAL_MODE_POLL_NFCF:
       gRFAL.protocol = ST25R95_Protocol_ISO18092;
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_POLL | ST25R95_ANALOG_CONFIG_TECH_NFCF | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_TX));
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_POLL | ST25R95_ANALOG_CONFIG_TECH_NFCF | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_RX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_POLL | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCF | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_TX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_POLL | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCF | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_RX));
       break;
     case RFAL_MODE_POLL_NFCV:
       gRFAL.protocol = ST25R95_Protocol_ISO15693;
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_POLL | ST25R95_ANALOG_CONFIG_TECH_NFCV | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_TX));
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_POLL | ST25R95_ANALOG_CONFIG_TECH_NFCV | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_RX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_POLL | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCV | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_TX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_POLL | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCV | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_RX));
       break;
     case RFAL_MODE_LISTEN_NFCA:
       gRFAL.protocol = ST25R95_Protocol_CE_ISO14443A;
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_LISTEN | ST25R95_ANALOG_CONFIG_TECH_NFCA | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_TX));
-      RFal_AnalogConfig_Set((ST25R95_ANALOG_CONFIG_LISTEN | ST25R95_ANALOG_CONFIG_TECH_NFCA | ST25R95_ANALOG_CONFIG_BITRATE_COMMON | ST25R95_ANALOG_CONFIG_RX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_LISTEN | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCA | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_TX));
+      RFal_AnalogConfig_Set((RFAL_ST25R95_ANALOG_CONFIG_LISTEN | RFAL_ST25R95_ANALOG_CONFIG_TECH_NFCA | RFAL_ST25R95_ANALOG_CONFIG_BITRATE_COMMON | RFAL_ST25R95_ANALOG_CONFIG_RX));
       break;
     /*******************************************************************************/
     case RFAL_MODE_POLL_B_PRIME:
@@ -291,7 +399,7 @@ NFC_OpResult RFal_SetBitRate(RFal_BitRate txBR, RFal_BitRate rxBR)
   gRFAL.txBR = ((txBR == RFAL_BR_KEEP) ? gRFAL.txBR : txBR);
   gRFAL.rxBR = ((rxBR == RFAL_BR_KEEP) ? gRFAL.rxBR : rxBR);
 
-  retCode = RFal_Set_BitRate(gRFAL.protocol, txBR, rxBR);
+  retCode = ST25R95_Set_BitRate(gRFAL.protocol, txBR, rxBR);
   if ((retCode == NFC_OK) && (gRFAL.protocol != ST25R95_Protocol_FieldOff)) {
     /* If field on, update bitrate value through ProtocolSelect */
     retCode = ST25R95_Protocol_Select(gRFAL.protocol);
@@ -321,7 +429,6 @@ NFC_OpResult RFal_GetBitRate(RFal_BitRate *txBR, RFal_BitRate *rxBR)
 /*******************************************************************************/
 void RFal_SetErrorHandling(RFal_EHandling eHandling)
 {
-  NO_WARNING(eHandling);
   return;
 }
 
@@ -400,7 +507,7 @@ NFC_OpResult RFal_FieldOnAndStartGT(void)
   /*******************************************************************************/
   /* Turn field On if not already On */
   if (!gRFAL.field) {
-    ret = RFal_Field_On(gRFAL.protocol);
+    ret = ST25R95_Field_On(gRFAL.protocol);
     gRFAL.field = true;
   }
 
@@ -408,7 +515,7 @@ NFC_OpResult RFal_FieldOnAndStartGT(void)
   /* Start GT timer in case the GT value is set */
   if ((gRFAL.timings.GT != RFAL_TIMING_NONE)) {
     /* Ensure that a SW timer doesn't have a lower value then the minimum  */
-    RFal_TimerStart(gRFAL.tmr.GT, RFal_Conv1fcToMs(MAX((gRFAL.timings.GT), RFAL_ST25R95_GT_MIN_1FC)));
+    RFal_TimerStart(gRFAL.tmr.GT, RFal_Conv1fcToMs(((gRFAL.timings.GT) > RFAL_ST25R95_GT_MIN_1FC) ? (gRFAL.timings.GT) : RFAL_ST25R95_GT_MIN_1FC));
   }
 
   return ret;
@@ -425,7 +532,7 @@ NFC_OpResult RFal_FieldOff(void)
   RFal_WakeUpModeStop();
   gRFAL.field = false;
   gRFAL.protocol = ST25R95_Protocol_FieldOff;
-  return (RFal_FieldOff());
+  return (ST25R95_Field_Off());
 }
 
 
@@ -446,10 +553,10 @@ NFC_OpResult RFal_StartTransceive(const RFal_TransceiveContext *ctx)
     /*******************************************************************************/
     if (RFal_IsModePassiveComm(gRFAL.mode)) { /* Passive Comms */
       if ((gRFAL.TxRx.ctx.fwt != RFAL_FWT_NONE) && (gRFAL.TxRx.ctx.fwt != 0)) {
-        RFal_Set_FWT(gRFAL.protocol, gRFAL.TxRx.ctx.fwt);
+        ST25R95_Set_FWT(gRFAL.protocol, gRFAL.TxRx.ctx.fwt);
       } else {
         /* Since ST25R95 does not support, use max FWT available */
-        RFal_Set_FWT(gRFAL.protocol, ST25R95_FWT_MAX);
+        ST25R95_Set_FWT(gRFAL.protocol, ST25R95_FWT_MAX);
       }
     }
 
@@ -576,8 +683,6 @@ NFC_OpResult RFal_GetTransceiveStatus(void)
 /*******************************************************************************/
 NFC_OpResult RFal_GetTransceiveRSSI(uint16_t *rssi)
 {
-  NO_WARNING(rssi);
-
   return NFC_Unsupport;
 }
 
@@ -649,7 +754,7 @@ void RFal_TransceiveTx(void)
       /*******************************************************************************/
       /* Prepare Rx                                                                  */
       /*******************************************************************************/
-      st25r95SPIPrepareRx(
+      ST25R95_IO_SPI_PrepareRx(
         gRFAL.protocol,
         gRFAL.TxRx.ctx.rxBuf,
         RFal_ConvBitsToBytes(gRFAL.TxRx.ctx.rxBufLen),
@@ -660,7 +765,7 @@ void RFal_TransceiveTx(void)
       /*******************************************************************************/
       /* Send the data                                                               */
       /*******************************************************************************/
-      st25r95SPISendData(gRFAL.TxRx.ctx.txBuf, RFal_ConvBitsToBytes(gRFAL.TxRx.ctx.txBufLen), gRFAL.protocol, gRFAL.TxRx.ctx.flags);
+      ST25R95_IO_SPI_Send_Data(gRFAL.TxRx.ctx.txBuf, RFal_ConvBitsToBytes(gRFAL.TxRx.ctx.txBufLen), gRFAL.protocol, gRFAL.TxRx.ctx.flags);
 
       /* Start FDTPoll SW timer */
       RFal_TimerStart(gRFAL.tmr.FDTPoll, (RFAL_ST25R95_SW_TMR_MIN_1MS + RFal_Conv1fcToMs(gRFAL.timings.FDTPoll)));
@@ -670,9 +775,6 @@ void RFal_TransceiveTx(void)
 
     /*******************************************************************************/
     case RFAL_TXRX_STATE_TX_WAIT_TXE:
-      if (!st25r95SPIIsTransmitCompleted()) {
-        break;
-      }
       transmitFlag = gRFAL.TxRx.ctx.txBufLen % 8;
       if (transmitFlag == 0) {
         transmitFlag = 0x8;
@@ -686,9 +788,9 @@ void RFal_TransceiveTx(void)
       if (gRFAL.mode == RFAL_MODE_POLL_NFCA_T1T) {
         transmitFlag |= RFAL_ST25R95_ISO14443A_TOPAZFORMAT;
       }
-      st25r95SPISendTransmitFlag(gRFAL.protocol, transmitFlag);
+      ST25R95_IO_SPI_Send_Transmit_Flag(gRFAL.protocol, transmitFlag);
       if (gRFAL.protocol == ST25R95_Protocol_CE_ISO14443A) {
-        st25r95RearmListen();
+        ST25R95_RearmListen();
       }
       gRFAL.TxRx.state = RFAL_TXRX_STATE_TX_DONE;
     /* fall through */
@@ -748,7 +850,7 @@ void RFal_TransceiveRx(void)
 
     /*******************************************************************************/
     case RFAL_TXRX_STATE_RX_WAIT_RXE:
-      if (st25r95SPIPollRead(ST25R95_CONTROL_POLL_NO_TIMEOUT) == NFC_SlaveTimeout) {
+      if (ST25R95_IO_SPI_Wait_Read(ST25R95_CONTROL_POLL_NO_TIMEOUT) == NFC_SlaveTimeout) {
         break;
       }
       gRFAL.TxRx.state = RFAL_TXRX_STATE_RX_READ_DATA;
@@ -756,7 +858,7 @@ void RFal_TransceiveRx(void)
 
     /*******************************************************************************/
     case RFAL_TXRX_STATE_RX_READ_DATA:
-      retCode = st25r95SPICompleteRx();
+      retCode = ST25R95_IO_SPI_Complete_Rx();
       /* Re-Start FDTPoll SW timer */
       RFal_TimerStart(gRFAL.tmr.FDTPoll, (RFAL_ST25R95_SW_TMR_MIN_1MS + RFal_Conv1fcToMs(gRFAL.timings.FDTPoll)));
 
@@ -1191,7 +1293,7 @@ NFC_OpResult RFal_GetFeliCaPollStatus(void)
   /* Assign output parameters if requested                                       */
 
   if ((gRFAL.nfcfData.pollResList != NULL) && (gRFAL.nfcfData.pollResListSize > 0) && (gRFAL.nfcfData.devDetected > 0)) {
-    memcpy(gRFAL.nfcfData.pollResList, gRFAL.nfcfData.pollResponses, (RFAL_FELICA_POLL_RES_LEN * (uint32_t)MIN(gRFAL.nfcfData.pollResListSize, gRFAL.nfcfData.devDetected)));
+    memcpy(gRFAL.nfcfData.pollResList, gRFAL.nfcfData.pollResponses, (RFAL_FELICA_POLL_RES_LEN * (uint32_t)((gRFAL.nfcfData.pollResListSize < gRFAL.nfcfData.devDetected) ? gRFAL.nfcfData.pollResListSize : gRFAL.nfcfData.devDetected)));
   }
 
   if (gRFAL.nfcfData.devicesDetected != NULL) {
@@ -1243,7 +1345,7 @@ NFC_OpResult RFal_ListenStart(uint32_t lmMask, const RFal_LmConfPA *confA, const
 
     RFal_SetMode(RFAL_MODE_LISTEN_NFCA, RFAL_BR_106, RFAL_BR_106);
 
-    if (st25r95SetACFilter(confA) != NFC_OK) {
+    if (ST25R95_SetACFilter(confA) != NFC_OK) {
       return (NFC_InvalidParameter);
     }
 
@@ -1265,19 +1367,19 @@ static NFC_OpResult RFal_RunListenModeWorker(void)
 {
   NFC_OpResult retCode = NFC_OK;
 
-  if (!st25r95IsInListen()) {
-    retCode = st25r95Listen();
+  if (!ST25R95_IsInListen()) {
+    retCode = ST25R95_Listen();
   }
 
   if (retCode != NFC_OK) {
     return (retCode);
   }
 
-  if (RFal_IO_SPI_WAIT_Read(ST25R95_CONTROL_POLL_NO_TIMEOUT) == NFC_SlaveTimeout) {
+  if (ST25R95_IO_SPI_Wait_Read(ST25R95_CONTROL_POLL_NO_TIMEOUT) == NFC_SlaveTimeout) {
     return (NFC_OK);
   }
 
-  retCode = RFal_IO_SPI_Complete_Rx(
+  retCode = ST25R95_IO_SPI_Complete_Rx(
     gRFAL.protocol,
     gRFAL.Lm.rxBuf,
     RFal_ConvBitsToBytes(gRFAL.Lm.rxBufLen),
@@ -1303,8 +1405,8 @@ NFC_OpResult RFal_ListenStop(void)
     return NFC_RequestError;
   }
 
-  RFal_IO_SPI_Command_Echo(); /* kill listen command */
-  RFal_FieldOff();
+  ST25R95_IO_SPI_Command_Echo(); /* kill listen command */
+  ST25R95_Field_Off();
   gRFAL.state              = RFAL_STATE_INIT;
   gRFAL.mode               = RFAL_MODE_NONE;
   gRFAL.protocol           = ST25R95_Protocol_FieldOff;
@@ -1349,7 +1451,7 @@ RFal_LmState RFal_ListenGetState(bool *dataFlag, RFal_BitRate *lastBR)
   if (dataFlag != NULL) {
     *dataFlag = gRFAL.Lm.dataFlag;
   }
-  state = st25r95GetLmState();
+  state = ST25R95_GetLmState();
 
   if (((state == RFAL_LM_STATE_ACTIVE_A) || (state == RFAL_LM_STATE_READY_Ax)) && gRFAL.cardEmulT4AT) {
     state = RFAL_LM_STATE_CARDEMU_4A;
@@ -1366,8 +1468,8 @@ NFC_OpResult RFal_ListenSetState(RFal_LmState newSt)
   uint8_t st25r95State;
   bool WasInListen;
 
-  WasInListen = st25r95IsInListen();
-  RFal_IO_SPI_Command_Echo(); /* kill listen command */
+  WasInListen = ST25R95_IsInListen();
+  ST25R95_IO_SPI_Command_Echo(); /* kill listen command */
   gRFAL.cardEmulT4AT = false;
 
   switch (newSt) {
@@ -1410,7 +1512,7 @@ NFC_OpResult RFal_ListenSetState(RFal_LmState newSt)
       break;
 
     case RFAL_LM_STATE_CARDEMU_4A:
-      st25r95State = st25r95GetLmState();
+      st25r95State = ST25R95_GetLmState();
       if ((st25r95State != ST25R95_ACSTATE_ACTIVE) || (st25r95State != ST25R95_ACSTATE_ACTIVEX)) {
         st25r95State = ST25R95_ACSTATE_ACTIVE;
       }
@@ -1418,10 +1520,10 @@ NFC_OpResult RFal_ListenSetState(RFal_LmState newSt)
       break;
   }
   if (retCode == NFC_OK) {
-    st25r95SetACState(st25r95State);
+    ST25R95_SetACState(st25r95State);
   }
   if (WasInListen) {
-    st25r95Listen();
+    ST25R95_Listen();
   }
 
   return (retCode);
@@ -1466,7 +1568,7 @@ NFC_OpResult RFal_WakeUpModeStart(const RFal_WakeUpConfig *config)
   }
 
   /* Use a fixed period of ~300 ms */
-  RFal_IO_SPI_Idle(gRFAL.wum.cfg.indAmp.reference - gRFAL.wum.cfg.indAmp.delta, gRFAL.wum.cfg.indAmp.reference + gRFAL.wum.cfg.indAmp.delta, RFAL_ST25R95_IDLE_DEFAULT_WUPERIOD);
+  ST25R95_IO_SPI_Idle(gRFAL.wum.cfg.indAmp.reference - gRFAL.wum.cfg.indAmp.delta, gRFAL.wum.cfg.indAmp.reference + gRFAL.wum.cfg.indAmp.delta, RFAL_ST25R95_IDLE_DEFAULT_WUPERIOD);
   gRFAL.state     = RFAL_STATE_WUM;
   gRFAL.wum.state = RFAL_WUM_STATE_ENABLED;
   return NFC_OK;
@@ -1507,8 +1609,8 @@ NFC_OpResult RFal_WakeUpModeStop(void)
   }
 
   gRFAL.wum.state = RFAL_WUM_STATE_NOT_INIT;
-  RFal_IO_SPI_Kill_Idle();
-  RFal_IO_SPI_Command_Echo();
+  ST25R95_IO_SPI_Kill_Idle();
+  ST25R95_IO_SPI_Command_Echo();
   return NFC_OK;
 }
 
@@ -1523,8 +1625,8 @@ static NFC_OpResult RFal_RunWakeUpModeWorker(void)
   switch (gRFAL.wum.state) {
     case RFAL_WUM_STATE_ENABLED:
     case RFAL_WUM_STATE_ENABLED_WOKE:
-      if (RFal_IO_SPI_WAIT_Read(ST25R95_CONTROL_POLL_NO_TIMEOUT) != NFC_SlaveTimeout) {
-        RFal_IO_SPI_Get_Idle_Response();
+      if (ST25R95_IO_SPI_Wait_Read(ST25R95_CONTROL_POLL_NO_TIMEOUT) != NFC_SlaveTimeout) {
+        ST25R95_IO_SPI_Get_Idle_Response();
         gRFAL.wum.state = RFAL_WUM_STATE_ENABLED_WOKE;
       }
 
@@ -1552,7 +1654,7 @@ NFC_OpResult RFal_ChipWriteReg(uint16_t reg, const uint8_t *values, uint8_t len)
   if (len != 1) {
     retCode = NFC_InvalidParameter;
   } else {
-    retCode = RFal_Write_Reg(gRFAL.protocol, reg, values[0]);
+    retCode = ST25R95_Write_Reg(gRFAL.protocol, reg, values[0]);
   }
   return (retCode);
 }
@@ -1571,7 +1673,7 @@ NFC_OpResult RFal_ChipReadReg(uint16_t reg, uint8_t *values, uint8_t len)
   if (len != 1) {
     retCode = NFC_InvalidParameter;
   } else {
-    retCode = RFal_Read_Reg(reg, values);
+    retCode = ST25R95_Read_Reg(reg, values);
   }
   return (retCode);
 }
@@ -1600,14 +1702,14 @@ NFC_OpResult RFal_ChipChangeRegBits(uint16_t reg, uint8_t valueMask, uint8_t val
   NFC_OpResult retCode;
   uint8_t tmp;
 
-  retCode = RFal_Read_Reg(reg, &tmp);
+  retCode = ST25R95_Read_Reg(reg, &tmp);
 
   if (retCode == NFC_OK) {
     /* mask out the bits we don't want to change */
     tmp &= (uint8_t)(~((uint32_t)valueMask));
     /* set the new value */
     tmp |= (value & valueMask);
-    retCode = RFal_Write_Reg(gRFAL.protocol, reg, tmp);
+    retCode = ST25R95_Write_Reg(gRFAL.protocol, reg, tmp);
   }
 
   return retCode;

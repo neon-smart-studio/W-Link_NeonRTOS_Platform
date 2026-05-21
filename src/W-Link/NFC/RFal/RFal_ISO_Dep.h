@@ -498,6 +498,7 @@ NFC_OpResult RFal_ISO_Dep_ListenGetActivationStatus(void);
 uint16_t RFal_ISO_Dep_GetMaxInfLen(void);
 NFC_OpResult RFal_ISO_Dep_StartTransceive(RFal_ISO_Dep_TxRxParam param);
 NFC_OpResult RFal_ISO_Dep_GetTransceiveStatus(void);
+NFC_OpResult RFal_ISO_Dep_DataExchangePICC(void);
 NFC_OpResult RFal_ISO_Dep_StartApduTransceive(RFal_ISO_Dep_ApduTxRxParam param);
 NFC_OpResult RFal_ISO_Dep_GetApduTransceiveStatus(void);
 NFC_OpResult RFal_ISO_Dep_RATS(RFal_ISO_Dep_FSxI FSDI, uint8_t DID, RFal_ISO_Dep_Ats *ats, uint8_t *atsLen);

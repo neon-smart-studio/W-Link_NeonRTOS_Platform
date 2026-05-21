@@ -151,7 +151,7 @@ NFC_OpResult NDef_RecordToRtdWpcWlc(const NDef_Record *record, NDef_Type *wpcWlc
     return NFC_InvalidParameter;
   }
 
-  if (! NDef_RecordTypeMatch(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeWpcWlc)) { /* "www.wirelesspowerconsortium.com:wlc" */
+  if (! NDef_Record_TypeMatch(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeWpcWlc)) { /* "www.wirelesspowerconsortium.com:wlc" */
     return NFC_ProtocolError;
   }
 
@@ -169,12 +169,12 @@ NFC_OpResult NDef_RtdWpcWlcToRecord(const NDef_Type *wpcWlc, NDef_Record *record
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* "www.wirelesspowerconsortium.com:wlc" */
-  (void)NDef_RecordSetType(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeWpcWlc);
+  (void)NDef_Record_SetType(record, NDEF_TNF_RTD_EXTERNAL_TYPE, &bufRtdTypeWpcWlc);
 
-  if (NDef_RecordSetNdefType(record, wpcWlc) < NFC_OK) {
+  if (NDef_RecordSetNDefType(record, wpcWlc) < NFC_OK) {
     return NFC_InvalidParameter;
   }
 

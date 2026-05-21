@@ -38,6 +38,7 @@
 
 #include "NDef_Record.h"
 #include "NDef_Buffer.h"
+#include "NDef_Types.h"
 
 #include "NFC/NFC_Def.h"
 

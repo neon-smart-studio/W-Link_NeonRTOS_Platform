@@ -175,13 +175,30 @@
 extern "C" {
 #endif
 
+/*! SPI transceive context definition */
+typedef struct {
+  bool rmvCRC;                         /*!< Remove CRC flag                 */
+  bool inListen;                       /*!< inListen flags                  */
+  bool NFCIP1;                         /*!< NFCIP1 flags                    */
+  uint16_t rxBufLen;                   /*!< rxBufLen                        */
+  uint16_t *rxRcvdLen;                 /*!< rxRcvdLen                       */
+  uint8_t *rxBuf;                      /*!< rxBuf                           */
+  uint8_t *additionalRespBytes;        /*!< additionalRespBytes             */
+  NFC_OpResult retCode;                  /*!< retCode                         */
+  uint8_t BufCRC[2];                   /*!< BufCRC                          */
+  uint8_t NFCIP1_SoD[1];               /*!< NFCIP1_SoD                      */
+  uint8_t protocol;                    /*!< protocol                        */
+
+} ST25R95_IO_SPIRxContext;
+
 NFC_OpResult ST25R95_IO_SPI_Wait_Read(NeonRTOS_Time_t timeout);
 NFC_OpResult ST25R95_IO_SPI_Wait_Send(void);
 NFC_OpResult ST25R95_IO_SPI_Send_Command_Type_And_Len(uint8_t *cmd, uint8_t *resp, uint16_t respBuffLen);
 NFC_OpResult ST25R95_IO_SPI_Command_Echo(void);
 NFC_OpResult ST25R95_IO_SPI_Send_Transmit_Flag(ST25R95_Protocol protocol, uint8_t transmitFlag);
 NFC_OpResult ST25R95_IO_SPI_Send_Data(uint8_t *buf, uint8_t bufLen, ST25R95_Protocol protocol, uint32_t flags);
-NFC_OpResult ST25R95_IO_SPI_Complete_Rx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes);
+NFC_OpResult ST25R95_IO_SPI_PrepareRx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes);
+NFC_OpResult ST25R95_IO_SPI_Complete_Rx();
 NFC_OpResult ST25R95_IO_SPI_Idle(uint8_t dacDataL, uint8_t dacDataH, uint8_t WUPeriod);
 NFC_OpResult ST25R95_IO_SPI_Get_Idle_Response(void);
 NFC_OpResult ST25R95_IO_SPI_nIRQ_IN_Pulse(void);

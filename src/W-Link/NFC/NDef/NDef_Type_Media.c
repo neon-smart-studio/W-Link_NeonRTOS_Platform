@@ -106,7 +106,7 @@ NFC_OpResult NDef_RecordToMedia(const NDef_Record *record, NDef_Type *media)
     return NFC_ProtocolError;
   }
 
-  type = NDef_RecordGetNdefType(record);
+  type = NDef_RecordGetNDefType(record);
   if ((type != NULL) && (type->id == NDEF_TYPE_ID_MEDIA)) {
     (void)memcpy(media, type, sizeof(NDef_Type));
     return NFC_OK;
@@ -131,11 +131,11 @@ NFC_OpResult NDef_MediaToRecord(const NDef_Type *media, NDef_Record *record)
 
   typeMedia = &media->data.media;
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
-  (void)NDef_RecordSetType(record, NDEF_TNF_MEDIA_TYPE, &typeMedia->bufType);
+  (void)NDef_Record_SetType(record, NDEF_TNF_MEDIA_TYPE, &typeMedia->bufType);
 
-  (void)NDef_RecordSetPayload(record, &typeMedia->bufPayload);
+  (void)NDef_Record_SetPayload(record, &typeMedia->bufPayload);
 
   return NFC_OK;
 }

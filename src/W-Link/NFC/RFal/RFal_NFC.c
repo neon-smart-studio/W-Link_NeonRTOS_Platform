@@ -182,7 +182,7 @@ NFC_OpResult RFal_NFC_Deactivate(RFal_NFC_DeactivateType deactType)
     gNfcDev.state       = RFAL_NFC_STATE_DEACTIVATION;
   } else {
     /* Otherwise deactivate immediately and go to IDLE */
-    RFal_NFC_Deactivation();
+    RFal_NFC_DeActivation();
     gNfcDev.state = RFAL_NFC_STATE_IDLE;
   }
 
@@ -406,7 +406,7 @@ void RFal_NFC_Worker(void)
     /*******************************************************************************/
     case RFAL_NFC_STATE_DEACTIVATION:
 
-      err = RFal_NFC_Deactivation();                                              /* Deactivate current device */
+      err = RFal_NFC_DeActivation();                                              /* Deactivate current device */
       if (err != NFC_Busy) {
         if (gNfcDev.deactType == RFAL_NFC_DEACTIVATE_SLEEP) {
           gNfcDev.state = RFAL_NFC_STATE_POLL_SELECT;
@@ -520,7 +520,7 @@ NFC_OpResult RFal_NFC_DataExchangeStart(uint8_t *txData, uint16_t txDataLen, uin
       /*******************************************************************************/
       case RFAL_NFC_INTERFACE_RF:
 
-        RFal_CreateByteFlagsTxRxContext(ctx, (uint8_t *)txData, txDataLen, gNfcDev.rxBuf.rfBuf, sizeof(gNfcDev.rxBuf.rfBuf), &gNfcDev.rxLen, RFAL_TXRX_FLAGS_DEFAULT, fwt);
+        RFAL_CreateByteFlagsTxRxContext(ctx, (uint8_t *)txData, txDataLen, gNfcDev.rxBuf.rfBuf, sizeof(gNfcDev.rxBuf.rfBuf), &gNfcDev.rxLen, RFAL_TXRX_FLAGS_DEFAULT, fwt);
         ctx.txBufLen = txDataLen;    /* RF interface uses number of bits */
 
         *rxData = (uint8_t *)gNfcDev.rxBuf.rfBuf;
@@ -715,7 +715,7 @@ NFC_OpResult RFal_NFC_PollTechDetection(void)
     if (RFal_IsGTExpired()) {                                                             /* Wait until Guard Time is fulfilled */
       gNfcDev.techs2do &= ~RFAL_NFC_POLL_TECH_AP2P;
 
-      err = RFal_NFC_NfcDepActivate(gNfcDev.devList, RFAL_NFCDEP_COMM_ACTIVE, NULL, 0);  /* Poll for NFC-A devices */
+      err = RFal_NFC_Dep_Activate(gNfcDev.devList, RFAL_NFCDEP_COMM_ACTIVE, NULL, 0);  /* Poll for NFC-A devices */
       if (err == NFC_OK) {
         gNfcDev.techsFound |= RFAL_NFC_POLL_TECH_AP2P;
 
@@ -749,7 +749,7 @@ NFC_OpResult RFal_NFC_PollTechDetection(void)
   /*******************************************************************************/
   if (((gNfcDev.disc.techs2Find & RFAL_NFC_POLL_TECH_A) != 0U) && ((gNfcDev.techs2do & RFAL_NFC_POLL_TECH_A) != 0U)) {
     if (!gNfcDev.isTechInit) {
-      err = RFal_NFCA_PollerInitialize();                         /* Initialize RFAL for NFC-A */
+      err = RFal_NFCA_PollerInit();                         /* Initialize RFAL for NFC-A */
       if(err < NFC_OK)
       {
         return err;
@@ -796,7 +796,7 @@ NFC_OpResult RFal_NFC_PollTechDetection(void)
   if (((gNfcDev.disc.techs2Find & RFAL_NFC_POLL_TECH_B) != 0U) && ((gNfcDev.techs2do & RFAL_NFC_POLL_TECH_B) != 0U)) {
 
     if (!gNfcDev.isTechInit) {
-      err = RFal_NFCB_PollerInitialize();                        /* Initialize RFAL for NFC-B */
+      err = RFal_NFCB_PollerInit();                        /* Initialize RFAL for NFC-B */
       if(err < NFC_OK)
       {
         return err;
@@ -844,7 +844,7 @@ NFC_OpResult RFal_NFC_PollTechDetection(void)
   if (((gNfcDev.disc.techs2Find & RFAL_NFC_POLL_TECH_F) != 0U) && ((gNfcDev.techs2do & RFAL_NFC_POLL_TECH_F) != 0U)) {
 
     if (!gNfcDev.isTechInit) {
-      err = RFal_NFCF_PollerInitialize(gNfcDev.disc.nfcfBR);    /* Initialize RFAL for NFC-F */
+      err = RFal_NFCF_PollerInit(gNfcDev.disc.nfcfBR);    /* Initialize RFAL for NFC-F */
       if(err < NFC_OK)
       {
         return err;
@@ -896,7 +896,7 @@ NFC_OpResult RFal_NFC_PollTechDetection(void)
     RFal_NFCV_InventoryRes invRes;
 
     if (!gNfcDev.isTechInit) {
-      err = RFal_NFCV_PollerInitialize();                        /* Initialize RFAL for NFC-V */
+      err = RFal_NFCV_PollerInit();                        /* Initialize RFAL for NFC-V */
       if(err < NFC_OK)
       {
         return err;
@@ -929,7 +929,7 @@ NFC_OpResult RFal_NFC_PollTechDetection(void)
   if (((gNfcDev.disc.techs2Find & RFAL_NFC_POLL_TECH_ST25TB) != 0U) && ((gNfcDev.techs2do & RFAL_NFC_POLL_TECH_ST25TB) != 0U)) {
 
     if (!gNfcDev.isTechInit) {
-      err = RFal_ST25TB_PollerInitialize();                      /* Initialize RFAL for NFC-V */
+      err = RFal_ST25TB_PollerInit();                      /* Initialize RFAL for NFC-V */
       if(err < NFC_OK)
       {
         return err;
@@ -999,11 +999,6 @@ NFC_OpResult RFal_NFC_PollCollResolution(void)
   //devCnt = 0;
   i      = 0;
 
-  /* Suppress warning when specific RFAL features have been disabled */
-  NO_WARNING(err);
-  NO_WARNING(devCnt);
-  NO_WARNING(i);
-
   /* Check if device limit has been reached */
   if (gNfcDev.devCnt >= gNfcDev.disc.devLimit) {
     return NFC_OK;
@@ -1016,7 +1011,7 @@ NFC_OpResult RFal_NFC_PollCollResolution(void)
     static RFal_NFCA_ListenDevice nfcaDevList[RFAL_NFC_MAX_DEVICES];
 
     if (!gNfcDev.isTechInit) {
-      err = RFal_NFCA_PollerInitialize();                         /* Initialize RFAL for NFC-A */
+      err = RFal_NFCA_PollerInit();                         /* Initialize RFAL for NFC-A */
       if(err < NFC_OK)
       {
         return err;
@@ -1070,7 +1065,7 @@ NFC_OpResult RFal_NFC_PollCollResolution(void)
     static RFal_NFCB_ListenDevice nfcbDevList[RFAL_NFC_MAX_DEVICES];
 
     if (!gNfcDev.isTechInit) {
-      err = RFal_NFCB_PollerInitialize();                         /* Initialize RFAL for NFC-B */
+      err = RFal_NFCB_PollerInit();                         /* Initialize RFAL for NFC-B */
       if(err < NFC_OK)
       {
         return err;
@@ -1125,7 +1120,7 @@ NFC_OpResult RFal_NFC_PollCollResolution(void)
     static RFal_NFCF_ListenDevice nfcfDevList[RFAL_NFC_MAX_DEVICES];
 
     if (!gNfcDev.isTechInit) {
-      err = RFal_NFCF_PollerInitialize(gNfcDev.disc.nfcfBR);      /* Initialize RFAL for NFC-F */
+      err = RFal_NFCF_PollerInit(gNfcDev.disc.nfcfBR);      /* Initialize RFAL for NFC-F */
       if(err < NFC_OK)
       {
         return err;
@@ -1179,7 +1174,7 @@ NFC_OpResult RFal_NFC_PollCollResolution(void)
     RFal_NFCV_ListenDevice nfcvDevList[RFAL_NFC_MAX_DEVICES];
 
     if (!gNfcDev.isTechInit) {
-      err = RFal_NFCV_PollerInitialize();                        /* Initialize RFAL for NFC-V */
+      err = RFal_NFCV_PollerInit();                        /* Initialize RFAL for NFC-V */
       if(err < NFC_OK)
       {
         return err;
@@ -1219,7 +1214,7 @@ NFC_OpResult RFal_NFC_PollCollResolution(void)
     RFal_ST25TB_ListenDevice st25tbDevList[RFAL_NFC_MAX_DEVICES];
 
     if (!gNfcDev.isTechInit) {
-      err = RFal_ST25TB_PollerInitialize();                      /* Initialize RFAL for ST25TB */
+      err = RFal_ST25TB_PollerInit();                      /* Initialize RFAL for ST25TB */
       if(err < NFC_OK)
       {
         return err;
@@ -1334,7 +1329,7 @@ NFC_OpResult RFal_NFC_PollActivation(uint8_t devIt)
     case RFAL_NFC_LISTEN_TYPE_NFCA:
 
       if (!gNfcDev.isTechInit) {
-        RFal_NFCA_PollerInitialize();
+        RFal_NFCA_PollerInit();
         gNfcDev.isTechInit = true;
         gNfcDev.isOperOngoing = false;
         return NFC_Busy;
@@ -1417,7 +1412,7 @@ NFC_OpResult RFal_NFC_PollActivation(uint8_t devIt)
 
           if (!gNfcDev.isOperOngoing) {
             /* Perform ISO-DEP (ISO14443-4) activation: RATS and PPS if supported */
-            RFal_ISO_Dep_InitializeWithParams(gNfcDev.disc.compMode, RFAL_ISODEP_MAX_R_RETRYS, RFAL_ISODEP_MAX_WTX_NACK_RETRYS, RFAL_ISODEP_MAX_WTX_RETRYS, RFAL_ISODEP_MAX_DSL_RETRYS, RFAL_ISODEP_MAX_I_RETRYS, RFAL_ISODEP_RATS_RETRIES);
+            RFal_ISO_Dep_InitWithParams(gNfcDev.disc.compMode, RFAL_ISODEP_MAX_R_RETRYS, RFAL_ISODEP_MAX_WTX_NACK_RETRYS, RFAL_ISODEP_MAX_WTX_RETRYS, RFAL_ISODEP_MAX_DSL_RETRYS, RFAL_ISODEP_MAX_I_RETRYS, RFAL_ISODEP_RATS_RETRIES);
             err = RFal_ISO_Dep_PollAStartActivation(gNfcDev.disc.isoDepFS, RFAL_ISODEP_NO_DID, gNfcDev.disc.maxBR, &gNfcDev.devList[devIt].proto.isoDep);
             if(err < NFC_OK)
             {
@@ -1441,7 +1436,7 @@ NFC_OpResult RFal_NFC_PollActivation(uint8_t devIt)
         case RFAL_NFCA_NFCDEP:                                                /* Device supports NFC-DEP */
 
           /* Perform NFC-DEP (P2P) activation: ATR and PSL if supported */
-          err = RFal_NFC_NfcDepActivate(&gNfcDev.devList[devIt], RFAL_NFCDEP_COMM_PASSIVE, NULL, 0);
+          err = RFal_NFC_Dep_Activate(&gNfcDev.devList[devIt], RFAL_NFCDEP_COMM_PASSIVE, NULL, 0);
           if(err < NFC_OK)
           {
             return err;
@@ -1466,7 +1461,7 @@ NFC_OpResult RFal_NFC_PollActivation(uint8_t devIt)
     case RFAL_NFC_LISTEN_TYPE_NFCB:
 
       if (!gNfcDev.isTechInit) {
-        RFal_NFCB_PollerInitialize();
+        RFal_NFCB_PollerInit();
         gNfcDev.isTechInit = true;
         gNfcDev.isOperOngoing = false;
 
@@ -1497,7 +1492,7 @@ NFC_OpResult RFal_NFC_PollActivation(uint8_t devIt)
       /* Check if device supports  ISO-DEP (ISO14443-4) */
       if ((gNfcDev.devList[devIt].dev.nfcb.sensbRes.protInfo.FsciProType & RFAL_NFCB_SENSB_RES_PROTO_ISO_MASK) != 0U) {
         if (!gNfcDev.isOperOngoing) {
-          RFal_ISO_Dep_InitializeWithParams(gNfcDev.disc.compMode, RFAL_ISODEP_MAX_R_RETRYS, RFAL_ISODEP_MAX_WTX_NACK_RETRYS, RFAL_ISODEP_MAX_WTX_RETRYS, RFAL_ISODEP_MAX_DSL_RETRYS, RFAL_ISODEP_MAX_I_RETRYS, RFAL_ISODEP_RATS_RETRIES);
+          RFal_ISO_Dep_InitWithParams(gNfcDev.disc.compMode, RFAL_ISODEP_MAX_R_RETRYS, RFAL_ISODEP_MAX_WTX_NACK_RETRYS, RFAL_ISODEP_MAX_WTX_RETRYS, RFAL_ISODEP_MAX_DSL_RETRYS, RFAL_ISODEP_MAX_I_RETRYS, RFAL_ISODEP_RATS_RETRIES);
           /* Perform ISO-DEP (ISO14443-4) activation: ATTRIB    */
           err = RFal_ISO_Dep_PollBStartActivation(gNfcDev.disc.isoDepFS, RFAL_ISODEP_NO_DID, gNfcDev.disc.maxBR, 0x00, &gNfcDev.devList[devIt].dev.nfcb, NULL, 0, &gNfcDev.devList[devIt].proto.isoDep);
           if(err < NFC_OK)
@@ -1526,11 +1521,11 @@ NFC_OpResult RFal_NFC_PollActivation(uint8_t devIt)
       /*******************************************************************************/
     case RFAL_NFC_LISTEN_TYPE_NFCF:
 
-      RFal_NFCF_PollerInitialize(gNfcDev.disc.nfcfBR);
+      RFal_NFCF_PollerInit(gNfcDev.disc.nfcfBR);
 
       if (RFal_NFCF_IsNfcDepSupported(&gNfcDev.devList[devIt].dev.nfcf)) {
         /* Perform NFC-DEP (P2P) activation: ATR and PSL if supported */
-        err = RFal_NFC_NfcDepActivate(&gNfcDev.devList[devIt], RFAL_NFCDEP_COMM_PASSIVE, NULL, 0);
+        err = RFal_NFC_Dep_Activate(&gNfcDev.devList[devIt], RFAL_NFCDEP_COMM_PASSIVE, NULL, 0);
         if(err < NFC_OK)
         {
           return err;
@@ -1556,7 +1551,7 @@ NFC_OpResult RFal_NFC_PollActivation(uint8_t devIt)
       /*******************************************************************************/
     case RFAL_NFC_LISTEN_TYPE_NFCV:
 
-      RFal_NFCV_PollerInitialize();
+      RFal_NFCV_PollerInit();
 
       /* No specific activation needed for a T5T */
 
@@ -1572,7 +1567,7 @@ NFC_OpResult RFal_NFC_PollActivation(uint8_t devIt)
       /*******************************************************************************/
     case RFAL_NFC_LISTEN_TYPE_ST25TB:
 
-      RFal_ST25TB_PollerInitialize();
+      RFal_ST25TB_PollerInit();
 
       /* No specific activation needed for a ST25TB */
 
@@ -1683,7 +1678,7 @@ NFC_OpResult RFal_NFC_ListenActivation(void)
           rxParam.isRxChaining = &gNfcDev.isRxChaining;
 
           RFal_ListenSetState(RFAL_LM_STATE_CARDEMU_4A); /* Set next state CE T4T */
-          RFal_ISO_Dep_Initialize();                       /* Initialize ISO-DEP layer to handle ISO14443-a activation / RATS */
+          RFal_ISO_Dep_Init();                       /* Initialize ISO-DEP layer to handle ISO14443-a activation / RATS */
 
           /* Set ISO-DEP layer to digest RATS and handle activation */
           ret = RFal_ISO_Dep_ListenStartActivation(&atsParam, NULL, gNfcDev.rxBuf.rfBuf, gNfcDev.rxLen, rxParam);
@@ -1696,7 +1691,7 @@ NFC_OpResult RFal_NFC_ListenActivation(void)
         /* Check if received data is a valid ATR_REQ */
         else if (RFal_NFC_Dep_IsAtrReq(&gNfcDev.rxBuf.rfBuf[hdrLen], (RFal_ConvBitsToBytes(gNfcDev.rxLen) - hdrLen), gNfcDev.devList->nfcid)) {
           gNfcDev.devList->type = RFAL_NFC_POLL_TYPE_NFCA;
-          ret = RFal_NFC_NfcDepActivate(gNfcDev.devList, RFAL_NFCDEP_COMM_PASSIVE, &gNfcDev.rxBuf.rfBuf[hdrLen], (RFal_ConvBitsToBytes(gNfcDev.rxLen) - hdrLen));
+          ret = RFal_NFC_Dep_Activate(gNfcDev.devList, RFAL_NFCDEP_COMM_PASSIVE, &gNfcDev.rxBuf.rfBuf[hdrLen], (RFal_ConvBitsToBytes(gNfcDev.rxLen) - hdrLen));
           if(ret < NFC_OK)
           {
               return ret;
@@ -1730,7 +1725,7 @@ NFC_OpResult RFal_NFC_ListenActivation(void)
 
         if (RFal_NFC_Dep_IsAtrReq(&gNfcDev.rxBuf.rfBuf[hdrLen], (RFal_ConvBitsToBytes(gNfcDev.rxLen) - hdrLen), gNfcDev.devList->nfcid)) {
           gNfcDev.devList->type = RFAL_NFC_POLL_TYPE_NFCF;
-          ret = RFal_NFC_NfcDepActivate(gNfcDev.devList, RFAL_NFCDEP_COMM_PASSIVE, &gNfcDev.rxBuf.rfBuf[hdrLen], (RFal_ConvBitsToBytes(gNfcDev.rxLen) - hdrLen));
+          ret = RFal_NFC_Dep_Activate(gNfcDev.devList, RFAL_NFCDEP_COMM_PASSIVE, &gNfcDev.rxBuf.rfBuf[hdrLen], (RFal_ConvBitsToBytes(gNfcDev.rxLen) - hdrLen));
           if(ret < NFC_OK)
           {
               return ret;
@@ -1776,7 +1771,7 @@ NFC_OpResult RFal_NFC_ListenActivation(void)
             gNfcDev.devList->type = RFAL_NFC_POLL_TYPE_AP2P;
             RFal_SetMode((RFAL_MODE_LISTEN_ACTIVE_P2P), bitRate, bitRate);
             RFal_SetFDTListen(RFAL_FDT_LISTEN_AP2P_LISTENER);
-            ret = RFal_NFC_NfcDepActivate(gNfcDev.devList, RFAL_NFCDEP_COMM_ACTIVE, &gNfcDev.rxBuf.rfBuf[hdrLen], (RFal_ConvBitsToBytes(gNfcDev.rxLen) - hdrLen));
+            ret = RFal_NFC_Dep_Activate(gNfcDev.devList, RFAL_NFCDEP_COMM_ACTIVE, &gNfcDev.rxBuf.rfBuf[hdrLen], (RFal_ConvBitsToBytes(gNfcDev.rxLen) - hdrLen));
             if(ret < NFC_OK)
             {
               return ret;
@@ -1835,7 +1830,7 @@ NFC_OpResult RFal_NFC_Dep_Activate(RFal_NFC_Device *device, RFal_NFC_Dep_CommMod
     initParam.commMode  = commMode;
     initParam.operParam = (RFAL_NFCDEP_OPER_FULL_MI_EN | RFAL_NFCDEP_OPER_EMPTY_DEP_DIS | RFAL_NFCDEP_OPER_ATN_EN | RFAL_NFCDEP_OPER_RTOX_REQ_EN);
 
-    RFal_NFC_Dep_Initialize();
+    RFal_NFC_Dep_Init();
     /* Perform NFC-DEP (P2P) activation: ATR and PSL if supported */
     return RFal_NFC_Dep_InitiatorHandleActivation(&initParam, gNfcDev.disc.maxBR, &device->proto.nfcDep);
   }
@@ -1868,7 +1863,7 @@ NFC_OpResult RFal_NFC_Dep_Activate(RFal_NFC_Device *device, RFal_NFC_Dep_CommMod
 
     RFal_ListenSetState(((device->type == RFAL_NFC_POLL_TYPE_NFCA) ? RFAL_LM_STATE_TARGET_A : RFAL_LM_STATE_TARGET_F));
 
-    RFal_NFC_Dep_Initialize();
+    RFal_NFC_Dep_Init();
     /* Perform NFC-DEP (P2P) activation: send ATR_RES and handle activation */
     return RFal_NFC_Dep_ListenStartActivation(&targetParam, atrReq, atrReqLen, actvParams);
   }
@@ -1878,16 +1873,13 @@ NFC_OpResult RFal_NFC_Dep_Activate(RFal_NFC_Device *device, RFal_NFC_Dep_CommMod
 }
 
 
-NFC_OpResult RFal_NFC_Deactivation(void)
+NFC_OpResult RFal_NFC_DeActivation(void)
 {
   bool       aux;
   NFC_OpResult ret;
 
   ret = NFC_OK;
   aux = false;
-
-  /* Suppress warning when specific RFAL features have been disabled */
-  NO_WARNING(ret);
 
   /* Check if a device has been activated */
   if (gNfcDev.activeDev != NULL) {
@@ -1957,7 +1949,7 @@ NFC_OpResult RFal_NFC_Deactivation(void)
 
       if ((gNfcDev.isFieldOn) && RFal_NFC_HasPollerTechs()) {                                /* Check if configured to Poll modes and the Field is On */
         aux = timerIsExpired(gNfcDev.discTmr);                                   /* Check total duration timer is already expired */
-        if (((millis() + RFAL_NFC_T_FIELD_OFF) > gNfcDev.discTmr) || (aux)) { /* In case Total Duration has expired or expring in less than tFIELD_OFF */
+        if (((NeonRTOS_Millis() + RFAL_NFC_T_FIELD_OFF) > gNfcDev.discTmr) || (aux)) { /* In case Total Duration has expired or expring in less than tFIELD_OFF */
           gNfcDev.discTmr = (uint32_t)timerCalculateTimer(RFAL_NFC_T_FIELD_OFF);       /* Ensure that Operating Field is in Off condition at least tFIELD_OFF */
         }
 

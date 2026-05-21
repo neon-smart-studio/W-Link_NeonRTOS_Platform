@@ -126,7 +126,7 @@ NFC_OpResult RFal_T4T_PollerParseRAPDU(RFal_T4T_RApduParam *apduParam)
   }
 
   apduParam->rApduBodyLen = (apduParam->rcvdLen - (uint16_t)RFAL_T4T_MAX_RAPDU_SW1SW2_LEN);
-  apduParam->statusWord   = GETU16(&apduParam->rApduBuf->apdu[ apduParam->rApduBodyLen ]);
+  apduParam->statusWord   = (((uint16_t)(&apduParam->rApduBuf->apdu[apduParam->rApduBodyLen])[0] << 8) | (uint16_t)(&apduParam->rApduBuf->apdu[apduParam->rApduBodyLen])[1]);
 
   /* Check SW1 SW2    T4T 1.0 5.1.3 NOTE */
   if (apduParam->statusWord == RFAL_T4T_ISO7816_STATUS_COMPLETE) {

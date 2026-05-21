@@ -118,14 +118,14 @@ NFC_OpResult NDef_RecordToFlatPayloadType(const NDef_Record *record, NDef_Type *
     return NFC_InvalidParameter;
   }
 
-  ndefData = NDef_RecordGetNdefType(record);
+  ndefData = NDef_RecordGetNDefType(record);
   if ((ndefData != NULL) && (ndefData->id == NDEF_TYPE_ID_FLAT)) {
     (void)memcpy(type, ndefData, sizeof(NDef_Type));
     return NFC_OK;
   }
 
   NDef_Const_Buffer bufPayload;
-  NFC_OpResult err = NDef_RecordGetPayload(record, &bufPayload);
+  NFC_OpResult err = NDef_Record_GetPayload(record, &bufPayload);
   if (err != NFC_OK) {
     return err;
   }
@@ -142,11 +142,11 @@ NFC_OpResult NDef_FlatPayloadTypeToRecord(const NDef_Type *type, NDef_Record *re
     return NFC_InvalidParameter;
   }
 
-  (void)NDef_RecordReset(record);
+  (void)NDef_Record_Reset(record);
 
   /* Do not initialize Type string */
 
-  if (NDef_RecordSetNdefType(record, type) != NFC_OK) {
+  if (NDef_RecordSetNDefType(record, type) != NFC_OK) {
     return NFC_InvalidParameter;
   }
 

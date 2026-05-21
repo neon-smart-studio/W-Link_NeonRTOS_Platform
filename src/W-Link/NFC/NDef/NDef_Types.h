@@ -258,11 +258,11 @@ typedef enum {
 
 
 /*! NDEF abstraction Struct */
-struct NDef_Type_Struct {
+typedef struct NDef_Type_Struct {
   NDef_Type_ID      id;                                       /*!< Type Id           */
-  uint32_t (*getPayloadLength)(const NDef_Type *type);       /*!< Return payload length, specific to each type */
-  const uint8_t *(*getPayloadItem)(const NDef_Type *type, NDef_Const_Buffer *item, bool begin); /*!< Payload Encoder, specific to each type */
-  NFC_OpResult(*typeToRecord)(const NDef_Type *type, NDef_Record *record);      /*!< Type to Record convert function */
+  uint32_t (*getPayloadLength)(const struct NDef_Type_Struct *type);       /*!< Return payload length, specific to each type */
+  const uint8_t *(*getPayloadItem)(const struct NDef_Type_Struct *type, NDef_Const_Buffer *item, bool begin); /*!< Payload Encoder, specific to each type */
+  NFC_OpResult(*typeToRecord)(const struct NDef_Type_Struct *type, NDef_Record *record);      /*!< Type to Record convert function */
   union {
 #if NDEF_TYPE_FLAT_SUPPORT
     NDef_Const_Buffer           bufPayload;       /*!< Flat/unknown type    */

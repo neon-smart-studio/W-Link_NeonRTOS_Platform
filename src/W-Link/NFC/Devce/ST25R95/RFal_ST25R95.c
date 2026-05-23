@@ -850,7 +850,7 @@ void RFal_TransceiveRx(void)
 
     /*******************************************************************************/
     case RFAL_TXRX_STATE_RX_WAIT_RXE:
-      if (ST25R95_IO_SPI_Wait_Read(ST25R95_CONTROL_POLL_NO_TIMEOUT) == NFC_SlaveTimeout) {
+      if (ST25R95_IO_SPI_Wait_Read(ST25R95_CONTROL_POLL_TIMEOUT) == NFC_SlaveTimeout) {
         break;
       }
       gRFAL.TxRx.state = RFAL_TXRX_STATE_RX_READ_DATA;
@@ -1375,7 +1375,7 @@ static NFC_OpResult RFal_RunListenModeWorker(void)
     return (retCode);
   }
 
-  if (ST25R95_IO_SPI_Wait_Read(ST25R95_CONTROL_POLL_NO_TIMEOUT) == NFC_SlaveTimeout) {
+  if (ST25R95_IO_SPI_Wait_Read(ST25R95_CONTROL_POLL_TIMEOUT) == NFC_SlaveTimeout) {
     return (NFC_OK);
   }
 
@@ -1513,8 +1513,10 @@ NFC_OpResult RFal_ListenSetState(RFal_LmState newSt)
 
     case RFAL_LM_STATE_CARDEMU_4A:
       st25r95State = ST25R95_GetLmState();
-      if ((st25r95State != ST25R95_ACSTATE_ACTIVE) || (st25r95State != ST25R95_ACSTATE_ACTIVEX)) {
+      if ((st25r95State != ST25R95_ACSTATE_ACTIVE) && (st25r95State != ST25R95_ACSTATE_ACTIVEX)) {
         st25r95State = ST25R95_ACSTATE_ACTIVE;
+      } else {
+        st25r95State = gST25R95ACState;
       }
       gRFAL.cardEmulT4AT = true;
       break;
@@ -1625,7 +1627,7 @@ static NFC_OpResult RFal_RunWakeUpModeWorker(void)
   switch (gRFAL.wum.state) {
     case RFAL_WUM_STATE_ENABLED:
     case RFAL_WUM_STATE_ENABLED_WOKE:
-      if (ST25R95_IO_SPI_Wait_Read(ST25R95_CONTROL_POLL_NO_TIMEOUT) != NFC_SlaveTimeout) {
+      if (ST25R95_IO_SPI_Wait_Read(ST25R95_CONTROL_POLL_TIMEOUT) != NFC_SlaveTimeout) {
         ST25R95_IO_SPI_Get_Idle_Response();
         gRFAL.wum.state = RFAL_WUM_STATE_ENABLED_WOKE;
       }

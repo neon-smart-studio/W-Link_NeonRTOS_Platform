@@ -110,6 +110,7 @@ NFC_OpResult RFal_NFC_Discover(const RFal_NFC_DiscoverParam *disParams)
       ((((disParams->techs2Find & RFAL_NFC_POLL_TECH_AP2P) != 0U) && (disParams->ap2pBR > RFAL_BR_424)) || (disParams->GBLen > RFAL_NFCDEP_GB_MAX_LEN))) {
     return NFC_InvalidParameter;
   }
+  /*
   if ((((disParams->techs2Find & RFAL_NFC_POLL_TECH_A) != 0U)      ) ||
       (((disParams->techs2Find & RFAL_NFC_POLL_TECH_B) != 0U)      ) ||
       (((disParams->techs2Find & RFAL_NFC_POLL_TECH_F) != 0U)      ) ||
@@ -120,7 +121,7 @@ NFC_OpResult RFal_NFC_Discover(const RFal_NFC_DiscoverParam *disParams)
       (((disParams->techs2Find & RFAL_NFC_LISTEN_TECH_B) != 0U)    ) ||
       (((disParams->techs2Find & RFAL_NFC_LISTEN_TECH_F) != 0U)    ) ||
       (((disParams->techs2Find & RFAL_NFC_LISTEN_TECH_AP2P) != 0U) )) {
-    return NFC_Unsupport;   /*  PRQA S  2880 # MISRA 2.1 - Unreachable code due to configuration option being set/unset  */
+    return NFC_Unsupport;   //  PRQA S  2880 # MISRA 2.1 - Unreachable code due to configuration option being set/unset
   }
 
   if (((disParams->techs2Find & RFAL_NFC_POLL_TECH_A) != 0U)      ||
@@ -133,8 +134,9 @@ NFC_OpResult RFal_NFC_Discover(const RFal_NFC_DiscoverParam *disParams)
       ((disParams->techs2Find & RFAL_NFC_LISTEN_TECH_B) != 0U)    ||
       ((disParams->techs2Find & RFAL_NFC_LISTEN_TECH_F) != 0U)    ||
       ((disParams->techs2Find & RFAL_NFC_LISTEN_TECH_AP2P) != 0U)) {
-    return NFC_Unsupport;   /*  PRQA S  2880 # MISRA 2.1 - Unreachable code due to configuration option being set/unset  */
+    return NFC_Unsupport;   //  PRQA S  2880 # MISRA 2.1 - Unreachable code due to configuration option being set/unset
   }
+  */
 
   /* Initialize context for discovery */
   gNfcDev.activeDev       = NULL;

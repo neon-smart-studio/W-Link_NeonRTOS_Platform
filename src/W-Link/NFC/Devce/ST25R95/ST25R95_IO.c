@@ -114,7 +114,7 @@ NFC_OpResult ST25R95_IO_SPI_Wait_Read(NeonRTOS_Time_t timeout)
 {
     NeonRTOS_Time_t elapsed = 0;
 
-    while (elapsed < timeout)
+    do 
     {
         hwGPIO_OpResult gpio_op_status;
         bool level;
@@ -132,7 +132,7 @@ NFC_OpResult ST25R95_IO_SPI_Wait_Read(NeonRTOS_Time_t timeout)
 
         NeonRTOS_Sleep(1);
         elapsed++;
-    }
+    }while(elapsed < timeout);
 
     return NFC_SlaveTimeout;
 }
@@ -455,30 +455,26 @@ NFC_OpResult ST25R95_IO_SPI_Command_Echo(void)
 
 NFC_OpResult ST25R95_IO_SPI_Send_Transmit_Flag(ST25R95_Protocol protocol, uint8_t transmitFlag)
 {
+    hwGPIO_OpResult gpio_op_status;
+    hwSPI_OpResult spi_op_status;
+
     if ((protocol == ST25R95_Protocol_ISO14443A) || (protocol == ST25R95_Protocol_CE_ISO14443A))
     {
-        hwGPIO_OpResult gpio_op_status;
-        hwSPI_OpResult spi_op_status;
-
         /* send transmission Flag */
         spi_op_status = SPI_Master_WriteByte(ST25R95_SPI_INDEX, transmitFlag);
         if(spi_op_status < hwSPI_OK)
         {
             return NFC_ST25R95_Map_SPI_Error_Code(spi_op_status);
         }
-        
-        gpio_op_status = GPIO_Pin_Write(ST25R95_GPIO_CS_PIN, 1);
-        if(gpio_op_status<hwGPIO_OK)
-        {
-            return NFC_ST25R95_Map_GPIO_Error_Code(gpio_op_status);
-        }
-
-        return NFC_OK;
     }
-    else
+    
+    gpio_op_status = GPIO_Pin_Write(ST25R95_GPIO_CS_PIN, 1);
+    if(gpio_op_status<hwGPIO_OK)
     {
-        return NFC_InvalidParameter;
+        return NFC_ST25R95_Map_GPIO_Error_Code(gpio_op_status);
     }
+        
+    return NFC_OK;
 }
 
 NFC_OpResult ST25R95_IO_SPI_Send_Data(uint8_t *buf, uint8_t bufLen, ST25R95_Protocol protocol, uint32_t flags)
@@ -575,7 +571,7 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx()
     NFC_OpResult op_status;
 
     uint8_t Result;
-    uint16_t len;
+    uint8_t len;
     uint16_t rcvdLen;
     uint16_t additionalRespBytesNb = 1;
 

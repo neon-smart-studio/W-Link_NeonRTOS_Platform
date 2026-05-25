@@ -569,8 +569,6 @@ hwI2C_OpResult I2C_Master_Reset(hwI2C_Index index)
 
 hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read_dat, uint8_t read_len, bool stop, NeonRTOS_Time_t timeoutMs)
 {
-    (void)stop;
-
     if (index >= hwI2C_Index_MAX) {
         return hwI2C_InvalidParameter;
     }
@@ -587,7 +585,18 @@ hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read
         return hwI2C_InvalidParameter;
     }
 
-    if (HAL_I2C_Master_Receive_IT(&g_i2c[index], address << 1, read_dat, read_len) != HAL_OK) {
+    uint32_t xfer_opt;
+
+    if (stop)
+    {
+        xfer_opt = I2C_LAST_FRAME;
+    }
+    else
+    {
+        xfer_opt = I2C_LAST_FRAME_NO_STOP;
+    }
+
+    if (HAL_I2C_Master_Seq_Receive_IT(&g_i2c[index], address << 1, read_dat, read_len, xfer_opt) != HAL_OK) {
         return hwI2C_BusError;
     }
 
@@ -601,8 +610,6 @@ hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read
 
 hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *write_dat, uint8_t write_len, bool stop, NeonRTOS_Time_t timeoutMs)
 {
-    (void)stop;
-
     if (index >= hwI2C_Index_MAX) {
         return hwI2C_InvalidParameter;
     }
@@ -619,7 +626,18 @@ hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *wri
         return hwI2C_InvalidParameter;
     }
 
-    if (HAL_I2C_Master_Transmit_IT(&g_i2c[index], address << 1, write_dat, write_len) != HAL_OK) {
+    uint32_t xfer_opt;
+
+    if (stop)
+    {
+        xfer_opt = I2C_LAST_FRAME;
+    }
+    else
+    {
+        xfer_opt = I2C_LAST_FRAME_NO_STOP;
+    }
+
+    if (HAL_I2C_Master_Seq_Transmit_IT(&g_i2c[index], address << 1, write_dat, write_len, xfer_opt) != HAL_OK) {
         return hwI2C_BusError;
     }
 

@@ -22,8 +22,6 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index);
 hwI2C_OpResult I2C_Master_Reset(hwI2C_Index index);
 hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read_dat, uint8_t read_len, bool stop, NeonRTOS_Time_t timeoutMs);
 hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *write_dat, uint8_t write_len, bool stop, NeonRTOS_Time_t timeoutMs);
-hwI2C_OpResult I2C_Master_Read_FromISR(hwI2C_Index index, uint8_t address, uint8_t *read_dat, uint8_t read_len, bool stop, NeonRTOS_Time_t timeoutMs);
-hwI2C_OpResult I2C_Master_Write_FromISR(hwI2C_Index index, uint8_t address, uint8_t *write_dat, uint8_t write_len, bool stop, NeonRTOS_Time_t timeoutMs);
 bool I2C_Master_isInit(hwI2C_Index index);
 
 #ifdef  __cplusplus

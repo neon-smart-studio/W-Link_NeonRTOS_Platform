@@ -48,7 +48,7 @@
 
 #include "NFC_Config.h"
 
-#ifdef NFC_READER_DEVICE_ST25R95
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
 
 #define RFAL_ST25R95_GPT_MAX_1FC         RFal_Conv8fcTo1fc(0xFFFF)                     /*!< Max GPT steps in 1fc (0xFFFF steps of 8/fc    => 0xFFFF * 590ns  = 38,7ms)      */
 #define RFAL_ST25R95_NRT_MAX_1FC         RFal_Conv4096fcTo1fc(0xFFFF)                  /*!< Max NRT steps in 1fc (0xFFFF steps of 4096/fc => 0xFFFF * 302us  = 19.8s)       */
@@ -195,6 +195,6 @@ extern "C" {
 }
 #endif
 
-#endif //NFC_READER_DEVICE_ST25R95
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95
 
 #endif /* RFST25R95_RFAL_H */

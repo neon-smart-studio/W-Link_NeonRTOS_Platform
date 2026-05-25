@@ -36,34 +36,9 @@
  * The original ST copyright and license notice are preserved below.
  ******************************************************************************/
 
-/*! \file
- *
- *  \author SRA
- *
- *  \brief RF Chip Analog Configuration Settings
- *
- *
- * \addtogroup RFAL
- * @{
- *
- * \addtogroup RFAL-HAL
- * \brief RFAL Hardware Abstraction Layer
- * @{
- *
- * \addtogroup AnalogConfig
- * \brief RFAL Analog Config Module
- * @{
- *
- */
-
 #ifndef ST25R95_RFRFAL_ST25R95_ANALOG_CONFIG_H
 #define ST25R95_RFRFAL_ST25R95_ANALOG_CONFIG_H
 
-/*
- ******************************************************************************
- * INCLUDES
- ******************************************************************************
- */
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -71,7 +46,7 @@
 
 #include "NFC_Config.h"
 
-#ifdef NFC_READER_DEVICE_ST25R95
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
 
 #define RFAL_ST25R95_ANALOG_CONFIG_LUT_SIZE                 (87U)     /*!< Maximum number of Configuration IDs in the Loop Up Table     */
 #define RFAL_ST25R95_ANALOG_CONFIG_LUT_NOT_FOUND            (0xFFU)   /*!< Index value indicating no Configuration IDs found            */
@@ -212,6 +187,6 @@ NFC_OpResult RFal_AnalogConfig_List_Read_Raw(uint8_t *tblBuf, uint16_t tblBufLen
 NFC_OpResult RFal_AnalogConfig_List_Read(RFal_AnalogConfigOffset *configOffset, uint8_t *more, RFal_AnalogConfig *config, RFal_AnalogConfigNum numConfig);
 NFC_OpResult RFal_AnalogConfig_Set(RFal_AnalogConfigId configId);
 
-#endif //NFC_READER_DEVICE_ST25R95
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95
 
 #endif /* ST25R95_RFRFAL_ST25R95_ANALOG_CONFIG_H */

@@ -45,7 +45,7 @@
 
 #include "NFC_Config.h"
 
-#ifdef NFC_READER_DEVICE_ST25R95
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
 
 #define RFal_TEST_REG         0x0080U      /*!< Test Register indicator  */
 
@@ -194,4 +194,4 @@ NFC_OpResult RFal_AnalogConfig_Set(RFal_AnalogConfigId configId)
   return op_status;
 }
 
-#endif //NFC_READER_DEVICE_ST25R95
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95

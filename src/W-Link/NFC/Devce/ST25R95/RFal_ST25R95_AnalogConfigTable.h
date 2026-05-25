@@ -45,7 +45,7 @@
 
 #include "NFC_Config.h"
 
-#ifdef NFC_READER_DEVICE_ST25R95
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
 
 /*! Macro for Configuration Setting with only one register-mask-value set:
  *  - Configuration ID[2], Number of Register sets to follow[1], Register[2], Mask[1], Value[1] */
@@ -98,6 +98,6 @@ const uint8_t RFal_AnalogConfigDefaultSettings[] = {
                     )
 };
 
-#endif //NFC_READER_DEVICE_ST25R95
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95
 
 #endif /* ST25R95_ANALOGCONFIG_H */

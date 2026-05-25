@@ -56,7 +56,7 @@
 
 #include "NFC_Config.h"
 
-#ifdef NFC_READER_DEVICE_ST25R95
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
 
 #define RFal_CreateByteFlagsTxRxContext( ctx, tB, tBL, rB, rBL, rdL, fl, t ) \
     (ctx).txBuf     = (uint8_t*)(tB);                                       \
@@ -1759,4 +1759,4 @@ NFC_OpResult RFal_ChipMeasurePowerSupply(uint8_t param, uint8_t *result)
   return NFC_Unsupport;
 }
 
-#endif //NFC_READER_DEVICE_ST25R95
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95

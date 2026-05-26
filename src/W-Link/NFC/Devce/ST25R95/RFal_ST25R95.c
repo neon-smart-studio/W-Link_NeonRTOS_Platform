@@ -286,7 +286,6 @@ void RFal_SetObsvMode(uint32_t txMode, uint32_t rxMode)
   return;
 }
 
-
 /*******************************************************************************/
 void RFal_GetObsvMode(uint8_t *txMode, uint8_t *rxMode)
 {
@@ -535,8 +534,6 @@ NFC_OpResult RFal_FieldOff(void)
   return (ST25R95_Field_Off());
 }
 
-
-
 /*******************************************************************************/
 NFC_OpResult RFal_StartTransceive(const RFal_TransceiveContext *ctx)
 {
@@ -586,20 +583,17 @@ NFC_OpResult RFal_StartTransceive(const RFal_TransceiveContext *ctx)
   return NFC_WrongState;
 }
 
-
 /*******************************************************************************/
 bool RFal_IsTransceiveInTx(void)
 {
   return ((gRFAL.TxRx.state >= RFAL_TXRX_STATE_TX_IDLE) && (gRFAL.TxRx.state < RFAL_TXRX_STATE_RX_IDLE));
 }
 
-
 /*******************************************************************************/
 bool RFal_IsTransceiveInRx(void)
 {
   return (gRFAL.TxRx.state >= RFAL_TXRX_STATE_RX_IDLE);
 }
-
 
 /*******************************************************************************/
 NFC_OpResult RFal_TransceiveBlockingTx(uint8_t *txBuf, uint16_t txBufLen, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *actLen, uint32_t flags, uint32_t fwt)
@@ -629,7 +623,6 @@ NFC_OpResult RFal_TransceiveBlockingRx(void)
   return ret;
 }
 
-
 /*******************************************************************************/
 NFC_OpResult RFal_TransceiveBlockingTxRx(uint8_t *txBuf, uint16_t txBufLen, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *actLen, uint32_t flags, uint32_t fwt)
 {
@@ -650,7 +643,6 @@ NFC_OpResult RFal_TransceiveBlockingTxRx(uint8_t *txBuf, uint16_t txBufLen, uint
 
   return ret;
 }
-
 
 /*******************************************************************************/
 static NFC_OpResult RFal_RunTransceiveWorker(void)
@@ -679,7 +671,6 @@ NFC_OpResult RFal_GetTransceiveStatus(void)
   return ((gRFAL.TxRx.state == RFAL_TXRX_STATE_IDLE) ? gRFAL.TxRx.status : NFC_Busy);
 }
 
-
 /*******************************************************************************/
 NFC_OpResult RFal_GetTransceiveRSSI(uint16_t *rssi)
 {
@@ -691,7 +682,6 @@ bool RFal_IsTransceiveSubcDetected(void)
 {
   return false;
 }
-
 
 /*******************************************************************************/
 void RFal_Worker(void)
@@ -994,7 +984,6 @@ NFC_OpResult RFal_ISO14443ATransceiveShortFrame(RFal_14443AShortFrameCmd txCmd, 
   return ret;
 }
 
-
 /*******************************************************************************/
 NFC_OpResult RFal_ISO14443ATransceiveAnticollisionFrame(uint8_t *buf, uint8_t *bytesToSend, uint8_t *bitsToSend, uint16_t *rxLength, uint32_t fwt)
 {
@@ -1013,8 +1002,6 @@ NFC_OpResult RFal_ISO14443ATransceiveAnticollisionFrame(uint8_t *buf, uint8_t *b
 
   return ret;
 }
-
-
 
 /*******************************************************************************/
 NFC_OpResult RFal_ISO14443AStartTransceiveAnticollisionFrame(uint8_t *buf, uint8_t *bytesToSend, uint8_t *bitsToSend, uint16_t *rxLength, uint32_t fwt)
@@ -1067,7 +1054,6 @@ NFC_OpResult RFal_ISO14443AStartTransceiveAnticollisionFrame(uint8_t *buf, uint8
 
   return NFC_OK;
 }
-
 
 /*******************************************************************************/
 NFC_OpResult RFal_ISO14443AGetTransceiveAnticollisionFrameStatus(void)
@@ -1194,7 +1180,6 @@ NFC_OpResult RFal_FeliCaPoll(RFal_FeliCaPollSlots slots, uint16_t sysCode, uint8
   return ret;
 }
 
-
 /*******************************************************************************/
 NFC_OpResult RFal_StartFeliCaPoll(RFal_FeliCaPollSlots slots, uint16_t sysCode, uint8_t reqCode, RFal_FeliCaPollRes *pollResList, uint8_t pollResListSize, uint8_t *devicesDetected, uint8_t *collisionsDetected)
 {
@@ -1250,7 +1235,6 @@ NFC_OpResult RFal_StartFeliCaPoll(RFal_FeliCaPollSlots slots, uint16_t sysCode, 
 
   return NFC_OK;
 }
-
 
 /*******************************************************************************/
 NFC_OpResult RFal_GetFeliCaPollStatus(void)
@@ -1396,7 +1380,6 @@ static NFC_OpResult RFal_RunListenModeWorker(void)
   return (retCode);
 }
 
-
 /*******************************************************************************/
 NFC_OpResult RFal_ListenStop(void)
 {
@@ -1435,7 +1418,6 @@ NFC_OpResult RFal_ListenSleepStart(RFal_LmState sleepSt, uint8_t *rxBuf, uint16_
   return retCode;
 }
 
-
 /*******************************************************************************/
 RFal_LmState RFal_ListenGetState(bool *dataFlag, RFal_BitRate *lastBR)
 {
@@ -1459,7 +1441,6 @@ RFal_LmState RFal_ListenGetState(bool *dataFlag, RFal_BitRate *lastBR)
 
   return (state);
 }
-
 
 /*******************************************************************************/
 NFC_OpResult RFal_ListenSetState(RFal_LmState newSt)
@@ -1576,20 +1557,17 @@ NFC_OpResult RFal_WakeUpModeStart(const RFal_WakeUpConfig *config)
   return NFC_OK;
 }
 
-
 /*******************************************************************************/
 bool RFal_WakeUpModeIsEnabled(void)
 {
   return NFC_Unsupport; /* NFC_Unsupport*/
 }
 
-
 /*******************************************************************************/
 NFC_OpResult RFal_WakeUpModeGetInfo(bool force, RFal_WakeUpInfo *info)
 {
   return NFC_Unsupport; /* NFC_Unsupport*/
 }
-
 
 /*******************************************************************************/
 bool RFal_WakeUpModeHasWoke(void)
@@ -1615,7 +1593,6 @@ NFC_OpResult RFal_WakeUpModeStop(void)
   ST25R95_IO_SPI_Command_Echo();
   return NFC_OK;
 }
-
 
 /*******************************************************************************/
 static NFC_OpResult RFal_RunWakeUpModeWorker(void)

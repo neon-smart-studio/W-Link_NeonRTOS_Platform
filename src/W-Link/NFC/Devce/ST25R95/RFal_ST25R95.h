@@ -79,7 +79,7 @@
 typedef struct {
   RFal_TransceiveState     state;       /*!< Current transceive state                            */
   RFal_TransceiveState     lastState;   /*!< Last transceive state (debug purposes)              */
-  NFC_OpResult              status;      /*!< Current status/error of the transceive              */
+  NFC_OpResult             status;      /*!< Current status/error of the transceive              */
 
   RFal_TransceiveContext   ctx;         /*!< The transceive context given by the caller          */
 } RFal_TxRx;

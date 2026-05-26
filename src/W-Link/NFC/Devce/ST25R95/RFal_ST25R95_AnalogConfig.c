@@ -37,6 +37,7 @@
  ******************************************************************************/
 
 #include <stddef.h>
+#include <string.h>
 
 #include "ST25R95_Def.h"
 
@@ -191,7 +192,7 @@ NFC_OpResult RFal_AnalogConfig_Set(RFal_AnalogConfigId configId)
 
   } /* while(found Analog Config Id) */
 
-  return op_status;
+  return NFC_OK;
 }
 
 #endif //CONFIG_NFC_READER_DEVICE_ST25R95

@@ -858,17 +858,14 @@ void RFal_TransceiveRx(void)
         /*******************************************************************************/
         /* In case of Incomplete byte append the residual bits                         */
         /*******************************************************************************/
-        if ((retCode >= ST25R95_ERR_INCOMPLETE_BYTE_01) && (retCode <= ST25R95_ERR_INCOMPLETE_BYTE_07)) {
-          (*gRFAL.TxRx.ctx.rxRcvdLen) += (retCode - ST25R95_ERR_INCOMPLETE_BYTE);
+        if ((retCode <= NFC_ImcompleteByte_01) && (retCode >= NFC_ImcompleteByte_07)) {
+          (*gRFAL.TxRx.ctx.rxRcvdLen) += (NFC_ImcompleteByte_00 - retCode);
 
           if ((*gRFAL.TxRx.ctx.rxRcvdLen) > 0) {
             (*gRFAL.TxRx.ctx.rxRcvdLen) -= RFAL_BITS_IN_BYTE;
           }
-
-          retCode = NFC_ImcompleteByte;
         }
       }
-
 
       /*******************************************************************************/
       /* Execute Post Transceive Callback                                            */

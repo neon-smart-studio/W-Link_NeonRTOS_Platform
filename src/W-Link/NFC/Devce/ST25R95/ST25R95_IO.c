@@ -792,14 +792,28 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx()
                 switch(errno)
                 {
                   case ST25R95_ERR_INCOMPLETE_BYTE:
+                    op_status = NFC_ImcompleteByte_00;
+                    break;
                   case ST25R95_ERR_INCOMPLETE_BYTE_01:
+                    op_status = NFC_ImcompleteByte_01;
+                    break;
                   case ST25R95_ERR_INCOMPLETE_BYTE_02:
+                    op_status = NFC_ImcompleteByte_02;
+                    break;
                   case ST25R95_ERR_INCOMPLETE_BYTE_03:
+                    op_status = NFC_ImcompleteByte_03;
+                    break;
                   case ST25R95_ERR_INCOMPLETE_BYTE_04:
+                    op_status = NFC_ImcompleteByte_04;
+                    break;
                   case ST25R95_ERR_INCOMPLETE_BYTE_05:
+                    op_status = NFC_ImcompleteByte_05;
+                    break;
                   case ST25R95_ERR_INCOMPLETE_BYTE_06:
+                    op_status = NFC_ImcompleteByte_06;
+                    break;
                   case ST25R95_ERR_INCOMPLETE_BYTE_07:
-                    op_status = NFC_ImcompleteByte;
+                    op_status = NFC_ImcompleteByte_07;
                     break;
                 }
             }

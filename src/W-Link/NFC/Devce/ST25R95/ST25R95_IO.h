@@ -198,7 +198,7 @@ NFC_OpResult ST25R95_IO_SPI_Command_Echo(void);
 NFC_OpResult ST25R95_IO_SPI_Send_Transmit_Flag(ST25R95_Protocol protocol, uint8_t transmitFlag);
 NFC_OpResult ST25R95_IO_SPI_Send_Data(uint8_t *buf, uint8_t bufLen, ST25R95_Protocol protocol, uint32_t flags);
 NFC_OpResult ST25R95_IO_SPI_PrepareRx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes);
-NFC_OpResult ST25R95_IO_SPI_Complete_Rx();
+NFC_OpResult ST25R95_IO_SPI_Complete_Rx(uint8_t* p_errno);
 NFC_OpResult ST25R95_IO_SPI_Idle(uint8_t dacDataL, uint8_t dacDataH, uint8_t WUPeriod);
 NFC_OpResult ST25R95_IO_SPI_Get_Idle_Response(void);
 NFC_OpResult ST25R95_IO_SPI_nIRQ_IN_Pulse(void);

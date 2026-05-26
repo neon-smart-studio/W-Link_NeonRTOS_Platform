@@ -848,7 +848,8 @@ void RFal_TransceiveRx(void)
 
     /*******************************************************************************/
     case RFAL_TXRX_STATE_RX_READ_DATA:
-      retCode = ST25R95_IO_SPI_Complete_Rx();
+      uint8_t errno;
+      retCode = ST25R95_IO_SPI_Complete_Rx(&errno);
       /* Re-Start FDTPoll SW timer */
       RFal_TimerStart(gRFAL.tmr.FDTPoll, (RFAL_ST25R95_SW_TMR_MIN_1MS + RFal_Conv1fcToMs(gRFAL.timings.FDTPoll)));
 
@@ -858,14 +859,17 @@ void RFal_TransceiveRx(void)
         /*******************************************************************************/
         /* In case of Incomplete byte append the residual bits                         */
         /*******************************************************************************/
-        if ((retCode <= NFC_ImcompleteByte_01) && (retCode >= NFC_ImcompleteByte_07)) {
-          (*gRFAL.TxRx.ctx.rxRcvdLen) += (NFC_ImcompleteByte_00 - retCode);
+        if ((errno >= ST25R95_ERR_INCOMPLETE_BYTE_01) && (errno <= ST25R95_ERR_INCOMPLETE_BYTE_07)) {
+          (*gRFAL.TxRx.ctx.rxRcvdLen) += (errno - ST25R95_ERR_INCOMPLETE_BYTE);
 
           if ((*gRFAL.TxRx.ctx.rxRcvdLen) > 0) {
             (*gRFAL.TxRx.ctx.rxRcvdLen) -= RFAL_BITS_IN_BYTE;
           }
+
+          retCode = NFC_ImcompleteByte;
         }
       }
+
 
       /*******************************************************************************/
       /* Execute Post Transceive Callback                                            */
@@ -1360,7 +1364,7 @@ static NFC_OpResult RFal_RunListenModeWorker(void)
     return (NFC_OK);
   }
 
-  retCode = ST25R95_IO_SPI_Complete_Rx(
+  retCode = ST25R95_IO_SPI_Prepare_Rx(
     gRFAL.protocol,
     gRFAL.Lm.rxBuf,
     RFal_ConvBitsToBytes(gRFAL.Lm.rxBufLen),
@@ -1368,6 +1372,7 @@ static NFC_OpResult RFal_RunListenModeWorker(void)
     (gRFAL.TxRx.ctx.flags & RFAL_TXRX_FLAGS_CRC_RX_KEEP) != RFAL_TXRX_FLAGS_CRC_RX_KEEP,
     gRFAL.RxInformationBytes
   );
+  retCode = ST25R95_IO_SPI_Complete_Rx(NULL);
   if (!((retCode == NFC_LinkLoss) || ((retCode == NFC_OK) && (gRFAL.Lm.rxLen == 0)))) {
     *gRFAL.Lm.rxLen   = RFal_ConvBytesToBits(*gRFAL.Lm.rxLen);
     gRFAL.Lm.dataFlag = true;

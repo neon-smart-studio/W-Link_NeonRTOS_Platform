@@ -563,7 +563,7 @@ NFC_OpResult ST25R95_IO_SPI_PrepareRx(ST25R95_Protocol protocol, uint8_t *rxBuf,
     return NFC_OK;
 }
 
-NFC_OpResult ST25R95_IO_SPI_Complete_Rx()
+NFC_OpResult ST25R95_IO_SPI_Complete_Rx(uint8_t* p_errno)
 {
     hwGPIO_OpResult gpio_op_status;
     hwSPI_OpResult spi_op_status;
@@ -575,8 +575,8 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx()
     uint16_t rcvdLen;
     uint16_t additionalRespBytesNb = 1;
 
-   uint8_t BufCRC[2];                   /*!< BufCRC                          */
-   uint8_t NFCIP1_SoD[1];               /*!< NFCIP1_SoD                      */
+    uint8_t BufCRC[2];                   /*!< BufCRC                          */
+    uint8_t NFCIP1_SoD[1];               /*!< NFCIP1_SoD                      */
 
     gpio_op_status = GPIO_Pin_Write(ST25R95_GPIO_CS_PIN, 0);
     if(gpio_op_status<hwGPIO_OK)
@@ -649,6 +649,11 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx()
       default:
         op_status = NFC_System;
         break;
+    }
+
+    if(p_errno!=NULL)
+    {
+        *p_errno = Result;
     }
 
     if ((op_status != NFC_OK) && (len != 0)) {
@@ -789,33 +794,12 @@ NFC_OpResult ST25R95_IO_SPI_Complete_Rx()
             {
                 uint8_t errno = ST25R95_ERR_INCOMPLETE_BYTE + ((st25r95SPIRxCtx.additionalRespBytes[0] & 0xFU) % 8U);
 
-                switch(errno)
+                if(p_errno!=NULL)
                 {
-                  case ST25R95_ERR_INCOMPLETE_BYTE:
-                    op_status = NFC_ImcompleteByte_00;
-                    break;
-                  case ST25R95_ERR_INCOMPLETE_BYTE_01:
-                    op_status = NFC_ImcompleteByte_01;
-                    break;
-                  case ST25R95_ERR_INCOMPLETE_BYTE_02:
-                    op_status = NFC_ImcompleteByte_02;
-                    break;
-                  case ST25R95_ERR_INCOMPLETE_BYTE_03:
-                    op_status = NFC_ImcompleteByte_03;
-                    break;
-                  case ST25R95_ERR_INCOMPLETE_BYTE_04:
-                    op_status = NFC_ImcompleteByte_04;
-                    break;
-                  case ST25R95_ERR_INCOMPLETE_BYTE_05:
-                    op_status = NFC_ImcompleteByte_05;
-                    break;
-                  case ST25R95_ERR_INCOMPLETE_BYTE_06:
-                    op_status = NFC_ImcompleteByte_06;
-                    break;
-                  case ST25R95_ERR_INCOMPLETE_BYTE_07:
-                    op_status = NFC_ImcompleteByte_07;
-                    break;
+                    *p_errno = errno;
                 }
+
+                op_status = NFC_ImcompleteByte;
             }
             else if (ST25R95_IS_PROT_ISO14443A_COLLISION_ERR(st25r95SPIRxCtx.additionalRespBytes[0]))
             {

@@ -292,7 +292,7 @@ int program_IFR(const IFR_config_TypeDef *ifr_image)
   * Erase & Flashing IFR sectors
   ************************************************************************/
 #ifndef BLUENRG_MS
-  Osal_MemCpy(&ifr_data[SECTOR_SIZE-IFR_SIZE], ifr_image, IFR_SIZE);
+  memcpy(&ifr_data[SECTOR_SIZE-IFR_SIZE], ifr_image, IFR_SIZE);
 #endif
   num_erase_retries = 0;
   while (num_erase_retries++ < MAX_ERASE_RETRIES) {

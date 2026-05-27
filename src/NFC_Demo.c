@@ -65,18 +65,6 @@
 ******************************************************************************
 */
 
-#define SPI_MOSI D11
-#define SPI_MISO D12
-#define SPI_SCK D13
-#define CS_PIN D10
-#define LED_A_PIN D7
-#define LED_B_PIN D6
-#define LED_F_PIN D5
-#define LED_V_PIN D4
-#define IRQ_IN_PIN D8
-#define IRQ_OUT_PIN D2
-#define INTERFACE_PIN D9
-
 /* Definition of possible states the demo state machine could have */
 #define DEMO_ST_NOTINIT               0  /*!< Demo State:  Not initialized */
 #define DEMO_ST_START_DISCOVERY       1  /*!< Demo State:  Start Discovery */
@@ -205,20 +193,6 @@ static const NDef_Type_DumpTable typeDumpTable[] = {
 };
 
 static char *hex2Str(unsigned char *data, size_t dataLen);
-
-static void ndefShowDemoUsage()
-{
-  uint32_t i;
-
-  UART_Printf("Use the User button to cycle among the different modes:\r\n");
-  for (i = 0; i < sizeof(ndefDemoFeatureDescription)/sizeof(ndefDemoFeatureDescription[0]); i++) {
-    UART_Printf((char *)ndefDemoFeatureDescription[i]);
-    UART_Printf("\r\n");
-  }
-  UART_Printf("In Write or Format mode (menu 2, 3 or 4), the demo returns to Read mode (menu 1) if no tag detected after ");
-  UART_Printf("%d", (NDEF_WRITE_FORMAT_TIMEOUT / 1000));
-  UART_Printf(" seconds\r\n\n");
-}
 
 void demoP2P(void)
 {
@@ -1371,10 +1345,6 @@ char *hex2Str(unsigned char *data, size_t dataLen)
 static void NFC_Reader_Task(void *arg)
 {
   NFC_OpResult err;
-
-  UART_Printf("Welcome to X-NUCLEO-NFC03A1\n");
-
-  ndefShowDemoUsage();
 
   err = RFal_NFC_Init();
   if( err == NFC_OK ) {

@@ -219,7 +219,6 @@ typedef enum {
   RFAL_MODE_LISTEN_ACTIVE_P2P      = 13    /*!< Mode to perform as Active P2P (ISO18092) Target                  */
 } RFal_Mode;
 
-
 /*! RFal Bit rates    */
 typedef enum {
   RFAL_BR_106                      = 0,    /*!< Bit Rate 106 kbit/s (fc/128)                                     */
@@ -238,14 +237,12 @@ typedef enum {
   RFAL_BR_KEEP                     = 0xFF  /*!< Value indicating to keep the same previous bit rate              */
 } RFal_BitRate;
 
-
 /*! RFal Compliance modes for upper modules  */
 typedef enum {
   RFAL_COMPLIANCE_MODE_NFC,                /*!< Perform with NFC Forum 1.1 compliance                            */
   RFAL_COMPLIANCE_MODE_EMV,                /*!< Perform with EMVCo compliance                                    */
   RFAL_COMPLIANCE_MODE_ISO                 /*!< Perform with ISO10373 compliance                                 */
 } RFal_ComplianceMode;
-
 
 /*! RFal main states flags    */
 typedef enum {

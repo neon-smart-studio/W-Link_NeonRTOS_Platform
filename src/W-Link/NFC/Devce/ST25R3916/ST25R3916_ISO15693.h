@@ -1,0 +1,99 @@
+/******************************************************************************
+  * \attention
+  *
+  * <h2><center>&copy; COPYRIGHT 2021 STMicroelectronics</center></h2>
+  *
+  * Licensed under ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT (the "License");
+  * You may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at:
+  *
+  *        www.st.com/mix_myliberty
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied,
+  * AND SPECIFICALLY DISCLAIMING THE IMPLIED WARRANTIES OF MERCHANTABILITY,
+  * FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  *
+******************************************************************************/
+/******************************************************************************
+ * This file contains code derived from or based on software provided by
+ * STMicroelectronics.
+ *
+ * Original source:
+ * STMicroelectronics X-CUBE / BSP / Middleware component
+ *
+ * Modifications:
+ * Copyright (c) 2026 Neon Smart Studio
+ * Author: Neon / Neona
+ *
+ * Licensed under:
+ * - Original ST license: ST MIX MYLIBERTY SOFTWARE LICENSE AGREEMENT
+ * - Additional modifications may be licensed separately where applicable.
+ *
+ * The original ST copyright and license notice are preserved below.
+ ******************************************************************************/
+
+#ifndef ST25R3916_ISO15693
+#define ST25R3916_ISO15693
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "ST25R3916_Def.h"
+
+#define ISO15693_REQ_FLAG_TWO_SUBCARRIERS 0x01U   /*!< Flag indication that communication uses two subcarriers */
+#define ISO15693_REQ_FLAG_HIGH_DATARATE   0x02U   /*!< Flag indication that communication uses high bitrate    */
+#define ISO15693_MASK_FDT_LISTEN         (65)     /*!< t1min = 308,2us = 4192/fc = 65.5 * 64/fc                */
+
+/*! t1max = 323,3us = 4384/fc = 68.5 * 64/fc
+ *         12 = 768/fc unmodulated time of single subcarrior SoF */
+#define ISO15693_FWT (69 + 12)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*! Enum holding possible VCD codings  */
+typedef enum {
+  ISO15693_VCD_CODING_1_4,
+  ISO15693_VCD_CODING_1_256
+} ST25R3916_ISO15693_VcdCoding_t;
+
+/*! Enum holding possible VICC datarates */
+
+/*! Configuration parameter used by #iso15693PhyConfigure  */
+typedef struct {
+  ST25R3916_ISO15693_VcdCoding_t coding;           /*!< desired VCD coding                                       */
+  uint32_t                speedMode;    /*!< 0: normal mode, 1: 2^1 = x2 Fast mode, 2 : 2^2 = x4 mode, 3 : 2^3 = x8 mode - all rx pulse numbers and times are divided by 1,2,4,8 */
+} ST25R3916_ISO15693_PhyConfig_t;
+
+/*! Parameters how the stream mode should work */
+struct ST25R3916_ISO15693_StreamConfig {
+  uint8_t useBPSK;              /*!< 0: subcarrier, 1:BPSK */
+  uint8_t din;                  /*!< the divider for the in subcarrier frequency: fc/2^din  */
+  uint8_t dout;                 /*!< the divider for the in subcarrier frequency fc/2^dout */
+  uint8_t report_period_length; /*!< the length of the reporting period 2^report_period_length*/
+};
+
+NFC_OpResult ST25R3916_ISO15693_PhyConfigure(const ST25R3916_ISO15693_PhyConfig_t *config, const struct ST25R3916_ISO15693_StreamConfig **needed_stream_config);
+NFC_OpResult ST25R3916_ISO15693_PhyGetConfiguration(ST25R3916_ISO15693_PhyConfig_t *config);
+NFC_OpResult ST25R3916_ISO15693_VCDCode(uint8_t *buffer, uint16_t length, bool sendCrc, bool sendFlags, bool picopassMode,
+                                                     uint16_t *subbit_total_length, uint16_t *offset,
+                                                     uint8_t *outbuf, uint16_t outBufSize, uint16_t *actOutBufSize);
+NFC_OpResult ST25R3916_ISO15693_VICCDecode(const uint8_t *inBuf,
+                                                        uint16_t inBufLen,
+                                                        uint8_t *outBuf,
+                                                        uint16_t outBufLen,
+                                                        uint16_t *outBufPos,
+                                                        uint16_t *bitsBeforeCol,
+                                                        uint16_t ignoreBits,
+                                                        bool picopassMode);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* ST25R3916_ISO15693 */

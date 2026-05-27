@@ -75,6 +75,24 @@
 #define RFal_TimerStart(timer, time_ms)         (timer) = timerCalculateTimer((uint16_t)(time_ms)) /*!< Configures and starts the RTOX timer          */
 #define RFal_TimerisExpired(timer)              timerIsExpired(timer)          /*!< Checks if timer has expired                   */
 
+/*! RFal Bit rates    */
+typedef enum {
+  RFAL_BR_106                      = 0,    /*!< Bit Rate 106 kbit/s (fc/128)                                     */
+  RFAL_BR_212                      = 1,    /*!< Bit Rate 212 kbit/s (fc/64)                                      */
+  RFAL_BR_424                      = 2,    /*!< Bit Rate 424 kbit/s (fc/32)                                      */
+  RFAL_BR_848                      = 3,    /*!< Bit Rate 848 kbit/s (fc/16)                                      */
+  RFAL_BR_1695                     = 4,    /*!< Bit Rate 1695 kbit/s (fc/8)                                      */
+  RFAL_BR_3390                     = 5,    /*!< Bit Rate 3390 kbit/s (fc/4)                                      */
+  RFAL_BR_6780                     = 6,    /*!< Bit Rate 6780 kbit/s (fc/2)                                      */
+  RFAL_BR_13560                    = 7,    /*!< Bit Rate 13560 kbit/s (fc)                                       */
+  RFAL_BR_211p88                   = 0xE9, /*!< Bit Rate 211,88 kbit/s (fc/64) Fast Mode VICC->VCD               */
+  RFAL_BR_105p94                   = 0xEA, /*!< Bit Rate 105,94 kbit/s (fc/128) Fast Mode VICC->VCD              */
+  RFAL_BR_52p97                    = 0xEB, /*!< Bit Rate 52.97 kbit/s (fc/256) Fast Mode VICC->VCD               */
+  RFAL_BR_26p48                    = 0xEC, /*!< Bit Rate 26,48 kbit/s (fc/512) NFCV VICC->VCD & VCD->VICC 1of4   */
+  RFAL_BR_1p66                     = 0xED, /*!< Bit Rate 1,66 kbit/s (fc/8192) NFCV VCD->VICC 1of256             */
+  RFAL_BR_KEEP                     = 0xFF  /*!< Value indicating to keep the same previous bit rate              */
+} RFal_BitRate;
+
 /*! Struct that holds all involved on a Transceive including the context passed by the caller     */
 typedef struct {
   RFal_TransceiveState     state;       /*!< Current transceive state                            */

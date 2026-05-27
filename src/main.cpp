@@ -6,7 +6,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
-
+/*
 #include "SysCtrl/SysCtrl.h"
 #include "UART/UART.h"
 #include "I2C/I2C_Master.h"
@@ -17,13 +17,13 @@
 //#include "NFC/Devce/ST25R95//RFal_ST25R95.h"
 
 #include "Bluetooth/Bluetooth.h"
-
+*/
 #include "NeonRTOS.h"
-
+/*
 #include "GPIO/GPIO.h"
 
 #include "NFC_Demo.h"
-
+*/
 /*
 #define ENV_SERVICE_UUID      "42821a40-e477-11e2-82d0-0002a5d5c51b"
 #define TEMP_CHAR_UUID        "a32e5520-e477-11e2-a9e3-0002a5d5c51b"
@@ -298,12 +298,12 @@ void BLE_Task(void* p)
 }
 */
 int main(void) {
-    SysCtrl_Init();
+    //SysCtrl_Init();
 
     //__HAL_RCC_WWDG_CLK_DISABLE();  // 禁用窗口看門狗
     //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗
 
-    UART_Open(LOG_UART_INDEX, 115200, false);
+    //UART_Open(LOG_UART_INDEX, 115200, false);
 /*
     NeonRTOS_TaskCreate(
         Sensor_Task,
@@ -324,7 +324,7 @@ int main(void) {
         NULL
     );
 */
-    NFC_Demo_Init();
+    //NFC_Demo_Init();
 
     // 啟動 NeonRTOS 調度器
     NeonRTOS_start();

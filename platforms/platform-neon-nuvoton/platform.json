@@ -1,0 +1,36 @@
+{
+  "name": "neon-nuvoton",
+  "title": "Neon Nuvoton Platform",
+  "version": "0.1.0",
+  "description": "Custom PlatformIO support for Nuvoton NUC/M480/Numicro MCUs",
+
+  "frameworks": {
+    "cmsis": {
+      "script": "builder/frameworks/cmsis.py",
+      "description": "CMSIS + Nuvoton BSP"
+    }
+  },
+
+  "packages": {
+    "toolchain-gccarmnoneeabi": {
+      "type": "toolchain",
+      "owner": "platformio",
+      "version": "^1.100301.0"
+    },
+    "tool-openocd-nuvoton": {
+      "type": "tool",
+      "optional": false,
+      "version": "file://packages/tool-openocd-nuvoton"
+    },
+    "tool-jlink": {
+      "type": "uploader",
+      "optional": true,
+      "owner": "platformio",
+      "version": "^1.72000.0"
+    }
+  },
+
+  "boards": {
+    "nuc472": "boards/nuc472.json"
+  }
+}

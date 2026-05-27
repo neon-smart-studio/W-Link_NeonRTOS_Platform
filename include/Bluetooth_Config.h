@@ -1,0 +1,5 @@
+
+#ifndef BLUETOOTH_CONFIG_H
+#define BLUETOOTH_CONFIG_H
+
+#endif //BLUETOOTH_CONFIG_H

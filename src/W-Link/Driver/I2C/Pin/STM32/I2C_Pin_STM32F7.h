@@ -48,8 +48,8 @@ static const I2C_Pin_Def I2C_Pin_Def_Table[hwI2C_Index_MAX][I2C_Pinset_MAX] =
 #if defined (I2C1_BASE)
     /* ================= I2C1 (I2C0) ================= */
     {
-        { hwGPIO_Pin_B6, hwGPIO_Pin_B9 },
-        { hwGPIO_Pin_B8, hwGPIO_Pin_B7 },
+        { hwGPIO_Pin_B6, hwGPIO_Pin_B7 },  // DEFAULT
+        { hwGPIO_Pin_B8, hwGPIO_Pin_B9 },  // ALT
     },
 #endif
 #if defined (I2C2_BASE)

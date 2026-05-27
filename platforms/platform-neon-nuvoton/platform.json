@@ -20,7 +20,7 @@
     "tool-openocd-nuvoton": {
       "type": "tool",
       "optional": false,
-      "version": "file://packages/tool-openocd-nuvoton"
+      "version": "https://github.com/neon-smart-studio/tool-openocd-nuvoton.git"
     },
     "tool-jlink": {
       "type": "uploader",

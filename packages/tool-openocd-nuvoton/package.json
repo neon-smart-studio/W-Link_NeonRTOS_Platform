@@ -1,8 +1,0 @@
-{
-  "name": "tool-openocd-nuvoton",
-  "version": "1.0.0",
-  "description": "Nuvoton OpenOCD Tool",
-  "system": [
-    "windows_amd64"
-  ]
-}

@@ -515,4 +515,4 @@ hwGPIO_OpResult GPIO_Interrupt_Pin_Read(hwGPIO_Int_Pin pin, bool* level)
     return hwGPIO_OK;
 }
 
-#endif
+#endif //DEVICE_RP2

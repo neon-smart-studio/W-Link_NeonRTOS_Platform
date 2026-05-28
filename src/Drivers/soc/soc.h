@@ -2,24 +2,23 @@
 #ifndef SOC_H
 #define SOC_H
 
-#ifdef DEVICE_TM4C1294
-#include "inc/hw_ints.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_emac.h"
-#include "inc/hw_types.h"
-#include "driverlib/rom.h"
-#include "driverlib/rom_map.h"
-#include "driverlib/debug.h"
-#include "driverlib/emac.h"
-#include "driverlib/pin_map.h"
-#include "driverlib/gpio.h"
-#include "driverlib/interrupt.h"
-#include "driverlib/uart.h"
-#include "driverlib/i2c.h"
-#include "driverlib/pwm.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/flash.h"
-#endif //DEVICE_TM4C1294
+#if defined (NUC442) || defined (NUC472)
+#include "NUC472_442.h"
+#include "sys.h"
+#include "clk.h"
+#include "gpio.h"
+#include "uart.h"
+#include "spi.h"
+#include "i2c.h"
+#include "rtc.h"
+#include "adc.h"
+#include "eadc.h"
+#define DEVICE_NUVOTON
+#endif //NUC442 || NUC472
+
+#if defined (RP2040) || defined (RP2350)
+#define DEVICE_RP2
+#endif
 
 #if defined (STM32C011xx) || defined (STM32C031xx) || \
     defined (STM32C051xx) || defined (STM32C071xx) || \
@@ -397,8 +396,23 @@
 #define DEVICE_STM32
 #endif
 
-#if defined (RP2040) || defined (RP2350)
-#define DEVICE_RP2
-#endif
+#ifdef DEVICE_TM4C1294
+#include "inc/hw_ints.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_emac.h"
+#include "inc/hw_types.h"
+#include "driverlib/rom.h"
+#include "driverlib/rom_map.h"
+#include "driverlib/debug.h"
+#include "driverlib/emac.h"
+#include "driverlib/pin_map.h"
+#include "driverlib/gpio.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/uart.h"
+#include "driverlib/i2c.h"
+#include "driverlib/pwm.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/flash.h"
+#endif //DEVICE_TM4C1294
 
 #endif //SOC_H

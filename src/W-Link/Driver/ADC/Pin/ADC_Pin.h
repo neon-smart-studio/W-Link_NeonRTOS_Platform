@@ -2,6 +2,12 @@
 #ifndef ADC_PIN_H
 #define ADC_PIN_H
 
+#include "soc.h"
+
+#ifdef DEVICE_NUVOTON
+#include "Nuvoton/ADC_Pin_NUC4x2.h"
+#endif
+
 #ifdef DEVICE_STM32
 #include "STM32/ADC_Pin_STM32.h"
 #endif

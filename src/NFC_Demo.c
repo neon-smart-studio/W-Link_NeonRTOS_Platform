@@ -36,8 +36,6 @@
  * The original ST copyright and license notice are preserved below.
  ******************************************************************************/
 
-#if 0
-
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -1590,5 +1588,3 @@ void NFC_Demo_Init(void) {
     );
 }
 //
-
-#endif

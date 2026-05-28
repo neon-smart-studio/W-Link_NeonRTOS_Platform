@@ -2,6 +2,21 @@
 #ifndef ADC_CHANNEL_H
 #define ADC_CHANNEL_H
 
+#ifdef DEVICE_NUVOTON
+typedef enum hwADC_Channel_Index_t
+{
+    hwADC_Channel_Index_0 = 0,
+    hwADC_Channel_Index_1,
+    hwADC_Channel_Index_2,
+    hwADC_Channel_Index_3,
+    hwADC_Channel_Index_4,
+    hwADC_Channel_Index_5,
+    hwADC_Channel_Index_6,
+    hwADC_Channel_Index_7,
+    hwADC_Channel_Index_MAX
+}hwADC_Channel_Index;
+#endif // DEVICE_NUVOTON
+
 #ifdef DEVICE_STM32
 typedef enum hwADC_Channel_Index_t
 {

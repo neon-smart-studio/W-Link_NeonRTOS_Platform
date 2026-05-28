@@ -2,6 +2,8 @@
 #ifndef UART_PIN_H
 #define UART_PIN_H
 
+#include "soc.h"
+
 #ifdef DEVICE_STM32
 #include "STM32/UART_Pin_STM32.h"
 #endif

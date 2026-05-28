@@ -2,6 +2,28 @@
 #ifndef I2C_INDEX_H
 #define I2C_INDEX_H
 
+#ifdef DEVICE_NUVOTON
+typedef enum hwI2C_Index_t
+{
+#if defined (I2C0_BASE)
+  hwI2C_Index_0 = 0,
+#endif
+#if defined (I2C1_BASE)
+  hwI2C_Index_1,
+#endif
+#if defined (I2C2_BASE)
+  hwI2C_Index_2,
+#endif
+#if defined (I2C3_BASE)
+  hwI2C_Index_3,
+#endif
+#if defined (I2C4_BASE)
+  hwI2C_Index_4,
+#endif
+  hwI2C_Index_MAX,
+}hwI2C_Index;
+#endif // DEVICE_NUVOTON
+
 #ifdef DEVICE_STM32
 typedef enum hwI2C_Index_t
 {

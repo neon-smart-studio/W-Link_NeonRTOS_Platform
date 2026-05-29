@@ -2,6 +2,14 @@
 #ifndef RTC_INDEX_H
 #define RTC_INDEX_H
 
+#ifdef DEVICE_NUVOTON
+typedef enum hwRTC_Index_t
+{
+  hwRTC_Index_0 = 0,
+  hwRTC_Index_MAX,
+}hwRTC_Index;
+#endif // DEVICE_NUVOTON
+
 #ifdef DEVICE_STM32
 typedef enum hwRTC_Index_t
 {

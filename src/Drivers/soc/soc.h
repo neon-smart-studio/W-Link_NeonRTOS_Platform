@@ -12,8 +12,8 @@
 #include "i2c.h"
 #include "rtc.h"
 #include "adc.h"
-#include "eadc.h"
 #include "pwm.h"
+#include "rtc.h"
 #define DEVICE_NUVOTON
 #endif //NUC442 || NUC472
 

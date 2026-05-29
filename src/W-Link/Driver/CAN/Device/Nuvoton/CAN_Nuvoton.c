@@ -193,7 +193,7 @@ hwCAN_OpResult CAN_Read(hwCAN_Index index, uint8_t *buf, uint32_t timeout)
     if(!CAN_Init_Status[index])
         return hwCAN_NotInit;
 
-    if(NeonRTOS_QueueReceive(&CAN_RxQueue[index], buf, timeout) != NeonRTOS_OK)
+    if(NeonRTOS_MsgQRead(&CAN_RxQueue[index], buf, timeout) != NeonRTOS_OK)
         return hwCAN_Timeout;
 
     return hwCAN_OK;

@@ -2,6 +2,13 @@
 #ifndef DAC_CHANNEL_H
 #define DAC_CHANNEL_H
 
+#ifdef DEVICE_NUVOTON
+typedef enum hwDAC_Channel_Index_t
+{
+  hwDAC_Channel_Index_MAX,
+}hwDAC_Channel_Index;
+#endif
+
 #ifdef DEVICE_STM32
 typedef enum hwDAC_Channel_Index_t
 {

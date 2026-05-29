@@ -261,8 +261,8 @@ tBleStatus aci_hal_get_anchor_period(uint32_t *anchor_period, uint32_t *max_free
   if(rp.status)
     return rp.status;
 
-  *anchor_period = btohl(rp.anchor_period);
-  *max_free_slot = btohl(rp.max_free_slot);
+  *anchor_period = rp.anchor_period;
+  *max_free_slot = rp.max_free_slot;
 
   return 0;
 }

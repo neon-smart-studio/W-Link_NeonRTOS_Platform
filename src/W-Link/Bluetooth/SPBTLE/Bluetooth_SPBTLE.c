@@ -49,6 +49,7 @@
 #include "HCI/Controller/bluenrg_hal_aci.h"
 #include "HCI/Controller/bluenrg_gap_aci.h"
 #include "HCI/Controller/bluenrg_gatt_aci.h"
+#include "HCI/Controller/bluenrg_updater_aci.h"
 
 #include "sm.h"
 
@@ -181,6 +182,18 @@ bool BlueNRG_DataPresent(void)
     GPIO_Interrupt_Pin_Read(SPBTLE_IRQ_PIN, &level);
 
     return level ? 1 : 0;
+}
+
+void BlueNRG_HW_Bootloader(void)
+{
+    // Reset BlueNRG SPI interface
+    BlueNRG_RST();
+
+    // Send an ACI command to reboot BlueNRG in bootloader mode
+    // The safest way to get in bootloader mode is keeping high
+    // the interrupt pin during reset, but this would require many
+    // changes to the current mbed driver
+    aci_updater_start();
 }
 
 static Bluetooth_OpResult SPBTLE_Map_SPI_Result(hwSPI_OpResult result)

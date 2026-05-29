@@ -26,6 +26,8 @@
 
 #include "hci_const.h"
 
+#include "Bluetooth/SPBTLE/Bluetooth_SPBTLE.h"
+
 #ifdef __cplusplus
  extern "C" {
 #endif

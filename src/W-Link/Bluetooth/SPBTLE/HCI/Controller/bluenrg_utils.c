@@ -1,5 +1,6 @@
 
 #include <stdint.h>
+#include <string.h>
 
 #include "../Utils/ble_status.h"
 
@@ -9,6 +10,8 @@
 
 #include "bluenrg_aci.h"
 #include "bluenrg_utils.h"
+
+#include "Bluetooth/SPBTLE/Bluetooth_SPBTLE.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -210,9 +213,15 @@ int read_IFR(uint8_t *data)
 void parse_IFR_data_config(const uint8_t data[64], IFR_config2_TypeDef *IFR_config)
 {
   IFR_config->stack_mode = data[0];
-  IFR_config->slave_sca_ppm = LE_TO_HOST_16(data+28);
+  IFR_config->slave_sca_ppm = (uint16_t) ( ((uint16_t) \
+                                           *((uint8_t *)(data+28))) | \
+                                          ((uint16_t) \
+                                           *((uint8_t *)(data+28) + 1) << 8 ) );
   IFR_config->master_sca = data[30];
-  IFR_config->hs_startup_time = LE_TO_HOST_16(data+32);
+  IFR_config->hs_startup_time = (uint16_t) ( ((uint16_t) \
+                                           *((uint8_t *)(data+32))) | \
+                                          ((uint16_t) \
+                                           *((uint8_t *)(data+32) + 1) << 8 ) );
   IFR_config->year = BCD_TO_INT(data[41]);
   IFR_config->month = BCD_TO_INT(data[42]);
   IFR_config->day = BCD_TO_INT(data[43]);
@@ -243,9 +252,9 @@ int IFR_validate(IFR_config2_TypeDef *IFR_config)
 void change_IFR_data_config(IFR_config2_TypeDef *IFR_config, uint8_t data[64])
 {
   data[0] = IFR_config->stack_mode;
-  HOST_TO_LE_16(data+28, IFR_config->slave_sca_ppm);
+  ( ((data+28)[0] =  (uint8_t) (IFR_config->slave_sca_ppm) ) , ((data+28)[1] =  (uint8_t) (IFR_config->slave_sca_ppm>>8) ) );
   data[30] = IFR_config->master_sca;
-  HOST_TO_LE_16(data+32, IFR_config->hs_startup_time);
+  ( ((data+32)[0] =  (uint8_t) (IFR_config->hs_startup_time) ) , ((data+32)[1] =  (uint8_t) (IFR_config->hs_startup_time>>8) ) );
   data[41] = INT_TO_BCD(IFR_config->year);
   data[42] = INT_TO_BCD(IFR_config->month);
   data[43] = INT_TO_BCD(IFR_config->day);

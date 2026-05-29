@@ -14,6 +14,7 @@
 *******************************************************************************/
 
 #include <stdint.h>
+#include <string.h>
 
 #include "../Utils/ble_status.h"
 
@@ -38,11 +39,11 @@ tBleStatus aci_l2cap_connection_parameter_update_request(uint16_t conn_handle, u
   uint8_t status;
   l2cap_conn_param_update_req_cp cp;
 
-  cp.conn_handle = htobs(conn_handle);
-  cp.interval_min = htobs(interval_min);
-  cp.interval_max = htobs(interval_max);
-  cp.slave_latency = htobs(slave_latency);
-  cp.timeout_multiplier = htobs(timeout_multiplier);
+  cp.conn_handle = conn_handle;
+  cp.interval_min = interval_min;
+  cp.interval_max = interval_max;
+  cp.slave_latency = slave_latency;
+  cp.timeout_multiplier = timeout_multiplier;
 
   memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
@@ -68,13 +69,13 @@ tBleStatus aci_l2cap_connection_parameter_update_response_IDB05A1(uint16_t conn_
   uint8_t status;
   l2cap_conn_param_update_resp_cp_IDB05A1 cp;
 
-  cp.conn_handle = htobs(conn_handle);
-  cp.interval_min = htobs(interval_min);
-  cp.interval_max = htobs(interval_max);
-  cp.slave_latency = htobs(slave_latency);
-  cp.timeout_multiplier = htobs(timeout_multiplier);
-  cp.min_ce_length = htobs(min_ce_length);
-  cp.max_ce_length = htobs(max_ce_length);
+  cp.conn_handle = conn_handle;
+  cp.interval_min = interval_min;
+  cp.interval_max = interval_max;
+  cp.slave_latency = slave_latency;
+  cp.timeout_multiplier = timeout_multiplier;
+  cp.min_ce_length = min_ce_length;
+  cp.max_ce_length = max_ce_length;
   cp.id = id;
   cp.accept = accept;
 
@@ -100,11 +101,11 @@ tBleStatus aci_l2cap_connection_parameter_update_response_IDB04A1(uint16_t conn_
   uint8_t status;
   l2cap_conn_param_update_resp_cp_IDB04A1 cp;
 
-  cp.conn_handle = htobs(conn_handle);
-  cp.interval_min = htobs(interval_min);
-  cp.interval_max = htobs(interval_max);
-  cp.slave_latency = htobs(slave_latency);
-  cp.timeout_multiplier = htobs(timeout_multiplier);
+  cp.conn_handle = conn_handle;
+  cp.interval_min = interval_min;
+  cp.interval_max = interval_max;
+  cp.slave_latency = slave_latency;
+  cp.timeout_multiplier = timeout_multiplier;
   cp.id = id;
   cp.accept = accept;
 

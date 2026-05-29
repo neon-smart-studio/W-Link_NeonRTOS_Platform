@@ -30,8 +30,6 @@ void CAN_TxMailbox0CompleteCallback(hwCAN_Index index)
 
 void CAN_RxFifo0MsgPendingCallback(hwCAN_Index index, uint8_t data[8])
 {
-    uint8_t data[8];
-
     if (index < hwCAN_Index_MAX)
         NeonRTOS_MsgQWrite(&CAN_RxQueue[index], data, NEONRT_NO_WAIT);
 }

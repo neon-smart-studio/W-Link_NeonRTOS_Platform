@@ -4,6 +4,10 @@
 
 #include "soc.h"
 
+#ifdef DEVICE_NUVOTON
+#include "Nuvoton/SPI_Pin_Nuvoton.h"
+#endif
+
 #ifdef DEVICE_STM32
 #include "STM32/SPI_Pin_STM32.h"
 #endif

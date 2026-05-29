@@ -1048,7 +1048,7 @@ Bluetooth_OpResult Bluetooth_DeInit(void)
         return SPBTLE_Map_GPIO_Result(gpio_op_status);
     }
 
-    gpio_op_status = GPIO_Interrupt_Pin_DeInit(SPBTLE_IRQ_PIN);
+    gpio_op_status = GPIO_Interrupt_DeInit(SPBTLE_IRQ_PIN);
     if(gpio_op_status < hwGPIO_OK)
     {
         return SPBTLE_Map_GPIO_Result(gpio_op_status);

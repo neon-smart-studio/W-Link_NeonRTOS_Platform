@@ -159,7 +159,7 @@ tBleStatus aci_hal_le_tx_test_packet_number(uint32_t *number_of_packets)
     return resp.status;
   }
 
-  *number_of_packets = btohl(resp.number_of_packets);
+  *number_of_packets = resp.number_of_packets;
 
   return 0;
 }
@@ -239,7 +239,7 @@ tBleStatus aci_hal_get_link_status(uint8_t link_status[8], uint16_t conn_handle[
 
   memcpy(link_status,rp.link_status,8);
   for(int i = 0; i < 8; i++)
-    conn_handle[i] = btohs(rp.conn_handle[i]);
+    conn_handle[i] = rp.conn_handle[i];
 
   return 0;
 }

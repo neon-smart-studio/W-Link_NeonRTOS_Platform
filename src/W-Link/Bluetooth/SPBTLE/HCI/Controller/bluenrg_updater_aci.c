@@ -14,6 +14,7 @@
 *******************************************************************************/
 
 #include <stdint.h>
+#include <string.h>
 
 #include "../Utils/ble_status.h"
 
@@ -34,7 +35,7 @@ tBleStatus aci_updater_start(void)
   struct hci_request rq;
   uint8_t status = 0;
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_UPDATER_START;
   rq.rparam = &status;
@@ -50,7 +51,7 @@ tBleStatus aci_updater_reboot(void)
   struct hci_request rq;
   uint8_t status = 0;
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_UPDATER_REBOOT;
   rq.rparam = &status;
@@ -66,9 +67,9 @@ tBleStatus aci_get_updater_version(uint8_t *version)
   struct hci_request rq;
   get_updater_version_rp resp;
 
-  Osal_MemSet(&resp, 0, sizeof(resp));
+  memset(&resp, 0, sizeof(resp));
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_GET_UPDATER_VERSION;
   rq.rparam = &resp;
@@ -87,9 +88,9 @@ tBleStatus aci_get_updater_buffer_size(uint8_t *buffer_size)
   struct hci_request rq;
   get_updater_bufsize_rp resp;
 
-  Osal_MemSet(&resp, 0, sizeof(resp));
+  memset(&resp, 0, sizeof(resp));
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_GET_UPDATER_BUFSIZE;
   rq.rparam = &resp;
@@ -108,7 +109,7 @@ tBleStatus aci_erase_blue_flag(void)
   struct hci_request rq;
   uint8_t status;
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_UPDATER_ERASE_BLUE_FLAG;
   rq.rparam = &status;
@@ -125,7 +126,7 @@ tBleStatus aci_reset_blue_flag(void)
   struct hci_request rq;
   uint8_t status;
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_UPDATER_RESET_BLUE_FLAG;
   rq.rparam = &status;
@@ -143,9 +144,9 @@ tBleStatus aci_updater_erase_sector(uint32_t address)
   updater_erase_sector_cp cp;
   uint8_t status;
 
-  cp.address = htobl(address);
+  cp.address = address;
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_UPDATER_ERASE_SECTOR;
   rq.cparam = &cp;
@@ -170,11 +171,11 @@ tBleStatus aci_updater_program_data_block(uint32_t address,
   if( len > sizeof(cp.data))
     return BLE_STATUS_INVALID_PARAMS;
 
-  cp.address = htobl(address);
-  cp.data_len = htobs(len);
-  Osal_MemCpy(cp.data, data, len);
+  cp.address = address;
+  cp.data_len = len;
+  memcpy(cp.data, data, len);
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_UPDATER_PROG_DATA_BLOCK;
   rq.cparam = &cp;
@@ -199,10 +200,10 @@ tBleStatus aci_updater_read_data_block(uint32_t address,
   if((data_len+1) > HCI_MAX_PAYLOAD_SIZE)
     return BLE_STATUS_INVALID_PARAMS;
 
-  cp.address = htobl(address);
-  cp.data_len = htobs(data_len);
+  cp.address = address;
+  cp.data_len = data_len;
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_UPDATER_READ_DATA_BLOCK;
   rq.cparam = &cp;
@@ -214,7 +215,7 @@ tBleStatus aci_updater_read_data_block(uint32_t address,
     return BLE_STATUS_TIMEOUT;
 
   // First byte is status
-  Osal_MemCpy(data, buffer+1, data_len);
+  memcpy(data, buffer+1, data_len);
 
   return buffer[0];
 }
@@ -227,12 +228,12 @@ tBleStatus aci_updater_calc_crc(uint32_t address,
   updater_calc_crc_cp cp;
   updater_calc_crc_rp resp;
 
-  Osal_MemSet(&resp, 0, sizeof(resp));
+  memset(&resp, 0, sizeof(resp));
 
-  cp.address = htobl(address);
+  cp.address = address;
   cp.num_sectors = num_sectors;
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_UPDATER_CALC_CRC;
   rq.cparam = &cp;
@@ -243,7 +244,7 @@ tBleStatus aci_updater_calc_crc(uint32_t address,
   if (hci_send_req(&rq, false) < 0)
     return BLE_STATUS_TIMEOUT;
 
-  *crc = btohl(resp.crc);
+  *crc = resp.crc;
 
   return resp.status;
 }
@@ -253,9 +254,9 @@ tBleStatus aci_updater_hw_version(uint8_t *version)
   struct hci_request rq;
   updater_hw_version_rp resp;
 
-  Osal_MemSet(&resp, 0, sizeof(resp));
+  memset(&resp, 0, sizeof(resp));
 
-  Osal_MemSet(&rq, 0, sizeof(rq));
+  memset(&rq, 0, sizeof(rq));
   rq.ogf = OGF_VENDOR_CMD;
   rq.ocf = OCF_UPDATER_HW_VERSION;
   rq.rparam = &resp;

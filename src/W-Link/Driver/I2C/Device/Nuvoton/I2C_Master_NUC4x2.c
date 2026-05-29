@@ -12,7 +12,7 @@
 
 #if defined(NUC442) || defined(NUC472)
 
-#include "GPIO/Device/RP2/GPIO_RP2.h"
+#include "GPIO/Device/Nuvoton/GPIO_Nuvoton.h"
 
 #include "I2C/Pin/Nuvoton/I2C_Pin_Nuvoton.h"
 
@@ -466,25 +466,8 @@ void I2C2_IRQHandler(void) { I2C_IRQ_Process(hwI2C_Index_2); }
 void I2C3_IRQHandler(void) { I2C_IRQ_Process(hwI2C_Index_3); }
 void I2C4_IRQHandler(void) { I2C_IRQ_Process(hwI2C_Index_4); }
 
-hwI2C_OpResult I2C_Instance_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
+static void I2C_Enable_Clock(hwI2C_Index index)
 {
-    if(index >= hwI2C_Index_MAX)
-        return hwI2C_InvalidParameter;
-
-    if(I2C_Master_Init_Status[index])
-        return hwI2C_OK;
-
-    if(speed_mode >= hwI2C_Speed_Mode_MAX)
-        return hwI2C_InvalidParameter;
-
-    I2C_T *i2c = I2C_Map_Soc_Base(index);
-
-    if(i2c == NULL)
-        return hwI2C_InvalidParameter;
-
-    memset(&i2c_xfer[index], 0, sizeof(i2c_xfer[index]));
-    i2c_xfer[index].state = NUC4x2_I2C_IDLE;
-
     switch(index)
     {
 #if defined(I2C0_BASE)
@@ -512,10 +495,66 @@ hwI2C_OpResult I2C_Instance_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
             CLK_EnableModuleClock(I2C4_MODULE);
             break;
 #endif
+    }
+
+    return;
+}
+
+static void I2C_Disable_Clock(hwI2C_Index index)
+{
+    switch(index)
+    {
+#if defined(I2C0_BASE)
+        case hwI2C_Index_0:
+            CLK_DisableModuleClock(I2C0_MODULE);
+            break;
+#endif
+#if defined(I2C1_BASE)
+        case hwI2C_Index_1:
+            CLK_DisableModuleClock(I2C1_MODULE);
+            break;
+#endif
+#if defined(I2C2_BASE)
+        case hwI2C_Index_2:
+            CLK_DisableModuleClock(I2C2_MODULE);
+            break;
+#endif
+#if defined(I2C3_BASE)
+        case hwI2C_Index_3:
+            CLK_DisableModuleClock(I2C3_MODULE);
+            break;
+#endif
+#if defined(I2C4_BASE)
+        case hwI2C_Index_4:
+            CLK_DisableModuleClock(I2C4_MODULE);
+            break;
+#endif
 
         default:
             break;
     }
+}
+
+hwI2C_OpResult I2C_Instance_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
+{
+    if(index >= hwI2C_Index_MAX)
+        return hwI2C_InvalidParameter;
+
+    if(I2C_Master_Init_Status[index])
+        return hwI2C_OK;
+
+    if(speed_mode >= hwI2C_Speed_Mode_MAX)
+        return hwI2C_InvalidParameter;
+
+    I2C_T *i2c = I2C_Map_Soc_Base(index);
+
+    if(i2c == NULL)
+        return hwI2C_InvalidParameter;
+
+    memset(&i2c_xfer[index], 0, sizeof(i2c_xfer[index]));
+    i2c_xfer[index].state = NUC4x2_I2C_IDLE;
+
+    I2C_Enable_Clock(index);
 
     switch(speed_mode)
     {
@@ -555,38 +594,8 @@ hwI2C_OpResult I2C_Instance_DeInit(hwI2C_Index index)
     I2C_STOP(i2c);
     I2C_Close(i2c);
 
-    switch(index)
-    {
-#if defined(I2C0_BASE)
-        case hwI2C_Index_0:
-            CLK_DisableModuleClock(I2C0_MODULE);
-            break;
-#endif
-#if defined(I2C1_BASE)
-        case hwI2C_Index_1:
-            CLK_DisableModuleClock(I2C1_MODULE);
-            break;
-#endif
-#if defined(I2C2_BASE)
-        case hwI2C_Index_2:
-            CLK_DisableModuleClock(I2C2_MODULE);
-            break;
-#endif
-#if defined(I2C3_BASE)
-        case hwI2C_Index_3:
-            CLK_DisableModuleClock(I2C3_MODULE);
-            break;
-#endif
-#if defined(I2C4_BASE)
-        case hwI2C_Index_4:
-            CLK_DisableModuleClock(I2C4_MODULE);
-            break;
-#endif
+    I2C_Disable_Clock(index);
 
-        default:
-            break;
-    }
-    
     memset(&i2c_xfer[index], 0, sizeof(i2c_xfer[index]));
     i2c_xfer[index].state = NUC4x2_I2C_IDLE;
 
@@ -612,7 +621,7 @@ hwI2C_OpResult I2C_Transfer_Write(hwI2C_Index index, uint8_t address, uint8_t *w
     NUC4x2_I2C_Transfer *t = &i2c_xfer[index];
 
     if(t->state == NUC4x2_I2C_TX || t->state == NUC4x2_I2C_RX)
-        return hwI2C_BusError;
+        return hwI2C_HwError;
 
     memset(t, 0, sizeof(*t));
 
@@ -647,7 +656,7 @@ hwI2C_OpResult I2C_Transfer_Read(hwI2C_Index index, uint8_t address, uint8_t *re
     NUC4x2_I2C_Transfer *t = &i2c_xfer[index];
 
     if(t->state == NUC4x2_I2C_TX || t->state == NUC4x2_I2C_RX)
-        return hwI2C_BusError;
+        return hwI2C_HwError;
 
     memset(t, 0, sizeof(*t));
 

@@ -14,6 +14,7 @@
 *******************************************************************************/
 
 #include <stdint.h>
+#include <string.h>
 
 #include "../Utils/ble_status.h"
 #include "../hci_const.h"

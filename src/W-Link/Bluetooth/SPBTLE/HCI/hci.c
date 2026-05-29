@@ -51,6 +51,10 @@ static tHciDataPacket     hciReadPacketBuffer[HCI_READ_PACKET_NUM_MAX];
 static volatile uint8_t hci_timer_id;
 static volatile uint8_t hci_timeout;
 
+void Enable_SPI_IRQ(void);
+void Disable_SPI_IRQ(void);
+void Clear_SPI_EXTI_Flag(void);
+
 void hci_timeout_callback(void)
 {
   hci_timeout = 1;

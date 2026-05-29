@@ -31,12 +31,12 @@ void CAN0_IRQHandler(void)
 
     if(status & CAN_STATUS_RXOK_Msk)
     {
-        uint8_t data[8] = {0};
+        STR_CANMSG_T canmsg;
 
-        CAN_Receive(CAN0, 0, data);
+        CAN_Receive(CAN1, 0, &canmsg);
         CAN_CLR_INT_PENDING_BIT(CAN0, CAN_STATUS_RXOK_Msk);
 
-        CAN_RxFifo0MsgPendingCallback(hwCAN_Index_0, data);
+        CAN_RxFifo0MsgPendingCallback(hwCAN_Index_0, canmsg.Data);
     }
 }
 #endif
@@ -54,12 +54,12 @@ void CAN1_IRQHandler(void)
 
     if(status & CAN_STATUS_RXOK_Msk)
     {
-        uint8_t data[8] = {0};
+        STR_CANMSG_T canmsg;
 
-        CAN_Receive(CAN1, 0, data);
+        CAN_Receive(CAN1, 0, &canmsg);
         CAN_CLR_INT_PENDING_BIT(CAN1, CAN_STATUS_RXOK_Msk);
 
-        CAN_RxFifo0MsgPendingCallback(hwCAN_Index_1, data);
+        CAN_RxFifo0MsgPendingCallback(hwCAN_Index_1, canmsg.Data);
     }
 }
 #endif
@@ -266,17 +266,7 @@ hwCAN_OpResult CAN_ConfigFilter(hwCAN_Index index)
     mask.u8IdType = 0;
     mask.u32Id    = 0x00000000;
 
-    CAN_SetRxMsgObj(can,
-                    0,
-                    CAN_STD_ID,
-                    0x000,
-                    TRUE);
-
-    CAN_SetRxMsgObjMask(can,
-                        0,
-                        CAN_STD_ID,
-                        0x000,
-                        FALSE);
+    CAN_SetRxMsg(can, 0, CAN_STD_ID, 0x000);
 
     return hwCAN_OK;
 }
@@ -340,14 +330,14 @@ void CAN_NVIC_DeInit(hwCAN_Index index)
     {
 #if defined(CAN0_BASE)
         case hwCAN_Index_0:
-            HAL_NVIC_DisableIRQ(CAN0_IRQn);
+            NVIC_DisableIRQ(CAN0_IRQn);
             NVIC_ClearPendingIRQ(CAN0_IRQn);
             break;
 #endif
 
 #if defined(CAN1_BASE)
         case hwCAN_Index_1:
-            HAL_NVIC_DisableIRQ(CAN1_IRQn);
+            NVIC_DisableIRQ(CAN1_IRQn);
             NVIC_ClearPendingIRQ(CAN1_IRQn);
             break;
 #endif

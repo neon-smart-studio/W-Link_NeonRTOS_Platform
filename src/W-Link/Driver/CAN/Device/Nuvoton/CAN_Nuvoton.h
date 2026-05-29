@@ -7,7 +7,7 @@
 #include "soc.h"
 #include "CAN/CAN.h"
 
-#include "CAN/Pin/STM32/CAN_Pin_STM32_Def.h"
+#include "CAN/Pin/Nuvoton/CAN_Pin_Nuvoton_Def.h"
 
 CAN_T *CAN_Map_Soc_Base(hwCAN_Index index);
 

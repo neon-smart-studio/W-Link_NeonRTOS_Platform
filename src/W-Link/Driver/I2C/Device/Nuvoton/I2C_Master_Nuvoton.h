@@ -23,9 +23,6 @@ void I2C_MasterTxCpltCallback(hwI2C_Index index);
 void I2C_MasterRxCpltCallback(hwI2C_Index index);
 void I2C_ErrorCallback(hwI2C_Index index);
 
-void I2C_Enable_Module_Clock(hwI2C_Index index);
-void I2C_Disable_Module_Clock(hwI2C_Index index);
-
 void I2C_GPIO_ConfigAF(hwI2C_Index index);
 void I2C_GPIO_DeConfigAF(hwI2C_Index index);
 

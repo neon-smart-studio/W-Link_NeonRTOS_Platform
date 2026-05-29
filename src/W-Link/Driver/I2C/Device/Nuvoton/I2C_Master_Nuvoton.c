@@ -76,7 +76,6 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index,
     }
 
     I2C_GPIO_ConfigAF(index);
-    I2C_Enable_Module_Clock(index);
 
     I2C_Instance_Init(index, speed_mode);
 
@@ -110,8 +109,6 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index)
     I2C_NVIC_DeInit(index);
 
     I2C_Instance_DeInit(index);
-
-    I2C_Disable_Module_Clock(index);
 
     I2C_GPIO_DeConfigAF(index);
 

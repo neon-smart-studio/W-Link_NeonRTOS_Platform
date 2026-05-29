@@ -2,6 +2,53 @@
 #ifndef PWM_INDEX_H
 #define PWM_INDEX_H
 
+#ifdef DEVICE_NUVOTON
+typedef enum
+{
+#if defined(PWM0_BASE)
+#if defined(PWM_CH0)
+	hwPWM_Channel_1 = 0,
+#endif
+#if defined(PWM_CH1)
+	hwPWM_Channel_2,
+#endif
+#if defined(PWM_CH2)
+	hwPWM_Channel_3,
+#endif
+#if defined(PWM_CH3)
+	hwPWM_Channel_4,
+#endif
+#if defined(PWM_CH4)
+	hwPWM_Channel_5,
+#endif
+#if defined(PWM_CH5)
+	hwPWM_Channel_6,
+#endif
+#endif
+#if defined(PWM1_BASE)
+#if defined(PWM_CH0)
+	hwPWM_Channel_7,
+#endif
+#if defined(PWM_CH1)
+	hwPWM_Channel_8,
+#endif
+#if defined(PWM_CH2)
+	hwPWM_Channel_9,
+#endif
+#if defined(PWM_CH3)
+	hwPWM_Channel_10,
+#endif
+#if defined(PWM_CH4)
+	hwPWM_Channel_11,
+#endif
+#if defined(PWM_CH5)
+	hwPWM_Channel_12,
+#endif
+#endif
+	hwPWM_Channel_MAX
+}hwPWM_Channel;
+#endif //DEVICE_NUVOTON
+
 #ifdef DEVICE_STM32
 typedef enum
 {

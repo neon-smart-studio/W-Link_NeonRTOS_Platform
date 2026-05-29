@@ -4,6 +4,10 @@
 
 #include "soc.h"
 
+#ifdef DEVICE_NUVOTON
+#include "Nuvoton/PWM_Pin_Nuvoton.h"
+#endif
+
 #ifdef DEVICE_STM32
 #include "STM32/PWM_Pin_STM32.h"
 #endif

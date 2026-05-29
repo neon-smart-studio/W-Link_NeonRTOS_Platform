@@ -71,76 +71,6 @@ I2C_T *I2C_Map_Soc_Base(hwI2C_Index index)
     }
 }
 
-void I2C_Enable_Module_Clock(hwI2C_Index index)
-{
-    switch(index)
-    {
-#if defined(I2C0_BASE)
-        case hwI2C_Index_0:
-            CLK_EnableModuleClock(I2C0_MODULE);
-            break;
-#endif
-#if defined(I2C1_BASE)
-        case hwI2C_Index_1:
-            CLK_EnableModuleClock(I2C1_MODULE);
-            break;
-#endif
-#if defined(I2C2_BASE)
-        case hwI2C_Index_2:
-            CLK_EnableModuleClock(I2C2_MODULE);
-            break;
-#endif
-#if defined(I2C3_BASE)
-        case hwI2C_Index_3:
-            CLK_EnableModuleClock(I2C3_MODULE);
-            break;
-#endif
-#if defined(I2C4_BASE)
-        case hwI2C_Index_4:
-            CLK_EnableModuleClock(I2C4_MODULE);
-            break;
-#endif
-
-        default:
-            break;
-    }
-}
-
-void I2C_Disable_Module_Clock(hwI2C_Index index)
-{
-    switch(index)
-    {
-#if defined(I2C0_BASE)
-        case hwI2C_Index_0:
-            CLK_DisableModuleClock(I2C0_MODULE);
-            break;
-#endif
-#if defined(I2C1_BASE)
-        case hwI2C_Index_1:
-            CLK_DisableModuleClock(I2C1_MODULE);
-            break;
-#endif
-#if defined(I2C2_BASE)
-        case hwI2C_Index_2:
-            CLK_DisableModuleClock(I2C2_MODULE);
-            break;
-#endif
-#if defined(I2C3_BASE)
-        case hwI2C_Index_3:
-            CLK_DisableModuleClock(I2C3_MODULE);
-            break;
-#endif
-#if defined(I2C4_BASE)
-        case hwI2C_Index_4:
-            CLK_DisableModuleClock(I2C4_MODULE);
-            break;
-#endif
-
-        default:
-            break;
-    }
-}
-
 void I2C_GPIO_ConfigAF(hwI2C_Index index)
 {
     I2C_Pin_Def def = I2C_Pin_Def_Table[index][I2C_Index_Map_Alt[index]];
@@ -555,6 +485,38 @@ hwI2C_OpResult I2C_Instance_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
     memset(&i2c_xfer[index], 0, sizeof(i2c_xfer[index]));
     i2c_xfer[index].state = NUC4x2_I2C_IDLE;
 
+    switch(index)
+    {
+#if defined(I2C0_BASE)
+        case hwI2C_Index_0:
+            CLK_EnableModuleClock(I2C0_MODULE);
+            break;
+#endif
+#if defined(I2C1_BASE)
+        case hwI2C_Index_1:
+            CLK_EnableModuleClock(I2C1_MODULE);
+            break;
+#endif
+#if defined(I2C2_BASE)
+        case hwI2C_Index_2:
+            CLK_EnableModuleClock(I2C2_MODULE);
+            break;
+#endif
+#if defined(I2C3_BASE)
+        case hwI2C_Index_3:
+            CLK_EnableModuleClock(I2C3_MODULE);
+            break;
+#endif
+#if defined(I2C4_BASE)
+        case hwI2C_Index_4:
+            CLK_EnableModuleClock(I2C4_MODULE);
+            break;
+#endif
+
+        default:
+            break;
+    }
+
     switch(speed_mode)
     {
         case hwI2C_Standard_Mode:
@@ -593,6 +555,38 @@ hwI2C_OpResult I2C_Instance_DeInit(hwI2C_Index index)
     I2C_STOP(i2c);
     I2C_Close(i2c);
 
+    switch(index)
+    {
+#if defined(I2C0_BASE)
+        case hwI2C_Index_0:
+            CLK_DisableModuleClock(I2C0_MODULE);
+            break;
+#endif
+#if defined(I2C1_BASE)
+        case hwI2C_Index_1:
+            CLK_DisableModuleClock(I2C1_MODULE);
+            break;
+#endif
+#if defined(I2C2_BASE)
+        case hwI2C_Index_2:
+            CLK_DisableModuleClock(I2C2_MODULE);
+            break;
+#endif
+#if defined(I2C3_BASE)
+        case hwI2C_Index_3:
+            CLK_DisableModuleClock(I2C3_MODULE);
+            break;
+#endif
+#if defined(I2C4_BASE)
+        case hwI2C_Index_4:
+            CLK_DisableModuleClock(I2C4_MODULE);
+            break;
+#endif
+
+        default:
+            break;
+    }
+    
     memset(&i2c_xfer[index], 0, sizeof(i2c_xfer[index]));
     i2c_xfer[index].state = NUC4x2_I2C_IDLE;
 

@@ -13,6 +13,7 @@
 #include "rtc.h"
 #include "adc.h"
 #include "eadc.h"
+#include "pwm.h"
 #define DEVICE_NUVOTON
 #endif //NUC442 || NUC472
 

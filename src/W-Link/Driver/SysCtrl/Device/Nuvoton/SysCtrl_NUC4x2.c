@@ -44,7 +44,7 @@ void SysCtrl_Init()
        AD0~AD15 / A0~Ax / nCS / nOE / nWE
     */
 
-#ifdef CONFIG_DEVICE_HAS_EXT_SRAM
+#ifdef NUVOTON_SDRAM
     /* 開 EBI Bank0，16-bit SRAM，normal mode，CS active low */
     EBI_Open(
         EBI_BANK0,

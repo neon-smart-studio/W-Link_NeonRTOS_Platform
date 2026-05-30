@@ -24,7 +24,6 @@ I2C_TypeDef *I2C_Map_Soc_Base(hwI2C_Index index);
 hwI2C_Index I2C_IndexFromHandle(I2C_HandleTypeDef *hI2C);
 
 hwI2C_OpResult I2C_Instance_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode);
-
 hwI2C_OpResult I2C_Instance_DeInit(hwI2C_Index index);
 
 void I2C_NVIC_Init(hwI2C_Index index);

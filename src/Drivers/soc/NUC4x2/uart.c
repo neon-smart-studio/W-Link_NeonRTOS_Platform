@@ -69,7 +69,7 @@ void UART_ClearIntFlag(UART_T* uart, uint32_t u32InterruptFlag)
  *
  *  @return None
  */
-void UART_Close(UART_T* uart)
+void UART_Close_Port(UART_T* uart)
 {
     uart->INTEN = 0;
 }
@@ -157,7 +157,7 @@ void UART_EnableInt(UART_T*  uart, uint32_t u32InterruptFlag )
  *
  *    @return   None
  */
-void UART_Open(UART_T* uart, uint32_t u32baudrate)
+void UART_Open_Port(UART_T* uart, uint32_t u32baudrate)
 {
     uint8_t u8UartClkSrcSel;
     uint32_t u32ClkTbl[4] = {__HXT, 0, __HIRC, __HIRC};
@@ -196,7 +196,7 @@ void UART_Open(UART_T* uart, uint32_t u32baudrate)
  *    @return   u32Count: Receive byte count
  *
  */
-uint32_t UART_Read(UART_T* uart, uint8_t *pu8RxBuf, uint32_t u32ReadBytes)
+uint32_t UART_Receive(UART_T* uart, uint8_t *pu8RxBuf, uint32_t u32ReadBytes)
 {
     uint32_t  u32Count;
 
@@ -326,7 +326,7 @@ void UART_SelectRS485Mode(UART_T* uart, uint32_t u32Mode, uint32_t u32Addr)
  *    @note     This function returns when the TX FIFO is full. So the transfer byte count(u32Count) maybe less than u32WriteBytes.
  *              Application should check the return value for the actual amount of data written to UART FIFO.
  */
-uint32_t UART_Write(UART_T* uart,uint8_t *pu8TxBuf, uint32_t u32WriteBytes)
+uint32_t UART_Send(UART_T* uart,uint8_t *pu8TxBuf, uint32_t u32WriteBytes)
 {
     uint32_t  u32Count;
 

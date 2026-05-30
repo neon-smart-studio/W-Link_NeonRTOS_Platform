@@ -2,6 +2,33 @@
 #ifndef UART_INDEX_H
 #define UART_INDEX_H
 
+#ifdef DEVICE_NUVOTON
+typedef enum hwUART_Index_t
+{
+#if defined (UART0_BASE)
+  hwUART_Index_0 = 0,
+#endif
+#if defined (UART1_BASE)
+  hwUART_Index_1,
+#endif
+#if defined (UART2_BASE)
+  hwUART_Index_2,
+#endif
+#if defined (UART3_BASE)
+  hwUART_Index_3,
+#endif
+#if defined (UART4_BASE)
+  hwUART_Index_4,
+#endif
+#if defined (UART5_BASE)
+  hwUART_Index_5,
+#endif
+  hwUART_Index_MAX,
+}hwUART_Index;
+// 定義標準輸出的 UART 索引
+#define LOG_UART_INDEX hwUART_Index_MAX
+#endif //DEVICE_NUVOTON
+
 #ifdef DEVICE_STM32
 typedef enum hwUART_Index_t
 {

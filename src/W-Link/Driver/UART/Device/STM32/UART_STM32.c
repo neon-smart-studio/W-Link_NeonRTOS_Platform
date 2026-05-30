@@ -323,6 +323,14 @@ hwUART_OpResult UART_Open_Specific_Format(
     UART_FlowControl[index] = rts_cts;
     UART_Init_Status[index] = true;
 
+    gpio_pin_init_status[tx_pin] = true;
+    gpio_pin_init_status[rx_pin] = true;
+
+    if (rts_cts) {
+        gpio_pin_init_status[rts_pin] = true;
+        gpio_pin_init_status[cts_pin] = true;
+    }
+
     return hwUART_OK;
 }
 

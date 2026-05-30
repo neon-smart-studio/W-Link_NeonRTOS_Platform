@@ -9,6 +9,8 @@
 
 extern bool gpio_pin_init_status[hwGPIO_Pin_MAX];
 
+void GPIO_Int_Handler(hwGPIO_Int_Pin irq_pin);
+
 void GPIO_NVIC_Init(hwGPIO_Int_Pin irq_pin);
 void GPIO_NVIC_DeInit(hwGPIO_Int_Pin irq_pin);
 

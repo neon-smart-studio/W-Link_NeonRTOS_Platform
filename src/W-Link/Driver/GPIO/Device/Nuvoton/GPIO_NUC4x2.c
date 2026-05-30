@@ -9,6 +9,8 @@
 
 #if defined(NUC442) || defined(NUC472)
 
+#include "GPIO_Nuvoton.h"
+
 static void GPIO_Nuvoton_DispatchIRQ(GPIO_T *port, hwGPIO_Int_Pin int_pin_start)
 {
     uint32_t status = port->INTSRC;

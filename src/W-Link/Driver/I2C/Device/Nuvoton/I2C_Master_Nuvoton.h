@@ -26,6 +26,8 @@ void I2C_ErrorCallback(hwI2C_Index index);
 void I2C_GPIO_ConfigAF(hwI2C_Index index);
 void I2C_GPIO_DeConfigAF(hwI2C_Index index);
 
+hwI2C_OpResult I2C_Instance_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode);
+hwI2C_OpResult I2C_Instance_DeInit(hwI2C_Index index);
 hwI2C_OpResult I2C_Transfer_Write(hwI2C_Index index, uint8_t address, uint8_t *write_dat, uint8_t write_len, bool stop, NeonRTOS_Time_t timeoutMs);
 hwI2C_OpResult I2C_Transfer_Read(hwI2C_Index index, uint8_t address, uint8_t *read_dat, uint8_t read_len, bool stop, NeonRTOS_Time_t timeoutMs);
 hwI2C_OpResult I2C_Transfer_Get_Status(hwI2C_Index index);

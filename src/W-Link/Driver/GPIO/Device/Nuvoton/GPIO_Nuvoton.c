@@ -341,7 +341,6 @@ hwGPIO_OpResult GPIO_Interrupt_Init(hwGPIO_Int_Pin irq_pin, hwGPIO_Interrupt_Mod
     GPIO_T *port = GPIO_Int_Map_Soc_Base(irq_pin);
     uint16_t pin_mask = GPIO_Int_Map_Soc_Pin(irq_pin);
     uint32_t pin_index = GPIO_Int_Pin_To_Index(irq_pin);
-    uint32_t int_mode = GPIO_Interrupt_Mode_To_Nuvoton(mode);
 
     if(port == NULL || pin_mask == 0)
     {

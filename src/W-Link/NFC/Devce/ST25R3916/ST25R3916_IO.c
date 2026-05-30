@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "GPIO/GPIO.h"
 #include "SPI/SPI_Master.h"
@@ -1043,23 +1044,34 @@ void ST25R3916_IO_ModifyInterrupts(uint32_t clr_mask, uint32_t set_mask)
 /*******************************************************************************/
 uint32_t ST25R3916_IO_WaitForInterruptsTimed(uint32_t mask, uint16_t tmo)
 {
-  uint32_t tmrDelay;
-  uint32_t status;
+    uint32_t start;
+    uint32_t status;
 
-  tmrDelay = timerCalculateTimer(tmo);
+    start = NeonRTOS_Millis();
 
-  /* Run until specific interrupt has happen or the timer has expired */
-  do {
-    status = (st25r3916interrupt.status & mask);
-  } while ((!timerIsExpired(tmrDelay) || (tmo == 0U)) && (status == 0U));
+    do {
+        status = st25r3916interrupt.status & mask;
 
-  status = st25r3916interrupt.status & mask;
+        if (status != 0U)
+            break;
 
-  st25r3916interrupt.status &= ~status;
+        /*
+         * tmo == 0 表示無限等待
+         */
+        if (tmo != 0U)
+        {
+            if ((uint32_t)(NeonRTOS_Millis() - start) >= (uint32_t)tmo)
+                break;
+        }
 
-  return status;
+        NeonRTOS_Sleep(1);
+    } while (1);
+
+    status = st25r3916interrupt.status & mask;
+    st25r3916interrupt.status &= ~status;
+
+    return status;
 }
-
 
 /*******************************************************************************/
 uint32_t ST25R3916_IO_GetInterrupt(uint32_t mask)

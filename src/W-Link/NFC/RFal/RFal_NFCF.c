@@ -211,7 +211,10 @@ NFC_OpResult RFal_NFCF_PollerCheckPresence(void)
       return ret;
   }
 
-  RFal_RunBlocking(ret, RFal_NFCF_PollerGetCheckPresenceStatus());
+  do{ 
+    ret = RFal_NFCF_PollerGetCheckPresenceStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }
@@ -245,7 +248,10 @@ NFC_OpResult RFal_NFCF_PollerCollisionResolution(RFal_ComplianceMode compMode, u
       return ret;
   }
 
-  RFal_RunBlocking(ret, RFal_NFCF_PollerGetCollisionResolutionStatus());
+  do{ 
+    ret = RFal_NFCF_PollerGetCollisionResolutionStatus();
+    RFal_Worker();
+  }while( ret == NFC_Busy );
 
   return ret;
 }

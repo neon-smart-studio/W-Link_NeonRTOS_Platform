@@ -47,6 +47,8 @@
 
 #include "NFC/NFC_Def.h"
 
+#include "NeonRTOS.h"
+
 #define NDEF_T5T_SYSINFO_MAX_LEN              22U    /*!< Max length for (Extended) Get System Info response */
 
 #define NDEF_T5T_MAX_BLOCK_1_BYTE_ADDR       256U    /*!< Max number of blocks for 1 byte addressing        */

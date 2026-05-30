@@ -44,6 +44,7 @@
 
 #include "ST25R3916_Def.h"
 
+#include "NFC/RFal/RFal.h"
 #include "NFC/RFal/RFal_RF.h"
 
 #include "NFC_Config.h"

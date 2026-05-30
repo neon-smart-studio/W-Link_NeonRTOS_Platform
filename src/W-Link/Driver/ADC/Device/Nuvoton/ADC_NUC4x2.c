@@ -11,8 +11,6 @@
 
 #include "ADC_Nuvoton.h"
 
-#include "ADC/Pin/Nuvoton/ADC_Pin_Nuvoton.h"
-
 static uint32_t ADC_Channel_Index_To_Mask(hwADC_Channel_Index ch)
 {
     switch(ch)

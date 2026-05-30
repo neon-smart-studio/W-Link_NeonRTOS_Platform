@@ -42,6 +42,7 @@
 #include <string.h>
 
 #include "RFal_NFC.h"
+#include "RFal_NFCB.h"
 #include "RFal.h"
 
 #include "NFC/NFC_Def.h"

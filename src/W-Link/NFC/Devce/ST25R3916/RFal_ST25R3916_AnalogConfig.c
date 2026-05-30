@@ -44,6 +44,8 @@
 #include "RFal_ST25R3916_AnalogConfig.h"
 #include "RFal_ST25R3916_AnalogConfigTbl.h"
 
+#include "NFC/RFal/RFal.h"
+
 #include "NFC_Config.h"
 
 #if defined(CONFIG_NFC_READER_DEVICE_ST25R3916) || defined(CONFIG_NFC_READER_DEVICE_ST25R3916B)

@@ -929,8 +929,8 @@ LPS22HB_OpStatus LPS22HB_Get_InterruptDifferentialEventStatus(LPS22HB_InterruptD
     return op_status;
   }
 
-  interruptsource->PH = (uint8_t)(tmp & LPS22HB_PH_MASK);
-  interruptsource->PL = (uint8_t)((tmp & LPS22HB_PL_MASK)>>LPS22HB_PL_BIT);
+  interruptsource->PHD = (uint8_t)(tmp & LPS22HB_PH_MASK);
+  interruptsource->PLD = (uint8_t)((tmp & LPS22HB_PL_MASK)>>LPS22HB_PL_BIT);
   interruptsource->IA = (uint8_t)((tmp & LPS22HB_IA_MASK)>>LPS22HB_IA_BIT);
   interruptsource->BOOT= (uint8_t)((tmp & LPS22HB_BOOT_STATUS_MASK)>>LPS22HB_BOOT_STATUS_BIT);
 

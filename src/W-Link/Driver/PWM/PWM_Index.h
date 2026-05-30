@@ -2,6 +2,8 @@
 #ifndef PWM_INDEX_H
 #define PWM_INDEX_H
 
+#include "soc.h"
+
 #ifdef DEVICE_NUVOTON
 typedef enum
 {

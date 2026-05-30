@@ -33,6 +33,7 @@
  * The original ST copyright and license notice are preserved below.
  ******************************************************************************/
 
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>

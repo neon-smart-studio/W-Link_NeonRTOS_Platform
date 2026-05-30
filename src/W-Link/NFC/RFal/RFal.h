@@ -184,6 +184,9 @@ NFC_OpResult RFal_ChipMeasurePhase(uint8_t *result);
 NFC_OpResult RFal_ChipMeasureCapacitance(uint8_t *result);
 NFC_OpResult RFal_ChipMeasurePowerSupply(uint8_t param, uint8_t *result);
 
+uint32_t timerCalculateTimer(uint16_t time);
+bool timerIsExpired(uint32_t timer);
+
 #ifdef __cplusplus
 }
 #endif

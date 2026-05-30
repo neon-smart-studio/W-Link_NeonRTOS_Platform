@@ -185,7 +185,7 @@ void SPI_GPIO_DeConfigAF(hwSPI_Index index, bool cs)
     uint16_t mosi_mask = GPIO_Map_Soc_Pin(def.mosi_pin);
     uint16_t miso_mask = GPIO_Map_Soc_Pin(def.miso_pin);
     uint16_t sclk_mask = GPIO_Map_Soc_Pin(def.sclk_pin);
-    uint16_t cs_mask = NULL;
+    uint16_t cs_mask = 0;
     if(cs)
     {
         cs_mask = GPIO_Map_Soc_Pin(def.cs_pin);
@@ -301,10 +301,10 @@ static void SPI_Nuvoton_IRQHandler(hwSPI_Index index)
     if (spi == NULL)
         return;
 
-    if (!SPI_GetIntFlag(spi, SPI_STATUS_UNITIF_Msk))
+    if (!(spi->STATUS & SPI_STATUS_UNITIF_Msk))
         return;
 
-    SPI_ClearIntFlag(spi, SPI_STATUS_UNITIF_Msk);
+    spi->STATUS = SPI_STATUS_UNITIF_Msk;
 
     SPI_Nuvoton_XferCtx_t *ctx = &spi_xfer_ctx[index];
 
@@ -355,7 +355,7 @@ static void SPI_Nuvoton_IRQHandler(hwSPI_Index index)
     ctx->mode = SPI_XFER_IDLE;
 
     SPI_DisableInt(spi, SPI_STATUS_UNITIF_Msk);
-    SPI_ClearIntFlag(spi, SPI_STATUS_UNITIF_Msk);
+    spi->STATUS = SPI_STATUS_UNITIF_Msk;
 
     if (done_mode == SPI_XFER_TX)
     {
@@ -578,8 +578,6 @@ hwSPI_OpResult SPI_Instance_ChangeMode(hwSPI_Index index, hwSPI_OpMode opMode)
     if (spi == NULL)
         return hwSPI_InvalidParameter;
 
-    SPI_SET_SS_HIGH(spi);
-
     spi->CTL &= ~(SPI_CTL_TXNEG_Msk | SPI_CTL_RXNEG_Msk | SPI_CTL_CLKPOL_Msk);
 
     switch (opMode)
@@ -628,7 +626,7 @@ hwSPI_OpResult SPI_Instance_Transmit_IT(hwSPI_Index index, const uint8_t *buf, u
     ctx->tx_count = 0;
     ctx->rx_count = 0;
 
-    SPI_ClearIntFlag(spi, SPI_STATUS_UNITIF_Msk);
+    spi->STATUS = SPI_STATUS_UNITIF_Msk;
     SPI_EnableInt(spi, SPI_STATUS_UNITIF_Msk);
 
     SPI_WRITE_TX(spi, ctx->tx_buf[ctx->tx_count++]);
@@ -658,7 +656,7 @@ hwSPI_OpResult SPI_Instance_Receive_IT(hwSPI_Index index, uint8_t *buf, uint16_t
     ctx->tx_count = 0;
     ctx->rx_count = 0;
 
-    SPI_ClearIntFlag(spi, SPI_STATUS_UNITIF_Msk);
+    spi->STATUS = SPI_STATUS_UNITIF_Msk;
     SPI_EnableInt(spi, SPI_STATUS_UNITIF_Msk);
 
     SPI_WRITE_TX(spi, 0xFF);
@@ -689,7 +687,7 @@ hwSPI_OpResult SPI_Instance_TransmitReceive_IT(hwSPI_Index index, const uint8_t 
     ctx->tx_count = 0;
     ctx->rx_count = 0;
 
-    SPI_ClearIntFlag(spi, SPI_STATUS_UNITIF_Msk);
+    spi->STATUS = SPI_STATUS_UNITIF_Msk;
     SPI_EnableInt(spi, SPI_STATUS_UNITIF_Msk);
 
     SPI_WRITE_TX(spi, ctx->tx_buf[ctx->tx_count++]);

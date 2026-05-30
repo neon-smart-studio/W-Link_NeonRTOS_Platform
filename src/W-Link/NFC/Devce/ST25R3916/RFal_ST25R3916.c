@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "GPIO/GPIO.h"
 #include "SPI/SPI_Master.h"
@@ -325,7 +326,7 @@ NFC_OpResult RFal_Deinit(void)
   gRFAL.state = RFAL_STATE_IDLE;
 
   /* Deinitialize chip */
-  ST25R3916_IO_Deinit();
+  ST25R3916_IO_DeInit();
 
   ST25R3916_IO_DisableInterrupts(ST25R3916_IRQ_MASK_ALL);
 
@@ -731,7 +732,7 @@ NFC_OpResult RFal_SetBitRate(RFal_BitRate txBR, RFal_BitRate rxBR)
         st25rStreamConf.dout                 = RFal_Iso15693StreamConfig->dout;
         st25rStreamConf.report_period_length = RFal_Iso15693StreamConfig->report_period_length;
         st25rStreamConf.useBPSK              = RFal_Iso15693StreamConfig->useBPSK;
-        ST25R3916_StreamConfigure(&st25rStreamConf);
+        ST25R3916_StreamConfigure((const struct ST25R3916_IO_StreamConfig *)&st25rStreamConf);
       }
 
       /* Set Analog configurations for this bit rate */
@@ -932,6 +933,164 @@ NFC_OpResult RFal_FieldOnAndStartGT(void)
   }
 
   return ret;
+}
+
+/*******************************************************************************/
+void RFal_CleanupTransceive(void)
+{
+  /*******************************************************************************/
+  /* Transceive flags                                                            */
+  /*******************************************************************************/
+
+  /* Restore default settings on NFCIP1 mode, Receiving parity + CRC bits and manual Tx Parity*/
+  ST25R3916_IO_ClearRegisterBits(ST25R3916_REG_ISO14443A_NFC, (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par | ST25R3916_REG_ISO14443A_NFC_nfc_f0));
+
+  /* Restore AGC enabled */
+  ST25R3916_IO_SetRegisterBits(ST25R3916_REG_RX_CONF2, ST25R3916_REG_RX_CONF2_agc_en);
+
+  /*******************************************************************************/
+
+  /*******************************************************************************/
+  /* Transceive timers                                                           */
+  /*******************************************************************************/
+  gRFAL.tmr.txRx   = RFAL_TIMING_NONE;
+  gRFAL.tmr.RXE    = RFAL_TIMING_NONE;
+  gRFAL.tmr.PPON2  = RFAL_TIMING_NONE;
+  /*******************************************************************************/
+  /*******************************************************************************/
+  /* Execute Post Transceive Callback                                            */
+  /*******************************************************************************/
+  if (gRFAL.callbacks.postTxRx != NULL) {
+    gRFAL.callbacks.postTxRx();
+  }
+  /*******************************************************************************/
+}
+
+/*******************************************************************************/
+void RFal_PrepareTransceive(void)
+{
+  uint32_t maskInterrupts;
+  uint8_t  reg;
+
+  /* If we are in RW or AP2P mode */
+  if (!RFal_IsModePassiveListen(gRFAL.mode)) {
+    /* Reset receive logic with STOP command */
+    ST25R3916_IO_ExecuteCommand(ST25R3916_CMD_STOP);
+
+    /* Reset Rx Gain */
+    ST25R3916_IO_ExecuteCommand(ST25R3916_CMD_RESET_RXGAIN);
+  } else {
+    /* In Passive Listen Mode do not use STOP as it stops FDT timer */
+    ST25R3916_IO_ExecuteCommand(ST25R3916_CMD_CLEAR_FIFO);
+  }
+
+  /*******************************************************************************/
+  /* FDT Poll                                                                    */
+  /*******************************************************************************/
+  if (gRFAL.timings.FDTPoll != RFAL_TIMING_NONE) {
+    /* In Passive communications General Purpose Timer is used to measure FDT Poll */
+    if (RFal_IsModePassiveComm(gRFAL.mode)) {   /* Passive Comms */
+      /* Configure GPT to start at RX end */
+      ST25R3916_SetStartGPTimer((uint16_t)RFal_Conv1fcTo8fc(((gRFAL.timings.FDTPoll < RFAL_FDT_POLL_ADJUSTMENT) ? gRFAL.timings.FDTPoll : (gRFAL.timings.FDTPoll - RFAL_FDT_POLL_ADJUSTMENT))), ST25R3916_REG_TIMER_EMV_CONTROL_gptc_erx);
+    }
+    /* In Active Poller mode GT PPON1 is used to ensure FDT Poll */
+    else if (gRFAL.mode == RFAL_MODE_POLL_ACTIVE_P2P) {
+      ST25R3916_IO_WriteRegister(ST25R3916_REG_FIELD_ON_GT, (uint8_t)RFal_Conv1fcTo2018fc(gRFAL.timings.FDTPoll));
+    } else {
+      /* MISRA 15.7 - Empty else */
+    }
+  }
+
+
+  /*******************************************************************************/
+  /* Execute Pre Transceive Callback                                             */
+  /*******************************************************************************/
+  if (gRFAL.callbacks.preTxRx != NULL) {
+    gRFAL.callbacks.preTxRx();
+  }
+  /*******************************************************************************/
+
+  maskInterrupts = (ST25R3916_IRQ_MASK_FWL  | ST25R3916_IRQ_MASK_TXE  |
+                    ST25R3916_IRQ_MASK_RXS  | ST25R3916_IRQ_MASK_RXE  |
+                    ST25R3916_IRQ_MASK_PAR  | ST25R3916_IRQ_MASK_CRC  |
+                    ST25R3916_IRQ_MASK_ERR1 | ST25R3916_IRQ_MASK_ERR2 |
+                    ST25R3916_IRQ_MASK_NRE);
+
+  /*******************************************************************************/
+  /* Transceive flags                                                            */
+  /*******************************************************************************/
+
+  reg = (ST25R3916_REG_ISO14443A_NFC_no_tx_par_off | ST25R3916_REG_ISO14443A_NFC_no_rx_par_off | ST25R3916_REG_ISO14443A_NFC_nfc_f0_off);
+
+  /* Check if NFCIP1 mode is to be enabled */
+  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_NFCIP1_ON) != 0U) {
+    reg |= ST25R3916_REG_ISO14443A_NFC_nfc_f0;
+  }
+
+  /* Check if Parity check is to be skipped and to keep the parity + CRC bits in FIFO */
+  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_KEEP) != 0U) {
+    reg |= ST25R3916_REG_ISO14443A_NFC_no_rx_par;
+  }
+
+  /* Check if automatic Parity bits is to be disabled */
+  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_NONE) != 0U) {
+    reg |= ST25R3916_REG_ISO14443A_NFC_no_tx_par;
+  }
+
+  /* Apply current TxRx flags on ISO14443A and NFC 106kb/s Settings Register */
+  ST25R3916_IO_ChangeRegisterBits(ST25R3916_REG_ISO14443A_NFC, (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par | ST25R3916_REG_ISO14443A_NFC_nfc_f0), reg);
+
+  /* Check if CRC is to be checked automatically upon reception */
+  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_MANUAL) != 0U) {
+    ST25R3916_IO_SetRegisterBits(ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
+  } else {
+    ST25R3916_IO_ClearRegisterBits(ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
+  }
+  /* Check if AGC is to be disabled */
+  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_AGC_OFF) != 0U) {
+    ST25R3916_IO_ClearRegisterBits(ST25R3916_REG_RX_CONF2, ST25R3916_REG_RX_CONF2_agc_en);
+  } else {
+    ST25R3916_IO_SetRegisterBits(ST25R3916_REG_RX_CONF2, ST25R3916_REG_RX_CONF2_agc_en);
+  }
+  /*******************************************************************************/
+
+  /*******************************************************************************/
+  /* EMVCo NRT mode                                                              */
+  /*******************************************************************************/
+  if (gRFAL.conf.eHandling == ERRORHANDLING_EMD) {
+    ST25R3916_IO_SetRegisterBits(ST25R3916_REG_TIMER_EMV_CONTROL, ST25R3916_REG_TIMER_EMV_CONTROL_nrt_emv);
+    maskInterrupts |= ST25R3916_IRQ_MASK_RX_REST;
+  } else {
+    ST25R3916_IO_ClearRegisterBits(ST25R3916_REG_TIMER_EMV_CONTROL, ST25R3916_REG_TIMER_EMV_CONTROL_nrt_emv);
+  }
+  /*******************************************************************************/
+
+  /* In Passive Listen mode additionally enable External Field interrupts  */
+  if (RFal_IsModePassiveListen(gRFAL.mode)) {
+    maskInterrupts |= (ST25R3916_IRQ_MASK_EOF | ST25R3916_IRQ_MASK_WU_F);        /* Enable external Field interrupts to detect Link Loss and SENF_REQ auto responses */
+  }
+
+  /* In Active comms enable also External Field interrupts and set RF Collision Avoidance */
+  if (RFal_IsModeActiveComm(gRFAL.mode)) {
+    maskInterrupts |= (ST25R3916_IRQ_MASK_EOF  | ST25R3916_IRQ_MASK_EON  | ST25R3916_IRQ_MASK_PPON2 | ST25R3916_IRQ_MASK_CAT | ST25R3916_IRQ_MASK_CAC);
+    /* Set n=0 for subsequent RF Collision Avoidance */
+    ST25R3916_IO_ChangeRegisterBits(ST25R3916_REG_AUX, ST25R3916_REG_AUX_nfc_n_mask, 0);
+  }
+
+  /*******************************************************************************/
+  /* Start transceive Sanity Timer if a FWT is used */
+  if ((gRFAL.TxRx.ctx.fwt != RFAL_FWT_NONE) && (gRFAL.TxRx.ctx.fwt != 0U)) {
+    RFal_TimerStart(gRFAL.tmr.txRx, RFal_CalcSanityTmr(gRFAL.TxRx.ctx.fwt));
+  }
+  /*******************************************************************************/
+
+  /*******************************************************************************/
+  /* Clear and enable these interrupts */
+  ST25R3916_IO_GetInterrupt(maskInterrupts);
+  ST25R3916_IO_EnableInterrupts(maskInterrupts);
+
+  /* Clear FIFO status local copy */
+  RFal_FIFOStatusClear();
 }
 
 /*******************************************************************************/
@@ -1239,7 +1398,7 @@ NFC_OpResult RFal_GetTransceiveRSSI(uint16_t *rssi)
     return NFC_InvalidParameter;
   }
 
-  ST25R3916_IO_GetRSSI(&amRSSI, &pmRSSI);
+  ST25R3916_GetRSSI(&amRSSI, &pmRSSI);
 
   /* Check if Correlator Summation mode is being used */
   isSumMode = (ST25R3916_IO_CheckReg(ST25R3916_REG_CORR_CONF1, ST25R3916_REG_CORR_CONF1_corr_s4, ST25R3916_REG_CORR_CONF1_corr_s4) ? ST25R3916_IO_CheckReg(ST25R3916_REG_AUX, ST25R3916_REG_AUX_dis_corr, 0x00) : false);
@@ -1371,164 +1530,6 @@ void RFal_ErrorHandling(void)
     }
   }
 
-}
-
-/*******************************************************************************/
-void RFal_CleanupTransceive(void)
-{
-  /*******************************************************************************/
-  /* Transceive flags                                                            */
-  /*******************************************************************************/
-
-  /* Restore default settings on NFCIP1 mode, Receiving parity + CRC bits and manual Tx Parity*/
-  ST25R3916_IO_ClearRegisterBits(ST25R3916_REG_ISO14443A_NFC, (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par | ST25R3916_REG_ISO14443A_NFC_nfc_f0));
-
-  /* Restore AGC enabled */
-  ST25R3916_IO_SetRegisterBits(ST25R3916_REG_RX_CONF2, ST25R3916_REG_RX_CONF2_agc_en);
-
-  /*******************************************************************************/
-
-  /*******************************************************************************/
-  /* Transceive timers                                                           */
-  /*******************************************************************************/
-  gRFAL.tmr.txRx   = RFAL_TIMING_NONE;
-  gRFAL.tmr.RXE    = RFAL_TIMING_NONE;
-  gRFAL.tmr.PPON2  = RFAL_TIMING_NONE;
-  /*******************************************************************************/
-  /*******************************************************************************/
-  /* Execute Post Transceive Callback                                            */
-  /*******************************************************************************/
-  if (gRFAL.callbacks.postTxRx != NULL) {
-    gRFAL.callbacks.postTxRx();
-  }
-  /*******************************************************************************/
-}
-
-/*******************************************************************************/
-void RFal_PrepareTransceive(void)
-{
-  uint32_t maskInterrupts;
-  uint8_t  reg;
-
-  /* If we are in RW or AP2P mode */
-  if (!RFal_IsModePassiveListen(gRFAL.mode)) {
-    /* Reset receive logic with STOP command */
-    ST25R3916_IO_ExecuteCommand(ST25R3916_CMD_STOP);
-
-    /* Reset Rx Gain */
-    ST25R3916_IO_ExecuteCommand(ST25R3916_CMD_RESET_RXGAIN);
-  } else {
-    /* In Passive Listen Mode do not use STOP as it stops FDT timer */
-    ST25R3916_IO_ExecuteCommand(ST25R3916_CMD_CLEAR_FIFO);
-  }
-
-  /*******************************************************************************/
-  /* FDT Poll                                                                    */
-  /*******************************************************************************/
-  if (gRFAL.timings.FDTPoll != RFAL_TIMING_NONE) {
-    /* In Passive communications General Purpose Timer is used to measure FDT Poll */
-    if (RFal_IsModePassiveComm(gRFAL.mode)) {   /* Passive Comms */
-      /* Configure GPT to start at RX end */
-      ST25R3916_SetStartGPTimer((uint16_t)RFal_Conv1fcTo8fc(((gRFAL.timings.FDTPoll < RFAL_FDT_POLL_ADJUSTMENT) ? gRFAL.timings.FDTPoll : (gRFAL.timings.FDTPoll - RFAL_FDT_POLL_ADJUSTMENT))), ST25R3916_REG_TIMER_EMV_CONTROL_gptc_erx);
-    }
-    /* In Active Poller mode GT PPON1 is used to ensure FDT Poll */
-    else if (gRFAL.mode == RFAL_MODE_POLL_ACTIVE_P2P) {
-      ST25R3916_IO_WriteRegister(ST25R3916_REG_FIELD_ON_GT, (uint8_t)RFal_Conv1fcTo2018fc(gRFAL.timings.FDTPoll));
-    } else {
-      /* MISRA 15.7 - Empty else */
-    }
-  }
-
-
-  /*******************************************************************************/
-  /* Execute Pre Transceive Callback                                             */
-  /*******************************************************************************/
-  if (gRFAL.callbacks.preTxRx != NULL) {
-    gRFAL.callbacks.preTxRx();
-  }
-  /*******************************************************************************/
-
-  maskInterrupts = (ST25R3916_IRQ_MASK_FWL  | ST25R3916_IRQ_MASK_TXE  |
-                    ST25R3916_IRQ_MASK_RXS  | ST25R3916_IRQ_MASK_RXE  |
-                    ST25R3916_IRQ_MASK_PAR  | ST25R3916_IRQ_MASK_CRC  |
-                    ST25R3916_IRQ_MASK_ERR1 | ST25R3916_IRQ_MASK_ERR2 |
-                    ST25R3916_IRQ_MASK_NRE);
-
-  /*******************************************************************************/
-  /* Transceive flags                                                            */
-  /*******************************************************************************/
-
-  reg = (ST25R3916_REG_ISO14443A_NFC_no_tx_par_off | ST25R3916_REG_ISO14443A_NFC_no_rx_par_off | ST25R3916_REG_ISO14443A_NFC_nfc_f0_off);
-
-  /* Check if NFCIP1 mode is to be enabled */
-  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_NFCIP1_ON) != 0U) {
-    reg |= ST25R3916_REG_ISO14443A_NFC_nfc_f0;
-  }
-
-  /* Check if Parity check is to be skipped and to keep the parity + CRC bits in FIFO */
-  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_KEEP) != 0U) {
-    reg |= ST25R3916_REG_ISO14443A_NFC_no_rx_par;
-  }
-
-  /* Check if automatic Parity bits is to be disabled */
-  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_NONE) != 0U) {
-    reg |= ST25R3916_REG_ISO14443A_NFC_no_tx_par;
-  }
-
-  /* Apply current TxRx flags on ISO14443A and NFC 106kb/s Settings Register */
-  ST25R3916_IO_ChangeRegisterBits(ST25R3916_REG_ISO14443A_NFC, (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par | ST25R3916_REG_ISO14443A_NFC_nfc_f0), reg);
-
-  /* Check if CRC is to be checked automatically upon reception */
-  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_MANUAL) != 0U) {
-    ST25R3916_IO_SetRegisterBits(ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
-  } else {
-    ST25R3916_IO_ClearRegisterBits(ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
-  }
-  /* Check if AGC is to be disabled */
-  if ((gRFAL.TxRx.ctx.flags & (uint32_t)RFAL_TXRX_FLAGS_AGC_OFF) != 0U) {
-    ST25R3916_IO_ClearRegisterBits(ST25R3916_REG_RX_CONF2, ST25R3916_REG_RX_CONF2_agc_en);
-  } else {
-    ST25R3916_IO_SetRegisterBits(ST25R3916_REG_RX_CONF2, ST25R3916_REG_RX_CONF2_agc_en);
-  }
-  /*******************************************************************************/
-
-  /*******************************************************************************/
-  /* EMVCo NRT mode                                                              */
-  /*******************************************************************************/
-  if (gRFAL.conf.eHandling == ERRORHANDLING_EMD) {
-    ST25R3916_IO_SetRegisterBits(ST25R3916_REG_TIMER_EMV_CONTROL, ST25R3916_REG_TIMER_EMV_CONTROL_nrt_emv);
-    maskInterrupts |= ST25R3916_IRQ_MASK_RX_REST;
-  } else {
-    ST25R3916_IO_ClearRegisterBits(ST25R3916_REG_TIMER_EMV_CONTROL, ST25R3916_REG_TIMER_EMV_CONTROL_nrt_emv);
-  }
-  /*******************************************************************************/
-
-  /* In Passive Listen mode additionally enable External Field interrupts  */
-  if (RFal_IsModePassiveListen(gRFAL.mode)) {
-    maskInterrupts |= (ST25R3916_IRQ_MASK_EOF | ST25R3916_IRQ_MASK_WU_F);        /* Enable external Field interrupts to detect Link Loss and SENF_REQ auto responses */
-  }
-
-  /* In Active comms enable also External Field interrupts and set RF Collision Avoidance */
-  if (RFal_IsModeActiveComm(gRFAL.mode)) {
-    maskInterrupts |= (ST25R3916_IRQ_MASK_EOF  | ST25R3916_IRQ_MASK_EON  | ST25R3916_IRQ_MASK_PPON2 | ST25R3916_IRQ_MASK_CAT | ST25R3916_IRQ_MASK_CAC);
-    /* Set n=0 for subsequent RF Collision Avoidance */
-    ST25R3916_IO_ChangeRegisterBits(ST25R3916_REG_AUX, ST25R3916_REG_AUX_nfc_n_mask, 0);
-  }
-
-  /*******************************************************************************/
-  /* Start transceive Sanity Timer if a FWT is used */
-  if ((gRFAL.TxRx.ctx.fwt != RFAL_FWT_NONE) && (gRFAL.TxRx.ctx.fwt != 0U)) {
-    RFal_TimerStart(gRFAL.tmr.txRx, RFal_CalcSanityTmr(gRFAL.TxRx.ctx.fwt));
-  }
-  /*******************************************************************************/
-
-  /*******************************************************************************/
-  /* Clear and enable these interrupts */
-  ST25R3916_IO_GetInterrupt(maskInterrupts);
-  ST25R3916_IO_EnableInterrupts(maskInterrupts);
-
-  /* Clear FIFO status local copy */
-  RFal_FIFOStatusClear();
 }
 
 /*******************************************************************************/
@@ -3847,7 +3848,7 @@ NFC_OpResult RFal_WakeUpModeGetInfo(bool force, RFal_WakeUpInfo *info)
   }
 
   /* Clear info structure */
-  ST_MEMSET(info, 0x00, sizeof(RFal_WakeUpInfo));
+  memset(info, 0x00, sizeof(RFal_WakeUpInfo));
 
   /* Update general information */
   info->irqWut          = gRFAL.wum.info.irqWut;
@@ -4195,7 +4196,7 @@ NFC_OpResult RFal_ChipReadReg(uint16_t reg, uint8_t *values, uint8_t len)
 /*******************************************************************************/
 NFC_OpResult RFal_ChipExecCmd(uint16_t cmd)
 {
-  if (!ST25R3916_IO_IsCmdValid((uint8_t)cmd)) {
+  if (!ST25R3916_IsCmdValid((uint8_t)cmd)) {
     return NFC_InvalidParameter;
   }
 
@@ -4308,7 +4309,7 @@ NFC_OpResult RFal_ChipMeasureCapacitance(uint8_t *result)
 /*******************************************************************************/
 NFC_OpResult RFal_ChipMeasurePowerSupply(uint8_t param, uint8_t *result)
 {
-  *result = ST25R3916_IO_MeasurePowerSupply(param);
+  *result = ST25R3916_MeasurePowerSupply(param);
 
   return NFC_OK;
 }
@@ -4340,7 +4341,7 @@ NFC_OpResult RFal_ChipMeasureCombinedIQ(uint8_t *result)
 /*******************************************************************************/
 NFC_OpResult RFal_ChipSetAntennaMode(bool single, bool rfiox)
 {
-  return ST25R3916_IO_SetAntennaMode(single, rfiox);
+  return ST25R3916_SetAntennaMode(single, rfiox);
 }
 
 /*******************************************************************************/

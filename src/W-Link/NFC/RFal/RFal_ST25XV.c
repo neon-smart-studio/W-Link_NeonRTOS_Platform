@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "RFal_NFC.h"
 #include "RFal_ST25XV.h"
@@ -61,7 +62,7 @@
 #define RFAL_ST25TV02K_TBOOT_RF          1U     /*!< RF Boot time (Minimum time from carrier generation to first data) */
 #define RFAL_ST25TV02K_TRF_OFF           2U     /*!< RF OFF time                                                       */
 
-#define RFAL_ST25xV_FDT_POLL_MAX                 rfalConvMsTo1fc(20) /*!< Maximum Wait time FDTV,EOF 20 ms    Digital 2.1  B.5 */
+#define RFAL_ST25xV_FDT_POLL_MAX                 RFal_ConvMsTo1fc(20) /*!< Maximum Wait time FDTV,EOF 20 ms    Digital 2.1  B.5 */
 #define RFAL_NFCV_FLAG_POS                0U     /*!< Flag byte position                                                */
 #define RFAL_NFCV_FLAG_LEN                1U     /*!< Flag byte length                                                  */
 
@@ -364,37 +365,37 @@ NFC_OpResult RFal_ST25XV_PollerFastExtReadMultipleBlocks(uint8_t flags, const ui
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerReadConfiguration(uint8_t flags, const uint8_t *uid, uint8_t pointer, uint8_t *regValue)
 {
-  return  rfalST25xVPollerGenericReadConfiguration(RFAL_NFCV_CMD_READ_CONFIGURATION, flags,  uid, pointer, regValue);
+  return  RFal_ST25XV_PollerGenericReadConfiguration(RFAL_NFCV_CMD_READ_CONFIGURATION, flags,  uid, pointer, regValue);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerWriteConfiguration(uint8_t flags, const uint8_t *uid, uint8_t pointer, uint8_t regValue)
 {
-  return rfalST25xVPollerGenericWriteConfiguration(RFAL_NFCV_CMD_WRITE_CONFIGURATION, flags, uid, pointer, regValue);
+  return RFal_ST25XV_PollerGenericWriteConfiguration(RFAL_NFCV_CMD_WRITE_CONFIGURATION, flags, uid, pointer, regValue);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerReadDynamicConfiguration(uint8_t flags, const uint8_t *uid, uint8_t pointer, uint8_t *regValue)
 {
-  return  rfalST25xVPollerGenericReadConfiguration(RFAL_NFCV_CMD_READ_DYN_CONFIGURATION, flags,  uid, pointer, regValue);
+  return  RFal_ST25XV_PollerGenericReadConfiguration(RFAL_NFCV_CMD_READ_DYN_CONFIGURATION, flags,  uid, pointer, regValue);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerWriteDynamicConfiguration(uint8_t flags, const uint8_t *uid, uint8_t pointer, uint8_t regValue)
 {
-  return rfalST25xVPollerGenericWriteConfiguration(RFAL_NFCV_CMD_WRITE_DYN_CONFIGURATION, flags, uid, pointer, regValue);
+  return RFal_ST25XV_PollerGenericWriteConfiguration(RFAL_NFCV_CMD_WRITE_DYN_CONFIGURATION, flags, uid, pointer, regValue);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerFastReadDynamicConfiguration(uint8_t flags, const uint8_t *uid, uint8_t pointer, uint8_t *regValue)
 {
-  return  rfalST25xVPollerGenericReadConfiguration(RFAL_NFCV_CMD_FAST_READ_DYN_CONFIGURATION, flags,  uid, pointer, regValue);
+  return  RFal_ST25XV_PollerGenericReadConfiguration(RFAL_NFCV_CMD_FAST_READ_DYN_CONFIGURATION, flags,  uid, pointer, regValue);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerFastWriteDynamicConfiguration(uint8_t flags, const uint8_t *uid, uint8_t pointer, uint8_t regValue)
 {
-  return rfalST25xVPollerGenericWriteConfiguration(RFAL_NFCV_CMD_FAST_WRITE_DYN_CONFIGURATION, flags, uid, pointer, regValue);
+  return RFal_ST25XV_PollerGenericWriteConfiguration(RFAL_NFCV_CMD_FAST_WRITE_DYN_CONFIGURATION, flags, uid, pointer, regValue);
 }
 
 /*******************************************************************************/
@@ -448,7 +449,7 @@ NFC_OpResult RFal_ST25XV_PollerGetRandomNumber(uint8_t flags, const uint8_t *uid
 {
   RFal_FieldOff();
   NeonRTOS_Sleep(RFAL_ST25TV02K_TRF_OFF);
-  RFal_NFCV_PollerInitialize();
+  RFal_NFCV_PollerInit();
   RFal_FieldOnAndStartGT();
   NeonRTOS_Sleep(RFAL_ST25TV02K_TBOOT_RF);
   return RFal_NFCV_PollerTransceiveReq(RFAL_NFCV_CMD_GET_RANDOM_NUMBER, flags, RFAL_NFCV_ST_IC_MFG_CODE, uid, NULL, 0U, rxBuf, rxBufLen, rcvLen);
@@ -457,35 +458,35 @@ NFC_OpResult RFal_ST25XV_PollerGetRandomNumber(uint8_t flags, const uint8_t *uid
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerWriteMessage(uint8_t flags, const uint8_t *uid, uint8_t msgLen, const uint8_t *msgData, uint8_t *txBuf, uint16_t txBufLen)
 {
-  return rfalST25xVPollerGenericWriteMessage(RFAL_NFCV_CMD_WRITE_MESSAGE, flags,  uid, msgLen, msgData,  txBuf, txBufLen);
+  return RFal_ST25XV_PollerGenericWriteMessage(RFAL_NFCV_CMD_WRITE_MESSAGE, flags,  uid, msgLen, msgData,  txBuf, txBufLen);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerFastWriteMessage(uint8_t flags, const uint8_t *uid, uint8_t msgLen, const uint8_t *msgData, uint8_t *txBuf, uint16_t txBufLen)
 {
-  return rfalST25xVPollerGenericWriteMessage(RFAL_NFCV_CMD_FAST_WRITE_MESSAGE, flags,  uid, msgLen, msgData,  txBuf, txBufLen);
+  return RFal_ST25XV_PollerGenericWriteMessage(RFAL_NFCV_CMD_FAST_WRITE_MESSAGE, flags,  uid, msgLen, msgData,  txBuf, txBufLen);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerReadMessageLength(uint8_t flags, const uint8_t *uid, uint8_t *msgLen)
 {
-  return rfalST25xVPollerGenericReadMessageLength(RFAL_NFCV_CMD_READ_MESSAGE_LENGTH, flags, uid, msgLen);
+  return RFal_ST25XV_PollerGenericReadMessageLength(RFAL_NFCV_CMD_READ_MESSAGE_LENGTH, flags, uid, msgLen);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerFastReadMsgLength(uint8_t flags, const uint8_t *uid, uint8_t *msgLen)
 {
-  return rfalST25xVPollerGenericReadMessageLength(RFAL_NFCV_CMD_FAST_READ_MESSAGE_LENGTH, flags, uid, msgLen);
+  return RFal_ST25XV_PollerGenericReadMessageLength(RFAL_NFCV_CMD_FAST_READ_MESSAGE_LENGTH, flags, uid, msgLen);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerReadMessage(uint8_t flags, const uint8_t *uid, uint8_t mbPointer, uint8_t numBytes, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rcvLen)
 {
-  return rfalST25xVPollerGenericReadMessage(RFAL_NFCV_CMD_READ_MESSAGE, flags, uid, mbPointer, numBytes, rxBuf, rxBufLen, rcvLen);
+  return RFal_ST25XV_PollerGenericReadMessage(RFAL_NFCV_CMD_READ_MESSAGE, flags, uid, mbPointer, numBytes, rxBuf, rxBufLen, rcvLen);
 }
 
 /*******************************************************************************/
 NFC_OpResult RFal_ST25XV_PollerFastReadMessage(uint8_t flags, const uint8_t *uid, uint8_t mbPointer, uint8_t numBytes, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rcvLen)
 {
-  return rfalST25xVPollerGenericReadMessage(RFAL_NFCV_CMD_FAST_READ_MESSAGE, flags, uid, mbPointer, numBytes, rxBuf, rxBufLen, rcvLen);
+  return RFal_ST25XV_PollerGenericReadMessage(RFAL_NFCV_CMD_FAST_READ_MESSAGE, flags, uid, mbPointer, numBytes, rxBuf, rxBufLen, rcvLen);
 }

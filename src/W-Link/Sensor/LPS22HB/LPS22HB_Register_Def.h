@@ -162,8 +162,8 @@ typedef enum
 
 typedef struct
 {
-  uint8_t PH;          /*!< High Differential Pressure event occured */
-  uint8_t PL;          /*!< Low Differential Pressure event occured */
+  uint8_t PHD;          /*!< High Differential Pressure event occured */
+  uint8_t PLD;          /*!< Low Differential Pressure event occured */
   uint8_t IA;          /*!< One or more interrupt events have been  generated.Interrupt Active */
   uint8_t BOOT;        /*!< i '1' indicates that the Boot (Reboot) phase is running */
 }LPS22HB_InterruptDiffStatus_st;

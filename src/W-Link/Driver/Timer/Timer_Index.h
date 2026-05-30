@@ -2,6 +2,27 @@
 #ifndef TIMER_INDEX_H
 #define TIMER_INDEX_H
 
+#include "soc.h"
+
+#ifdef DEVICE_NUVOTON
+typedef enum hwTimer_Index_t
+{
+#if defined (TIMER0_BASE)
+  hwTimer_Index_0 = 0,
+#endif
+#if defined (TIMER1_BASE)
+  hwTimer_Index_1,
+#endif
+#if defined (TIMER2_BASE)
+  hwTimer_Index_2,
+#endif
+#if defined (TIMER3_BASE)
+  hwTimer_Index_3,
+#endif
+  hwTimer_Index_MAX,
+}hwTimer_Index;
+#endif // DEVICE_NUVOTON
+
 #ifdef DEVICE_STM32
 typedef enum hwTimer_Index_t
 {

@@ -3,7 +3,7 @@
 
 #include "soc.h"
 
-#ifdef DEVICE_NUC4x2
+#ifdef NUC472
 
 void SysCtrl_Init()
 {

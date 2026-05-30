@@ -142,13 +142,13 @@ NFC_OpResult M24SR_IO_DeInit()
 {
     hwGPIO_OpResult gpio_op_status;
 
-    gpio_op_status = GPIO_DeInit(M24SR_GPIO_RFDISABLE_PIN);
+    gpio_op_status = GPIO_Pin_DeInit(M24SR_GPIO_RFDISABLE_PIN);
     if(gpio_op_status<hwGPIO_OK)
     {
         return NFC_M24SR_Map_GPIO_Error_Code(gpio_op_status);
     }
     
-    gpio_op_status = GPIO_UnRegister_Interrupt_Handler(M24SR_GPIO_GPO_PIN);
+    gpio_op_status = GPIO_Unregister_Interrupt_Handler(M24SR_GPIO_GPO_PIN);
     if(gpio_op_status<hwGPIO_OK)
     {
         return NFC_M24SR_Map_GPIO_Error_Code(gpio_op_status);

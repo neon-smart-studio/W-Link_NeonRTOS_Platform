@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "GPIO/GPIO.h"
 #include "SPI/SPI_Master.h"

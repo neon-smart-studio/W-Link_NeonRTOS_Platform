@@ -211,6 +211,8 @@ NFC_OpResult RFal_NFCB_PollerSlotMarker(uint8_t slotCode, RFal_NFCB_SensbRes *se
 NFC_OpResult RFal_NFCB_PollerStartSlotMarker(uint8_t slotCode, RFal_NFCB_SensbRes *sensbRes, uint8_t *sensbResLen);
 NFC_OpResult RFal_NFCB_PollerGetSlotMarkerStatus(void);
 NFC_OpResult RFal_NFCB_PollerTechnologyDetection(RFal_ComplianceMode compMode, RFal_NFCB_SensbRes *sensbRes, uint8_t *sensbResLen);
+NFC_OpResult RFal_NFCB_PollerStartTechnologyDetection(RFal_ComplianceMode compMode, RFal_NFCB_SensbRes *sensbRes, uint8_t *sensbResLen);
+NFC_OpResult RFal_NFCB_PollerGetTechnologyDetectionStatus(void);
 NFC_OpResult RFal_NFCB_PollerCollisionResolution(RFal_ComplianceMode compMode, uint8_t devLimit, RFal_NFCB_ListenDevice *nfcbDevList, uint8_t *devCnt);
 NFC_OpResult RFal_NFCB_PollerSlottedCollisionResolution(RFal_ComplianceMode compMode, uint8_t devLimit, RFal_NFCB_Slots initSlots, RFal_NFCB_Slots endSlots, RFal_NFCB_ListenDevice *nfcbDevList, uint8_t *devCnt, bool *colPending);
 NFC_OpResult RFal_NFCB_PollerStartCollisionResolution(RFal_ComplianceMode compMode, uint8_t devLimit, RFal_NFCB_ListenDevice *nfcbDevList, uint8_t *devCnt);

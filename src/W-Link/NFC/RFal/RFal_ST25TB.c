@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "RFal_NFC.h"
 #include "RFal_ST25TB.h"
@@ -69,7 +70,7 @@
 #define RFAL_ST25TB_T1               2048U                              /*!< ST25TB t1  151 us   ST25TB RF characteristics    */
 
 #define RFAL_ST25TB_FWT             (RFAL_ST25TB_T0 + RFAL_ST25TB_T1)   /*!< ST25TB FWT  = T0 + T1                            */
-#define RFAL_ST25TB_TW              rfalConvMsTo1fc(7U)                 /*!< ST25TB TW : Programming time for write max 7ms   */
+#define RFAL_ST25TB_TW              RFal_ConvMsTo1fc(7U)                 /*!< ST25TB TW : Programming time for write max 7ms   */
 
 
 /*! Initiate Request */

@@ -39,8 +39,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "ST25R3916_Def.h"
+
+#include "ST25R3916_CRC.h"
 
 #include "ST25R3916_ISO15693.h"
 

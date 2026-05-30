@@ -45,6 +45,8 @@
 
 #include "NFC_Config.h"
 
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
+
 #ifndef CONFIG_ST25R95_SPI_INDEX
 #define ST25R95_SPI_INDEX                  hwSPI_Index_0
 #else
@@ -197,7 +199,7 @@ NFC_OpResult ST25R95_IO_SPI_Send_Command_Type_And_Len(uint8_t *cmd, uint8_t *res
 NFC_OpResult ST25R95_IO_SPI_Command_Echo(void);
 NFC_OpResult ST25R95_IO_SPI_Send_Transmit_Flag(ST25R95_Protocol protocol, uint8_t transmitFlag);
 NFC_OpResult ST25R95_IO_SPI_Send_Data(uint8_t *buf, uint8_t bufLen, ST25R95_Protocol protocol, uint32_t flags);
-NFC_OpResult ST25R95_IO_SPI_PrepareRx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes);
+NFC_OpResult ST25R95_IO_SPI_Prepare_Rx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes);
 NFC_OpResult ST25R95_IO_SPI_Complete_Rx(uint8_t* p_errno);
 NFC_OpResult ST25R95_IO_SPI_Idle(uint8_t dacDataL, uint8_t dacDataH, uint8_t WUPeriod);
 NFC_OpResult ST25R95_IO_SPI_Get_Idle_Response(void);
@@ -209,9 +211,10 @@ NFC_OpResult ST25R95_IO_Get_BitRate(ST25R95_BitRate* pTxBR, ST25R95_BitRate* pRx
 NFC_OpResult ST25R95_IO_Init(void);
 NFC_OpResult ST25R95_IO_DeInit(void);
 
-
 #ifdef __cplusplus
 }
 #endif
+
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95
 
 #endif /* ST25R95_IO_H */

@@ -51,6 +51,8 @@
 
 #include "ST25R95.h"
 
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
+
 static uint8_t EchoCommand[1] = {ST25R95_COMMAND_ECHO};
 static uint8_t Idle[] = {ST25R95_COMMAND_IDLE, 0x0E, 0x0A, 0x21, 0x00, 0x38, 0x01, 0x18, 0x00, 0x20, 0x60, 0x60, 0x74, 0x84, 0x3F, 0x00};
 
@@ -550,7 +552,7 @@ NFC_OpResult ST25R95_IO_SPI_Send_Data(uint8_t *buf, uint8_t bufLen, ST25R95_Prot
     return NFC_OK;
 }
 
-NFC_OpResult ST25R95_IO_SPI_PrepareRx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes)
+NFC_OpResult ST25R95_IO_SPI_Prepare_Rx(ST25R95_Protocol protocol, uint8_t *rxBuf, uint16_t rxBufLen, uint16_t *rxRcvdLen, uint32_t flags, uint8_t *additionalRespBytes)
 {
     st25r95SPIRxCtx.protocol            = protocol;
     st25r95SPIRxCtx.rxBuf               = rxBuf;
@@ -1178,3 +1180,5 @@ NFC_OpResult ST25R95_IO_DeInit(void)
 
     return NFC_OK;
 }
+
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95

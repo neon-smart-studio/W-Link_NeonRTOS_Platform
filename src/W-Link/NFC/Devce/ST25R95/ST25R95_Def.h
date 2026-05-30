@@ -41,6 +41,8 @@
 
 #include "NFC/NFC_Def.h"
 
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
+
 #define ST25R95_ERRCODE_NONE                             0x00 /*!< no error occurred */
 #define ST25R95_ERRCODE_FRAMEOKADDITIONALINFO            0x80 /*!< Frame correctly received (additionally see CRC/Parity information) */
 #define ST25R95_ERRCODE_INVALIDCMDLENGHT                 0x82 /*!< Invalid command length */
@@ -123,5 +125,7 @@ typedef enum {
   ST25R95_FeliCa_8_Slots   =  7,   /*!< TSN with number of Time Slots: 8  */
   ST25R95_FeliCa_16_Slots  =  15   /*!< TSN with number of Time Slots: 16 */
 } ST25R95_FeliCaPollSlots;
+
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95
 
 #endif // ST25R95_DEF_H

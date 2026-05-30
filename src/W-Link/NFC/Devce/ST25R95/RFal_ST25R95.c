@@ -225,6 +225,20 @@ NFC_OpResult RFal_Init(void)
 }
 
 /*******************************************************************************/
+NFC_OpResult RFal_DeInit(void)
+{
+  /* Ensure that no previous operation is still ongoing */
+  if (RFal_ChipIsBusy()) {
+    return NFC_RequestError;
+  }
+
+  gRFAL.state = RFAL_STATE_IDLE;
+
+  /* Deinitialize chip */
+  return ST25R95_IO_DeInit();
+}
+
+/*******************************************************************************/
 NFC_OpResult RFal_Calibrate(void)
 {
   return (NFC_OK);
@@ -264,20 +278,6 @@ void RFal_SetPostTxRxCallback(RFal_PostTxRxCallback pFunc)
 void RFal_SetLmEonCallback(RFal_LmEonCallback pFunc)
 {
   return;   /* NFC_Unsupport */
-}
-
-/*******************************************************************************/
-NFC_OpResult RFal_DeInit(void)
-{
-  /* Ensure that no previous operation is still ongoing */
-  if (RFal_ChipIsBusy()) {
-    return NFC_RequestError;
-  }
-
-  gRFAL.state = RFAL_STATE_IDLE;
-
-  /* Deinitialize chip */
-  return RFal_IO_DeInit();
 }
 
 /*******************************************************************************/
@@ -744,7 +744,7 @@ void RFal_TransceiveTx(void)
       /*******************************************************************************/
       /* Prepare Rx                                                                  */
       /*******************************************************************************/
-      ST25R95_IO_SPI_PrepareRx(
+      ST25R95_IO_SPI_Prepare_Rx(
         gRFAL.protocol,
         gRFAL.TxRx.ctx.rxBuf,
         RFal_ConvBitsToBytes(gRFAL.TxRx.ctx.rxBufLen),

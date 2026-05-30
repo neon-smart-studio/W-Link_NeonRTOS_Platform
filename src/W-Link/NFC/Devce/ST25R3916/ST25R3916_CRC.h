@@ -41,6 +41,8 @@
 
 #include <stdint.h>
 
+#if defined(CONFIG_NFC_READER_DEVICE_ST25R3916) || defined(CONFIG_NFC_READER_DEVICE_ST25R3916B)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -50,5 +52,7 @@ uint16_t ST25R3916_CRC_CalculateCcitt(uint16_t preloadValue, const uint8_t *buf,
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* CONFIG_NFC_READER_DEVICE_ST25R3916 || CONFIG_NFC_READER_DEVICE_ST25R3916B */
 
 #endif // ST25R3916_CRC_H

@@ -34,6 +34,33 @@ void SysCtrl_Init()
 
     /* Lock protected registers */
     SYS_LockReg();
+
+
+    /* Enable EBI module clock */
+    CLK_EnableModuleClock(EBI_MODULE);
+
+    /* 設定 EBI pins multi-function */
+    /* 這裡要依你的板子 schematic 設：
+       AD0~AD15 / A0~Ax / nCS / nOE / nWE
+    */
+
+#ifdef CONFIG_DEVICE_HAS_EXT_SRAM
+    /* 開 EBI Bank0，16-bit SRAM，normal mode，CS active low */
+    EBI_Open(
+        EBI_BANK0,
+        EBI_BUSWIDTH_16BIT,
+        EBI_TIMING_NORMAL,
+        EBI_SEPARATEMODE_DISABLE,
+        EBI_CS_ACTIVE_LOW
+    );
+
+    /* 如果不穩，可以把 timing 放慢 */
+    EBI_SetBusTiming(
+        EBI_BANK0,
+        EBI_TIMING_NORMAL,
+        1
+    );
+#endif
 }
 
 #endif // DEVICE_NUC4x2

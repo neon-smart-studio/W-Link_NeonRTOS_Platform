@@ -51,6 +51,8 @@
 
 #include "ST25R3916_IO.h"
 
+#if defined(CONFIG_NFC_READER_DEVICE_ST25R3916) || defined(CONFIG_NFC_READER_DEVICE_ST25R3916B)
+
 #define ST25R3916_OPTIMIZE              true                           /*!< Optimization switch: false always write value to register      */
 #define ST25R3916_I2C_ADDR              (0xA0U >> 1)                   /*!< ST25R3916's default I2C 8bit address                                */
 #define ST25R3916_REG_LEN               1U                             /*!< Byte length of a ST25R3916 register                            */
@@ -1247,3 +1249,5 @@ NFC_OpResult ST25R3916_IO_DeInit()
 
     return NFC_OK;
 }
+
+#endif /* CONFIG_NFC_READER_DEVICE_ST25R3916 || CONFIG_NFC_READER_DEVICE_ST25R3916B */

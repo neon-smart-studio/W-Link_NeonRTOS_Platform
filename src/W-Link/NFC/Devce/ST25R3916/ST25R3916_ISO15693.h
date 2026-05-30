@@ -44,6 +44,8 @@
 
 #include "ST25R3916_Def.h"
 
+#if defined(CONFIG_NFC_READER_DEVICE_ST25R3916) || defined(CONFIG_NFC_READER_DEVICE_ST25R3916B)
+
 #define ISO15693_REQ_FLAG_TWO_SUBCARRIERS 0x01U   /*!< Flag indication that communication uses two subcarriers */
 #define ISO15693_REQ_FLAG_HIGH_DATARATE   0x02U   /*!< Flag indication that communication uses high bitrate    */
 #define ISO15693_MASK_FDT_LISTEN         (65)     /*!< t1min = 308,2us = 4192/fc = 65.5 * 64/fc                */
@@ -95,5 +97,7 @@ NFC_OpResult ST25R3916_ISO15693_VICCDecode(const uint8_t *inBuf,
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* CONFIG_NFC_READER_DEVICE_ST25R3916 || CONFIG_NFC_READER_DEVICE_ST25R3916B */
 
 #endif /* ST25R3916_ISO15693 */

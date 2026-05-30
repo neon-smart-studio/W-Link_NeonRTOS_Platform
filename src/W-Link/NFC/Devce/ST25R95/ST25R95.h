@@ -46,6 +46,8 @@
 
 #include "ST25R95_IO.h"
 
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
+
 #define ST25R95_PROTOCOLSELECT_BR_OFFSET                (3U) /*!< Bit Rate offset in ProtocolSelect Command */
 
 #ifdef __cplusplus
@@ -66,5 +68,7 @@ bool ST25R95_CheckChipID(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95
 
 #endif /* ST25R95_H */

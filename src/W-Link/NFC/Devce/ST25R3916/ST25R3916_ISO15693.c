@@ -47,6 +47,8 @@
 
 #include "ST25R3916_ISO15693.h"
 
+#if defined(CONFIG_NFC_READER_DEVICE_ST25R3916) || defined(CONFIG_NFC_READER_DEVICE_ST25R3916B)
+
 //#define ISO_15693_DEBUG dbgLog
 #define ISO_15693_DEBUG(...)   /*!< Macro for the log method  */
 
@@ -414,3 +416,5 @@ NFC_OpResult ST25R3916_ISO15693_VICCDecode(const uint8_t *inBuf,
 
   return err;
 }
+
+#endif /* CONFIG_NFC_READER_DEVICE_ST25R3916 || CONFIG_NFC_READER_DEVICE_ST25R3916B */

@@ -52,6 +52,8 @@
 
 #include "ST25R95.h"
 
+#ifdef CONFIG_NFC_READER_DEVICE_ST25R95
+
 static uint8_t ST25R95_CommandIDN[] = {ST25R95_COMMAND_IDN, 0x00};
 
 static uint8_t ProtocolSelectCommandFieldOff[]     = {0x02, 0x02, 0x00, 0x00};
@@ -596,3 +598,5 @@ NFC_OpResult ST25R95_Write_Reg(ST25R95_Protocol protocol, uint16_t reg, uint8_t 
 
   return NFC_OK;
 }
+
+#endif //CONFIG_NFC_READER_DEVICE_ST25R95

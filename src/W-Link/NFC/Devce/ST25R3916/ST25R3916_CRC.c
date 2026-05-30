@@ -38,6 +38,8 @@
 
 #include <stdint.h>
 
+#if defined(CONFIG_NFC_READER_DEVICE_ST25R3916) || defined(CONFIG_NFC_READER_DEVICE_ST25R3916B)
+
 static uint16_t ST25R3916_CRC_UpdateCcitt(uint16_t crcSeed, uint8_t dataByte)
 {
   uint16_t crc = crcSeed;
@@ -63,3 +65,4 @@ uint16_t ST25R3916_CRC_CalculateCcitt(uint16_t preloadValue, const uint8_t *buf,
   return crc;
 }
 
+#endif /* CONFIG_NFC_READER_DEVICE_ST25R3916 || CONFIG_NFC_READER_DEVICE_ST25R3916B */

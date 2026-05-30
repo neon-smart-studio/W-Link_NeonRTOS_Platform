@@ -324,7 +324,7 @@ int main(void) {
         NULL
     );
 */
-    NFC_Demo_Init();
+    //NFC_Demo_Init();
 
     // 啟動 NeonRTOS 調度器
     NeonRTOS_start();

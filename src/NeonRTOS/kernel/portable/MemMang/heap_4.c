@@ -37,6 +37,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "soc.h"
+
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
  * all the API functions to use the MPU wrappers.  That should only be done when
  * task.h is included from an application file. */
@@ -92,7 +94,13 @@
 * heap - probably so it can be placed in a special segment or address. */
     extern uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #else
+#ifdef CONFIG_DEVICE_HAS_EXT_SRAM
+#ifdef DEVICE_NUVOTON
+    PRIVILEGED_DATA static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ] __attribute__((section(".ext_sram")));
+#endif
+#else
     PRIVILEGED_DATA static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+#endif
 #endif /* configAPPLICATION_ALLOCATED_HEAP */
 
 /* Define the linked list structure.  This is used to link free blocks in order

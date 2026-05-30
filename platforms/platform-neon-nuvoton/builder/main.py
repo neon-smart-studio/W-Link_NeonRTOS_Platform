@@ -1,5 +1,5 @@
 from os.path import join, dirname, abspath, isfile
-from SCons.Script import DefaultEnvironment, AlwaysBuild
+from SCons.Script import DefaultEnvironment
 
 env = DefaultEnvironment()
 board = env.BoardConfig()
@@ -29,9 +29,26 @@ env.Replace(
 )
 
 env.AppendUnique(
+    CFLAGS=[
+        "-ffunction-sections",
+        "-fdata-sections",
+    ],
+    CXXFLAGS=[
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-exceptions",
+        "-fno-rtti",
+    ],
+    ASFLAGS=[
+        "-ffunction-sections",
+        "-fdata-sections",
+    ],
     LINKFLAGS=[
         "--specs=nano.specs",
-        "--specs=nosys.specs"
+        "--specs=nosys.specs",
+        "-Wl,--gc-sections",
+        "-Wl,-Map,firmware.map",
+        "-Wl,--print-memory-usage",
     ]
 )
 
@@ -50,7 +67,6 @@ if ldscript:
     )
 
 env.Replace(
-    GDB="arm-none-eabi-gdb",
     PROGNAME="firmware",
     PROGSUFFIX=".elf"
 )
@@ -58,7 +74,6 @@ env.Replace(
 env.BuildFrameworks(env.get("PIOFRAMEWORK"))
 
 target_elf = env.BuildProgram()
-
 elf_path = str(target_elf[0]).replace("\\", "/")
 
 upload_cmd = (
@@ -72,7 +87,7 @@ upload_cmd = (
     '-c "program ' + elf_path + ' verify reset exit"'
 )
 
-upload_target = env.Alias(
+env.Alias(
     "upload",
     target_elf,
     env.VerboseAction(upload_cmd, "Uploading " + elf_path)

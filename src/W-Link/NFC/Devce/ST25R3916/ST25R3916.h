@@ -46,6 +46,8 @@
 
 #include "ST25R3916_IO.h"
 
+#if defined(CONFIG_NFC_READER_DEVICE_ST25R3916) || defined(CONFIG_NFC_READER_DEVICE_ST25R3916B)
+
 #define ST25R3916_TOUT_MEASURE_VDD            100U    /*!< Max duration time of Measure Power Supply command  Datasheet: 25us  */
 #define ST25R3916_TOUT_MEASURE_AMPLITUDE      10U     /*!< Max duration time of Measure Amplitude command     Datasheet: 25us  */
 #define ST25R3916_TOUT_MEASURE_PHASE          10U     /*!< Max duration time of Measure Phase command         Datasheet: 25us  */
@@ -138,5 +140,7 @@ NFC_OpResult ST25R3916_SetAntennaMode(bool single, bool rfiox);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* CONFIG_NFC_READER_DEVICE_ST25R3916 || CONFIG_NFC_READER_DEVICE_ST25R3916B */
 
 #endif // ST25R3916_H

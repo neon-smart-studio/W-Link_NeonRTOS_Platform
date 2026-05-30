@@ -51,6 +51,8 @@
 
 #include "ST25R3916.h"
 
+#if defined(CONFIG_NFC_READER_DEVICE_ST25R3916) || defined(CONFIG_NFC_READER_DEVICE_ST25R3916B)
+
 #define ST25R3916_NRT_MAX                     0xFFFFU /*!< Max Register value of NRT                                           */
 
 static uint32_t gST25R3916NRT_64fcs = 0;
@@ -586,3 +588,5 @@ NFC_OpResult ST25R3916_SetAntennaMode(bool single, bool rfiox)
   ST25R3916_IO_ChangeRegisterBits(ST25R3916_REG_IO_CONF1, (ST25R3916_REG_IO_CONF1_single | ST25R3916_REG_IO_CONF1_rfo2), val);
   return NFC_OK;
 }
+
+#endif /* CONFIG_NFC_READER_DEVICE_ST25R3916 || CONFIG_NFC_READER_DEVICE_ST25R3916B */

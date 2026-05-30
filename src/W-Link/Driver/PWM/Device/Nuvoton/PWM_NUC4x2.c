@@ -10,7 +10,7 @@
 #include "Timer/Timer.h"
 #include "PWM/PWM.h"
 
-#ifdef NUC472
+#if defined(NUC442) || defined(NUC472)
 
 #include "PWM_Nuvoton.h"
 
@@ -466,4 +466,4 @@ uint32_t PWM_Channel_To_Mask(hwPWM_Channel channel_index)
     }
 }
 
-#endif /* NUC472 */
+#endif //NUC442 || NUC472

@@ -6,6 +6,6 @@
 
 #if defined(NUC442) || defined(NUC472)
 #include "I2C_Pin_NUC4x2.h"
-#endif
+#endif //NUC442 || NUC472
 
 #endif //I2C_PIN_NUVOTON_H

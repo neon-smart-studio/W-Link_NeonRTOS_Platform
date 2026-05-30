@@ -6,7 +6,7 @@
 #include "NeonRTOS.h"
 #include "Timer/Timer.h"
 
-#ifdef NUC472
+#if defined(NUC442) || defined(NUC472)
 
 #include "Timer_Nuvoton.h"
 
@@ -303,4 +303,4 @@ void Timer_NVIC_Disable(hwTimer_Index index)
     }
 }
 
-#endif /* NUC472 */
+#endif // NUC442 || NUC472

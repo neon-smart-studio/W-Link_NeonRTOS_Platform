@@ -3,7 +3,7 @@
 
 #include "soc.h"
 
-#ifdef NUC472
+#if defined(NUC442) || defined(NUC472)
 
 #include "RTC/RTC.h"
 #include "RTC_Nuvoton.h"
@@ -134,4 +134,4 @@ hwRTC_OpResult RTC_Device_ClearAlarm(
     return hwRTC_OK;
 }
 
-#endif /* NUC472 */
+#endif // NUC442 || NUC472

@@ -293,4 +293,4 @@ void ADC_NVIC_DeInit()
     NVIC_ClearPendingIRQ(ADC_IRQn);
 }
 
-#endif
+#endif // NUC442 || NUC472

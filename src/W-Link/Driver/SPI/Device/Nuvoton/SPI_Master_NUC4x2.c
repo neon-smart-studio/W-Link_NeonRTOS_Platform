@@ -6,7 +6,7 @@
 
 #include "SPI/SPI_Master.h"
 
-#ifdef NUC472
+#if defined(NUC442) || defined(NUC472)
 
 #include "GPIO/Device/Nuvoton/GPIO_Nuvoton.h"
 
@@ -764,4 +764,4 @@ void SPI_NVIC_DeInit(hwSPI_Index index)
     }
 }
 
-#endif // NUC472
+#endif // NUC442 || NUC472

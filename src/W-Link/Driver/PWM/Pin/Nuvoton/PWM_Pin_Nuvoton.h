@@ -4,8 +4,8 @@
 
 #include "soc.h"
 
-#ifdef NUC472
+#if defined(NUC442) || defined(NUC472)
 #include "PWM_Pin_NUC4x2.h"
-#endif //NUC4x2
+#endif //NUC442 || NUC472
 
 #endif //PWM_PIN_NUVOTON_H

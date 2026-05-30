@@ -7,7 +7,7 @@
 
 #include "NeonRTOS.h"
 
-#ifdef NUC472
+#if defined(NUC442) || defined(NUC472)
 
 #include "GPIO/Device/Nuvoton/GPIO_Nuvoton.h"
 
@@ -788,4 +788,4 @@ void UART5_IRQHandler(void)
 }
 #endif
 
-#endif /* NUC472 */
+#endif // NUC442 || NUC472

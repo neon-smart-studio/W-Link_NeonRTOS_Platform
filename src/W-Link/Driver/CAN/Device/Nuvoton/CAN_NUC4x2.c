@@ -347,4 +347,4 @@ void CAN_NVIC_DeInit(hwCAN_Index index)
     }
 }
 
-#endif
+#endif // NUC442 || NUC472

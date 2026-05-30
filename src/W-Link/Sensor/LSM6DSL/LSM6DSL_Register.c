@@ -190,7 +190,7 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FS_XL(LSM6DSL_ACC_GYRO_FS_XL_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_GetRawAccp_data(uint8_t *buff)
+LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_GetRawAccData(uint8_t *buff)
 {
   LSM6DSL_OpStatus op_status;
 
@@ -279,7 +279,7 @@ LSM6DSL_OpStatus LSM6DSL_ACC_Get_Acceleration(int *buff, bool from_fifo)
   }
   else
   {
-    op_status = LSM6DSL_ACC_GYRO_GetRawAccp_data(raw_DATA_tmp.u8bit);
+    op_status = LSM6DSL_ACC_GYRO_GetRawAccData(raw_DATA_tmp.u8bit);
     if (op_status < LSM6DSL_OK)
     {
       return op_status;
@@ -420,7 +420,7 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FS_G(LSM6DSL_ACC_GYRO_FS_G_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_GetRawGyrop_data(uint8_t *buff)
+LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_GetRawGyroData(uint8_t *buff)
 {
   LSM6DSL_OpStatus op_status;
 
@@ -6203,7 +6203,7 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_SH0_ReadMem(uint8_t SlvAddr, uint8_t reg, uint
   }
 
   /* Wait until operation is not completed */
-  op_status = LSM6DSL_ACC_GYRO_GetRawAccp_data(dummy);
+  op_status = LSM6DSL_ACC_GYRO_GetRawAccData(dummy);
   if (op_status < LSM6DSL_OK)
   {
     return op_status;
@@ -6321,7 +6321,7 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_SH0_WriteByte(uint8_t SlvAddr, uint8_t reg, ui
   }
 
   /* Wait until operation is not completed */
-  op_status = LSM6DSL_ACC_GYRO_GetRawAccp_data(dummy);
+  op_status = LSM6DSL_ACC_GYRO_GetRawAccData(dummy);
   if (op_status < LSM6DSL_OK)
   {
     return op_status;

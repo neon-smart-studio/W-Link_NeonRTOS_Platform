@@ -786,4 +786,4 @@ void I2C_NVIC_DeInit(hwI2C_Index index)
     }
 }
 
-#endif // DEVICE_NUC4x2
+#endif // NUC442 || NUC472

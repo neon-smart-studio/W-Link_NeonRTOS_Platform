@@ -4,8 +4,8 @@
 
 #include "SPI_Pin_Nuvoton_Def.h"
 
-#ifdef NUC472
+#if defined(NUC442) || defined(NUC472)
 #include "SPI_Pin_NUC4x2.h"
-#endif //NUC472
+#endif //NUC442 || NUC472
 
 #endif //SPI_PIN_NUVOTON_H

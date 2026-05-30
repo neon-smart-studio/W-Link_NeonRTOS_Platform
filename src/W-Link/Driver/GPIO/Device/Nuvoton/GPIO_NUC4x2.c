@@ -196,4 +196,4 @@ void GPIO_NVIC_DeInit(hwGPIO_Int_Pin irq_pin)
     if(port == GPI) NVIC_DisableIRQ(GPI_IRQn);
 }
 
-#endif
+#endif //NUC442 || NUC472

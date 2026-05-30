@@ -59,8 +59,6 @@
 #include "NFC/NDef/NDef_Poller.h"
 #include "NFC/NDef/NDef_Types.h"
 
-#if 0
-
 /*
 ******************************************************************************
 * GLOBAL DEFINES
@@ -1590,5 +1588,3 @@ void NFC_Demo_Init(void) {
     );
 }
 //
-
-#endif

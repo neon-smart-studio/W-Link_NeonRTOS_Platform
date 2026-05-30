@@ -27,6 +27,9 @@
 
 static bool DMA_Channel_Direction[hwDMA_Stream_Index_MAX] = {false};
 
+#define DMA_STREAM_LOCK(stream_index) if (NeonRTOS_LockObjLock(&DMA_Stream_Mutex[(stream_index)], DMA_MUTEX_TIMEOUT) != NeonRTOS_OK) { return hwDMA_MutexTimeout; }
+#define DMA_STREAM_UNLOCK(stream_index) if (NeonRTOS_LockObjUnlock(&DMA_Stream_Mutex[(stream_index)]) != NeonRTOS_OK) { return hwDMA_MutexTimeout; }
+
 static void* DMA_Get_Instance(hwDMA_Stream_Index stream_index)
 {
     DMA_Stream_TypeDef *dma_soc_stream_base = NULL;
@@ -63,13 +66,9 @@ static void* DMA_Get_Instance(hwDMA_Stream_Index stream_index)
     }
 }
 
-hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index,
-                               hwDMA_Peripheral_Direction dir,
-                               hwUART_Index index)
+hwDMA_OpResult DMA_DeConfig(hwDMA_Stream_Index stream_index)
 {
-    if (dir >= hwDMA_Peripheral_Direction_MAX ||
-        index >= hwUART_Index_MAX ||
-        stream_index >= hwDMA_Stream_Index_MAX)
+    if (stream_index >= hwDMA_Stream_Index_MAX)
     {
         return hwDMA_InvalidParameter;
     }
@@ -79,235 +78,278 @@ hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index,
         return hwDMA_NotInit;
     }
 
-    g_dma[stream_index].Instance = DMA_Get_Instance(stream_index);
-    if (g_dma[stream_index].Instance == NULL)
+    DMA_STREAM_LOCK(stream_index);
+
+    if (g_dma[stream_index].Instance != NULL)
     {
-        return hwDMA_InvalidParameter;
+        HAL_DMA_Abort(&g_dma[stream_index]);
+
+        if (HAL_DMA_DeInit(&g_dma[stream_index]) != HAL_OK)
+        {
+            DMA_STREAM_UNLOCK(stream_index);
+            return hwDMA_HwError;
+        }
     }
 
-    g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
-    g_dma[stream_index].Init.MemBurst            = DMA_MBURST_SINGLE;
-    g_dma[stream_index].Init.PeriphBurst         = DMA_PBURST_SINGLE;
-    g_dma[stream_index].Init.PeriphInc           = DMA_PINC_DISABLE;
-    g_dma[stream_index].Init.MemInc              = DMA_MINC_ENABLE;
-    g_dma[stream_index].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    g_dma[stream_index].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
-    g_dma[stream_index].Init.Mode                = DMA_NORMAL;
-    g_dma[stream_index].Init.Priority            = DMA_PRIORITY_HIGH;
+    memset(&g_dma[stream_index], 0, sizeof(DMA_HandleTypeDef));
 
-    switch (dir)
-    {
-        case hwDMA_Peripheral_Direction_TX:
-            g_dma[stream_index].Init.Direction = DMA_MEMORY_TO_PERIPH;
+    DMA_Channel_Direction[stream_index] = hwDMA_Peripheral_Direction_MAX;
 
-            switch (index)
-            {
-                case hwUART_Index_0:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_USART1_TX;
-                    break;
-                case hwUART_Index_1:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_USART2_TX;
-                    break;
-                case hwUART_Index_2:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_USART3_TX;
-                    break;
-                case hwUART_Index_3:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_UART4_TX;
-                    break;
-                case hwUART_Index_4:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_UART5_TX;
-                    break;
-                case hwUART_Index_5:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_USART6_TX;
-                    break;
-                case hwUART_Index_6:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_UART7_TX;
-                    break;
-                case hwUART_Index_7:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_UART8_TX;
-                    break;
-                default:
-                    return hwDMA_InvalidParameter;
-            }
-            break;
-
-        case hwDMA_Peripheral_Direction_RX:
-            g_dma[stream_index].Init.Direction = DMA_PERIPH_TO_MEMORY;
-
-            switch (index)
-            {
-                case hwUART_Index_0:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_USART1_RX;
-                    break;
-                case hwUART_Index_1:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_USART2_RX;
-                    break;
-                case hwUART_Index_2:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_USART3_RX;
-                    break;
-                case hwUART_Index_3:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_UART4_RX;
-                    break;
-                case hwUART_Index_4:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_UART5_RX;
-                    break;
-                case hwUART_Index_5:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_USART6_RX;
-                    break;
-                case hwUART_Index_6:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_UART7_RX;
-                    break;
-                case hwUART_Index_7:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_UART8_RX;
-                    break;
-                default:
-                    return hwDMA_InvalidParameter;
-            }
-            break;
-
-        default:
-            return hwDMA_InvalidParameter;
-    }
-
-    if (HAL_DMA_Init(&g_dma[stream_index]) != HAL_OK)
-    {
-        return hwDMA_HwError;
-    }
-
-    switch (dir)
-    {
-        case hwDMA_Peripheral_Direction_TX:
-            __HAL_LINKDMA(&g_uart[index], hdmatx, g_dma[stream_index]);
-            break;
-
-        case hwDMA_Peripheral_Direction_RX:
-            __HAL_LINKDMA(&g_uart[index], hdmarx, g_dma[stream_index]);
-            break;
-
-        default:
-            return hwDMA_InvalidParameter;
-    }
-
-    DMA_Channel_Direction[stream_index] = dir;
+    DMA_STREAM_UNLOCK(stream_index);
 
     return hwDMA_OK;
+}
+
+hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index, hwDMA_Peripheral_Direction dir, hwUART_Index index)
+{
+        if(dir>=hwDMA_Peripheral_Direction_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
+
+        if(stream_index>=hwDMA_Stream_Index_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
+
+        if(index>=hwUART_Index_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
+
+        if (DMA_Stream_Init_Status[stream_index] == false)
+        {
+                return hwDMA_NotInit;
+        }
+
+        g_dma[stream_index].Instance = DMA_Get_Instance(stream_index);
+        if (g_dma[stream_index].Instance == NULL)
+        {
+                return hwDMA_InvalidParameter;
+        }
+
+        DMA_STREAM_LOCK(stream_index);
+
+        g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
+        g_dma[stream_index].Init.MemBurst            = DMA_MBURST_SINGLE;
+        g_dma[stream_index].Init.PeriphBurst         = DMA_PBURST_SINGLE;
+        g_dma[stream_index].Init.PeriphInc           = DMA_PINC_DISABLE;
+        g_dma[stream_index].Init.MemInc              = DMA_MINC_ENABLE;
+        g_dma[stream_index].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+        g_dma[stream_index].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+        g_dma[stream_index].Init.Mode                = DMA_NORMAL;
+        g_dma[stream_index].Init.Priority            = DMA_PRIORITY_HIGH;
+
+        switch (dir)
+        {
+                case hwDMA_Peripheral_Direction_TX:
+                        g_dma[stream_index].Init.Direction = DMA_MEMORY_TO_PERIPH;
+
+                        switch (index)
+                        {
+                                case hwUART_Index_0:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART1_TX;
+                                        break;
+                                case hwUART_Index_1:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART2_TX;
+                                        break;
+                                case hwUART_Index_2:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART3_TX;
+                                        break;
+                                case hwUART_Index_3:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART4_TX;
+                                        break;
+                                case hwUART_Index_4:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART5_TX;
+                                        break;
+                                case hwUART_Index_5:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART6_TX;
+                                        break;
+                                case hwUART_Index_6:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART7_TX;
+                                        break;
+                                case hwUART_Index_7:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART8_TX;
+                                        break;
+                        }
+                        break;
+
+                case hwDMA_Peripheral_Direction_RX:
+                        g_dma[stream_index].Init.Direction = DMA_PERIPH_TO_MEMORY;
+
+                        switch (index)
+                        {
+                                case hwUART_Index_0:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART1_RX;
+                                        break;
+                                case hwUART_Index_1:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART2_RX;
+                                        break;
+                                case hwUART_Index_2:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART3_RX;
+                                        break;
+                                case hwUART_Index_3:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART4_RX;
+                                        break;
+                                case hwUART_Index_4:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART5_RX;
+                                        break;
+                                case hwUART_Index_5:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART6_RX;
+                                        break;
+                                case hwUART_Index_6:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART7_RX;
+                                        break;
+                                case hwUART_Index_7:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART8_RX;
+                                        break;
+                        }
+                        break;
+        }
+
+        if (HAL_DMA_Init(&g_dma[stream_index]) != HAL_OK)
+        {
+                DMA_STREAM_UNLOCK(stream_index);
+                return hwDMA_HwError;
+        }
+
+        switch (dir)
+        {
+                case hwDMA_Peripheral_Direction_TX:
+                        __HAL_LINKDMA(&g_uart[index], hdmatx, g_dma[stream_index]);
+                        break;
+
+                case hwDMA_Peripheral_Direction_RX:
+                        __HAL_LINKDMA(&g_uart[index], hdmarx, g_dma[stream_index]);
+                        break;
+        }
+
+        DMA_Channel_Direction[stream_index] = dir;
+
+        DMA_STREAM_UNLOCK(stream_index);
+        
+        return hwDMA_OK;
 }
 
 hwDMA_OpResult DMA_Config_I2C(hwDMA_Stream_Index stream_index, hwDMA_Peripheral_Direction dir, hwI2C_Index index)
 {
-    if (dir >= hwDMA_Peripheral_Direction_MAX ||
-        index >= hwI2C_Index_MAX ||
-        stream_index >= hwDMA_Stream_Index_MAX)
-    {
-        return hwDMA_InvalidParameter;
-    }
+        if(dir>=hwDMA_Peripheral_Direction_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-    if (DMA_Stream_Init_Status[stream_index] == false)
-    {
-        return hwDMA_NotInit;
-    }
+        if(stream_index>=hwDMA_Stream_Index_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-    g_dma[stream_index].Instance = DMA_Get_Instance(stream_index);
-    if(g_dma[stream_index].Instance == NULL)
-    {
-        return hwDMA_InvalidParameter;
-    }
+        if(index>=hwI2C_Index_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-    g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
-    g_dma[stream_index].Init.MemBurst            = DMA_MBURST_SINGLE;
-    g_dma[stream_index].Init.PeriphBurst         = DMA_PBURST_SINGLE;
-    g_dma[stream_index].Init.PeriphInc           = DMA_PINC_DISABLE;
-    g_dma[stream_index].Init.MemInc              = DMA_MINC_ENABLE;
-    g_dma[stream_index].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    g_dma[stream_index].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
-    g_dma[stream_index].Init.Mode                = DMA_NORMAL;
-    g_dma[stream_index].Init.Priority            = DMA_PRIORITY_HIGH;
+        if (DMA_Stream_Init_Status[stream_index] == false)
+        {
+                return hwDMA_NotInit;
+        }
 
-    switch (dir)
-    {
-        case hwDMA_Peripheral_Direction_TX:
-            g_dma[stream_index].Init.Direction = DMA_MEMORY_TO_PERIPH;
+        g_dma[stream_index].Instance = DMA_Get_Instance(stream_index);
+        if(g_dma[stream_index].Instance == NULL)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-            switch (index)
-            {
-                case hwI2C_Index_0:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_I2C1_TX;
-                    break;
+        DMA_STREAM_LOCK(stream_index);
 
-                case hwI2C_Index_1:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_I2C2_TX;
-                    break;
+        g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
+        g_dma[stream_index].Init.MemBurst            = DMA_MBURST_SINGLE;
+        g_dma[stream_index].Init.PeriphBurst         = DMA_PBURST_SINGLE;
+        g_dma[stream_index].Init.PeriphInc           = DMA_PINC_DISABLE;
+        g_dma[stream_index].Init.MemInc              = DMA_MINC_ENABLE;
+        g_dma[stream_index].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+        g_dma[stream_index].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+        g_dma[stream_index].Init.Mode                = DMA_NORMAL;
+        g_dma[stream_index].Init.Priority            = DMA_PRIORITY_HIGH;
 
-                case hwI2C_Index_2:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_I2C3_TX;
-                    break;
+        switch (dir)
+        {
+                case hwDMA_Peripheral_Direction_TX:
+                        g_dma[stream_index].Init.Direction = DMA_MEMORY_TO_PERIPH;
 
-                case hwI2C_Index_3:
-                    g_dma[stream_index].Init.Request = BDMA_REQUEST_I2C4_TX;
-                    break;
+                        switch (index)
+                        {
+                                case hwI2C_Index_0:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C1_TX;
+                                        break;
+
+                                case hwI2C_Index_1:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C2_TX;
+                                        break;
+
+                                case hwI2C_Index_2:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C3_TX;
+                                        break;
+
+                                case hwI2C_Index_3:
+                                        g_dma[stream_index].Init.Request = BDMA_REQUEST_I2C4_TX;
+                                        break;
+                        }
+                        break;
+
+                case hwDMA_Peripheral_Direction_RX:
+                        g_dma[stream_index].Init.Direction = DMA_PERIPH_TO_MEMORY;
+
+                        switch (index)
+                        {
+                                case hwI2C_Index_0:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C1_RX;
+                                        break;
+
+                                case hwI2C_Index_1:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C2_RX;
+                                        break;
+
+                                case hwI2C_Index_2:
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C3_RX;
+                                        break;
+
+                                case hwI2C_Index_3:
+                                        g_dma[stream_index].Init.Request = BDMA_REQUEST_I2C4_RX;
+                                        break;
+                        }
+                        break;
+        }
+
+        if (HAL_DMA_Init(&g_dma[stream_index]) != HAL_OK)
+        {
+                DMA_STREAM_UNLOCK(stream_index);
+                return hwDMA_HwError;
+        }
+
+        switch (dir)
+        {
+                case hwDMA_Peripheral_Direction_TX:
+                __HAL_LINKDMA(&g_i2c[index], hdmatx, g_dma[stream_index]);
+                break;
+
+                case hwDMA_Peripheral_Direction_RX:
+                __HAL_LINKDMA(&g_i2c[index], hdmarx, g_dma[stream_index]);
+                break;
 
                 default:
-                    return hwDMA_InvalidParameter;
-            }
-            break;
+                return hwDMA_InvalidParameter;
+        }
 
-        case hwDMA_Peripheral_Direction_RX:
-            g_dma[stream_index].Init.Direction = DMA_PERIPH_TO_MEMORY;
+        DMA_Channel_Direction[stream_index] = dir;
 
-            switch (index)
-            {
-                case hwI2C_Index_0:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_I2C1_RX;
-                    break;
+        DMA_STREAM_UNLOCK(stream_index);
 
-                case hwI2C_Index_1:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_I2C2_RX;
-                    break;
-
-                case hwI2C_Index_2:
-                    g_dma[stream_index].Init.Request = DMA_REQUEST_I2C3_RX;
-                    break;
-
-                case hwI2C_Index_3:
-                    g_dma[stream_index].Init.Request = BDMA_REQUEST_I2C4_RX;
-                    break;
-
-                default:
-                    return hwDMA_InvalidParameter;
-            }
-            break;
-
-        default:
-            return hwDMA_InvalidParameter;
-    }
-
-    if (HAL_DMA_Init(&g_dma[stream_index]) != HAL_OK)
-    {
-        return hwDMA_HwError;
-    }
-
-    switch (dir)
-    {
-        case hwDMA_Peripheral_Direction_TX:
-            __HAL_LINKDMA(&g_i2c[index], hdmatx, g_dma[stream_index]);
-            break;
-
-        case hwDMA_Peripheral_Direction_RX:
-            __HAL_LINKDMA(&g_i2c[index], hdmarx, g_dma[stream_index]);
-            break;
-
-        default:
-            return hwDMA_InvalidParameter;
-    }
-
-    DMA_Channel_Direction[stream_index] = dir;
-
-    return hwDMA_OK;
+        return hwDMA_OK;
 }
 
 hwDMA_OpResult DMA_Config_SPI(hwDMA_Stream_Index stream_index, hwDMA_Peripheral_Direction dir, hwSPI_Index index)
 {
-        if(dir>=hwDMA_Peripheral_Direction_MAX || index>=hwSPI_Index_MAX)
+        if(dir>=hwDMA_Peripheral_Direction_MAX)
         {
                 return hwDMA_InvalidParameter;
         }
@@ -332,6 +374,8 @@ hwDMA_OpResult DMA_Config_SPI(hwDMA_Stream_Index stream_index, hwDMA_Peripheral_
         {
                 return hwDMA_InvalidParameter;
         }
+
+        DMA_STREAM_LOCK(stream_index);
 
         g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_ENABLE;
         g_dma[stream_index].Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
@@ -395,7 +439,11 @@ hwDMA_OpResult DMA_Config_SPI(hwDMA_Stream_Index stream_index, hwDMA_Peripheral_
         g_dma[stream_index].Init.Mode                = DMA_NORMAL;
         g_dma[stream_index].Init.Priority            = DMA_PRIORITY_HIGH;
 
-        HAL_DMA_Init(&g_dma[stream_index]);
+        if (HAL_DMA_Init(&g_dma[stream_index]) != HAL_OK)
+        {
+                DMA_STREAM_UNLOCK(stream_index);
+                return hwDMA_HwError;
+        }
 
         switch(dir)
         {
@@ -409,104 +457,126 @@ hwDMA_OpResult DMA_Config_SPI(hwDMA_Stream_Index stream_index, hwDMA_Peripheral_
 
         DMA_Channel_Direction[stream_index] = dir;
 
+        DMA_STREAM_UNLOCK(stream_index);
+
         return hwDMA_OK;
 }
 
 hwDMA_OpResult DMA_Transfer_UART(hwDMA_Stream_Index stream_index, hwUART_Index index, uint8_t *buf, size_t len)
 {
-    if (stream_index >= hwDMA_Stream_Index_MAX ||
-        index >= hwUART_Index_MAX ||
-        buf == NULL ||
-        len == 0)
-    {
-        return hwDMA_InvalidParameter;
-    }
+        if(DMA_Channel_Direction[stream_index]>=hwDMA_Peripheral_Direction_MAX || buf==NULL)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-    if (DMA_Stream_Init_Status[stream_index] == false)
-    {
-        return hwDMA_NotInit;
-    }
+        if(stream_index>=hwDMA_Stream_Index_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-    switch (DMA_Channel_Direction[stream_index])
-    {
-        case hwDMA_Peripheral_Direction_TX:
-            SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
+        if(index>=hwUART_Index_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-            if (HAL_UART_Transmit_DMA(&g_uart[index], buf, len) != HAL_OK)
-            {
-                return hwDMA_HwError;
-            }
-            break;
+        if(DMA_Stream_Init_Status[stream_index]==false)
+        {
+                return hwDMA_NotInit;
+        }
 
-        case hwDMA_Peripheral_Direction_RX:
-            SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
+        DMA_STREAM_LOCK(stream_index);
 
-            if (HAL_UART_Receive_DMA(&g_uart[index], buf, len) != HAL_OK)
-            {
-                return hwDMA_HwError;
-            }
-            break;
+        switch (DMA_Channel_Direction[stream_index])
+        {
+                case hwDMA_Peripheral_Direction_TX:
+                        SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
 
-        default:
-            return hwDMA_InvalidParameter;
-    }
+                        if (HAL_UART_Transmit_DMA(&g_uart[index], buf, len) != HAL_OK)
+                        {
+                                DMA_STREAM_UNLOCK(stream_index);
+                                return hwDMA_HwError;
+                        }
+                        break;
 
-    while (HAL_UART_GetState(&g_uart[index]) != HAL_UART_STATE_READY) { }
+                case hwDMA_Peripheral_Direction_RX:
+                        SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
 
-    HAL_UART_DMAStop(&g_uart[index]);
+                        if (HAL_UART_Receive_DMA(&g_uart[index], buf, len) != HAL_OK)
+                        {
+                                DMA_STREAM_UNLOCK(stream_index);
+                                return hwDMA_HwError;
+                        }
+                        break;
+        }
 
-    return hwDMA_OK;
+        while (HAL_UART_GetState(&g_uart[index]) != HAL_UART_STATE_READY) { }
+
+        HAL_UART_DMAStop(&g_uart[index]);
+
+        DMA_STREAM_UNLOCK(stream_index);
+
+        return hwDMA_OK;
 }
 
 hwDMA_OpResult DMA_Transfer_I2C(hwDMA_Stream_Index stream_index, hwI2C_Index index, uint16_t dev_addr, uint8_t *buf, size_t len)
 {
-    if (stream_index >= hwDMA_Stream_Index_MAX ||
-        index >= hwI2C_Index_MAX ||
-        buf == NULL ||
-        len == 0)
-    {
-        return hwDMA_InvalidParameter;
-    }
+        if(DMA_Channel_Direction[stream_index]>=hwDMA_Peripheral_Direction_MAX || buf==NULL)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-    if (DMA_Stream_Init_Status[stream_index] == false)
-    {
-        return hwDMA_NotInit;
-    }
+        if(stream_index>=hwDMA_Stream_Index_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-    switch (DMA_Channel_Direction[stream_index])
-    {
-        case hwDMA_Peripheral_Direction_TX:
-            SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
+        if(index>=hwI2C_Index_MAX)
+        {
+                return hwDMA_InvalidParameter;
+        }
 
-            if (HAL_I2C_Master_Transmit_DMA(&g_i2c[index], dev_addr, buf, len) != HAL_OK)
-            {
-                return hwDMA_HwError;
-            }
-            break;
+        if(DMA_Stream_Init_Status[stream_index]==false)
+        {
+                return hwDMA_NotInit;
+        }
 
-        case hwDMA_Peripheral_Direction_RX:
-            SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
+        DMA_STREAM_LOCK(stream_index);
 
-            if (HAL_I2C_Master_Receive_DMA(&g_i2c[index], dev_addr, buf, len) != HAL_OK)
-            {
-                return hwDMA_HwError;
-            }
-            break;
+        switch (DMA_Channel_Direction[stream_index])
+        {
+                case hwDMA_Peripheral_Direction_TX:
+                        SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
 
-        default:
-            return hwDMA_InvalidParameter;
-    }
+                        if (HAL_I2C_Master_Transmit_DMA(&g_i2c[index], dev_addr, buf, len) != HAL_OK)
+                        {
+                                DMA_STREAM_UNLOCK(stream_index);
+                                return hwDMA_HwError;
+                        }
+                        break;
 
-    while (HAL_I2C_GetState(&g_i2c[index]) != HAL_I2C_STATE_READY) { }
+                case hwDMA_Peripheral_Direction_RX:
+                        SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
 
-    HAL_I2C_DMAStop(&g_i2c[index]);
+                        if (HAL_I2C_Master_Receive_DMA(&g_i2c[index], dev_addr, buf, len) != HAL_OK)
+                        {
+                                DMA_STREAM_UNLOCK(stream_index);
+                                return hwDMA_HwError;
+                        }
+                        break;
+        }
 
-    return hwDMA_OK;
+        while (HAL_I2C_GetState(&g_i2c[index]) != HAL_I2C_STATE_READY) { }
+
+        HAL_I2C_DMAStop(&g_i2c[index]);
+
+        DMA_STREAM_UNLOCK(stream_index);
+
+        return hwDMA_OK;
 }
 
 hwDMA_OpResult DMA_Transfer_SPI(hwDMA_Stream_Index stream_index, hwSPI_Index index, uint8_t* buf, size_t len)
 {
-        if(DMA_Channel_Direction[stream_index]>=hwDMA_Peripheral_Direction_MAX || index>=hwSPI_Index_MAX || buf==NULL)
+        if(DMA_Channel_Direction[stream_index]>=hwDMA_Peripheral_Direction_MAX || buf==NULL)
         {
                 return hwDMA_InvalidParameter;
         }
@@ -526,23 +596,37 @@ hwDMA_OpResult DMA_Transfer_SPI(hwDMA_Stream_Index stream_index, hwSPI_Index ind
                 return hwDMA_NotInit;
         }
 
+        DMA_STREAM_LOCK(stream_index);
+
         hwDMA_OpResult op_status = hwDMA_OK;
         
         switch(DMA_Channel_Direction[stream_index])
         {
                 case hwDMA_Peripheral_Direction_TX:
                         SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
-                        HAL_SPI_Transmit_DMA(&g_spi[index], buf, len);
+                        
+                        if (HAL_SPI_Transmit_DMA(&g_spi[index], buf, len) != HAL_OK)
+                        {
+                                DMA_STREAM_UNLOCK(stream_index);
+                                return hwDMA_HwError;
+                        }
                         break;
                 case hwDMA_Peripheral_Direction_RX:
                         SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
-                        HAL_SPI_Receive_DMA(&g_spi[index], buf, len);
+
+                        if (HAL_SPI_Receive_DMA(&g_spi[index], buf, len) != HAL_OK)
+                        {
+                                DMA_STREAM_UNLOCK(stream_index);
+                                return hwDMA_HwError;
+                        }
                         break;
         }
 
         while (HAL_SPI_GetState(&g_spi[index]) != HAL_SPI_STATE_READY) { }
         
         HAL_SPI_DMAStop(&g_spi[index]);
+
+        DMA_STREAM_UNLOCK(stream_index);
 
         return op_status;
 }

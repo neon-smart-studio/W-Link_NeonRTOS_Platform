@@ -229,17 +229,17 @@ void UART2_IRQHandler(void)
 #endif
 
 #if defined(LPUART1_BASE)
-#if defined (STM32L073xx) && defined (STM32L072xx) || defined (STM32L053xx) || defined (STM32L052xx)
+#if defined (STM32L073xx) || defined (STM32L072xx) || defined (STM32L053xx) || defined (STM32L052xx)
 void RNG_LPUART1_IRQHandler(void)
 {
     UART_HAL_IRQHandler(hwUART_Index_L1);
 }
-#elif defined (STM32L081xx) && defined (STM32L041xx) || defined (STM32L021xx)
+#elif defined (STM32L081xx) || defined (STM32L041xx) || defined (STM32L021xx)
 void AES_LPUART1_IRQHandler(void)
 {
     UART_HAL_IRQHandler(hwUART_Index_L1);
 }
-#elif defined (STM32L082xx) && defined (STM32L083xx) || defined (STM32L062xx) || defined (STM32L063xx)
+#elif defined (STM32L082xx) || defined (STM32L083xx) || defined (STM32L062xx) || defined (STM32L063xx)
 void AES_RNG_LPUART1_IRQHandler(void)
 {
     UART_HAL_IRQHandler(hwUART_Index_L1);
@@ -283,17 +283,17 @@ void UART_NVIC_Init(hwUART_Index index)
 #endif
 
 #if defined(LPUART1_IRQn)
-#if defined (STM32L073xx) && defined (STM32L072xx) || defined (STM32L053xx) || defined (STM32L052xx)
+#if defined (STM32L073xx) || defined (STM32L072xx) || defined (STM32L053xx) || defined (STM32L052xx)
         case hwUART_Index_L1:
             HAL_NVIC_SetPriority(RNG_LPUART1_IRQn, UART_IRQ_NVIC_PRIORITY, UART_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(RNG_LPUART1_IRQn);
             break;
-#elif defined (STM32L081xx) && defined (STM32L041xx) || defined (STM32L021xx)
+#elif defined (STM32L081xx) || defined (STM32L041xx) || defined (STM32L021xx)
         case hwUART_Index_L1:
             HAL_NVIC_SetPriority(AES_LPUART1_IRQn, UART_IRQ_NVIC_PRIORITY, UART_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(AES_LPUART1_IRQn);
             break;
-#elif defined (STM32L082xx) && defined (STM32L083xx) || defined (STM32L062xx) || defined (STM32L063xx)
+#elif defined (STM32L082xx) || defined (STM32L083xx) || defined (STM32L062xx) || defined (STM32L063xx)
         case hwUART_Index_L1:
             HAL_NVIC_SetPriority(AES_RNG_LPUART1_IRQn, UART_IRQ_NVIC_PRIORITY, UART_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(AES_RNG_LPUART1_IRQn);
@@ -336,15 +336,15 @@ void UART_NVIC_DeInit(hwUART_Index index)
 #endif
 
 #if defined(LPUART1_IRQn)
-#if defined (STM32L073xx) && defined (STM32L072xx) || defined (STM32L053xx) || defined (STM32L052xx)
+#if defined (STM32L073xx) || defined (STM32L072xx) || defined (STM32L053xx) || defined (STM32L052xx)
         case hwUART_Index_L1:
             HAL_NVIC_DisableIRQ(RNG_LPUART1_IRQn);
             break;
-#elif defined (STM32L081xx) && defined (STM32L041xx) || defined (STM32L021xx)
+#elif defined (STM32L081xx) || defined (STM32L041xx) || defined (STM32L021xx)
         case hwUART_Index_L1:
             HAL_NVIC_DisableIRQ(AES_LPUART1_IRQn);
             break;
-#elif defined (STM32L082xx) && defined (STM32L083xx) || defined (STM32L062xx) || defined (STM32L063xx)
+#elif defined (STM32L082xx) || defined (STM32L083xx) || defined (STM32L062xx) || defined (STM32L063xx)
         case hwUART_Index_L1:
             HAL_NVIC_DisableIRQ(AES_RNG_LPUART1_IRQn);
             break;

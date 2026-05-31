@@ -403,8 +403,6 @@ hwDMA_OpResult DMA_NVIC_Init(hwDMA_Stream_Index stream_index)
 #endif //DMA2_BASE
         }
 
-        DMA_Stream_Init_Status[stream_index] = true;
-
         return hwDMA_OK;
 }
 

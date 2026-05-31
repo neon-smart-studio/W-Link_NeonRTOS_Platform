@@ -57,6 +57,8 @@
 
 #include "Bluetooth_SPBTLE.h"
 
+#ifdef CONFIG_BLUETOOTH_DEVICE_SPBTLE
+
 #define HEADER_SIZE      5
 #define MAX_BUFFER_SIZE  255
 
@@ -1368,3 +1370,5 @@ Bluetooth_OpResult Bluetooth_Service_Update_Char_Value(
 
     return SPBTLE_SendRequest(BLE_REQ_UPDATE_CHAR_VALUE, &param);
 }
+
+#endif

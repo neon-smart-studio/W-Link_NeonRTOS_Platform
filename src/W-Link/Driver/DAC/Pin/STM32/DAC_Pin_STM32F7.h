@@ -2,7 +2,7 @@
 #ifndef DAC_PIN_STM32F7_H
 #define DAC_PIN_STM32F7_H
 
-#include "DAC_Pin_STM32_Def"
+#include "DAC_Pin_STM32_Def.h"
 
 static const DAC_Channel_Def DAC_Channel_Def_Table[hwDAC_Channel_Index_MAX] = {
 #if defined(DAC1_BASE)

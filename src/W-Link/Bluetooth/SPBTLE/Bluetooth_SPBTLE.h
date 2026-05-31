@@ -41,6 +41,8 @@
 
 #include "Bluetooth_Config.h"
 
+#ifdef CONFIG_BLUETOOTH_DEVICE_SPBTLE
+
 #define IDB04A1 0
 #define IDB05A1 1
 
@@ -113,5 +115,7 @@ void Hal_Write_Serial(
     int32_t n_bytes1,
     int32_t n_bytes2
 );
+
+#endif
 
 #endif //__SPBTLE_H

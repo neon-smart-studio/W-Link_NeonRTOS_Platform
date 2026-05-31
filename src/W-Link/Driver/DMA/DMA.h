@@ -4,9 +4,27 @@
 
 #include "DMA_Def.h"
 
-#include "DMA_Index.h"
+#include "CAN/CAN.h"
+#include "I2C/I2C_Master.h"
+#include "SPI/SPI_Master.h"
+#include "UART/UART.h"
 
-hwDMA_OpResult DMA_Stream_Init(hwDMA_Stream_Index stream_index);
-hwDMA_OpResult DMA_Stream_DeInit(hwDMA_Stream_Index stream_index);
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+hwDMA_OpResult DMA_Init();
+hwDMA_OpResult DMA_DeInit();
+
+hwDMA_OpResult DMA_Uart_Tx(hwUART_Index index, uint8_t *buf, size_t len);
+hwDMA_OpResult DMA_Uart_Rx(hwUART_Index index, uint8_t *buf, size_t len);
+hwDMA_OpResult DMA_I2C_Write(hwI2C_Index index, uint16_t dev_addr, uint8_t *buf, size_t len);
+hwDMA_OpResult DMA_I2C_Read(hwI2C_Index index, uint16_t dev_addr, uint8_t *buf, size_t len);
+hwDMA_OpResult DMA_SPI_Write(hwSPI_Index index, uint8_t *buf, size_t len);
+hwDMA_OpResult DMA_SPI_Read(hwSPI_Index index, uint8_t *buf, size_t len);
+
+#ifdef  __cplusplus
+}
+#endif // __cplusplus
 
 #endif //DMA_H

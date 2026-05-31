@@ -769,7 +769,7 @@ hwSPI_OpResult SPI_Master_Stream_Transfer(hwSPI_Index index, const uint8_t* tx_b
     return hwSPI_OK;
 }
 
-hwSPI_OpResult SPI_Master_BurstWrite(hwSPI_Index index, uint8_t* buf, uint32_t size)
+hwSPI_OpResult SPI_Master_Burst_Write(hwSPI_Index index, uint8_t* buf, uint32_t size)
 {
         if(index>=hwSPI_Index_MAX)
         {
@@ -800,22 +800,22 @@ hwSPI_OpResult SPI_Master_BurstWrite(hwSPI_Index index, uint8_t* buf, uint32_t s
         switch(index)
         {
         case hwSPI_Index_0:
-                DMA_Transfer_SPI(SPI0_MASTER_TX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_1:
-                DMA_Transfer_SPI(SPI1_MASTER_TX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_2:
-                DMA_Transfer_SPI(SPI2_MASTER_TX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_3:
-                DMA_Transfer_SPI(SPI3_MASTER_TX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_4:
-                DMA_Transfer_SPI(SPI4_MASTER_TX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_5:
-                DMA_Transfer_SPI(SPI5_MASTER_TX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         }
         
@@ -824,7 +824,7 @@ hwSPI_OpResult SPI_Master_BurstWrite(hwSPI_Index index, uint8_t* buf, uint32_t s
         return hwSPI_OK;
 }
 
-hwSPI_OpResult SPI_Master_BurstRead(hwSPI_Index index, uint8_t* buf, uint32_t size)
+hwSPI_OpResult SPI_Master_Burst_Read(hwSPI_Index index, uint8_t* buf, uint32_t size)
 {
         if(index>=hwSPI_Index_MAX)
         {
@@ -855,22 +855,22 @@ hwSPI_OpResult SPI_Master_BurstRead(hwSPI_Index index, uint8_t* buf, uint32_t si
         switch(index)
         {
         case hwSPI_Index_0:
-                DMA_Transfer_SPI(SPI0_MASTER_RX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_1:
-                DMA_Transfer_SPI(SPI1_MASTER_RX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_2:
-                DMA_Transfer_SPI(SPI2_MASTER_RX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_3:
-                DMA_Transfer_SPI(SPI3_MASTER_RX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_4:
-                DMA_Transfer_SPI(SPI4_MASTER_RX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         case hwSPI_Index_5:
-                DMA_Transfer_SPI(SPI5_MASTER_RX_DMA_CHANNEL, index, buf, size);
+                DMA_SPI_Write(index, buf, size);
                 break;
         }
         

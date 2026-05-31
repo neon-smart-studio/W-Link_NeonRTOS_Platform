@@ -1,6 +1,6 @@
 
-#ifndef DMA_INDEX_H
-#define DMA_INDEX_H
+#ifndef DMA_STM32_INDEX_H
+#define DMA_STM32_INDEX_H
 
 #include "soc.h"
 
@@ -27,7 +27,8 @@ typedef enum hwDMA_Stream_Index_t
   hwDMA_Stream_Index_15,
 #endif //DMA2_BASE
 #if defined (BDMA_BASE)
-  hwDMA_Stream_Index_16,
+  hwDMA_Stream_Index_BDMA_Start,
+  hwDMA_Stream_Index_16 = hwDMA_Stream_Index_BDMA_Start,
   hwDMA_Stream_Index_17,
   hwDMA_Stream_Index_18,
   hwDMA_Stream_Index_19,
@@ -35,8 +36,9 @@ typedef enum hwDMA_Stream_Index_t
   hwDMA_Stream_Index_21,
   hwDMA_Stream_Index_22,
   hwDMA_Stream_Index_23,
+  hwDMA_Stream_Index_BDMA_End = hwDMA_Stream_Index_23,
 #endif //BDMA_BASE
   hwDMA_Stream_Index_MAX,
 }hwDMA_Stream_Index;
 
-#endif //DMA_INDEX_H
+#endif //DMA_STM32_INDEX_H

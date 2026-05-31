@@ -15,6 +15,8 @@
 
 #include "DMA_STM32.h"
 
+#include "DMA_STM32_Index.h"
+
 #define DMA_IRQ_NVIC_PRIORITY 5
 #define DMA_IRQ_NVIC_SUB_PRIORITY 0
 
@@ -26,80 +28,65 @@ DMA_HandleTypeDef g_dma[hwDMA_Stream_Index_MAX];
 bool DMA_Stream_Init_Status[hwDMA_Stream_Index_MAX] = {false};
 NeonRTOS_LockObj_t DMA_Stream_Mutex[hwDMA_Stream_Index_MAX] = {NULL};
 
-hwDMA_OpResult DMA_Stream_Init(hwDMA_Stream_Index stream_index)
+hwDMA_OpResult DMA_Init()
 {
-    if (stream_index >= hwDMA_Stream_Index_MAX)
+    for (hwDMA_Stream_Index i = 0; i < hwDMA_Stream_Index_MAX; i++)
     {
-        return hwDMA_InvalidParameter;
+        if (NeonRTOS_LockObjCreate(&DMA_Stream_Mutex[i]) != NeonRTOS_OK)
+        {
+            return hwDMA_MemoryError;
+        }
+
+        DMA_Stream_Init_Status[i] = true;
     }
-
-    if (DMA_Stream_Init_Status[stream_index] == true)
-    {
-        return hwDMA_OK;
-    }
-
-    if (NeonRTOS_LockObj_Create(&DMA_Stream_Mutex[stream_index]) != NeonRTOS_OK)
-    {
-        return hwDMA_MemoryError;
-    }
-
-    hwDMA_OpResult op_status;
-
-    op_status = DMA_Instance_Init(stream_index);
-    if (op_status < hwDMA_OK)
-    {
-        return op_status;
-    }
-
-    op_status = DMA_NVIC_Init(stream_index);
-    if (op_status < hwDMA_OK)
-    {
-        DMA_Instance_DeInit(stream_index);
-        return op_status;
-    }
-
-    DMA_Stream_Init_Status[stream_index] = true;
+    
+    DMA_Clock_Enable();
 
     return hwDMA_OK;
 }
 
-hwDMA_OpResult DMA_Stream_DeInit(hwDMA_Stream_Index stream_index)
+hwDMA_OpResult DMA_DeInit()
 {
-    if (stream_index >= hwDMA_Stream_Index_MAX)
+    for (hwDMA_Stream_Index i = 0; i < hwDMA_Stream_Index_MAX; i++)
     {
-        return hwDMA_InvalidParameter;
+        NeonRTOS_LockObjDelete(&DMA_Stream_Mutex[i]);
+
+        DMA_Stream_Init_Status[i] = false;
     }
 
-    if (DMA_Stream_Init_Status[stream_index] == false)
-    {
-        return hwDMA_OK;
-    }
-
-    hwDMA_OpResult op_status;
-
-    op_status = DMA_DeConfig(stream_index);
-    if (op_status < hwDMA_OK)
-    {
-        return op_status;
-    }
-
-    op_status = DMA_NVIC_DeInit(stream_index);
-    if (op_status < hwDMA_OK)
-    {
-        return op_status;
-    }
-
-    op_status = DMA_Instance_DeInit(stream_index);
-    if (op_status < hwDMA_OK)
-    {
-        return op_status;
-    }
-
-    NeonRTOS_LockObj_Delete(&DMA_Stream_Mutex[stream_index]);
-
-    DMA_Stream_Init_Status[stream_index] = false;
+    DMA_Clock_Disable();
 
     return hwDMA_OK;
+}
+
+hwDMA_OpResult DMA_Uart_Tx(hwUART_Index index, uint8_t *buf, size_t len)
+{
+    return DMA_Xfer_UART(index, hwDMA_Peripheral_Direction_TX, buf, len);
+}
+
+hwDMA_OpResult DMA_Uart_Rx(hwUART_Index index, uint8_t *buf, size_t len)
+{
+    return DMA_Xfer_UART(index, hwDMA_Peripheral_Direction_RX, buf, len);
+}
+
+hwDMA_OpResult DMA_I2C_Write(hwI2C_Index index, uint16_t dev_addr, uint8_t *buf, size_t len)
+{
+    return DMA_Xfer_I2C(index, hwDMA_Peripheral_Direction_TX, dev_addr, buf, len);
+}
+
+hwDMA_OpResult DMA_I2C_Read(hwI2C_Index index, uint16_t dev_addr, uint8_t *buf, size_t len)
+{
+    return DMA_Xfer_I2C(index, hwDMA_Peripheral_Direction_RX, dev_addr, buf, len);
+}
+
+hwDMA_OpResult DMA_SPI_Write(hwSPI_Index index, uint8_t *buf, size_t len)
+{
+    return DMA_Xfer_SPI(index, hwDMA_Peripheral_Direction_TX, buf, len);
+}
+
+hwDMA_OpResult DMA_SPI_Read(hwSPI_Index index, uint8_t *buf, size_t len)
+{
+    return DMA_Xfer_SPI(index, hwDMA_Peripheral_Direction_RX, buf, len);
 }
 
 #endif //DEVICE_STM32

@@ -10,6 +10,7 @@
 #include "SysCtrl/SysCtrl.h"
 #include "UART/UART.h"
 #include "I2C/I2C_Master.h"
+#include "DMA/DMA.h"
 
 #include "Sensor/HTS221/HTS221.h"
 
@@ -300,6 +301,8 @@ void BLE_Task(void* p)
 int main(void) {
     SysCtrl_Init();
 
+    DMA_Init();
+    
     //__HAL_RCC_WWDG_CLK_DISABLE();  // 禁用窗口看門狗
     //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗
 

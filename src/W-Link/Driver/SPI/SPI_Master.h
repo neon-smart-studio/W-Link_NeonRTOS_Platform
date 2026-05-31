@@ -28,6 +28,9 @@ hwSPI_OpResult SPI_Master_Stream_Write(hwSPI_Index index, const uint8_t* buf, ui
 hwSPI_OpResult SPI_Master_Stream_Read(hwSPI_Index index, uint8_t* buf, uint16_t len);
 hwSPI_OpResult SPI_Master_Stream_Transfer(hwSPI_Index index, const uint8_t* tx_buf, uint8_t* rx_buf, uint16_t len);
 
+hwSPI_OpResult SPI_Master_Burst_Write(hwSPI_Index index, uint8_t* buf, uint32_t size);
+hwSPI_OpResult SPI_Master_Burst_Read(hwSPI_Index index, uint8_t* buf, uint32_t size);
+
 #ifdef  __cplusplus
 }
 #endif // __cplusplus

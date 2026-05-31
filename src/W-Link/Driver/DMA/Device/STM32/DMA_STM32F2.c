@@ -11,7 +11,7 @@
 
 #include "NeonRTOS.h"
 
-#ifdef STM32H7
+#ifdef STM32F2
 
 #include "DMA_STM32_Index.h"
 
@@ -50,18 +50,6 @@ static const hwDMA_Stream_Index UART_DMA_Channel_Map[hwUART_Index_MAX][hwDMA_Per
 #if defined (UART6_BASE) || defined(USART6_BASE)
         {hwDMA_Stream_Index_10, hwDMA_Stream_Index_11},
 #endif
-#if defined (UART7_BASE) || defined(USART7_BASE)
-        {hwDMA_Stream_Index_12, hwDMA_Stream_Index_13},
-#endif
-#if defined (UART8_BASE) || defined(USART8_BASE)
-        {hwDMA_Stream_Index_14, hwDMA_Stream_Index_15},
-#endif
-#if defined (UART9_BASE) || defined(USART9_BASE)
-        {hwDMA_Stream_Index_0, hwDMA_Stream_Index_1},
-#endif
-#if defined (UART10_BASE) || defined(USART10_BASE)
-        {hwDMA_Stream_Index_2, hwDMA_Stream_Index_3},
-#endif
 };
 
 static const hwDMA_Stream_Index SPI_DMA_Channel_Map[hwSPI_Index_MAX][hwDMA_Peripheral_Direction_MAX] = {
@@ -74,15 +62,6 @@ static const hwDMA_Stream_Index SPI_DMA_Channel_Map[hwSPI_Index_MAX][hwDMA_Perip
 #if defined (SPI3_BASE)
         {hwDMA_Stream_Index_4, hwDMA_Stream_Index_5},
 #endif
-#if defined (SPI4_BASE)
-        {hwDMA_Stream_Index_6, hwDMA_Stream_Index_7},
-#endif
-#if defined (SPI5_BASE)
-        {hwDMA_Stream_Index_8, hwDMA_Stream_Index_9},
-#endif
-#if defined (SPI6_BASE)
-        {hwDMA_Stream_Index_16, hwDMA_Stream_Index_17},
-#endif
 };
 
 static const hwDMA_Stream_Index I2C_DMA_Channel_Map[hwI2C_Index_MAX][hwDMA_Peripheral_Direction_MAX] = {
@@ -94,9 +73,6 @@ static const hwDMA_Stream_Index I2C_DMA_Channel_Map[hwI2C_Index_MAX][hwDMA_Perip
 #endif
 #if defined (I2C3_BASE)
         {hwDMA_Stream_Index_4, hwDMA_Stream_Index_5},
-#endif
-#if defined (I2C4_BASE)
-        {hwDMA_Stream_Index_18, hwDMA_Stream_Index_19},
 #endif
 };
 
@@ -164,43 +140,6 @@ DMA_TypeDef * DMA_Map_Soc_Base(hwDMA_Stream_Index index)
     return NULL;
 }
 
-#if defined (BDMA_BASE)
-BDMA_TypeDef * BDMA_Map_Soc_Base(hwDMA_Stream_Index index)
-{
-    switch(index)
-    {
-#if defined (BDMA_Channel0)
-        case hwDMA_Stream_Index_16:
-#endif
-#if defined (BDMA_Channel1)
-        case hwDMA_Stream_Index_17:
-#endif
-#if defined (BDMA_Channel2)
-        case hwDMA_Stream_Index_18:
-#endif
-#if defined (BDMA_Channel3)
-        case hwDMA_Stream_Index_19:
-#endif
-#if defined (BDMA_Channel4)
-        case hwDMA_Stream_Index_20:
-#endif
-#if defined (BDMA_Channel5)
-        case hwDMA_Stream_Index_21:
-#endif
-#if defined (BDMA_Channel6)
-        case hwDMA_Stream_Index_22:
-#endif
-#if defined (BDMA_Channel7)
-        case hwDMA_Stream_Index_23:
-#endif
-                return BDMA;
-        default:
-                break;
-    }
-    return NULL;
-}
-#endif //BDMA_BASE
-
 DMA_Stream_TypeDef * DMA_Map_Soc_Stream_Base(hwDMA_Stream_Index index)
 {
     switch(index)
@@ -262,41 +201,6 @@ DMA_Stream_TypeDef * DMA_Map_Soc_Stream_Base(hwDMA_Stream_Index index)
     return NULL;
 }
 
-#if defined (BDMA_BASE)
-BDMA_Channel_TypeDef * BDMA_Map_Soc_Channel_Base(hwDMA_Stream_Index index)
-{
-    switch(index)
-    {
-#if defined (BDMA_Channel0)
-        case hwDMA_Stream_Index_16: return BDMA_Channel0;
-#endif
-#if defined (BDMA_Channel1)
-        case hwDMA_Stream_Index_17: return BDMA_Channel1;
-#endif
-#if defined (BDMA_Channel2)
-        case hwDMA_Stream_Index_18: return BDMA_Channel2;
-#endif
-#if defined (BDMA_Channel3)
-        case hwDMA_Stream_Index_19: return BDMA_Channel3;
-#endif
-#if defined (BDMA_Channel4)
-        case hwDMA_Stream_Index_20: return BDMA_Channel4;
-#endif
-#if defined (BDMA_Channel5)
-        case hwDMA_Stream_Index_21: return BDMA_Channel5;
-#endif
-#if defined (BDMA_Channel6)
-        case hwDMA_Stream_Index_22: return BDMA_Channel6;
-#endif
-#if defined (BDMA_Channel7)
-        case hwDMA_Stream_Index_23: return BDMA_Channel7;
-#endif
-        default: break;
-    }
-    return NULL;
-}
-#endif //BDMA_BASE
-
 static void DMA_IRQ_Handler(hwDMA_Stream_Index index)
 {
         if(index>=hwDMA_Stream_Index_MAX)
@@ -306,18 +210,6 @@ static void DMA_IRQ_Handler(hwDMA_Stream_Index index)
 
         HAL_DMA_IRQHandler(&g_dma[index]);
 }
-
-#if defined (BDMA_BASE)
-static void BDMA_IRQ_Handler(hwDMA_Stream_Index index)
-{
-        if(index>=hwDMA_Stream_Index_MAX)
-        {
-                return;
-        }
-
-        HAL_DMA_IRQHandler(&g_dma[index]);
-}
-#endif //BDMA_BASE
 
 #if defined (DMA1_BASE)
 #if defined (DMA1_Stream0)
@@ -373,33 +265,6 @@ void DMA2_Stream7_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Stream_Index_15); }
 #endif
 #endif //DMA2_BASE
 
-#if defined (BDMA_BASE)
-#if defined (BDMA_Channel0)
-void BDMA_Channel0_IRQHandler(void){ BDMA_IRQ_Handler(hwDMA_Stream_Index_16); }
-#endif
-#if defined (BDMA_Channel1)
-void BDMA_Channel1_IRQHandler(void){ BDMA_IRQ_Handler(hwDMA_Stream_Index_17); }
-#endif
-#if defined (BDMA_Channel2)
-void BDMA_Channel2_IRQHandler(void){ BDMA_IRQ_Handler(hwDMA_Stream_Index_18); }
-#endif
-#if defined (BDMA_Channel3)
-void BDMA_Channel3_IRQHandler(void){ BDMA_IRQ_Handler(hwDMA_Stream_Index_19); }
-#endif
-#if defined (BDMA_Channel4)
-void BDMA_Channel4_IRQHandler(void){ BDMA_IRQ_Handler(hwDMA_Stream_Index_20); }
-#endif
-#if defined (BDMA_Channel5)
-void BDMA_Channel5_IRQHandler(void){ BDMA_IRQ_Handler(hwDMA_Stream_Index_21); }
-#endif
-#if defined (BDMA_Channel6)
-void BDMA_Channel6_IRQHandler(void){ BDMA_IRQ_Handler(hwDMA_Stream_Index_22); }
-#endif
-#if defined (BDMA_Channel7)
-void BDMA_Channel7_IRQHandler(void){ BDMA_IRQ_Handler(hwDMA_Stream_Index_23); }
-#endif
-#endif //BDMA_BASE
-
 void DMA_Clock_Enable()
 {
 #if defined (DMA1_BASE)
@@ -409,10 +274,6 @@ void DMA_Clock_Enable()
 #if defined (DMA2_BASE)
         __HAL_RCC_DMA2_CLK_ENABLE();
 #endif //DMA2_BASE
-
-#if defined (BDMA_BASE)
-        __HAL_RCC_BDMA_CLK_ENABLE();
-#endif //BDMA_BASE
 }
 
 void DMA_Clock_Disable()
@@ -424,10 +285,6 @@ void DMA_Clock_Disable()
 #if defined (DMA2_BASE)
         __HAL_RCC_DMA2_CLK_DISABLE();
 #endif //DMA2_BASE
-
-#if defined (BDMA_BASE)
-        __HAL_RCC_BDMA_CLK_DISABLE();
-#endif //BDMA_BASE
 }
 
 hwDMA_OpResult DMA_NVIC_Init(hwDMA_Stream_Index stream_index)
@@ -544,56 +401,6 @@ hwDMA_OpResult DMA_NVIC_Init(hwDMA_Stream_Index stream_index)
                         break;
 #endif
 #endif //DMA2_BASE
-#if defined (BDMA_BASE)
-#if defined (BDMA_Channel0)
-                case hwDMA_Stream_Index_16:
-                        HAL_NVIC_SetPriority(BDMA_Channel0_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(BDMA_Channel0_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel1)
-                case hwDMA_Stream_Index_17:
-                        HAL_NVIC_SetPriority(BDMA_Channel1_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(BDMA_Channel1_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel2)
-                case hwDMA_Stream_Index_18:
-                        HAL_NVIC_SetPriority(BDMA_Channel2_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(BDMA_Channel2_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel3)
-                case hwDMA_Stream_Index_19:
-                        HAL_NVIC_SetPriority(BDMA_Channel3_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(BDMA_Channel3_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel4)
-                case hwDMA_Stream_Index_20:
-                        HAL_NVIC_SetPriority(BDMA_Channel4_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(BDMA_Channel4_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel5)
-                case hwDMA_Stream_Index_21:
-                        HAL_NVIC_SetPriority(BDMA_Channel5_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(BDMA_Channel5_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel6)
-                case hwDMA_Stream_Index_22:
-                        HAL_NVIC_SetPriority(BDMA_Channel6_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(BDMA_Channel6_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel7)
-                case hwDMA_Stream_Index_23:
-                        HAL_NVIC_SetPriority(BDMA_Channel7_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(BDMA_Channel7_IRQn);
-                        break;
-#endif
-#endif //BDMA_BASE
         }
 
         DMA_Stream_Init_Status[stream_index] = true;
@@ -694,48 +501,6 @@ hwDMA_OpResult DMA_NVIC_DeInit(hwDMA_Stream_Index stream_index)
                         break;
 #endif
 #endif //DMA2_BASE
-#if defined (BDMA_BASE)
-#if defined (BDMA_Channel0)
-                case hwDMA_Stream_Index_16:
-                        HAL_NVIC_DisableIRQ(BDMA_Channel0_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel1)
-                case hwDMA_Stream_Index_17:
-                        HAL_NVIC_DisableIRQ(BDMA_Channel1_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel2)
-                case hwDMA_Stream_Index_18:
-                        HAL_NVIC_DisableIRQ(BDMA_Channel2_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel3)
-                case hwDMA_Stream_Index_19:
-                        HAL_NVIC_DisableIRQ(BDMA_Channel3_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel4)
-                case hwDMA_Stream_Index_20:
-                        HAL_NVIC_DisableIRQ(BDMA_Channel4_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel5)
-                case hwDMA_Stream_Index_21:
-                        HAL_NVIC_DisableIRQ(BDMA_Channel5_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel6)
-                case hwDMA_Stream_Index_22:
-                        HAL_NVIC_DisableIRQ(BDMA_Channel6_IRQn);
-                        break;
-#endif
-#if defined (BDMA_Channel7)
-                case hwDMA_Stream_Index_23:
-                        HAL_NVIC_DisableIRQ(BDMA_Channel7_IRQn);
-                        break;
-#endif
-#endif //BDMA_BASE
         }
 
         return hwDMA_OK;
@@ -743,38 +508,12 @@ hwDMA_OpResult DMA_NVIC_DeInit(hwDMA_Stream_Index stream_index)
 
 static void* DMA_Get_Instance(hwDMA_Stream_Index stream_index)
 {
-    DMA_Stream_TypeDef *dma_soc_stream_base = NULL;
-    BDMA_Channel_TypeDef *bdma_soc_channel_base = NULL;
-
     if (stream_index >= hwDMA_Stream_Index_MAX)
     {
         return NULL;
     }
 
-    if (stream_index < hwDMA_Stream_Index_16)
-    {
-        dma_soc_stream_base = DMA_Map_Soc_Stream_Base(stream_index);
-        if (dma_soc_stream_base == NULL)
-        {
-            return NULL;
-        }
-
-        return dma_soc_stream_base;
-    }
-    else if (stream_index >= hwDMA_Stream_Index_16 && stream_index < hwDMA_Stream_Index_MAX)
-    {
-        bdma_soc_channel_base = BDMA_Map_Soc_Channel_Base(stream_index);
-        if (bdma_soc_channel_base == NULL)
-        {
-            return NULL;
-        }
-
-        return bdma_soc_channel_base;
-    }
-    else
-    {
-        return NULL;
-    }
+    return DMA_Map_Soc_Stream_Base(stream_index);
 }
 
 static hwDMA_OpResult DMA_DeConfig(hwDMA_Stream_Index stream_index)
@@ -832,15 +571,13 @@ static hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index, hwDMA_Per
                 return hwDMA_InvalidParameter;
         }
 
-        g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
-        g_dma[stream_index].Init.MemBurst            = DMA_MBURST_SINGLE;
-        g_dma[stream_index].Init.PeriphBurst         = DMA_PBURST_SINGLE;
         g_dma[stream_index].Init.PeriphInc           = DMA_PINC_DISABLE;
         g_dma[stream_index].Init.MemInc              = DMA_MINC_ENABLE;
         g_dma[stream_index].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
         g_dma[stream_index].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
         g_dma[stream_index].Init.Mode                = DMA_NORMAL;
         g_dma[stream_index].Init.Priority            = DMA_PRIORITY_HIGH;
+        g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
 
         switch (dir)
         {
@@ -851,52 +588,32 @@ static hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index, hwDMA_Per
                         {
 #if defined (UART1_BASE) || defined(USART1_BASE)
                                 case hwUART_Index_0:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART1_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART2_BASE) || defined(USART2_BASE)
                                 case hwUART_Index_1:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART2_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART3_BASE) || defined(USART3_BASE)
                                 case hwUART_Index_2:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART3_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART4_BASE) || defined(USART4_BASE)
                                 case hwUART_Index_3:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART4_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART5_BASE) || defined(USART5_BASE)
                                 case hwUART_Index_4:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART5_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART6_BASE) || defined(USART6_BASE)
                                 case hwUART_Index_5:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART6_TX;
-                                        break;
-#endif
-#if defined (UART7_BASE) || defined(USART7_BASE)
-                                case hwUART_Index_6:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART7_TX;
-                                        break;
-#endif
-#if defined (UART8_BASE) || defined(USART8_BASE)
-                                case hwUART_Index_7:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART8_TX;
-                                        break;
-#endif
-#if defined (UART9_BASE) || defined(USART9_BASE)
-                                case hwUART_Index_8:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART9_TX;
-                                        break;
-#endif
-#if defined (UART10_BASE) || defined(USART10_BASE)
-                                case hwUART_Index_9:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART10_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_5;
                                         break;
 #endif
                         }
@@ -909,52 +626,32 @@ static hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index, hwDMA_Per
                         {
 #if defined (UART1_BASE) || defined(USART1_BASE)
                                 case hwUART_Index_0:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART1_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART2_BASE) || defined(USART2_BASE)
                                 case hwUART_Index_1:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART2_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART3_BASE) || defined(USART3_BASE)
                                 case hwUART_Index_2:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART3_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART4_BASE) || defined(USART4_BASE)
                                 case hwUART_Index_3:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART4_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART5_BASE) || defined(USART5_BASE)
                                 case hwUART_Index_4:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART5_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_4;
                                         break;
 #endif
 #if defined (UART6_BASE) || defined(USART6_BASE)
                                 case hwUART_Index_5:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART6_RX;
-                                        break;
-#endif
-#if defined (UART7_BASE) || defined(USART7_BASE)
-                                case hwUART_Index_6:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART7_RX;
-                                        break;
-#endif
-#if defined (UART8_BASE) || defined(USART8_BASE)
-                                case hwUART_Index_7:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART8_RX;
-                                        break;
-#endif
-#if defined (UART9_BASE) || defined(USART9_BASE)
-                                case hwUART_Index_8:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART9_RX;
-                                        break;
-#endif
-#if defined (UART10_BASE) || defined(USART10_BASE)
-                                case hwUART_Index_9:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART10_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_5;
                                         break;
 #endif
                         }
@@ -1008,15 +705,13 @@ static hwDMA_OpResult DMA_Config_I2C(hwDMA_Stream_Index stream_index, hwDMA_Peri
                 return hwDMA_InvalidParameter;
         }
 
-        g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
-        g_dma[stream_index].Init.MemBurst            = DMA_MBURST_SINGLE;
-        g_dma[stream_index].Init.PeriphBurst         = DMA_PBURST_SINGLE;
         g_dma[stream_index].Init.PeriphInc           = DMA_PINC_DISABLE;
         g_dma[stream_index].Init.MemInc              = DMA_MINC_ENABLE;
         g_dma[stream_index].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
         g_dma[stream_index].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
         g_dma[stream_index].Init.Mode                = DMA_NORMAL;
         g_dma[stream_index].Init.Priority            = DMA_PRIORITY_HIGH;
+        g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
 
         switch (dir)
         {
@@ -1025,24 +720,19 @@ static hwDMA_OpResult DMA_Config_I2C(hwDMA_Stream_Index stream_index, hwDMA_Peri
 
                         switch (index)
                         {
-#if defined (I2C1_BASE)
+#if defined(I2C1_BASE)
                                 case hwI2C_Index_0:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C1_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_1;
                                         break;
 #endif
-#if defined (I2C2_BASE)
+#if defined(I2C2_BASE)
                                 case hwI2C_Index_1:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C2_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_7;
                                         break;
 #endif
-#if defined (I2C3_BASE)
+#if defined(I2C3_BASE)
                                 case hwI2C_Index_2:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C3_TX;
-                                        break;
-#endif
-#if defined (I2C4_BASE)
-                                case hwI2C_Index_3:
-                                        g_dma[stream_index].Init.Request = BDMA_REQUEST_I2C4_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_3;
                                         break;
 #endif
                         }
@@ -1053,24 +743,19 @@ static hwDMA_OpResult DMA_Config_I2C(hwDMA_Stream_Index stream_index, hwDMA_Peri
 
                         switch (index)
                         {
-#if defined (I2C1_BASE)
+#if defined(I2C1_BASE)
                                 case hwI2C_Index_0:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C1_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_1;
                                         break;
 #endif
-#if defined (I2C2_BASE)
+#if defined(I2C2_BASE)
                                 case hwI2C_Index_1:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C2_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_7;
                                         break;
 #endif
-#if defined (I2C3_BASE)
+#if defined(I2C3_BASE)
                                 case hwI2C_Index_2:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_I2C3_RX;
-                                        break;
-#endif
-#if defined (I2C4_BASE)
-                                case hwI2C_Index_3:
-                                        g_dma[stream_index].Init.Request = BDMA_REQUEST_I2C4_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_3;
                                         break;
 #endif
                         }
@@ -1127,16 +812,13 @@ static hwDMA_OpResult DMA_Config_SPI(hwDMA_Stream_Index stream_index, hwDMA_Peri
                 return hwDMA_InvalidParameter;
         }
 
-        g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_ENABLE;
-        g_dma[stream_index].Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
-        g_dma[stream_index].Init.MemBurst            = DMA_MBURST_SINGLE;
-        g_dma[stream_index].Init.PeriphBurst         = DMA_PBURST_SINGLE;
         g_dma[stream_index].Init.PeriphInc           = DMA_PINC_DISABLE;
         g_dma[stream_index].Init.MemInc              = DMA_MINC_ENABLE;
         g_dma[stream_index].Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
         g_dma[stream_index].Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
         g_dma[stream_index].Init.Mode                = DMA_NORMAL;
         g_dma[stream_index].Init.Priority            = DMA_PRIORITY_HIGH;
+        g_dma[stream_index].Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
 
         switch(dir)
         {
@@ -1144,34 +826,19 @@ static hwDMA_OpResult DMA_Config_SPI(hwDMA_Stream_Index stream_index, hwDMA_Peri
                         g_dma[stream_index].Init.Direction = DMA_MEMORY_TO_PERIPH;
                         switch(index)
                         {
-#if defined (SPI1_BASE)
+#if defined(SPI1_BASE)
                                 case hwSPI_Index_0:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI1_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_3;
                                         break;
 #endif
-#if defined (SPI2_BASE)
+#if defined(SPI2_BASE)
                                 case hwSPI_Index_1:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI2_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_0;
                                         break;
 #endif
-#if defined (SPI3_BASE)
+#if defined(SPI3_BASE)
                                 case hwSPI_Index_2:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI3_TX;
-                                        break;
-#endif
-#if defined (SPI4_BASE)
-                                case hwSPI_Index_3:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI4_TX;
-                                        break;
-#endif
-#if defined (SPI5_BASE)
-                                case hwSPI_Index_4:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI5_TX;
-                                        break;
-#endif
-#if defined (SPI6_BASE)
-                                case hwSPI_Index_5:
-                                        g_dma[stream_index].Init.Request = BDMA_REQUEST_SPI6_TX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_0;
                                         break;
 #endif
                         }
@@ -1180,34 +847,19 @@ static hwDMA_OpResult DMA_Config_SPI(hwDMA_Stream_Index stream_index, hwDMA_Peri
                         g_dma[stream_index].Init.Direction = DMA_PERIPH_TO_MEMORY;
                         switch(index)
                         {
-#if defined (SPI1_BASE)
+#if defined(SPI1_BASE)
                                 case hwSPI_Index_0:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI1_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_3;
                                         break;
 #endif
-#if defined (SPI2_BASE)
+#if defined(SPI2_BASE)
                                 case hwSPI_Index_1:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI2_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_0;
                                         break;
 #endif
-#if defined (SPI3_BASE)
+#if defined(SPI3_BASE)
                                 case hwSPI_Index_2:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI3_RX;
-                                        break;
-#endif
-#if defined (SPI4_BASE)
-                                case hwSPI_Index_3:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI4_RX;
-                                        break;
-#endif
-#if defined (SPI5_BASE)
-                                case hwSPI_Index_4:
-                                        g_dma[stream_index].Init.Request = DMA_REQUEST_SPI5_RX;
-                                        break;
-#endif
-#if defined (SPI6_BASE)
-                                case hwSPI_Index_5:
-                                        g_dma[stream_index].Init.Request = BDMA_REQUEST_SPI6_RX;
+                                        g_dma[stream_index].Init.Channel = DMA_CHANNEL_0;
                                         break;
 #endif
                         }
@@ -1275,8 +927,6 @@ hwDMA_OpResult DMA_Xfer_UART(hwUART_Index index, hwDMA_Peripheral_Direction dir,
         switch (dir)
         {
                 case hwDMA_Peripheral_Direction_TX:
-                        SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
-
                         if (HAL_UART_Transmit_DMA(&g_uart[index], buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
@@ -1286,8 +936,6 @@ hwDMA_OpResult DMA_Xfer_UART(hwUART_Index index, hwDMA_Peripheral_Direction dir,
                         break;
 
                 case hwDMA_Peripheral_Direction_RX:
-                        SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
-
                         if (HAL_UART_Receive_DMA(&g_uart[index], buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
@@ -1351,8 +999,6 @@ hwDMA_OpResult DMA_Xfer_I2C(hwI2C_Index index, hwDMA_Peripheral_Direction dir, u
         switch (dir)
         {
                 case hwDMA_Peripheral_Direction_TX:
-                        SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
-
                         if (HAL_I2C_Master_Transmit_DMA(&g_i2c[index], dev_addr, buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
@@ -1362,8 +1008,6 @@ hwDMA_OpResult DMA_Xfer_I2C(hwI2C_Index index, hwDMA_Peripheral_Direction dir, u
                         break;
 
                 case hwDMA_Peripheral_Direction_RX:
-                        SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
-
                         if (HAL_I2C_Master_Receive_DMA(&g_i2c[index], dev_addr, buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
@@ -1374,8 +1018,6 @@ hwDMA_OpResult DMA_Xfer_I2C(hwI2C_Index index, hwDMA_Peripheral_Direction dir, u
         }
 
         while (HAL_I2C_GetState(&g_i2c[index]) != HAL_I2C_STATE_READY) { }
-
-        HAL_I2C_DMAStop(&g_i2c[index]);
 
         DMA_DeConfig(stream_index);
 
@@ -1427,8 +1069,6 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
         switch(dir)
         {
                 case hwDMA_Peripheral_Direction_TX:
-                        SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
-                        
                         if (HAL_SPI_Transmit_DMA(&g_spi[index], buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
@@ -1437,8 +1077,6 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
                         }
                         break;
                 case hwDMA_Peripheral_Direction_RX:
-                        SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
-
                         if (HAL_SPI_Receive_DMA(&g_spi[index], buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
@@ -1450,8 +1088,6 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
 
         while (HAL_SPI_GetState(&g_spi[index]) != HAL_SPI_STATE_READY) { }
         
-        HAL_SPI_DMAStop(&g_spi[index]);
-
         DMA_DeConfig(stream_index);
 
         DMA_STREAM_UNLOCK(stream_index);
@@ -1459,4 +1095,4 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
         return op_status;
 }
 
-#endif //STM32H7
+#endif //STM32F2

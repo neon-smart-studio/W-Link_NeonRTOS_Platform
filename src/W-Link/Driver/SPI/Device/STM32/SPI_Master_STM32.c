@@ -6,7 +6,9 @@
 
 #include "soc.h"
 #include "NeonRTOS.h"
+
 #include "SPI/SPI_Master.h"
+#include "DMA/DMA.h"
 
 #ifdef DEVICE_STM32
 
@@ -88,6 +90,39 @@ void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 
     NeonRTOS_SyncObjSignalFromISR(&Spi_Master_Send_SyncHandle[idx]);
     NeonRTOS_SyncObjSignalFromISR(&Spi_Master_Recv_SyncHandle[idx]);
+}
+
+static hwSPI_OpResult SPI_Map_DMA_HW_Error_Code(hwDMA_OpResult error_code)
+{
+    switch (error_code)
+    {
+        case hwDMA_OK:
+            return hwSPI_OK;
+
+        case hwDMA_NotInit:
+            return hwSPI_NotInit;
+
+        case hwDMA_InvalidParameter:
+            return hwSPI_InvalidParameter;
+
+        case hwDMA_HwError:
+            return hwSPI_HwError;
+
+        case hwDMA_MemoryError:
+            return hwSPI_MemoryError;
+
+        case hwDMA_MutexTimeout:
+            return hwSPI_MutexTimeout;
+
+        case hwDMA_XferTimeout:
+            return hwSPI_SlaveTimeout;
+
+        case hwDMA_Unsupport:
+            return hwSPI_Unsupport;
+
+        default:
+            return hwSPI_HwError;
+    }
 }
 
 hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_OpMode opMode, bool cs)
@@ -797,26 +832,11 @@ hwSPI_OpResult SPI_Master_Burst_Write(hwSPI_Index index, uint8_t* buf, uint32_t 
         
         SPI_MASTER_MUTEX_LOCK(index, SPI_MASTER_MUTEX_ACCESS_TIMEOUT);
 
-        switch(index)
+        hwDMA_OpResult dma_op_status = DMA_SPI_Write(index, buf, size);
+        if(dma_op_status < hwDMA_OK)
         {
-        case hwSPI_Index_0:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_1:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_2:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_3:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_4:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_5:
-                DMA_SPI_Write(index, buf, size);
-                break;
+            SPI_MASTER_MUTEX_UNLOCK(index);
+            return SPI_Map_DMA_HW_Error_Code(dma_op_status);
         }
         
         SPI_MASTER_MUTEX_UNLOCK(index);
@@ -852,26 +872,11 @@ hwSPI_OpResult SPI_Master_Burst_Read(hwSPI_Index index, uint8_t* buf, uint32_t s
         
         SPI_MASTER_MUTEX_LOCK(index, SPI_MASTER_MUTEX_ACCESS_TIMEOUT);
 
-        switch(index)
+        hwDMA_OpResult dma_op_status = DMA_SPI_Read(index, buf, size);
+        if(dma_op_status < hwDMA_OK)
         {
-        case hwSPI_Index_0:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_1:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_2:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_3:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_4:
-                DMA_SPI_Write(index, buf, size);
-                break;
-        case hwSPI_Index_5:
-                DMA_SPI_Write(index, buf, size);
-                break;
+            SPI_MASTER_MUTEX_UNLOCK(index);
+            return SPI_Map_DMA_HW_Error_Code(dma_op_status);
         }
         
         SPI_MASTER_MUTEX_UNLOCK(index);

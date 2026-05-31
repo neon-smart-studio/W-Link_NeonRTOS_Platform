@@ -23,13 +23,33 @@
 #define DMA_WAIT_ALLOCATED_TIMEOUT  1000
 #define DMA_WAIT_TRANSFER_TIMEOUT   1000
 
+#if defined (STM32F0) ||  defined (STM32F1) || defined (STM32F3) || defined (STM32L0) || defined (STM32G0)
+DMA_HandleTypeDef g_dma[hwDMA_Channel_Index_MAX];
+
+bool DMA_Stream_Init_Status[hwDMA_Channel_Index_MAX] = {false};
+NeonRTOS_LockObj_t DMA_Channel_Mutex[hwDMA_Channel_Index_MAX] = {NULL};
+#endif
+#if defined (STM32F2) ||  defined (STM32F4) || defined (STM32F7) || defined (STM32H7)
 DMA_HandleTypeDef g_dma[hwDMA_Stream_Index_MAX];
 
 bool DMA_Stream_Init_Status[hwDMA_Stream_Index_MAX] = {false};
 NeonRTOS_LockObj_t DMA_Stream_Mutex[hwDMA_Stream_Index_MAX] = {NULL};
+#endif
 
 hwDMA_OpResult DMA_Init()
 {
+#if defined (STM32F0) ||  defined (STM32F1) || defined (STM32F3) || defined (STM32L0) || defined (STM32G0)
+    for (hwDMA_Channel_Index i = 0; i < hwDMA_Channel_Index_MAX; i++)
+    {
+        if (NeonRTOS_LockObjCreate(&DMA_Channel_Mutex[i]) != NeonRTOS_OK)
+        {
+            return hwDMA_MemoryError;
+        }
+
+        DMA_Stream_Init_Status[i] = true;
+    }
+#endif
+#if defined (STM32F2) ||  defined (STM32F4) || defined (STM32F7) || defined (STM32H7)
     for (hwDMA_Stream_Index i = 0; i < hwDMA_Stream_Index_MAX; i++)
     {
         if (NeonRTOS_LockObjCreate(&DMA_Stream_Mutex[i]) != NeonRTOS_OK)
@@ -39,6 +59,7 @@ hwDMA_OpResult DMA_Init()
 
         DMA_Stream_Init_Status[i] = true;
     }
+#endif
     
     DMA_Clock_Enable();
 
@@ -47,12 +68,22 @@ hwDMA_OpResult DMA_Init()
 
 hwDMA_OpResult DMA_DeInit()
 {
+#if defined (STM32F0) ||  defined (STM32F1) || defined (STM32F3) || defined (STM32L0) || defined (STM32G0)
+    for (hwDMA_Channel_Index i = 0; i < hwDMA_Channel_Index_MAX; i++)
+    {
+        NeonRTOS_LockObjDelete(&DMA_Channel_Mutex[i]);
+
+        DMA_Stream_Init_Status[i] = false;
+    }
+#endif
+#if defined (STM32F2) ||  defined (STM32F4) || defined (STM32F7) || defined (STM32H7)
     for (hwDMA_Stream_Index i = 0; i < hwDMA_Stream_Index_MAX; i++)
     {
         NeonRTOS_LockObjDelete(&DMA_Stream_Mutex[i]);
 
         DMA_Stream_Init_Status[i] = false;
     }
+#endif
 
     DMA_Clock_Disable();
 

@@ -19,11 +19,10 @@ G4	DMA + DMAMUX
 U5	GPDMA
 */
 
-#if defined (STM32F0) ||  defined (STM32F1) || \
-    defined (STM32F3) || defined (STM32L0) || \
+#if defined (STM32F0) || defined (STM32F1) || defined (STM32F3) || \
     defined (STM32G0) || defined (STM32G4) || \
     defined (STM32C0) || defined (STM32U0) || \
-    defined (STM32L5)
+    defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5)
 typedef enum hwDMA_Channel_Index_t
 {
 #if defined (DMA1_BASE)
@@ -291,6 +290,112 @@ typedef enum hwDMA_Channel_Index_t
   hwDMA_Channel_Index_15,
 #endif
 #endif //GPDMA2_BASE
+  hwDMA_Channel_Index_MAX,
+}hwDMA_Channel_Index;
+#endif
+#if defined (STM32H7RS)
+typedef enum hwDMA_Channel_Index_t
+{
+#if defined (GPDMA1_BASE)
+#if defined (GPDMA1_Channel0)
+  hwDMA_Channel_Index_0,
+#endif
+#if defined (GPDMA1_Channel1)
+  hwDMA_Channel_Index_1,
+#endif
+#if defined (GPDMA1_Channel2)
+  hwDMA_Channel_Index_2,
+#endif
+#if defined (GPDMA1_Channel3)
+  hwDMA_Channel_Index_3,
+#endif
+#if defined (GPDMA1_Channel4)
+  hwDMA_Channel_Index_4,
+#endif
+#if defined (GPDMA1_Channel5)
+  hwDMA_Channel_Index_5,
+#endif
+#if defined (GPDMA1_Channel6)
+  hwDMA_Channel_Index_6,
+#endif
+#if defined (GPDMA1_Channel7)
+  hwDMA_Channel_Index_7,
+#endif
+#if defined (GPDMA1_Channel8)
+  hwDMA_Channel_Index_8,
+#endif
+#if defined (GPDMA1_Channel9)
+  hwDMA_Channel_Index_9,
+#endif
+#if defined (GPDMA1_Channel10)
+  hwDMA_Channel_Index_10,
+#endif
+#if defined (GPDMA1_Channel11)
+  hwDMA_Channel_Index_11,
+#endif
+#if defined (GPDMA1_Channel12)
+  hwDMA_Channel_Index_12,
+#endif
+#if defined (GPDMA1_Channel13)
+  hwDMA_Channel_Index_13,
+#endif
+#if defined (GPDMA1_Channel14)
+  hwDMA_Channel_Index_14,
+#endif
+#if defined (GPDMA1_Channel15)
+  hwDMA_Channel_Index_15,
+#endif
+#endif //GPDMA1_BASE
+#if defined (HPDMA1_BASE)
+#if defined (HPDMA1_Channel0)
+  hwDMA_Channel_Index_16,
+#endif
+#if defined (HPDMA1_Channel1)
+  hwDMA_Channel_Index_17,
+#endif
+#if defined (HPDMA1_Channel2)
+  hwDMA_Channel_Index_18,
+#endif
+#if defined (HPDMA1_Channel3)
+  hwDMA_Channel_Index_19,
+#endif
+#if defined (HPDMA1_Channel4)
+  hwDMA_Channel_Index_20,
+#endif
+#if defined (HPDMA1_Channel5)
+  hwDMA_Channel_Index_21,
+#endif
+#if defined (HPDMA1_Channel6)
+  hwDMA_Channel_Index_22,
+#endif
+#if defined (HPDMA1_Channel7)
+  hwDMA_Channel_Index_23,
+#endif
+#if defined (HPDMA1_Channel8)
+  hwDMA_Channel_Index_24,
+#endif
+#if defined (HPDMA1_Channel9)
+  hwDMA_Channel_Index_25,
+#endif
+#if defined (HPDMA1_Channel10)
+  hwDMA_Channel_Index_26,
+#endif
+#if defined (HPDMA1_Channel11)
+  hwDMA_Channel_Index_27,
+#endif
+#if defined (HPDMA1_Channel12)
+  hwDMA_Channel_Index_28,
+#endif
+#if defined (HPDMA1_Channel13)
+  hwDMA_Channel_Index_29,
+#endif
+#if defined (HPDMA1_Channel14)
+  hwDMA_Channel_Index_30,
+#endif
+#if defined (HPDMA1_Channel15)
+  hwDMA_Channel_Index_31,
+#endif
+#endif //HPDMA1_BASE
   hwDMA_Channel_Index_MAX,
 }hwDMA_Channel_Index;
 #endif

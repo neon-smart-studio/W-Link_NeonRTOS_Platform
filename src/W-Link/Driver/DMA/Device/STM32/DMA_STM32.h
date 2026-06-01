@@ -20,12 +20,12 @@ extern "C" {
 #define DMA_WAIT_ALLOCATED_TIMEOUT  1000
 #define DMA_WAIT_TRANSFER_TIMEOUT   1000
 
-#if defined (STM32F0) || defined (STM32F1) || \
-    defined (STM32F3) || defined (STM32L0) || \
+#if defined (STM32F0) || defined (STM32F1) || defined (STM32F3) || \
     defined (STM32G0) || defined (STM32G4) || \
-    defined (STM32C0) || defined (STM32U0) || \
-    defined (STM32U5) || defined (STM32H5) || \
-    defined (STM32L5)
+    defined (STM32C0) || defined (STM32H5) || \
+    defined (STM32U0) || defined (STM32U5) || \
+    defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
+    defined (STM32H7RS)
 extern DMA_HandleTypeDef g_dma[hwDMA_Channel_Index_MAX];
 extern bool DMA_Channel_Init_Status[hwDMA_Channel_Index_MAX];
 extern NeonRTOS_LockObj_t DMA_Channel_Mutex[hwDMA_Channel_Index_MAX];
@@ -38,12 +38,12 @@ extern bool DMA_Stream_Init_Status[hwDMA_Stream_Index_MAX];
 extern NeonRTOS_LockObj_t DMA_Stream_Mutex[hwDMA_Stream_Index_MAX];
 #endif
 
-#if defined (STM32F0) || defined (STM32F1) || \
-    defined (STM32F3) || defined (STM32L0) || \
+#if defined (STM32F0) || defined (STM32F1) || defined (STM32F3) || \
     defined (STM32G0) || defined (STM32G4) || \
-    defined (STM32C0) || defined (STM32U0) || \
-    defined (STM32U5) || defined (STM32H5) || \
-    defined (STM32L5)
+    defined (STM32C0) || defined (STM32H5) || \
+    defined (STM32U0) || defined (STM32U5) || \
+    defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
+    defined (STM32H7RS)
 DMA_TypeDef * DMA_Map_Soc_Base(hwDMA_Channel_Index index);
 DMA_Channel_TypeDef * DMA_Map_Soc_Stream_Base(hwDMA_Channel_Index index);
 #endif
@@ -62,12 +62,12 @@ BDMA_Channel_TypeDef * BDMA_Map_Soc_Channel_Base(hwDMA_Stream_Index index);
 void DMA_Clock_Enable();
 void DMA_Clock_Disable();
 
-#if defined (STM32F0) || defined (STM32F1) || \
-    defined (STM32F3) || defined (STM32L0) || \
+#if defined (STM32F0) || defined (STM32F1) || defined (STM32F3) || \
     defined (STM32G0) || defined (STM32G4) || \
-    defined (STM32C0) || defined (STM32U0) || \
-    defined (STM32U5) || defined (STM32H5) || \
-    defined (STM32L5)
+    defined (STM32C0) || defined (STM32H5) || \
+    defined (STM32U0) || defined (STM32U5) || \
+    defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
+    defined (STM32H7RS)
 hwDMA_OpResult DMA_NVIC_Init(hwDMA_Channel_Index stream_index);
 hwDMA_OpResult DMA_NVIC_DeInit(hwDMA_Channel_Index stream_index);
 #endif

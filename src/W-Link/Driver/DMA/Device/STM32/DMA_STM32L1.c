@@ -11,7 +11,7 @@
 
 #include "NeonRTOS.h"
 
-#ifdef STM32F3
+#ifdef STM32L1
 
 #include "DMA_STM32_Index.h"
 
@@ -27,19 +27,19 @@
 
 static const hwDMA_Channel_Index UART_DMA_Channel_Map[hwUART_Index_MAX][hwDMA_Peripheral_Direction_MAX] =
 {
-#if defined (UART1_BASE) || defined(USART1_BASE)
+#if defined(USART1_BASE)
     {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5}, // USART1_TX DMA1_CH4, RX DMA1_CH5
 #endif
-#if defined (UART2_BASE) || defined(USART2_BASE)
+#if defined(USART2_BASE)
     {hwDMA_Channel_Index_7, hwDMA_Channel_Index_6}, // USART2_TX DMA1_CH7, RX DMA1_CH6
 #endif
-#if defined (UART3_BASE) || defined(USART3_BASE)
+#if defined(USART3_BASE)
     {hwDMA_Channel_Index_2, hwDMA_Channel_Index_3}, // USART3_TX DMA1_CH2, RX DMA1_CH3
 #endif
-#if defined (UART4_BASE) || defined(USART4_BASE)
+#if defined(UART4_BASE)
     {hwDMA_Channel_Index_5, hwDMA_Channel_Index_3}, // UART4_TX DMA2_CH5, RX DMA2_CH3
 #endif
-#if defined (UART5_BASE) || defined(USART5_BASE)
+#if defined(UART5_BASE)
     {hwDMA_Channel_Index_2, hwDMA_Channel_Index_1}, // UART5_TX DMA2_CH2, RX DMA2_CH1
 #endif
 };
@@ -64,9 +64,6 @@ static const hwDMA_Channel_Index I2C_DMA_Channel_Map[hwI2C_Index_MAX][hwDMA_Peri
 #endif
 #if defined(I2C2_BASE)
     {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5}, // I2C2_TX DMA1_CH4, RX DMA1_CH5
-#endif
-#if defined(I2C3_BASE)
-    {hwDMA_Channel_Index_2, hwDMA_Channel_Index_1}, // I2C3_TX DMA2_CH2, RX DMA2_CH1
 #endif
 };
 
@@ -906,4 +903,4 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
         return op_status;
 }
 
-#endif //STM32F3
+#endif //STM32L1

@@ -23,12 +23,12 @@
 #define DMA_WAIT_ALLOCATED_TIMEOUT  1000
 #define DMA_WAIT_TRANSFER_TIMEOUT   1000
 
-#if defined (STM32F0) || defined (STM32F1) || \
-    defined (STM32F3) || defined (STM32L0) || \
+#if defined (STM32F0) || defined (STM32F1) || defined (STM32F3) || \
     defined (STM32G0) || defined (STM32G4) || \
-    defined (STM32C0) || defined (STM32U0) || \
-    defined (STM32U5) || defined (STM32H5) || \
-    defined (STM32L5)
+    defined (STM32C0) || defined (STM32H5) || \
+    defined (STM32U0) || defined (STM32U5) || \
+    defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
+    defined (STM32H7RS)
 DMA_HandleTypeDef g_dma[hwDMA_Channel_Index_MAX];
 
 bool DMA_Channel_Init_Status[hwDMA_Channel_Index_MAX] = {false};
@@ -45,12 +45,12 @@ NeonRTOS_LockObj_t DMA_Stream_Mutex[hwDMA_Stream_Index_MAX] = {NULL};
 
 hwDMA_OpResult DMA_Init()
 {
-#if defined (STM32F0) || defined (STM32F1) || \
-    defined (STM32F3) || defined (STM32L0) || \
+#if defined (STM32F0) || defined (STM32F1) || defined (STM32F3) || \
     defined (STM32G0) || defined (STM32G4) || \
-    defined (STM32C0) || defined (STM32U0) || \
-    defined (STM32U5) || defined (STM32H5) || \
-    defined (STM32L5)
+    defined (STM32C0) || defined (STM32H5) || \
+    defined (STM32U0) || defined (STM32U5) || \
+    defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
+    defined (STM32H7RS)
     for (hwDMA_Channel_Index i = 0; i < hwDMA_Channel_Index_MAX; i++)
     {
         if (NeonRTOS_LockObjCreate(&DMA_Channel_Mutex[i]) != NeonRTOS_OK)
@@ -81,12 +81,12 @@ hwDMA_OpResult DMA_Init()
 
 hwDMA_OpResult DMA_DeInit()
 {
-#if defined (STM32F0) || defined (STM32F1) || \
-    defined (STM32F3) || defined (STM32L0) || \
+#if defined (STM32F0) || defined (STM32F1) || defined (STM32F3) || \
     defined (STM32G0) || defined (STM32G4) || \
-    defined (STM32C0) || defined (STM32U0) || \
-    defined (STM32U5) || defined (STM32H5) || \
-    defined (STM32L5)
+    defined (STM32C0) || defined (STM32H5) || \
+    defined (STM32U0) || defined (STM32U5) || \
+    defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
+    defined (STM32H7RS)
     for (hwDMA_Channel_Index i = 0; i < hwDMA_Channel_Index_MAX; i++)
     {
         NeonRTOS_LockObjDelete(&DMA_Channel_Mutex[i]);

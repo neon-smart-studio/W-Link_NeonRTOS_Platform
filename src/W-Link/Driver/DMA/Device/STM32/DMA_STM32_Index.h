@@ -19,7 +19,7 @@ G4	DMA + DMAMUX
 U5	GPDMA
 */
 
-#if defined (STM32F0) ||  defined (STM32F1) || defined (STM32F3) || defined (STM32L0) || defined (STM32G0)
+#if defined (STM32F0) ||  defined (STM32F1) || defined (STM32F3) || defined (STM32L0) || defined (STM32G0) || defined (STM32C0) || defined (STM32U0)
 typedef enum hwDMA_Channel_Index_t
 {
 #if defined (DMA1_BASE)

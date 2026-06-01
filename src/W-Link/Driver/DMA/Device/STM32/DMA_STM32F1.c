@@ -267,7 +267,7 @@ hwDMA_OpResult DMA_NVIC_Init(hwDMA_Channel_Index channel_index)
                 return hwDMA_InvalidParameter;
         }
 
-        if(DMA_Stream_Init_Status[channel_index]==true)
+        if(DMA_Channel_Init_Status[channel_index]==true)
         {
                 return hwDMA_OK;
         }
@@ -472,7 +472,7 @@ static hwDMA_OpResult DMA_DeConfig(hwDMA_Channel_Index channel_index)
         return hwDMA_InvalidParameter;
     }
 
-    if (DMA_Stream_Init_Status[channel_index] == false)
+    if (DMA_Channel_Init_Status[channel_index] == false)
     {
         return hwDMA_NotInit;
     }
@@ -509,7 +509,7 @@ static hwDMA_OpResult DMA_Config_UART(hwDMA_Channel_Index channel_index, hwDMA_P
                 return hwDMA_InvalidParameter;
         }
 
-        if (DMA_Stream_Init_Status[channel_index] == false)
+        if (DMA_Channel_Init_Status[channel_index] == false)
         {
                 return hwDMA_NotInit;
         }
@@ -574,7 +574,7 @@ static hwDMA_OpResult DMA_Config_I2C(hwDMA_Channel_Index channel_index, hwDMA_Pe
                 return hwDMA_InvalidParameter;
         }
 
-        if (DMA_Stream_Init_Status[channel_index] == false)
+        if (DMA_Channel_Init_Status[channel_index] == false)
         {
                 return hwDMA_NotInit;
         }
@@ -642,7 +642,7 @@ static hwDMA_OpResult DMA_Config_SPI(hwDMA_Channel_Index channel_index, hwDMA_Pe
                 return hwDMA_InvalidParameter;
         }
 
-        if(DMA_Stream_Init_Status[channel_index]==false)
+        if(DMA_Channel_Init_Status[channel_index]==false)
         {
                 return hwDMA_NotInit;
         }
@@ -712,7 +712,7 @@ hwDMA_OpResult DMA_Xfer_UART(hwUART_Index index, hwDMA_Peripheral_Direction dir,
                 return hwDMA_InvalidParameter;
         }
 
-        if(DMA_Stream_Init_Status[channel_index]==false)
+        if(DMA_Channel_Init_Status[channel_index]==false)
         {
                 return hwDMA_NotInit;
         }
@@ -784,7 +784,7 @@ hwDMA_OpResult DMA_Xfer_I2C(hwI2C_Index index, hwDMA_Peripheral_Direction dir, u
                 return hwDMA_InvalidParameter;
         }
 
-        if(DMA_Stream_Init_Status[channel_index]==false)
+        if(DMA_Channel_Init_Status[channel_index]==false)
         {
                 return hwDMA_NotInit;
         }
@@ -856,7 +856,7 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
                 return hwDMA_InvalidParameter;
         }
 
-        if(DMA_Stream_Init_Status[channel_index]==false)
+        if(DMA_Channel_Init_Status[channel_index]==false)
         {
                 return hwDMA_NotInit;
         }

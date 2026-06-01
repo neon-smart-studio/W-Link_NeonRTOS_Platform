@@ -11,7 +11,7 @@
 
 #include "NeonRTOS.h"
 
-#ifdef STM32F3
+#ifdef STM32C0
 
 #include "DMA_STM32_Index.h"
 
@@ -31,48 +31,41 @@
 #define DMA_CHANNEL_LOCK(channel_index) if (NeonRTOS_LockObjLock(&DMA_Channel_Mutex[(channel_index)], DMA_WAIT_ALLOCATED_TIMEOUT) != NeonRTOS_OK) { return hwDMA_MutexTimeout; }
 #define DMA_CHANNEL_UNLOCK(channel_index) if (NeonRTOS_LockObjUnlock(&DMA_Channel_Mutex[(channel_index)]) != NeonRTOS_OK) { return hwDMA_MutexTimeout; }
 
+static bool DMA_NVIC_Init_Status[hwDMA_Channel_Index_MAX] = {false};
+
 static const hwDMA_Channel_Index UART_DMA_Channel_Map[hwUART_Index_MAX][hwDMA_Peripheral_Direction_MAX] =
 {
-#if defined (UART1_BASE) || defined(USART1_BASE)
-    {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5}, // USART1_TX DMA1_CH4, RX DMA1_CH5
+#if defined(UART1_BASE) || defined(USART1_BASE)
+    {hwDMA_Channel_Index_1, hwDMA_Channel_Index_2},
 #endif
-#if defined (UART2_BASE) || defined(USART2_BASE)
-    {hwDMA_Channel_Index_7, hwDMA_Channel_Index_6}, // USART2_TX DMA1_CH7, RX DMA1_CH6
+#if defined(UART2_BASE) || defined(USART2_BASE)
+    {hwDMA_Channel_Index_3, hwDMA_Channel_Index_1},
 #endif
-#if defined (UART3_BASE) || defined(USART3_BASE)
-    {hwDMA_Channel_Index_2, hwDMA_Channel_Index_3}, // USART3_TX DMA1_CH2, RX DMA1_CH3
+#if defined(UART3_BASE) || defined(USART3_BASE)
+    {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5},
 #endif
-#if defined (UART4_BASE) || defined(USART4_BASE)
-    {hwDMA_Channel_Index_5, hwDMA_Channel_Index_3}, // UART4_TX DMA2_CH5, RX DMA2_CH3
-#endif
-#if defined (UART5_BASE) || defined(USART5_BASE)
-    {hwDMA_Channel_Index_2, hwDMA_Channel_Index_1}, // UART5_TX DMA2_CH2, RX DMA2_CH1
+#if defined(UART4_BASE) || defined(USART4_BASE)
+    {hwDMA_Channel_Index_6, hwDMA_Channel_Index_7},
 #endif
 };
 
 static const hwDMA_Channel_Index SPI_DMA_Channel_Map[hwSPI_Index_MAX][hwDMA_Peripheral_Direction_MAX] =
 {
 #if defined(SPI1_BASE)
-    {hwDMA_Channel_Index_3, hwDMA_Channel_Index_2}, // SPI1_TX DMA1_CH3, RX DMA1_CH2
+    {hwDMA_Channel_Index_1, hwDMA_Channel_Index_2},
 #endif
 #if defined(SPI2_BASE)
-    {hwDMA_Channel_Index_5, hwDMA_Channel_Index_4}, // SPI2_TX DMA1_CH5, RX DMA1_CH4
-#endif
-#if defined(SPI3_BASE)
-    {hwDMA_Channel_Index_2, hwDMA_Channel_Index_1}, // SPI3_TX DMA2_CH2, RX DMA2_CH1
+    {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5},
 #endif
 };
 
 static const hwDMA_Channel_Index I2C_DMA_Channel_Map[hwI2C_Index_MAX][hwDMA_Peripheral_Direction_MAX] =
 {
 #if defined(I2C1_BASE)
-    {hwDMA_Channel_Index_6, hwDMA_Channel_Index_7}, // I2C1_TX DMA1_CH6, RX DMA1_CH7
+    {hwDMA_Channel_Index_1, hwDMA_Channel_Index_2},
 #endif
 #if defined(I2C2_BASE)
-    {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5}, // I2C2_TX DMA1_CH4, RX DMA1_CH5
-#endif
-#if defined(I2C3_BASE)
-    {hwDMA_Channel_Index_2, hwDMA_Channel_Index_1}, // I2C3_TX DMA2_CH2, RX DMA2_CH1
+    {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5},
 #endif
 };
 
@@ -103,30 +96,6 @@ DMA_TypeDef * DMA_Map_Soc_Base(hwDMA_Channel_Index index)
         case hwDMA_Channel_Index_7:
 #endif
                 return DMA1;
-#endif
-#if defined (DMA2_BASE)
-#if defined (DMA2_Channel1)
-        case hwDMA_Channel_Index_8:
-#endif
-#if defined (DMA2_Channel2)
-        case hwDMA_Channel_Index_9:
-#endif
-#if  defined (DMA2_Channel3)
-        case hwDMA_Channel_Index_10:
-#endif
-#if defined (DMA2_Channel4)
-        case hwDMA_Channel_Index_11:
-#endif
-#if defined (DMA2_Channel5)
-        case hwDMA_Channel_Index_12:
-#endif
-#if defined (DMA2_Channel6)
-        case hwDMA_Channel_Index_13:
-#endif
-#if defined (DMA2_Channel7)
-        case hwDMA_Channel_Index_14:
-#endif
-                return DMA2;
 #endif
         default:
                 break;
@@ -161,29 +130,6 @@ DMA_Channel_TypeDef * DMA_Map_Soc_Channel_Base(hwDMA_Channel_Index index)
         case hwDMA_Channel_Index_7: return DMA1_Channel7;
 #endif
 #endif
-#if defined (DMA2_BASE)
-#if defined (DMA2_Channel1)
-        case hwDMA_Channel_Index_8: return DMA2_Channel1;
-#endif
-#if defined (DMA2_Channel2)
-        case hwDMA_Channel_Index_9: return DMA2_Channel2;
-#endif
-#if defined (DMA2_Channel3)
-        case hwDMA_Channel_Index_10: return DMA2_Channel3;
-#endif
-#if defined (DMA2_Channel4)
-        case hwDMA_Channel_Index_11: return DMA2_Channel4;
-#endif
-#if defined (DMA2_Channel5)
-        case hwDMA_Channel_Index_12: return DMA2_Channel5;
-#endif
-#if defined (DMA2_Channel6)
-        case hwDMA_Channel_Index_13: return DMA2_Channel6;
-#endif
-#if defined (DMA2_Channel7)
-        case hwDMA_Channel_Index_14: return DMA2_Channel7;
-#endif
-#endif
         default: break;
     }
     return NULL;
@@ -199,6 +145,86 @@ static void DMA_IRQ_Handler(hwDMA_Channel_Index index)
         HAL_DMA_IRQHandler(&g_dma[index]);
 }
 
+#if defined (STM32C011xx) || defined (STM32C031xx)
+#if defined (DMA1_BASE)
+#if defined (DMA1_Channel1)
+void DMA1_Channel1_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_1); }
+#endif
+#if defined (DMA1_Channel2) || defined (DMA1_Channel3)
+void DMA1_Channel2_3_IRQHandler(void)
+{
+#if defined (DMA1_Channel2)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_2);
+#endif
+#if defined (DMA1_Channel3)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_3);
+#endif
+}
+#endif
+#endif
+#elif defined (STM32C051xx) || defined (STM32C071xx)
+#if defined (DMA1_BASE)
+#if defined (DMA1_Channel1)
+void DMA1_Channel1_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_1); }
+#endif
+#if defined (DMA1_Channel2) || defined (DMA1_Channel3)
+void DMA1_Channel2_3_IRQHandler(void)
+{
+#if defined (DMA1_Channel2)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_2);
+#endif
+#if defined (DMA1_Channel3)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_3);
+#endif
+}
+#endif
+#if defined (DMA1_Channel4) || defined (DMA1_Channel5)
+void DMAMUX1_DMA1_CH4_5_IRQHandler(void)
+{
+#if defined (DMA1_Channel4)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_4);
+#endif
+#if defined (DMA1_Channel5)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_5);
+#endif
+}
+#endif
+#endif //DMA1_BASE
+#elif defined (STM32C091xx) || defined (STM32C092xx)
+#if defined (DMA1_BASE)
+#if defined (DMA1_Channel1)
+void DMA1_Channel1_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_1); }
+#endif
+#if defined (DMA1_Channel2) || defined (DMA1_Channel3)
+void DMA1_Channel2_3_IRQHandler(void)
+{
+#if defined (DMA1_Channel2)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_2);
+#endif
+#if defined (DMA1_Channel3)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_3);
+#endif
+}
+#endif
+#if defined (DMA1_Channel4) || defined (DMA1_Channel5)
+void DMAMUX1_DMA1_CH4_5_6_7_IRQHandler(void)
+{
+#if defined (DMA1_Channel4)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_4);
+#endif
+#if defined (DMA1_Channel5)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_5);
+#endif
+#if defined (DMA1_Channel6)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_6);
+#endif
+#if defined (DMA1_Channel7)
+        DMA_IRQ_Handler(hwDMA_Channel_Index_7);
+#endif
+}
+#endif
+#endif //DMA1_BASE
+#else
 #if defined (DMA1_BASE)
 #if defined (DMA1_Channel1)
 void DMA1_Channel1_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_1); }
@@ -222,40 +248,13 @@ void DMA1_Channel6_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_6); }
 void DMA1_Channel7_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_7); }
 #endif
 #endif //DMA1_BASE
-
-#if defined (DMA2_BASE)
-#if defined (DMA2_Channel1)
-void DMA2_Channel1_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_8); }
 #endif
-#if defined (DMA2_Channel2)
-void DMA2_Channel2_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_9); }
-#endif
-#if defined (DMA2_Channel3)
-void DMA2_Channel3_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_10); }
-#endif
-#if defined (DMA2_Channel4)
-void DMA2_Channel4_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_11); }
-#endif
-#if defined (DMA2_Channel5)
-void DMA2_Channel5_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_12); }
-#endif
-#if defined (DMA2_Channel6)
-void DMA2_Channel6_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_13); }
-#endif
-#if defined (DMA2_Channel7)
-void DMA2_Channel7_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_14); }
-#endif
-#endif //DMA2_BASE
 
 void DMA_Clock_Enable()
 {
 #if defined (DMA1_BASE)
          __HAL_RCC_DMA1_CLK_ENABLE();
 #endif //DMA1_BASE
-
-#if defined (DMA2_BASE)
-        __HAL_RCC_DMA2_CLK_ENABLE();
-#endif //DMA2_BASE
 }
 
 void DMA_Clock_Disable()
@@ -263,10 +262,6 @@ void DMA_Clock_Disable()
 #if defined (DMA1_BASE)
         __HAL_RCC_DMA1_CLK_DISABLE();
 #endif //DMA1_BASE
-
-#if defined (DMA2_BASE)
-        __HAL_RCC_DMA2_CLK_DISABLE();
-#endif //DMA2_BASE
 }
 
 hwDMA_OpResult DMA_NVIC_Init(hwDMA_Channel_Index channel_index)
@@ -283,6 +278,85 @@ hwDMA_OpResult DMA_NVIC_Init(hwDMA_Channel_Index channel_index)
 
         switch(channel_index)
         {
+#if defined (STM32C011xx) || defined (STM32C031xx)
+#if defined (DMA1_BASE)
+#if defined (DMA1_Channel1)
+                case hwDMA_Channel_Index_1:
+                        HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
+                        HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+                        break;
+#endif
+#if defined (DMA1_Channel2)
+                case hwDMA_Channel_Index_2:
+#endif
+#if defined (DMA1_Channel3)
+                case hwDMA_Channel_Index_3:
+#endif
+                        HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
+                        HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
+                        break;
+#endif
+#elif defined (STM32C051xx) || defined (STM32C071xx)
+#if defined (DMA1_BASE)
+#if defined (DMA1_Channel1)
+                case hwDMA_Channel_Index_1:
+                        HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
+                        HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+                        break;
+#endif
+#if defined (DMA1_Channel2)
+                case hwDMA_Channel_Index_2:
+#endif
+#if defined (DMA1_Channel3)
+                case hwDMA_Channel_Index_3:
+#endif
+                        HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
+                        HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
+                        break;
+#if defined (DMA1_Channel4)
+                case hwDMA_Channel_Index_4:
+#endif
+#if defined (DMA1_Channel5)
+                case hwDMA_Channel_Index_5:
+#endif
+                        HAL_NVIC_SetPriority(DMAMUX1_DMA1_CH4_5_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
+                        HAL_NVIC_EnableIRQ(DMAMUX1_DMA1_CH4_5_IRQn);
+                        break;
+#endif
+#elif defined (STM32C091xx) || defined (STM32C092xx)
+#if defined (DMA1_BASE)
+#if defined (DMA1_Channel1)
+                case hwDMA_Channel_Index_1:
+                        HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
+                        HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+                        break;
+#endif
+#if defined (DMA1_Channel2)
+                case hwDMA_Channel_Index_2:
+#endif
+#if defined (DMA1_Channel3)
+                case hwDMA_Channel_Index_3:
+#endif
+                        HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
+                        HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
+                        break;
+#if defined (DMA1_Channel4)
+                case hwDMA_Channel_Index_4:
+#endif
+#if defined (DMA1_Channel5)
+                case hwDMA_Channel_Index_5:
+#endif
+#if defined (DMA1_Channel6)
+                case hwDMA_Channel_Index_6:
+#endif
+#if defined (DMA1_Channel7)
+                case hwDMA_Channel_Index_7:
+#endif
+                        HAL_NVIC_SetPriority(DMAMUX1_DMA1_CH4_5_6_7_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
+                        HAL_NVIC_EnableIRQ(DMAMUX1_DMA1_CH4_5_6_7_IRQn);
+                        break;
+#endif
+#else
 #if defined (DMA1_BASE)
 #if defined (DMA1_Channel1)
                 case hwDMA_Channel_Index_1:
@@ -327,51 +401,10 @@ hwDMA_OpResult DMA_NVIC_Init(hwDMA_Channel_Index channel_index)
                         break;
 #endif
 #endif //DMA1_BASE
-#if defined (DMA2_BASE)
-#if defined (DMA2_Channel1)
-                case hwDMA_Channel_Index_8:
-                        HAL_NVIC_SetPriority(DMA2_Channel1_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(DMA2_Channel1_IRQn);
-                        break;
 #endif
-#if defined (DMA2_Channel2)
-                case hwDMA_Channel_Index_9:
-                        HAL_NVIC_SetPriority(DMA2_Channel2_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(DMA2_Channel2_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel3)
-                case hwDMA_Channel_Index_10:
-                        HAL_NVIC_SetPriority(DMA2_Channel3_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(DMA2_Channel3_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel4)
-                case hwDMA_Channel_Index_11:
-                        HAL_NVIC_SetPriority(DMA2_Channel4_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(DMA2_Channel4_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel5)
-                case hwDMA_Channel_Index_12:
-                        HAL_NVIC_SetPriority(DMA2_Channel5_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(DMA2_Channel5_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel6)
-                case hwDMA_Channel_Index_13:
-                        HAL_NVIC_SetPriority(DMA2_Channel6_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(DMA2_Channel6_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel7)
-                case hwDMA_Channel_Index_14:
-                        HAL_NVIC_SetPriority(DMA2_Channel7_IRQn, DMA_IRQ_NVIC_PRIORITY, DMA_IRQ_NVIC_SUB_PRIORITY);
-                        HAL_NVIC_EnableIRQ(DMA2_Channel7_IRQn);
-                        break;
-#endif
-#endif //DMA2_BASE
         }
+
+        DMA_NVIC_Init_Status[channel_index] = true;
 
         return hwDMA_OK;
 }
@@ -383,8 +416,127 @@ hwDMA_OpResult DMA_NVIC_DeInit(hwDMA_Channel_Index channel_index)
                 return hwDMA_InvalidParameter;
         }
 
+        DMA_NVIC_Init_Status[channel_index] = false;
+
         switch(channel_index)
         {
+#if defined (STM32C011xx) || defined (STM32C031xx)
+#if defined (DMA1_BASE)
+#if defined (DMA1_Channel1)
+                case hwDMA_Channel_Index_1:
+                        HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
+                        break;
+#endif
+#if defined (DMA1_Channel2)
+                case hwDMA_Channel_Index_2:
+#endif
+#if defined (DMA1_Channel3)
+                case hwDMA_Channel_Index_3:
+#endif
+                        HAL_NVIC_DisableIRQ(DMA1_Channel2_3_IRQn);
+                        break;
+#endif
+#elif defined (STM32C051xx) || defined (STM32C071xx)
+#if defined (DMA1_BASE)
+#if defined (DMA1_Channel1)
+                case hwDMA_Channel_Index_1:
+                        HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
+                        break;
+#endif
+#if defined (DMA1_Channel2)
+                case hwDMA_Channel_Index_2:
+#endif
+#if defined (DMA1_Channel3)
+                case hwDMA_Channel_Index_3:
+#endif
+#if defined (DMA1_Channel2) && defined (DMA1_Channel3)
+                        if(!DMA_NVIC_Init_Status[hwDMA_Channel_Index_2] && !DMA_NVIC_Init_Status[hwDMA_Channel_Index_3])
+#endif
+                        {
+                                HAL_NVIC_DisableIRQ(DMA1_Channel2_3_IRQn);
+                        }
+                        break;
+#if defined (DMA1_Channel4)
+                case hwDMA_Channel_Index_4:
+#endif
+#if defined (DMA1_Channel5)
+                case hwDMA_Channel_Index_5:
+#endif
+#if defined (DMA1_Channel2) && defined (DMA1_Channel3)
+                        if(!DMA_NVIC_Init_Status[hwDMA_Channel_Index_4] && !DMA_NVIC_Init_Status[hwDMA_Channel_Index_5])
+#endif
+                        {
+                                HAL_NVIC_DisableIRQ(DMAMUX1_DMA1_CH4_5_IRQn);
+                        }
+                        break;
+#endif
+#elif defined (STM32C091xx) || defined (STM32C092xx)
+#if defined (DMA1_BASE)
+#if defined (DMA1_Channel1)
+                case hwDMA_Channel_Index_1:
+                        HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
+                        break;
+#endif
+#if defined (DMA1_Channel2)
+                case hwDMA_Channel_Index_2:
+#endif
+#if defined (DMA1_Channel3)
+                case hwDMA_Channel_Index_3:
+#endif
+#if defined (DMA1_Channel2) && defined (DMA1_Channel3)
+                        if(!DMA_NVIC_Init_Status[hwDMA_Channel_Index_2] && !DMA_NVIC_Init_Status[hwDMA_Channel_Index_3])
+#endif
+                        {
+                                HAL_NVIC_DisableIRQ(DMA1_Channel2_3_IRQn);
+                        }
+                        break;
+#if defined (DMA1_Channel4)
+                case hwDMA_Channel_Index_4:
+#endif
+#if defined (DMA1_Channel5)
+                case hwDMA_Channel_Index_5:
+#endif
+#if defined (DMA1_Channel6)
+                case hwDMA_Channel_Index_6:
+#endif
+#if defined (DMA1_Channel7)
+                case hwDMA_Channel_Index_7:
+#endif
+                        {
+                                bool dma1_4_7_used = false;
+
+#if defined (DMA1_Channel4)
+                                if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_4])
+                                {
+                                        dma1_4_7_used = true;
+                                }
+#endif
+#if defined (DMA1_Channel5)
+                                if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_5])
+                                {
+                                        dma1_4_7_used = true;
+                                }
+#endif
+#if defined (DMA1_Channel6)
+                                if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_6])
+                                {
+                                        dma1_4_7_used = true;
+                                }
+#endif
+#if defined (DMA1_Channel7)
+                                if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_7])
+                                {
+                                        dma1_4_7_used = true;
+                                }
+#endif
+                                if (!dma1_4_7_used)
+                                {
+                                        HAL_NVIC_DisableIRQ(DMAMUX1_DMA1_CH4_5_6_7_IRQn);
+                                }
+                        }
+                        break;
+#endif
+#else
 #if defined (DMA1_BASE)
 #if defined (DMA1_Channel1)
                 case hwDMA_Channel_Index_1:
@@ -422,43 +574,7 @@ hwDMA_OpResult DMA_NVIC_DeInit(hwDMA_Channel_Index channel_index)
                         break;
 #endif
 #endif //DMA1_BASE
-#if defined (DMA2_BASE)
-#if defined (DMA2_Channel1)
-                case hwDMA_Channel_Index_8:
-                        HAL_NVIC_DisableIRQ(DMA2_Channel1_IRQn);
-                        break;
 #endif
-#if defined (DMA2_Channel2)
-                case hwDMA_Channel_Index_9:
-                        HAL_NVIC_DisableIRQ(DMA2_Channel2_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel3)
-                case hwDMA_Channel_Index_10:
-                        HAL_NVIC_DisableIRQ(DMA2_Channel3_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel4)
-                case hwDMA_Channel_Index_11:
-                        HAL_NVIC_DisableIRQ(DMA2_Channel4_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel5)
-                case hwDMA_Channel_Index_12:
-                        HAL_NVIC_DisableIRQ(DMA2_Channel5_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel6)
-                case hwDMA_Channel_Index_13:
-                        HAL_NVIC_DisableIRQ(DMA2_Channel6_IRQn);
-                        break;
-#endif
-#if defined (DMA2_Channel7)
-                case hwDMA_Channel_Index_14:
-                        HAL_NVIC_DisableIRQ(DMA2_Channel7_IRQn);
-                        break;
-#endif
-#endif //DMA2_BASE
         }
 
         return hwDMA_OK;
@@ -540,10 +656,98 @@ static hwDMA_OpResult DMA_Config_UART(hwDMA_Channel_Index channel_index, hwDMA_P
         {
                 case hwDMA_Peripheral_Direction_TX:
                         g_dma[channel_index].Init.Direction = DMA_MEMORY_TO_PERIPH;
+
+                        switch(index)
+                        {
+#if defined (UART1_BASE)
+                                case hwUART_Index_0:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART1_TX;
+                                        break;
+#endif
+#if defined(USART1_BASE)
+                                case hwUART_Index_0:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART1_TX;
+                                        break;
+#endif
+#if defined (UART2_BASE)
+                                case hwUART_Index_1:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART2_TX;
+                                        break;
+#endif
+#if defined(USART2_BASE)
+                                case hwUART_Index_1:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART2_TX;
+                                        break;
+#endif
+#if defined (UART3_BASE)
+                                case hwUART_Index_2:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART3_TX;
+                                        break;
+#endif
+#if defined(USART3_BASE)
+                                case hwUART_Index_2:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART3_TX;
+                                        break;
+#endif
+#if defined (UART4_BASE)
+                                case hwUART_Index_3:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART4_TX;
+                                        break;
+#endif
+#if defined(USART4_BASE)
+                                case hwUART_Index_3:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART4_TX;
+                                        break;
+#endif
+                        }
                         break;
 
                 case hwDMA_Peripheral_Direction_RX:
                         g_dma[channel_index].Init.Direction = DMA_PERIPH_TO_MEMORY;
+
+                        switch(index)
+                        {
+#if defined (UART1_BASE)
+                                case hwUART_Index_0:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART1_RX;
+                                        break;
+#endif
+#if defined(USART1_BASE)
+                                case hwUART_Index_0:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART1_RX;
+                                        break;
+#endif
+#if defined (UART2_BASE)
+                                case hwUART_Index_1:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART2_RX;
+                                        break;
+#endif
+#if defined(USART2_BASE)
+                                case hwUART_Index_1:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART2_RX;
+                                        break;
+#endif
+#if defined (UART3_BASE)
+                                case hwUART_Index_2:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART3_RX;
+                                        break;
+#endif
+#if defined(USART3_BASE)
+                                case hwUART_Index_2:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART3_RX;
+                                        break;
+#endif
+#if defined (UART4_BASE)
+                                case hwUART_Index_3:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART4_RX;
+                                        break;
+#endif
+#if defined(USART4_BASE)
+                                case hwUART_Index_3:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART4_RX;
+                                        break;
+#endif
+                        }
                         break;
         }
 
@@ -605,10 +809,38 @@ static hwDMA_OpResult DMA_Config_I2C(hwDMA_Channel_Index channel_index, hwDMA_Pe
         {
                 case hwDMA_Peripheral_Direction_TX:
                         g_dma[channel_index].Init.Direction = DMA_MEMORY_TO_PERIPH;
+
+                        switch(index)
+                        {
+#if defined(I2C1_BASE)
+                                case hwI2C_Index_0:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_I2C1_TX;
+                                        break;
+#endif
+#if defined(I2C2_BASE)
+                                case hwI2C_Index_1:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_I2C2_TX;
+                                        break;
+#endif
+                        }
                         break;
 
                 case hwDMA_Peripheral_Direction_RX:
                         g_dma[channel_index].Init.Direction = DMA_PERIPH_TO_MEMORY;
+
+                        switch(index)
+                        {
+#if defined(I2C1_BASE)
+                                case hwI2C_Index_0:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_I2C1_RX;
+                                        break;
+#endif
+#if defined(I2C2_BASE)
+                                case hwI2C_Index_1:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_I2C2_RX;
+                                        break;
+#endif
+                        }
                         break;
         }
 
@@ -673,9 +905,37 @@ static hwDMA_OpResult DMA_Config_SPI(hwDMA_Channel_Index channel_index, hwDMA_Pe
         {
                 case hwDMA_Peripheral_Direction_TX:
                         g_dma[channel_index].Init.Direction = DMA_MEMORY_TO_PERIPH;
+
+                        switch(index)
+                        {
+#if defined(SPI1_BASE)
+                                case hwSPI_Index_0:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_SPI1_TX;
+                                        break;
+#endif
+#if defined(SPI2_BASE)
+                                case hwSPI_Index_1:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_SPI2_TX;
+                                        break;
+#endif
+                        }
                         break;
                 case hwDMA_Peripheral_Direction_RX:
                         g_dma[channel_index].Init.Direction = DMA_PERIPH_TO_MEMORY;
+                        
+                        switch(index)
+                        {
+#if defined(SPI1_BASE)
+                                case hwSPI_Index_0:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_SPI1_RX;
+                                        break;
+#endif
+#if defined(SPI2_BASE)
+                                case hwSPI_Index_1:
+                                        g_dma[channel_index].Init.Request = DMA_REQUEST_SPI2_RX;
+                                        break;
+#endif
+                        }
                         break;
         }
 
@@ -912,4 +1172,4 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
         return op_status;
 }
 
-#endif //STM32F3
+#endif //STM32C0

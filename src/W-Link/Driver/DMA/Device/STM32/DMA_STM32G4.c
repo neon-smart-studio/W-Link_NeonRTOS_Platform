@@ -11,7 +11,7 @@
 
 #include "NeonRTOS.h"
 
-#ifdef STM32F3
+#ifdef STM32G4
 
 #include "DMA_STM32_Index.h"
 
@@ -28,45 +28,57 @@
 static const hwDMA_Channel_Index UART_DMA_Channel_Map[hwUART_Index_MAX][hwDMA_Peripheral_Direction_MAX] =
 {
 #if defined (UART1_BASE) || defined(USART1_BASE)
-    {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5}, // USART1_TX DMA1_CH4, RX DMA1_CH5
+    {hwDMA_Channel_Index_1, hwDMA_Channel_Index_2},
 #endif
 #if defined (UART2_BASE) || defined(USART2_BASE)
-    {hwDMA_Channel_Index_7, hwDMA_Channel_Index_6}, // USART2_TX DMA1_CH7, RX DMA1_CH6
+    {hwDMA_Channel_Index_3, hwDMA_Channel_Index_4},
 #endif
 #if defined (UART3_BASE) || defined(USART3_BASE)
-    {hwDMA_Channel_Index_2, hwDMA_Channel_Index_3}, // USART3_TX DMA1_CH2, RX DMA1_CH3
+    {hwDMA_Channel_Index_5, hwDMA_Channel_Index_6},
 #endif
 #if defined (UART4_BASE) || defined(USART4_BASE)
-    {hwDMA_Channel_Index_5, hwDMA_Channel_Index_3}, // UART4_TX DMA2_CH5, RX DMA2_CH3
+    {hwDMA_Channel_Index_9, hwDMA_Channel_Index_10},
 #endif
 #if defined (UART5_BASE) || defined(USART5_BASE)
-    {hwDMA_Channel_Index_2, hwDMA_Channel_Index_1}, // UART5_TX DMA2_CH2, RX DMA2_CH1
+    {hwDMA_Channel_Index_11, hwDMA_Channel_Index_12},
+#endif
+#if defined (UART6_BASE) || defined(USART6_BASE)
+    {hwDMA_Channel_Index_13, hwDMA_Channel_Index_14},
+#endif
+#if defined (LPUART1_BASE)
+    {hwDMA_Channel_Index_1, hwDMA_Channel_Index_2},
 #endif
 };
 
 static const hwDMA_Channel_Index SPI_DMA_Channel_Map[hwSPI_Index_MAX][hwDMA_Peripheral_Direction_MAX] =
 {
 #if defined(SPI1_BASE)
-    {hwDMA_Channel_Index_3, hwDMA_Channel_Index_2}, // SPI1_TX DMA1_CH3, RX DMA1_CH2
+    {hwDMA_Channel_Index_1, hwDMA_Channel_Index_2},
 #endif
 #if defined(SPI2_BASE)
-    {hwDMA_Channel_Index_5, hwDMA_Channel_Index_4}, // SPI2_TX DMA1_CH5, RX DMA1_CH4
+    {hwDMA_Channel_Index_3, hwDMA_Channel_Index_4},
 #endif
 #if defined(SPI3_BASE)
-    {hwDMA_Channel_Index_2, hwDMA_Channel_Index_1}, // SPI3_TX DMA2_CH2, RX DMA2_CH1
+    {hwDMA_Channel_Index_5, hwDMA_Channel_Index_6},
+#endif
+#if defined(SPI4_BASE)
+    {hwDMA_Channel_Index_9, hwDMA_Channel_Index_10},
 #endif
 };
 
 static const hwDMA_Channel_Index I2C_DMA_Channel_Map[hwI2C_Index_MAX][hwDMA_Peripheral_Direction_MAX] =
 {
 #if defined(I2C1_BASE)
-    {hwDMA_Channel_Index_6, hwDMA_Channel_Index_7}, // I2C1_TX DMA1_CH6, RX DMA1_CH7
+    {hwDMA_Channel_Index_1, hwDMA_Channel_Index_2},
 #endif
 #if defined(I2C2_BASE)
-    {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5}, // I2C2_TX DMA1_CH4, RX DMA1_CH5
+    {hwDMA_Channel_Index_3, hwDMA_Channel_Index_4},
 #endif
 #if defined(I2C3_BASE)
-    {hwDMA_Channel_Index_2, hwDMA_Channel_Index_1}, // I2C3_TX DMA2_CH2, RX DMA2_CH1
+    {hwDMA_Channel_Index_5, hwDMA_Channel_Index_6},
+#endif
+#if defined(I2C4_BASE)
+    {hwDMA_Channel_Index_11, hwDMA_Channel_Index_12},
 #endif
 };
 
@@ -219,25 +231,25 @@ void DMA1_Channel7_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_7); }
 
 #if defined (DMA2_BASE)
 #if defined (DMA2_Channel1)
-void DMA2_Channel1_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_8); }
+void DMA2_Channel1_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_9); }
 #endif
 #if defined (DMA2_Channel2)
-void DMA2_Channel2_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_9); }
+void DMA2_Channel2_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_10); }
 #endif
 #if defined (DMA2_Channel3)
-void DMA2_Channel3_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_10); }
+void DMA2_Channel3_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_11); }
 #endif
 #if defined (DMA2_Channel4)
-void DMA2_Channel4_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_11); }
+void DMA2_Channel4_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_12); }
 #endif
 #if defined (DMA2_Channel5)
-void DMA2_Channel5_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_12); }
+void DMA2_Channel5_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_13); }
 #endif
 #if defined (DMA2_Channel6)
-void DMA2_Channel6_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_13); }
+void DMA2_Channel6_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_14); }
 #endif
 #if defined (DMA2_Channel7)
-void DMA2_Channel7_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_14); }
+void DMA2_Channel7_IRQHandler(void){ DMA_IRQ_Handler(hwDMA_Channel_Index_15); }
 #endif
 #endif //DMA2_BASE
 
@@ -250,6 +262,10 @@ void DMA_Clock_Enable()
 #if defined (DMA2_BASE)
         __HAL_RCC_DMA2_CLK_ENABLE();
 #endif //DMA2_BASE
+
+#if defined(DMAMUX1)
+        __HAL_RCC_DMAMUX1_CLK_ENABLE();
+#endif
 }
 
 void DMA_Clock_Disable()
@@ -261,6 +277,10 @@ void DMA_Clock_Disable()
 #if defined (DMA2_BASE)
         __HAL_RCC_DMA2_CLK_DISABLE();
 #endif //DMA2_BASE
+
+#if defined(DMAMUX1)
+        __HAL_RCC_DMAMUX1_CLK_DISABLE();
+#endif
 }
 
 hwDMA_OpResult DMA_NVIC_Init(hwDMA_Channel_Index channel_index)
@@ -906,4 +926,4 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
         return op_status;
 }
 
-#endif //STM32F3
+#endif //STM32G4

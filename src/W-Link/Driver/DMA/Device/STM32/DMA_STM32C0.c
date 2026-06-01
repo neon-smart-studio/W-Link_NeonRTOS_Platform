@@ -22,12 +22,6 @@
 #include "SPI/Device/STM32/SPI_Master_STM32.h"
 #include "UART/Device/STM32/UART_STM32.h"
 
-#define DMA_IRQ_NVIC_PRIORITY 5
-#define DMA_IRQ_NVIC_SUB_PRIORITY 0
-
-#define DMA_WAIT_ALLOCATED_TIMEOUT  1000
-#define DMA_WAIT_TRANSFER_TIMEOUT   1000
-
 #define DMA_CHANNEL_LOCK(channel_index) if (NeonRTOS_LockObjLock(&DMA_Channel_Mutex[(channel_index)], DMA_WAIT_ALLOCATED_TIMEOUT) != NeonRTOS_OK) { return hwDMA_MutexTimeout; }
 #define DMA_CHANNEL_UNLOCK(channel_index) if (NeonRTOS_LockObjUnlock(&DMA_Channel_Mutex[(channel_index)]) != NeonRTOS_OK) { return hwDMA_MutexTimeout; }
 

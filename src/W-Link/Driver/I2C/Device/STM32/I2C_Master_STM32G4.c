@@ -93,6 +93,29 @@ uint32_t I2C_Get_PCLK(hwI2C_Index index)
     }
 #endif
 
+#if defined(I2C4_BASE)
+    if (index == hwI2C_Index_3) {
+        uint32_t clocksource = __HAL_RCC_GET_I2C4_SOURCE();
+
+#if defined(RCC_I2C4CLKSOURCE_PCLK1)
+        if (clocksource == RCC_I2C4CLKSOURCE_PCLK1)
+            return HAL_RCC_GetPCLK1Freq();
+#endif
+
+#if defined(RCC_I2C4CLKSOURCE_SYSCLK)
+        if (clocksource == RCC_I2C4CLKSOURCE_SYSCLK)
+            return HAL_RCC_GetSysClockFreq();
+#endif
+
+#if defined(RCC_I2C4CLKSOURCE_HSI)
+        if (clocksource == RCC_I2C4CLKSOURCE_HSI)
+            return HSI_VALUE;
+#endif
+
+        return HAL_RCC_GetPCLK1Freq();
+    }
+#endif
+
     return pclk;
 }
 

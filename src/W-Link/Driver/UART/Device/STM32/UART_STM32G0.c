@@ -599,7 +599,7 @@ void UART_NVIC_DeInit(hwUART_Index index)
 #if defined(LPUART2_BASE)
         case hwUART_Index_L2:
 #endif
-#if (defined(UART2_BASE) || defined(USART2_BASE)) && (defined(LPUART2_BASE)
+#if (defined(UART2_BASE) || defined(USART2_BASE)) && defined(LPUART2_BASE)
             if(!UART_Init_Status[hwUART_Index_1] && !UART_Init_Status[hwUART_Index_L2])
 #endif
             {

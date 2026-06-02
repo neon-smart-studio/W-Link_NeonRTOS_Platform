@@ -159,7 +159,7 @@ static void Ethernet_ReleaseRxDesc(void)
     }
 }
 
-hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], bool igmp, onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb)
+hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -211,17 +211,15 @@ hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], bool igmp, onLinkUpCallb
     EthHandle.Init.AutoNegotiation = ETH_AUTONEGOTIATION_ENABLE;
     EthHandle.Init.Speed = ETH_SPEED_100M;
     EthHandle.Init.DuplexMode = ETH_MODE_FULLDUPLEX;
-#ifdef ETHERNET_RMII_MODE_CONFIGURATION
     EthHandle.Init.MediaInterface = ETH_MEDIA_INTERFACE_RMII;
-#else
-    EthHandle.Init.MediaInterface = ETH_MEDIA_INTERFACE_MII;
-#endif /* ETHERNET_RMII_MODE_CONFIGURATION */
     EthHandle.Init.RxMode = ETH_RXPOLLING_MODE;
     EthHandle.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
     EthHandle.Init.PhyAddress = LAN8742A_PHY_ADDRESS;
 
     /* configure ethernet peripheral (GPIOs, clocks, MAC, DMA) */
-    HAL_ETH_Init(&EthHandle);
+    if(HAL_ETH_Init(&EthHandle) != HAL_OK) {
+        return hwEthernet_HwError;
+    }
 
     /* Initialize Tx Descriptors list: Chain Mode */
     HAL_ETH_DMATxDescListInit(&EthHandle, DMATxDscrTab, &Tx_Buff[0][0], ETH_TXBUFNB);
@@ -316,7 +314,7 @@ hwEthernet_OpResult Ethernet_Input(uint8_t *in_data, uint16_t in_len, uint16_t *
         return hwEthernet_InvalidParameter;
     }
 
-    if (HAL_ETH_GetReceivedFrame_IT(&EthHandle) != HAL_OK) {
+    if (HAL_ETH_GetReceivedFrame(&EthHandle) != HAL_OK) {
         return hwEthernet_Busy;
     }
 

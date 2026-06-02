@@ -228,8 +228,6 @@ void NeonTCPIP_init(const uint8_t *ip, const uint8_t *gw, const uint8_t *netmask
     } else {
       DHCP_state = DHCP_LINK_DOWN;
     }
-
-    NeonTCPIP_ETH_Scheduler();
 }
 
 uint8_t NeonTCPIP_IF_isInit(void)

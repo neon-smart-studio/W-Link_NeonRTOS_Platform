@@ -106,6 +106,29 @@ static void packet_dump(const char * msg, const struct pbuf* p)
 #define packet_dump(...)
 #endif /* dump */
 
+static err_t Map_Ethernet_OpResult_to_err_t(hwEthernet_OpResult result)
+{
+    switch (result) {
+    case hwEthernet_OK:
+        return ERR_OK;
+    case hwEthernet_NotInit:
+        return ERR_ARG;
+    case hwEthernet_InvalidParameter:
+        return ERR_ARG;
+    case hwEthernet_Busy:
+        return ERR_USE;
+    case hwEthernet_MemoryError:
+    case hwEthernet_BufferError:
+        return ERR_MEM;
+    case hwEthernet_HwError:
+        return ERR_IF;
+    case hwEthernet_Unsupport:
+        return ERR_VAL;
+    default:
+        return ERR_IF;
+    }
+}
+
 static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
     uint8_t frame[ETH_MAX_PACKET_SIZE];
@@ -128,19 +151,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
 
     hwEthernet_OpResult  result = Ethernet_Output(frame, frame_len);
     
-    switch (result) {
-    case hwEthernet_OK:
-        return ERR_OK;
-    case hwEthernet_Busy:
-        return ERR_USE;
-    case hwEthernet_MemoryError:
-    case hwEthernet_BufferError:
-        return ERR_MEM;
-    case hwEthernet_InvalidParameter:
-        return ERR_ARG;
-    default:
-        return ERR_IF;
-    }
+    return Map_Ethernet_OpResult_to_err_t(result);
 }
 
 static struct pbuf *low_level_input(struct netif *netif)
@@ -225,11 +236,13 @@ err_t ethernetif_init(struct netif *netif)
 
   pNetif = netif;
 
-#ifdef LWIP_IGMP
-  Ethernet_Init(macaddress, true, ethernetif_onLinkUp, ethernetif_onLinkDown);
-#else
-  Ethernet_Init(macaddress, false, ethernetif_onLinkUp, ethernetif_onLinkDown);
-#endif
+  hwEthernet_OpResult result;
+
+  result = Ethernet_Init(macaddress, ethernetif_onLinkUp, ethernetif_onLinkDown);
+  if(result < hwEthernet_OK)
+  {
+      return Map_Ethernet_OpResult_to_err_t(result);
+  }
 
   /* Initialize interface hostname */
   pNetif->hostname = "NeonRT";

@@ -317,7 +317,7 @@ void APP_Thread(void* p)
 
     NeonTCPIP_init(NULL, NULL, NULL);
 
-    //HTTPd_Init();
+    HTTPd_Init();
 
     while (1)
     {

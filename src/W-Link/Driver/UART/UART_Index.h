@@ -81,7 +81,8 @@ typedef enum hwUART_Index_t
 }hwUART_Index;
 // 定義標準輸出的 UART 索引
 //#define LOG_UART_INDEX hwUART_Index_0
-#define LOG_UART_INDEX hwUART_Index_1
+//#define LOG_UART_INDEX hwUART_Index_1
+#define LOG_UART_INDEX hwUART_Index_2
 #endif //DEVICE_STM32
 
 #ifdef DEVICE_RP2

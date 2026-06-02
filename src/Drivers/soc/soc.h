@@ -69,6 +69,7 @@
 #include "stm32f1xx_hal_adc.h"
 #include "stm32f1xx_hal_can.h"
 #include "stm32f1xx_hal_dac.h"
+#include "stm32f1xx_hal_eth.h"
 #endif //STM32F1
 
 #if defined (STM32F205xx) || defined (STM32F215xx) || defined (STM32F207xx) || defined (STM32F217xx)
@@ -83,6 +84,7 @@
 #include "stm32f2xx_hal_adc.h"
 #include "stm32f2xx_hal_can.h"
 #include "stm32f2xx_hal_dac.h"
+#include "stm32f2xx_hal_eth.h"
 #endif //STM32F2
 
 #if defined (STM32F301x8) || defined (STM32F302x8) || defined (STM32F318xx) || \
@@ -120,6 +122,7 @@
 #include "stm32f4xx_hal_adc.h"
 #include "stm32f4xx_hal_can.h"
 #include "stm32f4xx_hal_dac.h"
+#include "stm32f4xx_hal_eth.h"
 #endif //STM32F4
 
 #if defined (STM32F756xx) || defined (STM32F746xx) || defined (STM32F745xx) || defined (STM32F765xx) || \
@@ -137,6 +140,7 @@
 #include "stm32f7xx_hal_adc.h"
 #include "stm32f7xx_hal_can.h"
 #include "stm32f7xx_hal_dac.h"
+#include "stm32f7xx_hal_eth.h"
 #endif //STM32F7
 
 #if defined (STM32G071xx) || defined (STM32G081xx) || defined (STM32G070xx) || \
@@ -183,7 +187,38 @@
 #include "stm32h5xx_hal_rtc.h"
 #include "stm32h5xx_hal_adc.h"
 #include "stm32h5xx_hal_dac.h"
+#include "stm32h5xx_hal_eth.h"
 #endif
+
+#if defined (STM32H743xx) || defined (STM32H753xx)  || defined (STM32H750xx) || defined (STM32H742xx)  || \
+    defined (STM32H745xx) || defined (STM32H745xG)  || defined (STM32H755xx) || defined (STM32H747xx)  || defined (STM32H747xG) || defined (STM32H757xx) || \
+    defined (STM32H7A3xx) || defined (STM32H7A3xxQ) || defined (STM32H7B3xx) || defined (STM32H7B3xxQ) || defined (STM32H7B0xx) || defined (STM32H7B0xxQ) || \
+    defined (STM32H735xx) || defined (STM32H733xx)  || defined (STM32H730xx) || defined (STM32H730xxQ) || defined (STM32H725xx) || defined (STM32H723xx)
+#include "stm32h7xx.h"
+#include "stm32h7xx_hal_gpio.h"
+#include "stm32h7xx_hal_exti.h"
+#include "stm32h7xx_hal_uart.h"
+#include "stm32h7xx_hal_spi.h"
+#include "stm32h7xx_hal_i2c.h"
+#include "stm32h7xx_hal_dma.h"
+#include "stm32h7xx_hal_rtc.h"
+#include "stm32h7xx_hal_adc.h"
+#include "stm32h7xx_hal_dac.h"
+#include "stm32h7xx_hal_eth.h"
+#endif //STM32H7
+
+#if defined (STM32H7R7xx) || defined (STM32H7R3xx) || defined (STM32H7S3xx) || defined (STM32H7S7xx)
+#include "stm32h7rsxx.h"
+#include "stm32h7rsxx_hal_gpio.h"
+#include "stm32h7rsxx_hal_exti.h"
+#include "stm32h7rsxx_hal_uart.h"
+#include "stm32h7rsxx_hal_spi.h"
+#include "stm32h7rsxx_hal_i2c.h"
+#include "stm32h7rsxx_hal_dma.h"
+#include "stm32h7rsxx_hal_rtc.h"
+#include "stm32h7rsxx_hal_adc.h"
+#include "stm32h7rsxx_hal_eth.h"
+#endif //STM32H7RS
 
 #if defined (STM32L010x4) || defined (STM32L010x6) || defined (STM32L010x8) || defined (STM32L010xB) || \
     defined (STM32L011xx) || defined (STM32L021xx) || \
@@ -302,34 +337,6 @@
 #include "stm32u5xx_hal_adc.h"
 #include "stm32u5xx_hal_dac.h"
 #endif
-
-#if defined (STM32H743xx) || defined (STM32H753xx)  || defined (STM32H750xx) || defined (STM32H742xx)  || \
-    defined (STM32H745xx) || defined (STM32H745xG)  || defined (STM32H755xx) || defined (STM32H747xx)  || defined (STM32H747xG) || defined (STM32H757xx) || \
-    defined (STM32H7A3xx) || defined (STM32H7A3xxQ) || defined (STM32H7B3xx) || defined (STM32H7B3xxQ) || defined (STM32H7B0xx) || defined (STM32H7B0xxQ) || \
-    defined (STM32H735xx) || defined (STM32H733xx)  || defined (STM32H730xx) || defined (STM32H730xxQ) || defined (STM32H725xx) || defined (STM32H723xx)
-#include "stm32h7xx.h"
-#include "stm32h7xx_hal_gpio.h"
-#include "stm32h7xx_hal_exti.h"
-#include "stm32h7xx_hal_uart.h"
-#include "stm32h7xx_hal_spi.h"
-#include "stm32h7xx_hal_i2c.h"
-#include "stm32h7xx_hal_dma.h"
-#include "stm32h7xx_hal_rtc.h"
-#include "stm32h7xx_hal_adc.h"
-#include "stm32h7xx_hal_dac.h"
-#endif //STM32H7
-
-#if defined (STM32H7R7xx) || defined (STM32H7R3xx) || defined (STM32H7S3xx) || defined (STM32H7S7xx)
-#include "stm32h7rsxx.h"
-#include "stm32h7rsxx_hal_gpio.h"
-#include "stm32h7rsxx_hal_exti.h"
-#include "stm32h7rsxx_hal_uart.h"
-#include "stm32h7rsxx_hal_spi.h"
-#include "stm32h7rsxx_hal_i2c.h"
-#include "stm32h7rsxx_hal_dma.h"
-#include "stm32h7rsxx_hal_rtc.h"
-#include "stm32h7rsxx_hal_adc.h"
-#endif //STM32H7RS
 
 #if defined (STM32WB55xx) || defined (STM32WB5Mxx) || defined (STM32WB50xx) || defined (STM32WB35xx) || \
     defined(STM32WB30xx) || defined(STM32WB15xx) || defined(STM32WB10xx) || defined(STM32WB1Mxx)

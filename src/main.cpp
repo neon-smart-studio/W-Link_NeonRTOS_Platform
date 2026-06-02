@@ -20,8 +20,11 @@
 #include "Bluetooth/Bluetooth.h"
 
 #include "NeonRTOS.h"
+#include "NeonTCPIP.h"
 
 #include "GPIO/GPIO.h"
+
+#include "NeonService/HTTPd/HTTPd.h"
 
 #include "NFC_Demo.h"
 
@@ -298,6 +301,66 @@ void BLE_Task(void* p)
     }
 }
 */
+
+#define LED_G hwGPIO_Pin_B0
+#define LED_B hwGPIO_Pin_B7
+#define LED_R hwGPIO_Pin_B14
+
+#define APP_THREAD_STACK_SIZE  2048
+#define APP_THREAD_PRIORITY    1
+
+void APP_Thread(void* p)
+{
+    GPIO_Pin_Init(LED_R, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
+    GPIO_Pin_Init(LED_B, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
+    GPIO_Pin_Init(LED_G, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
+
+    NeonTCPIP_init(NULL, NULL, NULL);
+
+    //HTTPd_Init();
+
+    while (1)
+    {
+        if(NeonTCPIP_IF_isLinkUp())
+        {
+#if LWIP_DHCP
+            if(NeonTCPIP_Get_DHCP_State()==DHCP_ADDRESS_ASSIGNED)
+            {
+                GPIO_Pin_Write(LED_B, 1);
+                NeonRTOS_Sleep(500);
+
+                GPIO_Pin_Write(LED_B, 0);
+                NeonRTOS_Sleep(500);
+            }
+            else
+            {
+                GPIO_Pin_Write(LED_G, 1);
+                NeonRTOS_Sleep(500);
+
+                GPIO_Pin_Write(LED_G, 0);
+                NeonRTOS_Sleep(500);
+            }
+#else
+                GPIO_Pin_Write(LED_B, 1);
+                NeonRTOS_Sleep(500);
+
+                GPIO_Pin_Write(LED_B, 0);
+                NeonRTOS_Sleep(500);
+#endif
+        }
+        else
+        {
+            GPIO_Pin_Write(LED_R, 1);
+            NeonRTOS_Sleep(200);
+
+            GPIO_Pin_Write(LED_R, 0);
+            NeonRTOS_Sleep(200);  
+        }
+
+        size_t freeHeapSize = NeonRTOS_GetFreeHeapSize();
+        UART_Printf("Remain Heap Size %d bytes\n", freeHeapSize);
+    }
+}
 int main(void) {
     SysCtrl_Init();
 
@@ -307,6 +370,7 @@ int main(void) {
     //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗
 
     UART_Open(LOG_UART_INDEX, 115200, false);
+    
 /*
     NeonRTOS_TaskCreate(
         Sensor_Task,
@@ -327,6 +391,15 @@ int main(void) {
         NULL
     );
 */
+	NeonRTOS_TaskCreate(
+        APP_Thread,
+        (signed char *)"APP Thread",
+        APP_THREAD_STACK_SIZE,
+        NULL,
+        APP_THREAD_PRIORITY,
+        NULL
+    );
+
     //NFC_Demo_Init();
 
     // 啟動 NeonRTOS 調度器

@@ -25,7 +25,8 @@ extern "C" {
     defined (STM32C0) || defined (STM32H5) || \
     defined (STM32U0) || defined (STM32U5) || \
     defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
-    defined (STM32H7RS)
+    defined (STM32H7RS) || \
+    defined (STM32WB) || defined (STM32WBA) || defined (STM32WL)
 extern DMA_HandleTypeDef g_dma[hwDMA_Channel_Index_MAX];
 extern bool DMA_Channel_Init_Status[hwDMA_Channel_Index_MAX];
 extern NeonRTOS_LockObj_t DMA_Channel_Mutex[hwDMA_Channel_Index_MAX];
@@ -43,7 +44,8 @@ extern NeonRTOS_LockObj_t DMA_Stream_Mutex[hwDMA_Stream_Index_MAX];
     defined (STM32C0) || defined (STM32H5) || \
     defined (STM32U0) || defined (STM32U5) || \
     defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
-    defined (STM32H7RS)
+    defined (STM32H7RS) || \
+    defined (STM32WB) || defined (STM32WBA) || defined (STM32WL)
 DMA_TypeDef * DMA_Map_Soc_Base(hwDMA_Channel_Index index);
 DMA_Channel_TypeDef * DMA_Map_Soc_Stream_Base(hwDMA_Channel_Index index);
 #endif
@@ -67,7 +69,8 @@ void DMA_Clock_Disable();
     defined (STM32C0) || defined (STM32H5) || \
     defined (STM32U0) || defined (STM32U5) || \
     defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
-    defined (STM32H7RS)
+    defined (STM32H7RS) || \
+    defined (STM32WB) || defined (STM32WBA) || defined (STM32WL)
 hwDMA_OpResult DMA_NVIC_Init(hwDMA_Channel_Index stream_index);
 hwDMA_OpResult DMA_NVIC_DeInit(hwDMA_Channel_Index stream_index);
 #endif

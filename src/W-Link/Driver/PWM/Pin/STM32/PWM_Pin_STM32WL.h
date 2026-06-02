@@ -1,7 +1,9 @@
 #ifndef PWM_PIN_STM32WL_H
 #define PWM_PIN_STM32WL_H
 
-#include "PWM_Pin_STM32.h"
+#include "PWM_Pin_STM32_Def.h"
+
+#include "PWM/Device/STM32/PWM_STM32_Base.h"
 
 typedef enum {
     PWM_Pinset_DEFAULT = 0,

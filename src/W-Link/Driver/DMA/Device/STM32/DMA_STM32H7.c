@@ -843,62 +843,62 @@ static hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index, hwDMA_Per
                         {
 #if defined (UART1_BASE)
                                 case hwUART_Index_0:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART1_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART1_TX;
                                         break;
 #endif
 #if defined(USART1_BASE)
                                 case hwUART_Index_0:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART1_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART1_TX;
                                         break;
 #endif
 #if defined (UART2_BASE)
                                 case hwUART_Index_1:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART2_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART2_TX;
                                         break;
 #endif
 #if defined(USART2_BASE)
                                 case hwUART_Index_1:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART2_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART2_TX;
                                         break;
 #endif
 #if defined (UART3_BASE)
                                 case hwUART_Index_2:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART3_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART3_TX;
                                         break;
 #endif
 #if defined(USART3_BASE)
                                 case hwUART_Index_2:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART3_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART3_TX;
                                         break;
 #endif
 #if defined (UART4_BASE)
                                 case hwUART_Index_3:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART4_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART4_TX;
                                         break;
 #endif
 #if defined(USART4_BASE)
                                 case hwUART_Index_3:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART4_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART4_TX;
                                         break;
 #endif
 #if defined (UART5_BASE)
                                 case hwUART_Index_4:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART5_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART5_TX;
                                         break;
 #endif
 #if defined(USART5_BASE)
                                 case hwUART_Index_4:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART5_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART5_TX;
                                         break;
 #endif
 #if defined (UART6_BASE)
                                 case hwUART_Index_5:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART6_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART6_TX;
                                         break;
 #endif
 #if defined(USART6_BASE)
                                 case hwUART_Index_5:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART6_TX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART6_TX;
                                         break;
 #endif
 #if defined (UART7_BASE)
@@ -943,7 +943,7 @@ static hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index, hwDMA_Per
 #endif
 #if defined(LPUART1_BASE)
                                 case hwUART_Index_L1:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_LPUART1_TX;
+                                        g_dma[stream_index].Init.Request = BDMA_REQUEST_LPUART1_TX;
                                         break;
 #endif
                         }
@@ -956,62 +956,62 @@ static hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index, hwDMA_Per
                         {
 #if defined (UART1_BASE)
                                 case hwUART_Index_0:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART1_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART1_RX;
                                         break;
 #endif
 #if defined(USART1_BASE)
                                 case hwUART_Index_0:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART1_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART1_RX;
                                         break;
 #endif
 #if defined (UART2_BASE)
                                 case hwUART_Index_1:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART2_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART2_RX;
                                         break;
 #endif
 #if defined(USART2_BASE)
                                 case hwUART_Index_1:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART2_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART2_RX;
                                         break;
 #endif
 #if defined (UART3_BASE)
                                 case hwUART_Index_2:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART3_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART3_RX;
                                         break;
 #endif
 #if defined(USART3_BASE)
                                 case hwUART_Index_2:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART3_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART3_RX;
                                         break;
 #endif
 #if defined (UART4_BASE)
                                 case hwUART_Index_3:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART4_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART4_RX;
                                         break;
 #endif
 #if defined(USART4_BASE)
                                 case hwUART_Index_3:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART4_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART4_RX;
                                         break;
 #endif
 #if defined (UART5_BASE)
                                 case hwUART_Index_4:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART5_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART5_RX;
                                         break;
 #endif
 #if defined(USART5_BASE)
                                 case hwUART_Index_4:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART5_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART5_RX;
                                         break;
 #endif
 #if defined (UART6_BASE)
                                 case hwUART_Index_5:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_UART6_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_UART6_RX;
                                         break;
 #endif
 #if defined(USART6_BASE)
                                 case hwUART_Index_5:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_USART6_RX;
+                                        g_dma[stream_index].Init.Request = DMA_REQUEST_USART6_RX;
                                         break;
 #endif
 #if defined (UART7_BASE)
@@ -1056,7 +1056,7 @@ static hwDMA_OpResult DMA_Config_UART(hwDMA_Stream_Index stream_index, hwDMA_Per
 #endif
 #if defined(LPUART1_BASE)
                                 case hwUART_Index_L1:
-                                        g_dma[channel_index].Init.Request = DMA_REQUEST_LPUART1_RX;
+                                        g_dma[stream_index].Init.Request = BDMA_REQUEST_LPUART1_RX;
                                         break;
 #endif
                         }

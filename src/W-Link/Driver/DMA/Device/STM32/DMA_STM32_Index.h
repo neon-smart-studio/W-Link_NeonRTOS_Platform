@@ -22,7 +22,8 @@ U5	GPDMA
 #if defined (STM32F0) || defined (STM32F1) || defined (STM32F3) || \
     defined (STM32G0) || defined (STM32G4) || \
     defined (STM32C0) || defined (STM32U0) || \
-    defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5)
+    defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
+    defined (STM32WB) || defined (STM32WL)
 typedef enum hwDMA_Channel_Index_t
 {
 #if defined (DMA1_BASE)
@@ -235,7 +236,7 @@ typedef enum hwDMA_Channel_Index_t
   hwDMA_Channel_Index_MAX,
 }hwDMA_Channel_Index;
 #endif
-#if defined (STM32H5)
+#if defined (STM32H5) || defined (STM32WBA)
 typedef enum hwDMA_Channel_Index_t
 {
 #if defined (GPDMA1_BASE)

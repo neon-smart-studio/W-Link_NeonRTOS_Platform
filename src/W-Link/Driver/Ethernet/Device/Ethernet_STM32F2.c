@@ -66,21 +66,15 @@
 
 #include "NeonRTOS.h"
 
-#include "Internet/Ethernet/Ethernet.h"
+#include "Ethernet/Ethernet.h"
 
-#include "Internet/Ethernet/Ethernet_Def.h"
+#include "Ethernet/Ethernet_Def.h"
 
 #include "GPIO/GPIO.h"
 
 #ifdef STM32F2
 
 #include "GPIO/Device/STM32/GPIO_STM32.h"
-
-#define ETH_IRQ_PRIO       15 // Warning: it should be lower prio (higher value) than Systick
-#define ETH_IRQ_SUBPRIO    0
-
-#define HAL_ETH_TASK_STACK_SIZE  2048
-#define HAL_ETH_TASK_PRIORITY    2
 
 #define LAN8742A_PHY_ADDRESS            0x00U
 
@@ -115,7 +109,6 @@
 
 #define PHY_SPEED_STATUS                ((uint16_t)0x0004U)  /*!< PHY Speed mask                                  */
 #define PHY_DUPLEX_STATUS               ((uint16_t)0x0010U)  /*!< PHY Duplex mask                                 */
-
 
 #define PHY_ISFR                        ((uint16_t)0x01DU)   /*!< PHY Interrupt Source Flag register Offset       */
 #define PHY_IMR                         ((uint16_t)0x001E)   /*!< PHY Interrupt Mask register Offset              */

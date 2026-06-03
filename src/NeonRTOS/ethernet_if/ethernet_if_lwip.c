@@ -11,7 +11,7 @@
 
 #include "NeonRTOS.h"
 
-#include "Internet/Ethernet/Ethernet.h"
+#include "Ethernet/Ethernet.h"
 
 #include "ethernet_if_lwip.h"
 
@@ -35,6 +35,9 @@ uint32_t ETH_HashTableLow = 0x0;
 //#define PKT_DUMP_RAW
 
 struct netif * pNetif = NULL;
+
+static uint8_t tx_frame[ETH_MAX_PACKET_SIZE];
+static uint8_t rx_frame[ETH_MAX_PACKET_SIZE];
 
 #if defined(PKT_RX_DUMP) ||  defined(PKT_TX_DUMP)
 static void packet_dump(const char * msg, const struct pbuf* p)
@@ -128,9 +131,6 @@ static err_t Map_Ethernet_OpResult_to_err_t(hwEthernet_OpResult result)
         return ERR_IF;
     }
 }
-
-static uint8_t tx_frame[ETH_MAX_PACKET_SIZE];
-static uint8_t rx_frame[ETH_MAX_PACKET_SIZE];
 
 static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {

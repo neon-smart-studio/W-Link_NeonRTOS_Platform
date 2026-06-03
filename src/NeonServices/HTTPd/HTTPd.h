@@ -14,6 +14,7 @@ extern "C" {
 
 //#define HTTPD_USE_SSL
 
+#define HTTPD_SEND_BLOCK_INTERVAL            1000
 #define HTTPD_RECV_BLOCK_INTERVAL            100
 
 #ifdef HTTPD_USE_SSL
@@ -22,11 +23,9 @@ extern "C" {
 #define HTTP_PORT                            80
 #endif
 
-#define HTTPD_TIMER_ID_OFFSET                1
-
-#define HTTP_TIMEOUT_STR                     "5"
-#define HTTP_TIMEOUT_S                       5
-#define HTTP_TIMEOUT_TIMER_MS                5000
+#define HTTP_TIMEOUT_STR                     "3"
+#define HTTP_TIMEOUT_S                       3
+#define HTTP_TIMEOUT_TIMER_MS                3000
 #define WEBSOCKET_TIMEOUT_TIMER_MS           300000
 
 #define WS_SERVER_CMD_BUF_SIZE               1024

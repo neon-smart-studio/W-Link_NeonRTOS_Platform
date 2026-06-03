@@ -129,10 +129,13 @@ static err_t Map_Ethernet_OpResult_to_err_t(hwEthernet_OpResult result)
     }
 }
 
+static uint8_t tx_frame[ETH_MAX_PACKET_SIZE];
+static uint8_t rx_frame[ETH_MAX_PACKET_SIZE];
+
 static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
-    uint8_t frame[ETH_MAX_PACKET_SIZE];
     uint16_t frame_len;
+    hwEthernet_OpResult result;
 
     UNUSED(netif);
 
@@ -140,40 +143,49 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
         return ERR_ARG;
     }
 
-    if ((p->tot_len == 0U) || (p->tot_len > sizeof(frame))) {
+    if ((p->tot_len == 0U) || (p->tot_len > ETH_MAX_PACKET_SIZE)) {
         return ERR_MEM;
     }
 
-    frame_len = (uint16_t)pbuf_copy_partial(p, frame, p->tot_len, 0U);
+    frame_len = (uint16_t)pbuf_copy_partial(p, tx_frame, p->tot_len, 0U);
+
     if (frame_len != p->tot_len) {
         return ERR_BUF;
     }
 
-    hwEthernet_OpResult  result = Ethernet_Output(frame, frame_len);
-    
+    result = Ethernet_Output(tx_frame, frame_len);
+
     return Map_Ethernet_OpResult_to_err_t(result);
 }
 
 static struct pbuf *low_level_input(struct netif *netif)
 {
-    uint8_t frame[ETH_MAX_PACKET_SIZE];
-    uint16_t frame_len = 0U;
     hwEthernet_OpResult result;
     struct pbuf *p;
+    uint32_t framelength = 0U;
 
     UNUSED(netif);
 
-    result = Ethernet_Input(frame, sizeof(frame), &frame_len);
-    if ((result != hwEthernet_OK) || (frame_len == 0U)) {
+    result = Ethernet_Get_Input_Frame_Length(&framelength);
+    if ((result != hwEthernet_OK) || (framelength == 0U)) {
         return NULL;
     }
 
-    p = pbuf_alloc(PBUF_RAW, frame_len, PBUF_POOL);
+    if (framelength > ETH_MAX_PACKET_SIZE) {
+        return NULL;
+    }
+
+    result = Ethernet_Input(rx_frame, framelength);
+    if (result != hwEthernet_OK) {
+        return NULL;
+    }
+
+    p = pbuf_alloc(PBUF_RAW, (u16_t)framelength, PBUF_POOL);
     if (p == NULL) {
         return NULL;
     }
 
-    if (pbuf_take(p, frame, frame_len) != ERR_OK) {
+    if (pbuf_take(p, rx_frame, (u16_t)framelength) != ERR_OK) {
         pbuf_free(p);
         return NULL;
     }

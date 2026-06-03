@@ -139,7 +139,7 @@ static ETH_HandleTypeDef EthHandle;
 static onLinkUpCallback onLinkUpCB = NULL;
 static onLinkDownCallback onLinkDownCB = NULL;
 
-static void Ethernet_ReleaseRxDesc(void)
+static void Ethernet_Release_Rx(void)
 {
     __IO ETH_DMADescTypeDef *dmarxdesc;
     uint32_t i;
@@ -250,41 +250,57 @@ hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
     hwEthernet_OpResult ret = hwEthernet_OK;
     __IO ETH_DMADescTypeDef *DmaTxDesc;
     uint8_t *buffer;
-    uint32_t framelength = 0;
+    uint32_t framelength = 0U;
+    uint32_t bufferoffset = 0U;
     uint32_t byteslefttocopy;
-    uint32_t payloadoffset = 0;
+    uint32_t payloadoffset = 0U;
+    uint32_t desc_count = 0U;
 
-    if (out_data == NULL || out_len == 0) {
+    if ((out_data == NULL) || (out_len == 0U)) {
         return hwEthernet_InvalidParameter;
+    }
+
+    if (out_len > ETH_MAX_PACKET_SIZE) {
+        return hwEthernet_BufferError;
     }
 
     DmaTxDesc = EthHandle.TxDesc;
     buffer = (uint8_t *)DmaTxDesc->Buffer1Addr;
     byteslefttocopy = out_len;
+    payloadoffset = 0U;
+    bufferoffset = 0U;
 
+    /* Reference ST ethernetif.c flow: copy payload into chained DMA Tx buffers. */
     while (byteslefttocopy > 0U) {
         uint32_t copy_len;
+
+        if (desc_count >= ETH_TXBUFNB) {
+            ret = hwEthernet_BufferError;
+            break;
+        }
 
         if ((DmaTxDesc->Status & ETH_DMATXDESC_OWN) != 0U) {
             ret = hwEthernet_Busy;
             break;
         }
 
-        copy_len = byteslefttocopy;
-
-        if (copy_len > ETH_TX_BUF_SIZE) {
-            copy_len = ETH_TX_BUF_SIZE;
+        copy_len = ETH_TX_BUF_SIZE - bufferoffset;
+        if (copy_len > byteslefttocopy) {
+            copy_len = byteslefttocopy;
         }
 
-        memcpy(buffer, out_data + payloadoffset, copy_len);
+        memcpy(buffer + bufferoffset, out_data + payloadoffset, copy_len);
 
         byteslefttocopy -= copy_len;
-        payloadoffset   += copy_len;
-        framelength     += copy_len;
+        payloadoffset += copy_len;
+        framelength += copy_len;
+        bufferoffset += copy_len;
 
         if (byteslefttocopy > 0U) {
             DmaTxDesc = (ETH_DMADescTypeDef *)DmaTxDesc->Buffer2NextDescAddr;
             buffer = (uint8_t *)DmaTxDesc->Buffer1Addr;
+            bufferoffset = 0U;
+            desc_count++;
         }
     }
 
@@ -296,68 +312,81 @@ hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
 
     if ((EthHandle.Instance->DMASR & ETH_DMASR_TUS) != 0U) {
         EthHandle.Instance->DMASR = ETH_DMASR_TUS;
-        EthHandle.Instance->DMATPDR = 0;
+        EthHandle.Instance->DMATPDR = 0U;
     }
 
     return ret;
 }
 
-hwEthernet_OpResult Ethernet_Input(uint8_t *in_data, uint16_t in_len, uint16_t *actual_len)
+hwEthernet_OpResult Ethernet_Get_Input_Frame_Length(uint32_t* frame_len)
 {
-    uint8_t *buffer;
-    __IO ETH_DMADescTypeDef *dmarxdesc;
-    uint32_t len;
-    uint32_t byteslefttocopy;
-    uint32_t payloadoffset = 0;
-
-    if (in_data == NULL || in_len == 0) {
+    if ((frame_len == 0U)) {
         return hwEthernet_InvalidParameter;
     }
 
     if (HAL_ETH_GetReceivedFrame(&EthHandle) != HAL_OK) {
         return hwEthernet_Busy;
     }
+    
+    *frame_len = EthHandle.RxFrameInfos.length;
 
-    len = EthHandle.RxFrameInfos.length;
-    buffer = (uint8_t *)EthHandle.RxFrameInfos.buffer;
+    if(*frame_len == 0 || *frame_len > ETH_MAX_PACKET_SIZE)
+    {
+        Ethernet_Release_Rx();
 
-    if (len == 0U) {
-        Ethernet_ReleaseRxDesc();
         return hwEthernet_Busy;
     }
 
-    if (len > in_len) {
-        Ethernet_ReleaseRxDesc();
+    return hwEthernet_OK;
+}
+
+hwEthernet_OpResult Ethernet_Input(uint8_t *in_data, uint32_t in_len)
+{
+    uint8_t *buffer;
+    __IO ETH_DMADescTypeDef *dmarxdesc;
+    uint32_t bufferoffset = 0U;
+    uint32_t payloadoffset = 0U;
+    uint32_t byteslefttocopy;
+
+    if ((in_len == 0U) || (in_data == NULL)) {
+        return hwEthernet_InvalidParameter;
+    }
+
+    if ((in_len > ETH_MAX_PACKET_SIZE)) {
+        Ethernet_Release_Rx();
+        
         return hwEthernet_BufferError;
     }
 
+    buffer = (uint8_t *)EthHandle.RxFrameInfos.buffer;
     dmarxdesc = EthHandle.RxFrameInfos.FSRxDesc;
-    byteslefttocopy = len;
+    byteslefttocopy = in_len;
+    bufferoffset = 0U;
+    payloadoffset = 0U;
 
+    /* Reference ST ethernetif.c flow: copy chained DMA Rx buffers into flat W-Link buffer. */
     while (byteslefttocopy > 0U) {
-        uint32_t copy_len = byteslefttocopy;
+        uint32_t copy_len = ETH_RX_BUF_SIZE - bufferoffset;
 
-        if (copy_len > ETH_RX_BUF_SIZE) {
-            copy_len = ETH_RX_BUF_SIZE;
+        if (copy_len > byteslefttocopy) {
+            copy_len = byteslefttocopy;
         }
 
-        memcpy(in_data + payloadoffset, buffer, copy_len);
+        memcpy(in_data + payloadoffset, buffer + bufferoffset, copy_len);
 
         byteslefttocopy -= copy_len;
-        payloadoffset   += copy_len;
+        payloadoffset += copy_len;
+        bufferoffset += copy_len;
 
         if (byteslefttocopy > 0U) {
             dmarxdesc = (ETH_DMADescTypeDef *)dmarxdesc->Buffer2NextDescAddr;
             buffer = (uint8_t *)dmarxdesc->Buffer1Addr;
+            bufferoffset = 0U;
         }
     }
 
-    Ethernet_ReleaseRxDesc();
-
-    if (actual_len != NULL) {
-        *actual_len = (uint16_t)len;
-    }
-
+    Ethernet_Release_Rx();
+    
     return hwEthernet_OK;
 }
 

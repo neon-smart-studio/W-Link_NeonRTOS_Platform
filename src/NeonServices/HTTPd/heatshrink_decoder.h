@@ -6,10 +6,6 @@
 #include "heatshrink_common.h"
 #include "heatshrink_config.h"
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 typedef enum {
     HSDR_SINK_OK,               /* data sunk, ready to poll */
     HSDR_SINK_FULL,             /* out of space in internal buffer */
@@ -101,9 +97,5 @@ HSD_poll_res heatshrink_decoder_poll(heatshrink_decoder *hsd,
  * If the return value is HSDR_FINISH_MORE, there is still more output, so
  * call heatshrink_decoder_poll and repeat. */
 HSD_finish_res heatshrink_decoder_finish(heatshrink_decoder *hsd);
-
-#ifdef  __cplusplus
-}
-#endif // __cplusplus
 
 #endif

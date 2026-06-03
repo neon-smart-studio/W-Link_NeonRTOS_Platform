@@ -24,7 +24,7 @@
 
 #include "GPIO/GPIO.h"
 
-#include "NeonService/HTTPd/HTTPd.h"
+#include "NeonServices/HTTPd/HTTPd.h"
 
 #include "NFC_Demo.h"
 

@@ -1,0 +1,49 @@
+{
+  "name": "Nuvoton NUC472",
+  "url": "https://www.nuvoton.com/",
+  "vendor": "Nuvoton",
+
+  "build": {
+    "mcu": "nuc472",
+    "cpu": "cortex-m4",
+    "f_cpu": "84000000L",
+    "ldscript": "nuc4x2_sdram.ld",
+    "extra_flags": [
+      "-DNUC472",
+      "-D__NUC472__",
+      "-DARM_MATH_CM4",
+      "-DNUVOTON_SDRAM"
+    ]
+  },
+
+  "upload": {
+    "maximum_size": 524288,
+    "maximum_ram_size": 65535,
+    "protocol": "nulink",
+    "protocols": ["nulink", "jlink", "custom"]
+  },
+
+  "debug": {
+    "default_tool": "nulink",
+    "onboard_tools": ["nulink"],
+    "svd_path": "NUC472.svd",
+    "tools": {
+      "nulink": {
+        "server": {
+          "package": "tool-openocd-nuvoton",
+          "executable": "bin/openocd.exe",
+          "arguments": [
+            "-s",
+            "scripts",
+            "-f",
+            "interface/nulink.cfg",
+            "-f",
+            "target/numicroM4.cfg"
+          ]
+        }
+      }
+    }
+  },
+
+  "frameworks": ["cmsis"]
+}

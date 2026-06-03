@@ -3,6 +3,7 @@
 #define	__NEONRT__H__
 
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef	__cplusplus
 extern "C" {

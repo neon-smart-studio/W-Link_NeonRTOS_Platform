@@ -5,6 +5,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifndef ETH_MAX_PACKET_SIZE
+#define ETH_MAX_PACKET_SIZE             1536U
+#endif
+
 typedef enum hwEthernet_OpResult_t
 {
   hwEthernet_OK = 0,

@@ -137,8 +137,6 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     uint16_t frame_len;
     hwEthernet_OpResult result;
 
-    UNUSED(netif);
-
     if (p == NULL) {
         return ERR_ARG;
     }
@@ -163,8 +161,6 @@ static struct pbuf *low_level_input(struct netif *netif)
     hwEthernet_OpResult result;
     struct pbuf *p;
     uint32_t framelength = 0U;
-
-    UNUSED(netif);
 
     result = Ethernet_Get_Input_Frame_Length(&framelength);
     if ((result != hwEthernet_OK) || (framelength == 0U)) {
@@ -317,12 +313,11 @@ void ethernetif_update_config(struct netif *netif)
   ethernetif_notify_conn_changed(netif);
 }
 
-__weak void ethernetif_notify_conn_changed(struct netif *netif)
+__attribute__((weak)) void ethernetif_notify_conn_changed(struct netif *netif)
 {
   /* NOTE : This is function clould be implemented in user file
             when the callback is needed,
   */
-  UNUSED(netif);
 }
 
 #if LWIP_IGMP

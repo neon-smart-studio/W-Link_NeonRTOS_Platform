@@ -364,7 +364,7 @@ void APP_Thread(void* p)
 int main(void) {
     SysCtrl_Init();
 
-    DMA_Init();
+    //DMA_Init();
     
     //__HAL_RCC_WWDG_CLK_DISABLE();  // 禁用窗口看門狗
     //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗

@@ -1,4 +1,4 @@
-from os.path import join, dirname, abspath, isfile
+from os.path import join, dirname, abspath, isfile, isdir
 from SCons.Script import DefaultEnvironment
 
 env = DefaultEnvironment()
@@ -6,6 +6,10 @@ board = env.BoardConfig()
 
 build_script = env.subst("$BUILD_SCRIPT")
 platform_dir = abspath(join(dirname(build_script), ".."))
+
+project_dir = env.subst("$PROJECT_DIR")
+project_include_dir = env.subst("$PROJECT_INCLUDE_DIR")
+project_src_dir = env.subst("$PROJECT_SRC_DIR")
 
 openocd_dir = env.PioPlatform().get_package_dir("tool-openocd-nuvoton")
 
@@ -28,10 +32,29 @@ env.Replace(
     SIZE="arm-none-eabi-size"
 )
 
+include_paths = [
+    join(project_dir, "include"),
+    project_include_dir,
+]
+
 env.AppendUnique(
+    CPPPATH=[
+        p for p in include_paths
+        if p and isdir(p)
+    ],
+
     CFLAGS=[
         "-ffunction-sections",
         "-fdata-sections",
+
+        "-Wno-implicit-function-declaration",
+        "-Wno-error=implicit-function-declaration",
+
+        "-Wno-int-conversion",
+        "-Wno-error=int-conversion",
+
+        "-Wno-incompatible-pointer-types",
+        "-Wno-error=incompatible-pointer-types",
     ],
     CXXFLAGS=[
         "-ffunction-sections",

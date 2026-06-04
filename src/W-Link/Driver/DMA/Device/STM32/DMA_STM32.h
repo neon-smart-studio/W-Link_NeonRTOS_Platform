@@ -71,8 +71,8 @@ void DMA_Clock_Disable();
     defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
     defined (STM32H7RS) || \
     defined (STM32WB) || defined (STM32WBA) || defined (STM32WL)
-hwDMA_OpResult DMA_NVIC_Init(hwDMA_Channel_Index stream_index);
-hwDMA_OpResult DMA_NVIC_DeInit(hwDMA_Channel_Index stream_index);
+hwDMA_OpResult DMA_NVIC_Init(hwDMA_Channel_Index channel_index);
+hwDMA_OpResult DMA_NVIC_DeInit(hwDMA_Channel_Index channel_index);
 #endif
 
 #if defined (STM32F2) || defined (STM32F4) || \

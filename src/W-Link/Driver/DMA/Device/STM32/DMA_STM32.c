@@ -60,6 +60,8 @@ hwDMA_OpResult DMA_Init()
             return hwDMA_MemoryError;
         }
 
+        DMA_NVIC_Init(i);
+
         DMA_Channel_Init_Status[i] = true;
     }
 #endif
@@ -71,6 +73,8 @@ hwDMA_OpResult DMA_Init()
         {
             return hwDMA_MemoryError;
         }
+
+        DMA_NVIC_Init(i);
 
         DMA_Stream_Init_Status[i] = true;
     }
@@ -94,6 +98,8 @@ hwDMA_OpResult DMA_DeInit()
     {
         NeonRTOS_LockObjDelete(&DMA_Channel_Mutex[i]);
 
+        DMA_NVIC_DeInit(i);
+
         DMA_Channel_Init_Status[i] = false;
     }
 #endif
@@ -102,6 +108,8 @@ hwDMA_OpResult DMA_DeInit()
     for (hwDMA_Stream_Index i = 0; i < hwDMA_Stream_Index_MAX; i++)
     {
         NeonRTOS_LockObjDelete(&DMA_Stream_Mutex[i]);
+
+        DMA_NVIC_DeInit(i);
 
         DMA_Stream_Init_Status[i] = false;
     }

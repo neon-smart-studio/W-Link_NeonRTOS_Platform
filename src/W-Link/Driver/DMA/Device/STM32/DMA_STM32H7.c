@@ -1320,7 +1320,7 @@ static hwDMA_OpResult DMA_Config_SPI(hwDMA_Stream_Index stream_index, hwDMA_Peri
         {
                 return hwDMA_HwError;
         }
-
+        
         switch(dir)
         {
                 case hwDMA_Peripheral_Direction_TX:

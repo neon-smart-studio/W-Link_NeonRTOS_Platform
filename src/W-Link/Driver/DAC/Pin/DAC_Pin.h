@@ -4,6 +4,8 @@
 
 #include "soc.h"
 
+#include "Driver_Config.h"
+
 #ifdef DEVICE_NUVOTON
 //#include "Nuvoton/DAC_Pin_Nuvoton.h"
 #endif

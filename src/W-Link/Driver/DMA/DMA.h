@@ -9,6 +9,8 @@
 #include "SPI/SPI_Master.h"
 #include "UART/UART.h"
 
+#include "Driver_Config.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif

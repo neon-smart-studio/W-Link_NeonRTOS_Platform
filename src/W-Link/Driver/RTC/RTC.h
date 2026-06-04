@@ -12,6 +12,8 @@
 
 #include "RTC_Alarm_Channel.h"
 
+#include "Driver_Config.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif

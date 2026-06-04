@@ -270,10 +270,7 @@ static hwEthernet_OpResult Ethernet_Try_Fetch_Rx_Frame(void)
 
 /* ================= Public API ================= */
 
-hwEthernet_OpResult Ethernet_Init(
-    const uint8_t mac[6],
-    onLinkUpCallback link_up_cb,
-    onLinkDownCallback link_down_cb)
+hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb, onInterruptCallback interrupt_cb)
 {
     uint8_t mac_buf[6];
     uint32_t timeout;

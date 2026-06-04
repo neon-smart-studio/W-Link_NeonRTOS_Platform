@@ -2,6 +2,8 @@
 #ifndef UART_INDEX_H
 #define UART_INDEX_H
 
+#include "Driver_Config.h"
+
 #ifdef DEVICE_NUVOTON
 typedef enum hwUART_Index_t
 {

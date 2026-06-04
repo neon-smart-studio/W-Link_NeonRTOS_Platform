@@ -74,6 +74,8 @@
 
 #ifdef STM32F2
 
+#ifdef CONFIG_ETHERNET_ONBOARD
+
 #include "GPIO/Device/STM32/GPIO_STM32.h"
 
 #define LAN8742A_PHY_ADDRESS            0x00U
@@ -152,7 +154,7 @@ static void Ethernet_Release_Rx(void)
     }
 }
 
-hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb)
+hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb, onInterruptCallback interrupt_cb)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -481,5 +483,55 @@ void Ethernet_Get_Hardware_Mac(uint8_t mac[6])
     mac[4] = (baseUID & 0x0000FF00) >> 8;
     mac[5] = (baseUID & 0x000000FF);
 }
+
+#ifndef HASH_BITS
+#define HASH_BITS 6 /* #bits in hash */
+#endif
+
+static uint32_t ethcrc(const uint8_t *data, size_t length)
+{
+  uint32_t crc = 0xffffffff;
+  size_t i;
+  int j;
+
+  for (i = 0; i < length; i++) {
+    for (j = 0; j < 8; j++) {
+      if (((crc >> 31) ^ (data[i] >> j)) & 0x01) {
+        /* x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1 */
+        crc = (crc << 1) ^ 0x04C11DB7;
+      } else {
+        crc = crc << 1;
+      }
+    }
+  }
+  return ~crc;
+}
+
+hwEthernet_OpResult Ethernet_Register_Multicast_Address(const uint8_t *mac, uint32_t *eth_HashTableHigh, uint32_t *eth_HashTableLow)
+{
+  uint32_t crc;
+  uint8_t hash;
+
+  /* Calculate crc32 value of mac address */
+  crc = ethcrc(mac, HASH_BITS);
+
+  /*
+   * Only upper HASH_BITS are used
+   * which point to specific bit in the hash registers
+   */
+  hash = (crc >> 26) & 0x3F;
+
+  if (hash > 31) {
+    *eth_HashTableHigh |= 1 << (hash - 32);
+    EthHandle.Instance->MACHTHR = *eth_HashTableHigh;
+  } else {
+    *eth_HashTableLow |= 1 << hash;
+    EthHandle.Instance->MACHTLR = *eth_HashTableLow;
+  }
+
+  return hwEthernet_OK;
+}
+
+#endif //CONFIG_ETHERNET_ONBOARD
 
 #endif //STM32F2

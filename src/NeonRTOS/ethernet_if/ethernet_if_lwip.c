@@ -145,6 +145,10 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
         return ERR_MEM;
     }
 
+#ifdef PKT_TX_DUMP
+    packet_dump(__FUNCTION__, p);
+#endif /* DM9051_TX_DUMP */
+
     frame_len = (uint16_t)pbuf_copy_partial(p, tx_frame, p->tot_len, 0U);
 
     if (frame_len != p->tot_len) {
@@ -202,11 +206,16 @@ void ethernetif_input(struct netif *netif)
     return;
   }
 
+#ifdef PKT_RX_DUMP
+    if(p)
+        packet_dump(__FUNCTION__, p);
+#endif /* DM9051_RX_DUMP */
+
   /* entry point to the LwIP stack */
   err = netif->input(p, netif);
 
   if (err != ERR_OK) {
-    LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_input: IP input error\n"));
+    UART_Printf("netif->input err=%d\n", err);
     pbuf_free(p);
     p = NULL;
   }
@@ -234,6 +243,11 @@ static void ethernetif_onLinkDown()
     netif_set_link_down(pNetif);
 }
 
+static void ethernetif_onInterrupt()
+{
+    ethernetif_input(pNetif);
+}
+
 err_t ethernetif_init(struct netif *netif)
 {
   uint8_t macaddress[6];
@@ -246,7 +260,7 @@ err_t ethernetif_init(struct netif *netif)
 
   hwEthernet_OpResult result;
 
-  result = Ethernet_Init(macaddress, ethernetif_onLinkUp, ethernetif_onLinkDown);
+  result = Ethernet_Init(macaddress, ethernetif_onLinkUp, ethernetif_onLinkDown, ethernetif_onInterrupt);
   if(result < hwEthernet_OK)
   {
       return Map_Ethernet_OpResult_to_err_t(result);
@@ -333,56 +347,11 @@ err_t igmp_mac_filter(struct netif *netif, const ip4_addr_t *ip4_addr, netif_mac
   mac[4] = *(p + 2);
   mac[5] = *(p + 3);
 
-  register_multicast_address(mac);
+  Ethernet_Register_Multicast_Address(mac, &ETH_HashTableHigh, &ETH_HashTableLow);
 
   return 0;
 }
 
-#ifndef HASH_BITS
-#define HASH_BITS 6 /* #bits in hash */
-#endif
-
-uint32_t ethcrc(const uint8_t *data, size_t length)
-{
-  uint32_t crc = 0xffffffff;
-  size_t i;
-  int j;
-
-  for (i = 0; i < length; i++) {
-    for (j = 0; j < 8; j++) {
-      if (((crc >> 31) ^ (data[i] >> j)) & 0x01) {
-        /* x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1 */
-        crc = (crc << 1) ^ 0x04C11DB7;
-      } else {
-        crc = crc << 1;
-      }
-    }
-  }
-  return ~crc;
-}
-
-void register_multicast_address(const uint8_t *mac)
-{
-  uint32_t crc;
-  uint8_t hash;
-
-  /* Calculate crc32 value of mac address */
-  crc = ethcrc(mac, HASH_BITS);
-
-  /*
-   * Only upper HASH_BITS are used
-   * which point to specific bit in the hash registers
-   */
-  hash = (crc >> 26) & 0x3F;
-
-  if (hash > 31) {
-    ETH_HashTableHigh |= 1 << (hash - 32);
-    EthHandle.Instance->MACHTHR = ETH_HashTableHigh;
-  } else {
-    ETH_HashTableLow |= 1 << hash;
-    EthHandle.Instance->MACHTLR = ETH_HashTableLow;
-  }
-}
 #endif /* LWIP_IGMP */
 
 uint32_t ethernetif_get_tick(void)

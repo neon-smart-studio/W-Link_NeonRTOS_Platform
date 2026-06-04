@@ -10,6 +10,8 @@
 
 #include "GPIO_Def.h"
 
+#include "Driver_Config.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif

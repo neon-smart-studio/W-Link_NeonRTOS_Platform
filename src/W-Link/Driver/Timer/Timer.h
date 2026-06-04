@@ -11,6 +11,8 @@
 
 #include "Timer_Index.h"
 
+#include "Driver_Config.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif

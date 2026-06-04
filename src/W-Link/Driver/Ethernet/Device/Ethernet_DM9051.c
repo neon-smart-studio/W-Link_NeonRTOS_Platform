@@ -476,6 +476,8 @@ void DM9051_PendingFunctionCall(void* p1, uint32_t p2)
     if(onInterruptCB != NULL) {
         onInterruptCB();
     }
+
+    GPIO_Interrupt_Enable(DM9051_IRQ_Pin);
 }
 
 void DM9051_IRQHandler(hwGPIO_Int_Pin pin, hwGPIO_Interrupt_Action action)
@@ -709,6 +711,7 @@ hwEthernet_OpResult Ethernet_Input(uint8_t *in_data, uint32_t in_len)
 
     DM9051_Read_Mem(in_data, in_len);
 
+    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
     /*
     UART_Printf("RX frame len=%lu %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
             in_len,

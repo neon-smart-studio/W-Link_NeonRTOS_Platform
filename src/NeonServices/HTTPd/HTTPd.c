@@ -197,7 +197,7 @@ static void HTTPd_Connection_Timeout_CB(NeonRTOS_TimerHandle connection_timeout_
                 {
                         return;
                 }
-                printf("HTTPD Client Index %d Connection Timeout\n", TimerID);
+                //UART_Printf("HTTPD Client Index %d Connection Timeout\n", TimerID);
                 HTTPd_WebSocketd_Client_List[TimerID]->connection_destruct_flag = true;
         }
 }
@@ -409,7 +409,7 @@ int WebSocketServer_CreateAcceptKey(const uint8_t *key, char *buffer, int buffer
 	strcat(concatenatedBuffer, (char*)key);
 	strcat(concatenatedBuffer, WebSocket_UUID);
 
-	//printf("concatenatedBuffer = %s\n", concatenatedBuffer);
+	////UART_Printf("concatenatedBuffer = %s\n", concatenatedBuffer);
 
 	sha1nfo s;
 	uint8_t* pHash;
@@ -418,9 +418,9 @@ int WebSocketServer_CreateAcceptKey(const uint8_t *key, char *buffer, int buffer
         sha1_write(&s, concatenatedBuffer, strlen(concatenatedBuffer));
         pHash = sha1_result(&s);
 	
-	//printf("hash = %s\n", hash);
+	////UART_Printf("hash = %s\n", hash);
 
-	//printf("status = %d, olen = %d, bufferSize = %d, buffer = %s\n", olen, status, bufferSize, buffer);;
+	////UART_Printf("status = %d, olen = %d, bufferSize = %d, buffer = %s\n", olen, status, bufferSize, buffer);;
 	return base64_encode(20, pHash, bufferSize, buffer);
 }
 
@@ -569,7 +569,7 @@ int HTTPd_Parse_InMsg_Headers(uint8_t *header, uint16_t header_len, HTTPd_WebSoc
 	if (connData->getArgs != 0) {
 		*connData->getArgs = 0;
 		connData->getArgs++;
-		printf("args = %s\n", connData->getArgs);
+		//UART_Printf("args = %s\n", connData->getArgs);
 	}
 	else {
 		connData->getArgs = NULL;
@@ -1562,17 +1562,17 @@ void HTTP_Server_Task(void *pvParameters)
         pk_init(&server_pk);
 
         if((ret = x509_crt_parse(&server_x509, (const unsigned char *)test_srv_crt, strlen(test_srv_crt))) != 0) {
-                printf(" failed\n  ! x509_crt_parse returned %d\n\n", ret);
+                //UART_Printf(" failed\n  ! x509_crt_parse returned %d\n\n", ret);
                 goto exit;
         }
 
         if((ret = x509_crt_parse(&server_x509, (const unsigned char *)test_ca_list, strlen(test_ca_list))) != 0) {
-                printf(" failed\n  ! x509_crt_parse returned %d\n\n", ret);
+                //UART_Printf(" failed\n  ! x509_crt_parse returned %d\n\n", ret);
                 goto exit;
         }
 
         if((ret = pk_parse_key(&server_pk, test_srv_key, strlen(test_srv_key), NULL, 0)) != 0) {
-                printf(" failed\n  ! pk_parse_key returned %d\n\n", ret);
+                //UART_Printf(" failed\n  ! pk_parse_key returned %d\n\n", ret);
                 goto exit;
         }
 
@@ -1638,7 +1638,7 @@ void HTTP_Server_Task(void *pvParameters)
                         ret = accept(HTTP_WebSocket_Server_Socket, (struct sockaddr *) &current_http_socket_addr, &sin_size);
                         if (ret >= 0) 
                         {
-                                printf("[HTTPD Server] accept = %d!\n", ret);
+                                //UART_Printf("[HTTPD Server] accept = %d!\n", ret);
                                 add_HTTP_client = true;
                         }
                         else{
@@ -1650,7 +1650,7 @@ void HTTP_Server_Task(void *pvParameters)
                                 }
                                 if(socket_errno>0)
                                 {
-                                        printf("[HTTPD Server] accept socket_errno = %d!\n", socket_errno);
+                                        //UART_Printf("[HTTPD Server] accept socket_errno = %d!\n", socket_errno);
 
                                         if(socket_errno != EAGAIN && socket_errno != EWOULDBLOCK)
                                         {
@@ -1670,7 +1670,7 @@ void HTTP_Server_Task(void *pvParameters)
                                 current_http_socketID = ret;
                                 
                                 uint8_t j = 0;
-                                printf("[HTTPD Server] current_http_socketID = %d --> AddHttpClient\n", current_http_socketID);
+                                //UART_Printf("[HTTPD Server] current_http_socketID = %d --> AddHttpClient\n", current_http_socketID);
 
                                 do
                                 {
@@ -1683,7 +1683,7 @@ void HTTP_Server_Task(void *pvParameters)
                                                                 HTTPd_WebSocketd_Client_List[j] = mem_Malloc(sizeof(HTTPd_WebSocked_Client_Connection));
                                                                 if(HTTPd_WebSocketd_Client_List[j]==NULL)
                                                                 {
-                                                                        printf("[HTTPD Server] current_http_socketID = %d mem_Malloc failed\n", current_http_socketID);
+                                                                        //UART_Printf("[HTTPD Server] current_http_socketID = %d mem_Malloc failed\n", current_http_socketID);
                                                                         client_index = -1;
                                                                         break;
                                                                 }
@@ -1694,7 +1694,7 @@ void HTTP_Server_Task(void *pvParameters)
                                                                 {
                                                                         mem_Free(HTTPd_WebSocketd_Client_List[j]);
                                                                         HTTPd_WebSocketd_Client_List[j] = NULL;
-                                                                        printf("[HTTPD Server] current_http_socketID = %d NeonRTOS_TimerCreate failed\n", current_http_socketID);
+                                                                        //UART_Printf("[HTTPD Server] current_http_socketID = %d NeonRTOS_TimerCreate failed\n", current_http_socketID);
                                                                         client_index = -1;
                                                                         break;
                                                                 }
@@ -1715,11 +1715,11 @@ void HTTP_Server_Task(void *pvParameters)
                                         }
                                         else
                                         {
-                                                printf("[HTTPD Server] current_http_socketID = %d too many clients wait...\n", current_http_socketID);
+                                                //UART_Printf("[HTTPD Server] current_http_socketID = %d too many clients wait...\n", current_http_socketID);
                                                 NeonRTOS_Sleep(500);
                                         }
                                 }while(client_index<0);
-                                printf("[HTTPD Server] AddHttpClient --> client_index = %d\n", client_index);
+                                //UART_Printf("[HTTPD Server] AddHttpClient --> client_index = %d\n", client_index);
                         }
                         
 
@@ -1769,7 +1769,7 @@ void HTTP_Server_Task(void *pvParameters)
         
 #ifdef HTTPD_USE_SSL
                         if((ret = ssl_init(&ssl)) != 0) {
-                                printf("[HTTPD Server] failed\n  ! ssl_init returned %d\n\n", ret);
+                                //UART_Printf("[HTTPD Server] failed\n  ! ssl_init returned %d\n\n", ret);
                                 HTTPd_WebSocketd_Client_List[client_index].client_destruct_flag = true;
                                 continue;
                         }
@@ -1780,13 +1780,13 @@ void HTTP_Server_Task(void *pvParameters)
                         ssl_set_rng(&ssl, SSL_Random, NULL);
                         ssl_set_bio(&ssl, lwip_read, &HTTPd_WebSocketd_Client_List[client_index].socket_id, lwip_write, &HTTPd_WebSocketd_Client_List[client_index].socket_id);
                         if((ret = ssl_set_own_cert(&ssl, &server_x509, &server_pk)) != 0) {
-                                printf("[HTTPD Server] failed\n  ! ssl_set_own_cert returned %d\n\n", ret);
+                                //UART_Printf("[HTTPD Server] failed\n  ! ssl_set_own_cert returned %d\n\n", ret);
                                 HTTPd_WebSocketd_Client_List[client_index].client_destruct_flag = true;
                                 continue;
                         }
                         
                         if((ret = ssl_handshake(&ssl)) != 0) {
-                                printf("[HTTPD Server] failed\n  ! ssl_handshake returned %d\n\n", ret);
+                                //UART_Printf("[HTTPD Server] failed\n  ! ssl_handshake returned %d\n\n", ret);
                                 HTTPd_WebSocketd_Client_List[client_index].client_destruct_flag = true;
                                 continue;
                         }
@@ -1808,7 +1808,7 @@ void HTTP_Server_Task(void *pvParameters)
                         setsockopt(current_http_socketID, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
                         
                         NeonRTOS_TimerStart(&HTTPd_WebSocketd_Client_List[client_index]->connection_timeout_timer);
-                        printf("[HTTPD %d] httpserver acpt sockfd %d!\n", client_index, current_http_socketID);
+                        //UART_Printf("[HTTPD %d] httpserver acpt sockfd %d!\n", client_index, current_http_socketID);
                 }
 
                 if(GetNumOfHttpdClient()<=0)
@@ -1826,16 +1826,18 @@ void HTTP_Server_Task(void *pvParameters)
 
                         if(HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag)
                         {
-                                printf("[HTTPD %d] Client socketID %d close\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                //UART_Printf("[HTTPD %d] Client socketID %d close\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                 
                                 if (HTTPd_WebSocketd_Client_List[i]->url) {
+                                        //UART_Printf("[HTTPD %d] HTTPd_WebSocketd_Client_List[i]->url = %s\n", i, HTTPd_WebSocketd_Client_List[i]->url);
+                                
                                         mem_Free(HTTPd_WebSocketd_Client_List[i]->url);
                                         HTTPd_WebSocketd_Client_List[i]->url = NULL;
                                 }
                                 
                                 if (HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer != NULL)
                                 {
-                                        printf("[HTTPD %d] HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer != NULL\n", i);
+                                        //UART_Printf("[HTTPD %d] HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer != NULL\n", i);
                                         NeonRTOS_TimerStop(&HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer);
                                         NeonRTOS_TimerDelete(&HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer);
                                         HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer = NULL;
@@ -1862,7 +1864,7 @@ void HTTP_Server_Task(void *pvParameters)
                                 uint8_t* http_cmd_buf = mem_Malloc(HTTPD_CMD_BUF_SIZE);
                                 if (http_cmd_buf == NULL)
                                 {
-                                        printf("[HTTPD %d] cmdbuf malloc err!\n", i);
+                                        //UART_Printf("[HTTPD %d] cmdbuf malloc err!\n", i);
                                         continue;
                                 }
                                 
@@ -1887,39 +1889,39 @@ void HTTP_Server_Task(void *pvParameters)
                                                 if(ret<0)
                                                 {
                                                         client_close = true;
-                                                        printf("[HTTPD %d] socket err sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                        //UART_Printf("[HTTPD %d] socket err sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                         break;
                                                 }
                                                 
                                                 if (HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag)
                                                 {
-                                                        printf("[HTTPD %d] socket timeout sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                        //UART_Printf("[HTTPD %d] socket timeout sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                         client_close = true;
                                                         break;
                                                 }
 
                                                 if(socket_errno == EAGAIN || socket_errno == EWOULDBLOCK)
                                                 {
-                                                        printf("[HTTPD %d] socket errno: 0 EAGAIN --> Skip!\n", i);
+                                                        //UART_Printf("[HTTPD %d] socket errno: 0 EAGAIN --> Skip!\n", i);
                                                         client_skip = true;
                                                         break;
                                                 }
                                                 
                                                 if(socket_errno==0)
                                                 {
-                                                        printf("[HTTPD %d] socket errno: 0 sockfd %d --> Skip!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                        //UART_Printf("[HTTPD %d] socket errno: 0 sockfd %d --> Skip!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                         client_skip = true;
                                                         break;
                                                 }
 
                                                 client_close = true;
-                                                printf("[HTTPD %d] socket errno: %d sockfd %d!\n", i, socket_errno, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                //UART_Printf("[HTTPD %d] socket errno: %d sockfd %d!\n", i, socket_errno, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                 
                                                 break;
                                         }
                                         else if(ret==0)
                                         {
-                                                printf("[HTTPD %d] socket remote close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                //UART_Printf("[HTTPD %d] socket remote close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                 client_close = true; 
                                                 break;  
                                         }
@@ -1965,7 +1967,7 @@ void HTTP_Server_Task(void *pvParameters)
                                                         {
                                                                 mem_Free(http_cmd_buf);
                                                                 
-                                                                printf("[HTTPD %d] err request data too large\n", i);
+                                                                //UART_Printf("[HTTPD %d] err request data too large\n", i);
                                                                 continue;
                                                         }
 
@@ -1985,39 +1987,39 @@ void HTTP_Server_Task(void *pvParameters)
                                                                         if(ret<0)
                                                                         {
                                                                                 cgi_client_close = true;
-                                                                                printf("[HTTPD %d] cgi socket err sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                                //UART_Printf("[HTTPD %d] cgi socket err sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                                                 break;
                                                                         }
                                                                         
                                                                         if (HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag)
                                                                         {
-                                                                                printf("[HTTPD %d] cgi socket timeout sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                                //UART_Printf("[HTTPD %d] cgi socket timeout sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                                                 cgi_client_close = true;
                                                                                 break;
                                                                         }
 
                                                                         if(socket_errno == EAGAIN || socket_errno == EWOULDBLOCK)
                                                                         {
-                                                                                printf("[HTTPD %d] cgi socket errno: 0 EAGAIN --> Skip!\n", i);
+                                                                                //UART_Printf("[HTTPD %d] cgi socket errno: 0 EAGAIN --> Skip!\n", i);
                                                                                 cgi_client_skip = true;
                                                                                 break;
                                                                         }
                                                                         
                                                                         if(socket_errno==0)
                                                                         {
-                                                                                printf("[HTTPD %d] cgi socket errno: 0 sockfd %d --> Skip!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                                //UART_Printf("[HTTPD %d] cgi socket errno: 0 sockfd %d --> Skip!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                                                 cgi_client_skip = true;
                                                                                 break;
                                                                         }
 
                                                                         cgi_client_close = true;
-                                                                        printf("[HTTPD %d] cgi socket errno: %d sockfd %d!\n", i, socket_errno, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                        //UART_Printf("[HTTPD %d] cgi socket errno: %d sockfd %d!\n", i, socket_errno, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                                         
                                                                         break;
                                                                 }
                                                                 else if(ret==0)
                                                                 {
-                                                                        printf("[HTTPD %d] cgi socket remote close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                        //UART_Printf("[HTTPD %d] cgi socket remote close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                                         cgi_client_close = true; 
                                                                         break;  
                                                                 }
@@ -2037,7 +2039,7 @@ void HTTP_Server_Task(void *pvParameters)
                                                         {
                                                                 if(HTTPd_WebSocketd_Client_List[i]->data_buff!=NULL)
                                                                 {
-                                                                        printf("[HTTPD %d] cgi HTTPd_WebSocketd_Client_List[%d]->data_buff!=NULL\n", i, i);
+                                                                        //UART_Printf("[HTTPD %d] cgi HTTPd_WebSocketd_Client_List[%d]->data_buff!=NULL\n", i, i);
 
                                                                         mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
                                                                         
@@ -2047,7 +2049,7 @@ void HTTP_Server_Task(void *pvParameters)
 
                                                                 mem_Free(http_cmd_buf);
                                                                 
-                                                                printf("[HTTPD %d] cgi client_close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                //UART_Printf("[HTTPD %d] cgi client_close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
 
                                                                 HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
                                                                 continue;
@@ -2055,7 +2057,7 @@ void HTTP_Server_Task(void *pvParameters)
                                                 }
                                         }
                                         
-                                        printf("[HTTPD %d] Request URL = %s\n", i, HTTPd_WebSocketd_Client_List[i]->url);
+                                        //UART_Printf("[HTTPD %d] Request URL = %s\n", i, HTTPd_WebSocketd_Client_List[i]->url);
                                         
                                         int r = HTTPD_CGI_DONE;
                                         
@@ -2087,17 +2089,17 @@ void HTTP_Server_Task(void *pvParameters)
                                                 {
                                                         ret = HTTPd_WebSocketd_Client_List[i]->cgi(HTTPd_WebSocketd_Client_List[i]); //Execute cgi fn.
                                                         if (ret == HTTPD_CGI_DONE) {
-                                                                printf("[HTTPD %d] HTTPD_CGI_DONE\n", i);
+                                                                //UART_Printf("[HTTPD %d] HTTPD_CGI_DONE\n", i);
                                                         }
                                                         if (ret == HTTPD_CGI_NOTFOUND || ret == HTTPD_CGI_AUTHENTICATED) {
-                                                                printf("[HTTPD %d] ERROR! CGI fn returns code %d after sending data! Bad CGI!\n", i, ret);
+                                                                //UART_Printf("[HTTPD %d] ERROR! CGI fn returns code %d after sending data! Bad CGI!\n", i, ret);
                                                         }
                                                 }
                                         }
 
                                         if(HTTPd_WebSocketd_Client_List[i]->data_buff!=NULL)
                                         {
-                                                printf("[HTTPD %d] HTTPd_WebSocketd_Client_List[i]->data_buff!=NULL\n", i);
+                                                //UART_Printf("[HTTPD %d] HTTPd_WebSocketd_Client_List[i]->data_buff!=NULL\n", i);
 
                                                 mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
                                                 
@@ -2107,7 +2109,7 @@ void HTTP_Server_Task(void *pvParameters)
 
                                         if(r==HTTPD_CGI_DONE)
                                         {
-                                                printf("[HTTPD %d] URL = %s CGI DONE\n", i, HTTPd_WebSocketd_Client_List[i]->url);
+                                                //UART_Printf("[HTTPD %d] URL = %s CGI DONE\n", i, HTTPd_WebSocketd_Client_List[i]->url);
                                                 
                                                 NeonRTOS_TimerStop(&HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer);
                                                 
@@ -2160,7 +2162,7 @@ void HTTP_Server_Task(void *pvParameters)
                                         if(ret<0)
                                         {
                                                 mem_Free(WebSocketServerDataBuf);
-                                                printf("[HTTPD %d] ws socket err sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                //UART_Printf("[HTTPD %d] ws socket err sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                 
                                                 HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
                                                 continue;
@@ -2171,21 +2173,21 @@ void HTTP_Server_Task(void *pvParameters)
                                                 mem_Free(WebSocketServerDataBuf);
                                                 if (HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag)
                                                 {
-                                                        printf("[HTTPD %d] ws timeout sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                        //UART_Printf("[HTTPD %d] ws timeout sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                 }
                                                 continue;
                                         }
                                         
                                         mem_Free(WebSocketServerDataBuf);
                                         
-                                        printf("[HTTPD %d] ws socket err:%d sockfd %d!\n", i, socket_errno, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                        //UART_Printf("[HTTPD %d] ws socket err:%d sockfd %d!\n", i, socket_errno, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                         break;
                                 }
                                 else if(ret==0)
                                 {
                                         mem_Free(WebSocketServerDataBuf);
                                         
-                                        printf("[HTTPD %d] ws socket remote close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                        //UART_Printf("[HTTPD %d] ws socket remote close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                         
                                         HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
                                         continue;
@@ -2226,7 +2228,7 @@ void HTTP_Server_Task(void *pvParameters)
                                         // shut down the connection gracefully
                                         mem_Free(WebSocketServerDataBuf);
                                         
-                                        printf("[HTTPD %d] ws close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                        //UART_Printf("[HTTPD %d] ws close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                         
                                         HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
                                         continue;
@@ -2268,7 +2270,7 @@ int HTTPd_Init()
 {
     if(NeonRtFsInit()!=NEONRTFS_INIT_RESULT_OK)
     {
-          printf("HTTP Server No Web Image in Flash\n");
+          //UART_Printf("HTTP Server No Web Image in Flash\n");
     }
     
     if(NeonRTOS_TaskCreate(HTTP_Server_Task, (signed const char *)"httpd", HTTP_STACK_SIZE, NULL, HTTP_TASK_PRIORITY, NULL)!=NeonRTOS_OK)

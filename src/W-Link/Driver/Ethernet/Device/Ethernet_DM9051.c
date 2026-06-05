@@ -320,11 +320,7 @@ static void DM9051_Read_Mem(uint8_t *buf, uint16_t len)
             SPI_Master_TransferByte(DM9051_SPI_INDEX, dummy, &buf[i]);
         }
     } else {
-    for (uint16_t i = 0; i < len; i++) {
-        SPI_Master_TransferByte(DM9051_SPI_INDEX, 0x00, &buf[i]);
-    }
-
-        //SPI_Master_Burst_Read(DM9051_SPI_INDEX, buf, len);
+        SPI_Master_Burst_Read(DM9051_SPI_INDEX, buf, len);
     }
 
     DM9051_CS_HIGH();
@@ -345,10 +341,7 @@ static void DM9051_Write_Mem(const uint8_t *buf, uint16_t len)
             SPI_Master_WriteByte(DM9051_SPI_INDEX, buf[i]);
         }
     } else {
-    for (uint16_t i = 0; i < len; i++) {
-        SPI_Master_WriteByte(DM9051_SPI_INDEX, buf[i]);
-    }
-        //SPI_Master_Burst_Write(DM9051_SPI_INDEX, buf, len);
+        SPI_Master_Burst_Write(DM9051_SPI_INDEX, buf, len);
     }
 
     DM9051_CS_HIGH();
@@ -527,6 +520,7 @@ hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up
     DM9051_Soft_Reset(mac);
 
     //DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
+    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_OFF); // Disable all interrupts
     
     onLinkUpCB = link_up_cb;
     onLinkDownCB = link_down_cb;
@@ -590,26 +584,11 @@ hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
     return hwEthernet_OK;
 }
 
-static uint8_t DM9051_Read_Rx_Ready(void)
-{
-    uint8_t rx0 = 0;
-    uint8_t rx1 = 0;
-
-    DM9051_CS_LOW();
-    SPI_Master_TransferByte(DM9051_SPI_INDEX, DM_SPI_MRCMDX, &rx0);
-    SPI_Master_TransferByte(DM9051_SPI_INDEX, 0x00, &rx1);
-    DM9051_CS_HIGH();
-
-    return rx1;
-}
-
 hwEthernet_OpResult Ethernet_Get_Input_Frame_Length(uint32_t *frame_len)
 {
     uint8_t isr_reg;
     uint8_t nsr_reg;
-    struct pbuf *p = NULL;
 
-    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_OFF); // Disable all interrupts
     isr_reg = DM9051_Read_Reg(DM9051_ISR);
     DM9051_Write_Reg(DM9051_ISR, (isr_reg & ISR_CLR_STATUS));  // Clear ISR status
     //UART_Printf("isr_reg=0x%x", isr_reg);
@@ -663,6 +642,13 @@ hwEthernet_OpResult Ethernet_Get_Input_Frame_Length(uint32_t *frame_len)
 
     rx_status = ReceiveData[0] + (ReceiveData[1] << 8);
     rx_len = ReceiveData[2] + (ReceiveData[3] << 8);
+
+    if ((rx_len < 14) || (rx_len > DM9051_PKT_MAX)) {
+        UART_Printf("bad rx len=%u status=%04X, reset rx fifo\n", rx_len, rx_status);
+        DM9051_Write_Reg(DM9051_MPCR, MPCR_RSTRX);
+        DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
+        return hwEthernet_BufferError;
+    }
 
     //UART_Printf("RX header status=%04X len=%u\n", rx_status, rx_len);
 

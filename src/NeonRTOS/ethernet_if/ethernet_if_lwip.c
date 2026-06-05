@@ -119,7 +119,7 @@ static err_t Map_Ethernet_OpResult_to_err_t(hwEthernet_OpResult result)
     case hwEthernet_InvalidParameter:
         return ERR_ARG;
     case hwEthernet_Busy:
-        return ERR_USE;
+        return ERR_IF;
     case hwEthernet_MemoryError:
     case hwEthernet_BufferError:
         return ERR_MEM;
@@ -195,30 +195,30 @@ static struct pbuf *low_level_input(struct netif *netif)
 
 void ethernetif_input(struct netif *netif)
 {
-  err_t err;
-  struct pbuf *p;
+    err_t err;
+    struct pbuf *p;
 
-  /* move received packet into a new pbuf */
-  p = low_level_input(netif);
+    /* move received packet into a new pbuf */
+    p = low_level_input(netif);
 
-  /* no packet could be read, silently ignore this */
-  if (p == NULL) {
-    return;
-  }
+    /* no packet could be read, silently ignore this */
+    if (p == NULL) {
+        return;
+    }
 
 #ifdef PKT_RX_DUMP
     if(p)
         packet_dump(__FUNCTION__, p);
 #endif /* DM9051_RX_DUMP */
 
-  /* entry point to the LwIP stack */
-  err = netif->input(p, netif);
+    /* entry point to the LwIP stack */
+    err = netif->input(p, netif);
 
-  if (err != ERR_OK) {
-    UART_Printf("netif->input err=%d\n", err);
-    pbuf_free(p);
-    p = NULL;
-  }
+    if (err != ERR_OK) {
+        UART_Printf("netif->input err=%d\n", err);
+        pbuf_free(p);
+        p = NULL;
+    }
 }
 
 uint8_t ethernetif_is_init(void)

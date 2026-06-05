@@ -1527,8 +1527,6 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
         switch(dir)
         {
                 case hwDMA_Peripheral_Direction_TX:
-                        SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
-                        
                         if (HAL_SPI_Transmit_DMA(&g_spi[index], buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
@@ -1537,8 +1535,6 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
                         }
                         break;
                 case hwDMA_Peripheral_Direction_RX:
-                        SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
-
                         if (HAL_SPI_Receive_DMA(&g_spi[index], buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);

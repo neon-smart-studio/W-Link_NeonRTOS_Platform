@@ -21,6 +21,8 @@
 
 #include "LWIP_Config.h"
 
+#include "Driver_Config.h"
+
 /**
  * NO_SYS==1: Provides VERY minimal functionality. Otherwise,
  * use lwIP facilities.

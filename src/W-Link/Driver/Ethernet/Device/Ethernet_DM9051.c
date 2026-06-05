@@ -272,7 +272,6 @@ static bool ETH_Init = false;
 
 static onLinkUpCallback onLinkUpCB = NULL;
 static onLinkDownCallback onLinkDownCB = NULL;
-static onInterruptCallback onInterruptCB = NULL;
 
 void DM9051_Hardware_Reset()
 {
@@ -471,42 +470,15 @@ static void DM9051_Chip_Reset(uint8_t mac[6])
     DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET);
 }
 
-void DM9051_PendingFunctionCall(void* p1, uint32_t p2)
-{
-    if(onInterruptCB != NULL) {
-        onInterruptCB();
-    }
-
-    GPIO_Interrupt_Enable(DM9051_IRQ_Pin);
-}
-
-void DM9051_IRQHandler(hwGPIO_Int_Pin pin, hwGPIO_Interrupt_Action action)
-{
-    GPIO_Interrupt_Disable(DM9051_IRQ_Pin);
-
-    NeonRTOS_PendingFunctionCall(DM9051_PendingFunctionCall, NULL, 0);
-}
-
-hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb, onInterruptCallback interrupt_cb)
+hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb)
 {
     int i, oft;
     uint32_t device_id;
-    bool int_mode = false;
-
-    if(interrupt_cb != NULL) {
-        int_mode = true;
-    }
-
-    if(int_mode)
-    {
-        GPIO_Interrupt_Init(DM9051_IRQ_Pin, hwGPIO_Interrupt_Mode_Rising_Edge);
-        GPIO_Register_Interrupt_Handler(DM9051_IRQ_Pin, DM9051_IRQHandler);
-    }
 
     GPIO_Pin_Init(DM9051_RST_Pin, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
     GPIO_Pin_Init(DM9051_CS_Pin, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
 
-    SPI_Master_Init(DM9051_SPI_INDEX, 20000000, hwSPI_OpMode_Polarity0_Phase0, false);
+    SPI_Master_Init(DM9051_SPI_INDEX, 10000000, hwSPI_OpMode_Polarity0_Phase0, false);
 
     DM9051_Hardware_Reset();
 
@@ -554,11 +526,10 @@ hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up
     /* Activate DM9051 */
     DM9051_Soft_Reset(mac);
 
-    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
+    //DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
     
     onLinkUpCB = link_up_cb;
     onLinkDownCB = link_down_cb;
-    onInterruptCB = interrupt_cb;
     
     ETH_Init = true;
 
@@ -567,9 +538,6 @@ hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up
 
 hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
 {
-    ETH_BufferTypeDef txbuffer;
-    uint8_t *txbuf;
-
     if ((out_data == NULL) || (out_len == 0U)) {
         return hwEthernet_InvalidParameter;
     }
@@ -711,7 +679,7 @@ hwEthernet_OpResult Ethernet_Input(uint8_t *in_data, uint32_t in_len)
 
     DM9051_Read_Mem(in_data, in_len);
 
-    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
+    //DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
     /*
     UART_Printf("RX frame len=%lu %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
             in_len,

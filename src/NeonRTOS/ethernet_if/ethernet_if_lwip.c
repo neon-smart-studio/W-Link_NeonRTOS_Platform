@@ -243,11 +243,6 @@ static void ethernetif_onLinkDown()
     netif_set_link_down(pNetif);
 }
 
-static void ethernetif_onInterrupt()
-{
-    ethernetif_input(pNetif);
-}
-
 err_t ethernetif_init(struct netif *netif)
 {
   uint8_t macaddress[6];
@@ -260,7 +255,7 @@ err_t ethernetif_init(struct netif *netif)
 
   hwEthernet_OpResult result;
 
-  result = Ethernet_Init(macaddress, ethernetif_onLinkUp, ethernetif_onLinkDown, ethernetif_onInterrupt);
+  result = Ethernet_Init(macaddress, ethernetif_onLinkUp, ethernetif_onLinkDown);
   if(result < hwEthernet_OK)
   {
       return Map_Ethernet_OpResult_to_err_t(result);

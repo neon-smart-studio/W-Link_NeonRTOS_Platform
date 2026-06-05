@@ -1320,7 +1320,7 @@ static hwDMA_OpResult DMA_Config_SPI(hwDMA_Stream_Index stream_index, hwDMA_Peri
         {
                 return hwDMA_HwError;
         }
-        
+
         switch(dir)
         {
                 case hwDMA_Peripheral_Direction_TX:
@@ -1476,8 +1476,6 @@ hwDMA_OpResult DMA_Xfer_I2C(hwI2C_Index index, hwDMA_Peripheral_Direction dir, u
         }
 
         while (HAL_I2C_GetState(&g_i2c[index]) != HAL_I2C_STATE_READY) { }
-
-        HAL_I2C_DMAStop(&g_i2c[index]);
 
         DMA_DeConfig(stream_index);
 

@@ -165,50 +165,6 @@ static uint32_t Ethernet_AlignUp32(uint32_t size)
     return (size + 31UL) & ~31UL;
 }
 
-static void Ethernet_CleanDCache(void *addr, uint32_t len)
-{
-#if (__DCACHE_PRESENT == 1U)
-    if ((addr == NULL) || (len == 0U)) {
-        return;
-    }
-
-    /* D-Cache 沒開就不要呼叫 SCB_CleanDCache_by_Addr */
-    if ((SCB->CCR & SCB_CCR_DC_Msk) == 0U) {
-        return;
-    }
-
-    uintptr_t start = Ethernet_AlignDown32((uintptr_t)addr);
-    uintptr_t end   = Ethernet_AlignUp32(((uintptr_t)addr) + len);
-    uintptr_t size  = end - start;
-
-    SCB_CleanDCache_by_Addr((uint32_t *)start, (int32_t)size);
-#else
-    (void)addr;
-    (void)len;
-#endif
-}
-
-static void Ethernet_InvalidateDCache(void *addr, uint32_t len)
-{
-#if (__DCACHE_PRESENT == 1U)
-    if ((addr == NULL) || (len == 0U)) {
-        return;
-    }
-
-    /* D-Cache 沒開就不要呼叫 SCB_InvalidateDCache_by_Addr */
-    if ((SCB->CCR & SCB_CCR_DC_Msk) == 0U) {
-        return;
-    }
-
-    uint32_t start = Ethernet_AlignDown32((uint32_t)addr);
-    uint32_t size = Ethernet_AlignUp32(((uint32_t)addr + len) - start);
-    SCB_InvalidateDCache_by_Addr((uint32_t *)start, (int32_t)size);
-#else
-    (void)addr;
-    (void)len;
-#endif
-}
-
 static void Ethernet_Release_Rx(void)
 {
     rx_frame_ptr = NULL;
@@ -269,7 +225,7 @@ void HAL_ETH_TxFreeCallback(uint32_t *buff)
     (void)buff;
 }
 
-hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb, onInterruptCallback interrupt_cb)
+hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -377,7 +333,6 @@ hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
 
     txbuf = Tx_Buff[tx_buf_index];
     memcpy(txbuf, out_data, out_len);
-    Ethernet_CleanDCache(txbuf, out_len);
 
     memset(&txbuffer, 0, sizeof(txbuffer));
     txbuffer.buffer = txbuf;
@@ -462,7 +417,6 @@ hwEthernet_OpResult Ethernet_Input(uint8_t *in_data, uint32_t in_len)
     ETH_BufferTypeDef *node = rx_frame_ptr;
 
     while (node != NULL) {
-        Ethernet_InvalidateDCache(node->buffer, node->len);
         memcpy(&in_data[offset], node->buffer, node->len);
         offset += node->len;
         node = node->next;
@@ -583,13 +537,18 @@ hwEthernet_OpResult Ethernet_Register_Multicast_Address(const uint8_t *mac, uint
    */
   hash = (crc >> 26) & 0x3F;
 
-  if (hash > 31) {
-    *eth_HashTableHigh |= 1 << (hash - 32);
-    EthHandle.Instance->MACHTHR = *eth_HashTableHigh;
-  } else {
-    *eth_HashTableLow |= 1 << hash;
-    EthHandle.Instance->MACHTLR = *eth_HashTableLow;
-  }
+  if (hash > 31)
+    {
+        *eth_HashTableHigh |= (1UL << (hash - 32));
+
+        EthHandle.Instance->MACHT1R = *eth_HashTableHigh;
+    }
+    else
+    {
+        *eth_HashTableLow |= (1UL << hash);
+
+        EthHandle.Instance->MACHT0R = *eth_HashTableLow;
+    }
 
   return hwEthernet_OK;
 }

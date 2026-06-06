@@ -20,12 +20,6 @@
 
 int LED_PWM_Get_All_LED_Status(cJSON *pcjson)
 {
-	cJSON * pSubJson_main = cJSON_CreateObject();
-	if (NULL == pSubJson_main)
-	{
-		return -1;
-	}
-	
 	cJSON * pSubJson_individual_lst = cJSON_CreateArray();
 	if (NULL == pSubJson_individual_lst)
 	{

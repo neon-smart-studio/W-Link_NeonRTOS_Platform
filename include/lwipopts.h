@@ -96,15 +96,15 @@ a lot of data that needs to be copied, this should be set high. */
 #define TCP_MSS                 (1500 - 40)   /* TCP_MSS = (Ethernet MTU - IP header size - TCP header size) */
 
 /* TCP sender buffer space (bytes). */
-#define TCP_SND_BUF             (CONFIG_LWIP_PBUF_POOL_SIZE*TCP_MSS)
+#define TCP_SND_BUF             (CONFIG_LWIP_NUM_SND_BUF*TCP_MSS)
 
 /*  TCP_SND_QUEUELEN: TCP sender buffer space (pbufs). This must be at least
   as much as (2 * TCP_SND_BUF/TCP_MSS) for things to work. */
 
-#define TCP_SND_QUEUELEN        (2* TCP_SND_BUF/TCP_MSS)
+#define TCP_SND_QUEUELEN        (CONFIG_LWIP_NUM_SND_BUF_QUEUELEN)
 
 /* TCP receive window. */
-#define TCP_WND                 (CONFIG_LWIP_PBUF_POOL_SIZE*TCP_MSS)
+#define TCP_WND                 (CONFIG_LWIP_NUM_WND*TCP_MSS)
 
 #define LWIP_TCP_KEEPALIVE                  1   /* Keep the TCP link active. Important for MQTT/TLS */
 #define LWIP_RANDOMIZE_INITIAL_LOCAL_PORTS  1   /* Prevent the same port to be used after reset. \

@@ -471,7 +471,7 @@ hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up
     GPIO_Pin_Init(DM9051_RST_Pin, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
     GPIO_Pin_Init(DM9051_CS_Pin, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
 
-    SPI_Master_Init(DM9051_SPI_INDEX, 10000000, hwSPI_OpMode_Polarity0_Phase0, false);
+    SPI_Master_Init(DM9051_SPI_INDEX, 20000000, hwSPI_OpMode_Polarity0_Phase0, false);
 
     DM9051_Hardware_Reset();
 
@@ -604,7 +604,9 @@ hwEthernet_OpResult Ethernet_Get_Input_Frame_Length(uint32_t *frame_len)
     if (isr_reg & ISR_ROS)
     {
         UART_Printf("Receive_FIFO Overflow\n");
-        DM9051_Write_Reg(DM9051_MPCR, 0x01); //reset rx point
+        DM9051_Write_Reg(DM9051_MPCR, MPCR_RSTRX);
+        DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
+        return hwEthernet_BufferError;
     }
 
     // transmit
@@ -626,8 +628,7 @@ hwEthernet_OpResult Ethernet_Get_Input_Frame_Length(uint32_t *frame_len)
 
         if (rx_bytes[1] != DM9051_PKT_RDY)
         {
-            UART_Printf("NSR %02X, RCMDX %02X: rx error, dm9051_chip_rx_fifo_reset\n", nsr_reg, rx_bytes[1]);
-            DM9051_Write_Reg(DM9051_MPCR, 0x01); //reset rx point
+            UART_Printf("NSR %02X, RCMDX %02X: rx not ready\n", nsr_reg, rx_bytes[1]);
             DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
             return hwEthernet_BufferError;
         }
@@ -753,6 +754,8 @@ hwEthernet_OpResult Ethernet_Register_Multicast_Address(const uint8_t *mac, uint
         *eth_HashTableLow |= 1 << hash;
         DM9051_Write_Reg(DM9051_MAR + hash_group, (*eth_HashTableLow >> (hash_group * 8)) & 0xff);
     }
+
+    return hwEthernet_OK;
 }
 
 #endif //CONFIG_ETHERNET_ONBOARD

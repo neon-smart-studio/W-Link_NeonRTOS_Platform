@@ -35,6 +35,10 @@
 #define OPCODE_PING 0x9
 #define OPCODE_PONG 0xA
 
+#define WS_RECV_OK        0
+#define WS_RECV_NODATA    1
+#define WS_RECV_CLOSE    -1
+
 #define FLAGS_MASK ((uint8_t)0xF0)
 #define OPCODE_MASK ((uint8_t)0x0F)
 #define IS_MASKED ((uint8_t)(1<<7))

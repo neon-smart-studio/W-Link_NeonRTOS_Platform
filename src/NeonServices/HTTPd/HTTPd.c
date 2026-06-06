@@ -261,17 +261,27 @@ static void HTTPd_WebsocketServer_Send_Message(HTTPd_WebSocked_Client_Connection
 	{
 		return;
 	}
-	if (payloadLength == 0)
-	{
-		return;
-	}
+        
 	uint8_t options;
-	
-	if (flags&WEBSOCK_FLAG_BIN) options = OPCODE_BINARY;
-	else options = OPCODE_TEXT;
-	if (!(flags&WEBSOCK_FLAG_CONT)) options |= FLAG_FIN;
-	if ((flags&WEBSOCK_FLAG_PONG)) options |= OPCODE_PONG;
-	
+
+	if (flags & WEBSOCK_FLAG_PONG)
+        {
+                options = OPCODE_PONG;
+        }
+        else if (flags & WEBSOCK_FLAG_BIN)
+        {
+                options = OPCODE_BINARY;
+        }
+        else
+        {
+                options = OPCODE_TEXT;
+        }
+
+        if (!(flags & WEBSOCK_FLAG_CONT))
+        {
+                options |= FLAG_FIN;
+        }
+
 	char buf[14];
 	int i = 0;
 	buf[i++] = options;
@@ -292,13 +302,51 @@ static void HTTPd_WebsocketServer_Send_Message(HTTPd_WebSocked_Client_Connection
 		buf[i++] = payloadLength;
 	}
 	
+        uint32_t sent = 0;
+        uint32_t len = i;
+
+        while (sent < len)
+        {
+                int ret;
 #ifdef HTTPD_USE_SSL
-        ssl_write(&ws_client->client_ssl_ctx, buf, i);
-        ssl_write(&ws_client->client_ssl_ctx, payload, payloadLength);
+                ret = ssl_write(&ws_client->client_ssl_ctx, &buf[sent], len - sent, 0);
 #else
-        send(ws_client->socket_id, buf, i, 0);
-        send(ws_client->socket_id, payload, payloadLength, 0);
+                ret = send(ws_client->socket_id, &buf[sent], len - sent, 0);
 #endif
+
+                if (ret <= 0)
+                {
+                        ws_client->connection_destruct_flag = true;
+                        return;
+                }
+
+                sent += ret;
+        }
+	
+
+        if(payloadLength>0)
+        {
+                sent = 0;
+                len = payloadLength;
+
+                while (sent < len)
+                {
+                        int ret;
+#ifdef HTTPD_USE_SSL
+                        ret = ssl_write(&ws_client->client_ssl_ctx, &payload[sent], len - sent, 0);
+#else
+                        ret = send(ws_client->socket_id, &payload[sent], len - sent, 0);
+#endif
+
+                        if (ret <= 0)
+                        {
+                                ws_client->connection_destruct_flag = true;
+                                return;
+                        }
+
+                        sent += ret;
+                }
+        }
 }
 
 static void HTTPd_WebsocketServer_Send_Brocast_Message(const char *payload, uint64_t payloadLength, uint8_t flags) 
@@ -506,7 +554,11 @@ int WebSocketServer_ReceiveWsFrame(HTTPd_WebSocked_Client_Connection *conn,
 
 int HTTPd_Parse_InMsg_Headers(uint8_t *header, uint16_t header_len, HTTPd_WebSocked_Client_Connection *connData) {
     
-	connData->url = NULL;
+	if (connData->url != NULL)
+        {
+                mem_Free(connData->url);
+                connData->url = NULL;
+        }
 
 	uint8_t* second_line = (uint8_t*)strstr((const char*)header, "\r\n");
 	if (second_line == NULL)
@@ -700,30 +752,37 @@ int HTTPd_UnRegister_CGI_URL_Callback(const char *url)
       HttpdDynamicUrlItem* pItemLast = NULL;
       HttpdDynamicUrlItem* pItemCurrent = Registered_URL_List;
       
-      while(pItemCurrent!=NULL)
-      {
-              if(strlen(url)==strlen(pItemCurrent->url))
-              {
-                      if(strncmp(url, pItemCurrent->url, strlen(url))==0)
-                      {
-                            exist = true;
-                            
-                            pItemLast->next = pItemCurrent->next;
-                            
-                            mem_Free(pItemCurrent);
-                            
-                            break;
-                      }
-              }
-              pItemLast = pItemCurrent;
-              pItemCurrent = pItemCurrent->next;
-      }
-      
-      if(exist)
-      {
-              return 0;
-      }
-      return -1;
+        while(pItemCurrent!=NULL)
+        {
+                if(strlen(url)==strlen(pItemCurrent->url))
+                {
+                        if(strncmp(url, pItemCurrent->url, strlen(url))==0)
+                        {
+                                exist = true;
+                                
+                                if (pItemLast == NULL)
+                                {
+                                        Registered_URL_List = pItemCurrent->next;
+                                }
+                                else
+                                {
+                                        pItemLast->next = pItemCurrent->next;
+                                }
+
+                                mem_Free(pItemCurrent);
+                                
+                                break;
+                        }
+                }
+                pItemLast = pItemCurrent;
+                pItemCurrent = pItemCurrent->next;
+        }
+        
+        if(exist)
+        {
+                return 0;
+        }
+        return -1;
 }
 
 HTTPd_Method HTTPd_Get_CGI_Request_Type(HTTPd_WebSocked_Client_Connection *connData)
@@ -765,8 +824,6 @@ int HTTPd_CGI_ParseUint(const char *s)
 
 int HTTPd_Send_CGI_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_t status_code, const char* rsp_type, uint8_t* rsp_data, uint64_t rsp_len)
 {
-        int socket_status;
-        
         if(connData==NULL)
         {
                 return HTTPD_CGI_DONE;
@@ -828,26 +885,55 @@ int HTTPd_Send_CGI_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_
         
         buf_ptr = HTTPd_Parse_End_Of_Headers(buf_ptr);
         
-#ifdef HTTPD_USE_SSL
-        socket_status = ssl_write(&connData->client_ssl_ctx, http_cmd_buf, buf_ptr - http_cmd_buf);
-#else
-        socket_status = send(connData->socket_id, http_cmd_buf, buf_ptr - http_cmd_buf, 0);
-#endif
-        
-        mem_Free(http_cmd_buf);
-        
-        if (socket_status < 0)
+        uint32_t sent = 0;
+        uint32_t len = (buf_ptr - http_cmd_buf);
+
+        while (sent < len)
         {
-                return HTTPD_CGI_DONE;
+                int ret;
+#ifdef HTTPD_USE_SSL
+                ret = ssl_write(&connData->client_ssl_ctx, &http_cmd_buf[sent], len - sent, 0);
+#else
+                ret = send(connData->socket_id, &http_cmd_buf[sent], len - sent, 0);
+#endif
+
+                if (ret <= 0)
+                {
+                        mem_Free(http_cmd_buf);
+
+                        connData->connection_destruct_flag = true;
+
+                        return HTTPD_CGI_DONE;
+                }
+
+                sent += ret;
         }
-                
+
+        mem_Free(http_cmd_buf);
+         
         if (rsp_len > 0 )
         {
+                uint32_t sent = 0;
+                uint32_t len = rsp_len;
+
+                while (sent < len)
+                {
+                        int ret;
 #ifdef HTTPD_USE_SSL
-                socket_status = ssl_write(&connData->client_ssl_ctx, rsp_data, rsp_len);
+                        ret = ssl_write(&connData->client_ssl_ctx, &rsp_data[sent], len - sent, 0);
 #else
-                socket_status = send(connData->socket_id, rsp_data, rsp_len, 0);
+                        ret = send(connData->socket_id, &rsp_data[sent], len - sent, 0);
 #endif
+
+                        if (ret <= 0)
+                        {
+                                connData->connection_destruct_flag = true;
+
+                                return HTTPD_CGI_DONE;
+                        }
+
+                        sent += ret;
+                }
         }
         
         return HTTPD_CGI_DONE;
@@ -943,19 +1029,29 @@ static int HTTP_SendHeader(HTTPd_WebSocked_Client_Connection *connData, int stat
         }
 	buf_ptr = HTTPd_Parse_End_Of_Headers(buf_ptr);
 	
-	int socket_status;
-	
+        uint32_t sent = 0;
+        uint32_t len = (buf_ptr - http_cmd_buf);
+
+        while (sent < len)
+        {
+                int ret;
 #ifdef HTTPD_USE_SSL
-        socket_status = ssl_write(&connData->client_ssl_ctx, http_cmd_buf, buf_ptr - http_cmd_buf);
+                ret = ssl_write(&connData->client_ssl_ctx, &http_cmd_buf[sent], len - sent, 0);
 #else
-	socket_status = send(connData->socket_id, http_cmd_buf, buf_ptr - http_cmd_buf, 0);
+                ret = send(connData->socket_id, &http_cmd_buf[sent], len - sent, 0);
 #endif
-	
-	if (socket_status < 0)
-	{
-	        mem_Free(http_cmd_buf);
-		return HTTPD_CGI_DONE;
-	}
+
+                if (ret <= 0)
+                {
+                        mem_Free(http_cmd_buf);
+
+                        connData->connection_destruct_flag = true;
+
+                        return HTTPD_CGI_DONE;
+                }
+
+                sent += ret;
+        }
 	
 	mem_Free(http_cmd_buf);
 
@@ -973,8 +1069,6 @@ int HTTPd_SendWebFile(HTTPd_WebSocked_Client_Connection *connData)
 	
 	int content_len;
 
-	int socket_status;
-	
 	const char* web_file_content_type_str = HTTPdGetMimetype(connData->url);
 
 	NeonRtFsFile* send_file = NULL;
@@ -1003,23 +1097,48 @@ int HTTPd_SendWebFile(HTTPd_WebSocked_Client_Connection *connData)
         }
 	
         uint8_t* web_send_buf = mem_Malloc(HTTPD_DAT_BUF_SIZE);
-        if (web_send_buf != NULL)
+        if (web_send_buf == NULL)
         {
-                uint32_t fs_rd_len;
-        
-                do
-                {
-                        fs_rd_len = NeonRtFsRead(send_file, web_send_buf, HTTPD_DAT_BUF_SIZE);
-#ifdef HTTPD_USE_SSL
-                        socket_status = ssl_write(&connData->client_ssl_ctx, web_send_buf, fs_rd_len);
-#else
-                        socket_status = send(connData->socket_id, web_send_buf, fs_rd_len, 0);
-#endif
-                }
-                while (socket_status > 0 && fs_rd_len>=HTTPD_DAT_BUF_SIZE);
-                
-                mem_Free(web_send_buf);
+                NeonRtFsClose(send_file);
+
+                connData->connection_destruct_flag = true;
+
+                return HTTPD_CGI_DONE;
         }
+
+        uint32_t fs_rd_len;
+        do
+        {
+                fs_rd_len = NeonRtFsRead(send_file, web_send_buf, HTTPD_DAT_BUF_SIZE);
+
+                uint32_t sent = 0;
+                uint32_t len = fs_rd_len;
+
+                while (sent < len)
+                {
+                        int ret;
+#ifdef HTTPD_USE_SSL
+                        ret = ssl_write(&connData->client_ssl_ctx, &web_send_buf[sent], len - sent, 0);
+#else
+                        ret = send(connData->socket_id, &web_send_buf[sent], len - sent, 0);
+#endif
+
+                        if (ret <= 0)
+                        {
+                                mem_Free(web_send_buf);
+                                
+                                NeonRtFsClose(send_file);
+
+                                connData->connection_destruct_flag = true;
+
+                                return HTTPD_CGI_DONE;
+                        }
+
+                        sent += ret;
+                }
+        }while (fs_rd_len >= HTTPD_DAT_BUF_SIZE);
+        
+        mem_Free(web_send_buf);
         
         NeonRtFsClose(send_file);
 
@@ -1030,7 +1149,6 @@ int HTTPd_Redirect(HTTPd_WebSocked_Client_Connection *connData, char *newUrl)
 {
 	int content_len;
 	bool web_file_exist;
-	int socket_status;
         const char* pRedirMsg = "Redirecting\r\n";
 	
         if(connData==NULL) return HTTPD_CGI_DONE;
@@ -1050,23 +1168,45 @@ int HTTPd_Redirect(HTTPd_WebSocked_Client_Connection *connData, char *newUrl)
         int r;
         bool isGzip = false;
 
-        if (web_file_exist) {
+        if (web_file_exist)
+        {
                 isGzip = NeonRtFsFlags(redir_web_file) & FLAG_GZIP;
-                if (isGzip) {
-                        if (strstr(connData->accept_encoding, "gzip") == NULL){
+                if (isGzip)
+                {
+                        if (strstr(connData->accept_encoding, "gzip") == NULL)
+                        {
                                 const char* pRetMsg = "Your browser does not accept gzip-compressed data.\r\n";
 
                                 r = HTTP_SendHeader(connData, 501, "text/plain", strlen(pRetMsg), false, NULL);
                                 if(r!=HTTPD_CGI_MORE)
                                 {
+                                        NeonRtFsClose(redir_web_file);
                                         return HTTPD_CGI_DONE;
                                 }
 
+                                uint32_t sent = 0;
+                                uint32_t len = strlen(pRetMsg);
+
+                                while (sent < len)
+                                {
+                                        int ret;
 #ifdef HTTPD_USE_SSL
-                                socket_status = ssl_write(&connData->client_ssl_ctx, pRetMsg, strlen(pRetMsg));
+                                        ret = ssl_write(&connData->client_ssl_ctx, &pRetMsg[sent], len - sent, 0);
 #else
-                                socket_status = send(connData->socket_id, pRetMsg, strlen(pRetMsg), 0);
+                                        ret = send(connData->socket_id, &pRetMsg[sent], len - sent, 0);
 #endif
+
+                                        if (ret <= 0)
+                                        {
+                                                NeonRtFsClose(redir_web_file);
+                                                
+                                                connData->connection_destruct_flag = true;
+
+                                                return HTTPD_CGI_DONE;
+                                        }
+
+                                        sent += ret;
+                                }
 
                                 NeonRtFsClose(redir_web_file);
                                 
@@ -1095,34 +1235,75 @@ int HTTPd_Redirect(HTTPd_WebSocked_Client_Connection *connData, char *newUrl)
 	if (web_file_exist == true)
 	{
 		uint8_t* web_send_buf = mem_Malloc(HTTPD_DAT_BUF_SIZE);
-		if (web_send_buf != NULL)
-		{
-                        uint32_t fs_rd_len;
-                
-                        do
-                        {
-                                fs_rd_len = NeonRtFsRead(redir_web_file, web_send_buf, HTTPD_DAT_BUF_SIZE);
-                                
-#ifdef HTTPD_USE_SSL
-                                socket_status = ssl_write(&connData->client_ssl_ctx, web_send_buf, fs_rd_len);
-#else
-                                socket_status = send(connData->socket_id, web_send_buf, fs_rd_len, 0);
-#endif
-                        }
-                        while (socket_status > 0 && fs_rd_len>=HTTPD_DAT_BUF_SIZE);
-                        
-		        mem_Free(web_send_buf);
+                if (web_send_buf == NULL)
+                {
+                        NeonRtFsClose(redir_web_file);
+
+                        connData->connection_destruct_flag = true;
+
+                        return HTTPD_CGI_DONE;
                 }
+
+                uint32_t fs_rd_len;
+                do
+                {
+                        fs_rd_len = NeonRtFsRead(redir_web_file, web_send_buf, HTTPD_DAT_BUF_SIZE);
+                        
+                        uint32_t sent = 0;
+                        uint32_t len = fs_rd_len;
+
+                        while (sent < len)
+                        {
+                                int ret;
+#ifdef HTTPD_USE_SSL
+                                ret = ssl_write(&connData->client_ssl_ctx, &web_send_buf[sent], len - sent, 0);
+#else
+                                ret = send(connData->socket_id, &web_send_buf[sent], len - sent, 0);
+#endif
+
+                                if (ret <= 0)
+                                {
+                                        mem_Free(web_send_buf);
+                                        
+                                        NeonRtFsClose(redir_web_file);
+
+                                        connData->connection_destruct_flag = true;
+
+                                        return HTTPD_CGI_DONE;
+                                }
+
+                                sent += ret;
+                        }
+                }
+                while (fs_rd_len>=HTTPD_DAT_BUF_SIZE);
+                
+                mem_Free(web_send_buf);
                 
 		NeonRtFsClose(redir_web_file);
 	}
 	else
 	{
+                uint32_t sent = 0;
+                uint32_t len = strlen(pRedirMsg);
+
+                while (sent < len)
+                {
+                        int ret;
 #ifdef HTTPD_USE_SSL
-                socket_status = ssl_write(&connData->client_ssl_ctx, pRedirMsg, strlen(pRedirMsg));
+                        ret = ssl_write(&connData->client_ssl_ctx, &pRedirMsg[sent], len - sent, 0);
 #else
-		socket_status = send(connData->socket_id, pRedirMsg, strlen(pRedirMsg), 0);
+                        ret = send(connData->socket_id, &pRedirMsg[sent], len - sent, 0);
 #endif
+
+                        if (ret <= 0)
+                        {
+                                connData->connection_destruct_flag = true;
+
+                                return HTTPD_CGI_DONE;
+                        }
+
+                        sent += ret;
+                }
 	}
 	return HTTPD_CGI_DONE;
 }
@@ -1131,7 +1312,6 @@ int HTTPd_NotFound(HTTPd_WebSocked_Client_Connection *connData)
 {
 	int content_len;
 	bool web_file_exist;
-	int socket_status;
         const char* pNotFoundMsg = "Not Found.\r\n";
 	
         if(connData==NULL) return HTTPD_CGI_DONE;
@@ -1151,23 +1331,45 @@ int HTTPd_NotFound(HTTPd_WebSocked_Client_Connection *connData)
         int r;
         bool isGzip = false;
 
-        if (web_file_exist) {
+        if (web_file_exist)
+        {
                 isGzip = NeonRtFsFlags(notfound_web_file) & FLAG_GZIP;
-                if (isGzip) {
-                        if (strstr(connData->accept_encoding, "gzip") == NULL){
+                if (isGzip)
+                {
+                        if (strstr(connData->accept_encoding, "gzip") == NULL)
+                        {
                                 const char* pRetMsg = "Your browser does not accept gzip-compressed data.\r\n";
 
                                 r = HTTP_SendHeader(connData, 501, "text/plain", strlen(pRetMsg), false, NULL);
                                 if(r!=HTTPD_CGI_MORE)
                                 {
+                                        NeonRtFsClose(notfound_web_file);
                                         return HTTPD_CGI_DONE;
                                 }
 
+                                uint32_t sent = 0;
+                                uint32_t len = strlen(pRetMsg);
+
+                                while (sent < len)
+                                {
+                                        int ret;
 #ifdef HTTPD_USE_SSL
-                                socket_status = ssl_write(&connData->client_ssl_ctx, pRetMsg, strlen(pRetMsg));
+                                        ret = ssl_write(&connData->client_ssl_ctx, &pRetMsg[sent], len - sent, 0);
 #else
-                                socket_status = send(connData->socket_id, pRetMsg, strlen(pRetMsg), 0);
+                                        ret = send(connData->socket_id, &pRetMsg[sent], len - sent, 0);
 #endif
+
+                                        if (ret <= 0)
+                                        {
+                                                NeonRtFsClose(notfound_web_file);
+
+                                                connData->connection_destruct_flag = true;
+
+                                                return HTTPD_CGI_DONE;
+                                        }
+
+                                        sent += ret;
+                                }
 
                                 NeonRtFsClose(notfound_web_file);
                                 
@@ -1196,34 +1398,75 @@ int HTTPd_NotFound(HTTPd_WebSocked_Client_Connection *connData)
 	if (web_file_exist == true)
 	{
 		uint8_t* web_send_buf = mem_Malloc(HTTPD_DAT_BUF_SIZE);
-		if (web_send_buf != NULL)
-		{
-                        uint32_t fs_rd_len;
-                
-                        do
-                        {
-                                fs_rd_len = NeonRtFsRead(notfound_web_file, web_send_buf, HTTPD_DAT_BUF_SIZE);
-                                
-#ifdef HTTPD_USE_SSL
-                                socket_status = ssl_write(&connData->client_ssl_ctx, web_send_buf, fs_rd_len);
-#else
-                                socket_status = send(connData->socket_id, web_send_buf, fs_rd_len, 0);
-#endif
-                        }
-                        while (socket_status > 0 && fs_rd_len>=HTTPD_DAT_BUF_SIZE);
-                        
-		        mem_Free(web_send_buf);
+                if (web_send_buf == NULL)
+                {
+                        NeonRtFsClose(notfound_web_file);
+
+                        connData->connection_destruct_flag = true;
+
+                        return HTTPD_CGI_DONE;
                 }
+
+                uint32_t fs_rd_len;
+                do
+                {
+                        fs_rd_len = NeonRtFsRead(notfound_web_file, web_send_buf, HTTPD_DAT_BUF_SIZE);
+                        
+                        uint32_t sent = 0;
+                        uint32_t len = fs_rd_len;
+
+                        while (sent < len)
+                        {
+                                int ret;
+#ifdef HTTPD_USE_SSL
+                                ret = ssl_write(&connData->client_ssl_ctx, &web_send_buf[sent], len - sent, 0);
+#else
+                                ret = send(connData->socket_id, &web_send_buf[sent], len - sent, 0);
+#endif
+
+                                if (ret <= 0)
+                                {
+                                        mem_Free(web_send_buf);
+
+                                        NeonRtFsClose(notfound_web_file);
+
+                                        connData->connection_destruct_flag = true;
+
+                                        return HTTPD_CGI_DONE;
+                                }
+
+                                sent += ret;
+                        }
+                }
+                while (fs_rd_len>=HTTPD_DAT_BUF_SIZE);
+                
+                mem_Free(web_send_buf);
                 
 		NeonRtFsClose(notfound_web_file);
 	}
 	else
 	{
+                uint32_t sent = 0;
+                uint32_t len = strlen(pNotFoundMsg);
+
+                while (sent < len)
+                {
+                        int ret;
 #ifdef HTTPD_USE_SSL
-                socket_status = ssl_write(&connData->client_ssl_ctx, pNotFoundMsg, strlen(pNotFoundMsg));
+                        ret = ssl_write(&connData->client_ssl_ctx, &pNotFoundMsg[sent], len - sent, 0);
 #else
-		socket_status = send(connData->socket_id, pNotFoundMsg, strlen(pNotFoundMsg), 0);
+                        ret = send(connData->socket_id, &pNotFoundMsg[sent], len - sent, 0);
 #endif
+
+                        if (ret <= 0)
+                        {
+                                connData->connection_destruct_flag = true;
+
+                                return HTTPD_CGI_DONE;
+                        }
+
+                        sent += ret;
+                }
 	}
 	return HTTPD_CGI_DONE;
 }
@@ -1249,11 +1492,27 @@ int HTTPdSendApiDebugToolPage(HTTPd_WebSocked_Client_Connection *connData)
 		return HTTPD_CGI_DONE;
         }
 
+        uint32_t sent = 0;
+        uint32_t len = strlen(HTTP_API_Debug_Tool_Page_HTML);
+
+        while (sent < len)
+        {
+                int ret;
 #ifdef HTTPD_USE_SSL
-        ssl_write(&connData->client_ssl_ctx, HTTP_API_Debug_Tool_Page_HTML, strlen(HTTP_API_Debug_Tool_Page_HTML));
+                ret = ssl_write(&connData->client_ssl_ctx, &HTTP_API_Debug_Tool_Page_HTML[sent], len - sent, 0);
 #else
-	send(connData->socket_id, HTTP_API_Debug_Tool_Page_HTML, strlen(HTTP_API_Debug_Tool_Page_HTML), 0);
+                ret = send(connData->socket_id, &HTTP_API_Debug_Tool_Page_HTML[sent], len - sent, 0);
 #endif
+
+                if (ret <= 0)
+                {
+                        connData->connection_destruct_flag = true;
+
+                        return HTTPD_CGI_DONE;
+                }
+
+                sent += ret;
+        }
 	
 	return HTTPD_CGI_DONE;
 }
@@ -1371,7 +1630,8 @@ int HTTPd_Process_POST_Request(HTTPd_WebSocked_Client_Connection *connData)
         return HTTPD_CGI_DONE;
 }
 
-int HTTPd_Process_GET_Request(HTTPd_WebSocked_Client_Connection *connData) {
+int HTTPd_Process_GET_Request(HTTPd_WebSocked_Client_Connection *connData)
+{
 	if (connData->websocket_client == true)
 	{
 		char* acceptKey = mem_Malloc(100);
@@ -1396,12 +1656,32 @@ int HTTPd_Process_GET_Request(HTTPd_WebSocked_Client_Connection *connData) {
 		buf_ptr = HTTPd_Parse_Headers(buf_ptr, WebSocket_Accept_Identifier, acceptKey);
 		buf_ptr = HTTPd_Parse_End_Of_Headers(buf_ptr);
 
+                uint32_t sent = 0;
+                uint32_t len = (buf_ptr - ws_cmd_send_buf);
+
+                while (sent < len)
+                {
+                        int ret;
 #ifdef HTTPD_USE_SSL
-                ssl_write(&connData->client_ssl_ctx, ws_cmd_send_buf, buf_ptr - ws_cmd_send_buf);
+                        ret = ssl_write(&connData->client_ssl_ctx, &ws_cmd_send_buf[sent], len - sent, 0);
 #else
-		send(connData->socket_id, ws_cmd_send_buf, buf_ptr - ws_cmd_send_buf, 0);
+                        ret = send(connData->socket_id, &ws_cmd_send_buf[sent], len - sent, 0);
 #endif
-		
+
+                        if (ret <= 0)
+                        {
+                                mem_Free(acceptKey);
+                                
+                                mem_Free(ws_cmd_send_buf);
+
+                                connData->connection_destruct_flag = true;
+
+                                return HTTPD_CGI_DONE;
+                        }
+
+                        sent += ret;
+                }
+                
 		mem_Free(acceptKey);
 		
 		mem_Free(ws_cmd_send_buf);
@@ -1673,7 +1953,7 @@ void HTTP_Server_Task(void *pvParameters)
                                         j++;
                                 }
                         }
-                        
+
                         /* 防止 client_index 仍然是 -1 時後面炸掉 */
                         if (client_index < 0)
                         {
@@ -1820,7 +2100,8 @@ void HTTP_Server_Task(void *pvParameters)
                                 do {
                                         int remain = HTTPD_CMD_BUF_SIZE - recv_len - 1;
 
-                                        if (remain <= 0) {
+                                        if (remain <= 0)
+                                        {
                                                 client_close = true;
                                                 break;
                                         }
@@ -1828,18 +2109,12 @@ void HTTP_Server_Task(void *pvParameters)
 #ifdef HTTPD_USE_SSL
                                         ret = ssl_read(&ssl, &http_cmd_buf[recv_len], remain);
 #else
-                                        ret = recv(HTTPd_WebSocketd_Client_List[i]->socket_id,
-                                                &http_cmd_buf[recv_len],
-                                                remain,
-                                                0);
+                                        ret = recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &http_cmd_buf[recv_len], remain, 0);
 #endif
 
-                                        if (ret < 0) {
-                                                ret = getsockopt(HTTPd_WebSocketd_Client_List[i]->socket_id,
-                                                                SOL_SOCKET,
-                                                                SO_ERROR,
-                                                                &socket_errno,
-                                                                &socket_errno_optlen);
+                                        if (ret < 0)
+                                        {
+                                                ret = getsockopt(HTTPd_WebSocketd_Client_List[i]->socket_id, SOL_SOCKET, SO_ERROR, &socket_errno, &socket_errno_optlen);
 
                                                 if (ret < 0 || HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag) {
                                                         client_close = true;
@@ -1867,7 +2142,8 @@ void HTTP_Server_Task(void *pvParameters)
 
                                 } while (data_ptr == NULL);
 
-                                if (data_ptr != NULL) {
+                                if (data_ptr != NULL)
+                                {
                                         data_ptr += 4;
 
                                         already_body_len = recv_len - (uint16_t)(data_ptr - http_cmd_buf);
@@ -1892,7 +2168,14 @@ void HTTP_Server_Task(void *pvParameters)
                                 {
                                         NeonRTOS_TimerStop(&HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer);
                                         
-                                        HTTPd_Parse_InMsg_Headers(header_ptr, data_ptr - header_ptr, HTTPd_WebSocketd_Client_List[i]);
+                                        if (HTTPd_Parse_InMsg_Headers(header_ptr, data_ptr - header_ptr, HTTPd_WebSocketd_Client_List[i]) < 0)
+                                        {
+                                                mem_Free(http_cmd_buf);
+
+                                                HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
+                                                
+                                                continue;
+                                        }
                                         
                                         if(HTTPd_WebSocketd_Client_List[i]->data_len>0)
                                         {
@@ -1908,7 +2191,10 @@ void HTTP_Server_Task(void *pvParameters)
                                                         {
                                                                 mem_Free(http_cmd_buf);
                                                                 
+                                                                HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
+
                                                                 //UART_Printf("[HTTPD %d] err request data too large\n", i);
+                                                                
                                                                 continue;
                                                         }
 
@@ -1929,7 +2215,7 @@ void HTTP_Server_Task(void *pvParameters)
 #ifdef HTTPD_USE_SSL
                                                                 ret = ssl_read(&ssl, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], 1);
 #else
-                                                                ret = recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], HTTPd_WebSocketd_Client_List[i]->data_len - already_body_len, 0);
+                                                                ret = recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], HTTPd_WebSocketd_Client_List[i]->data_len - cgi_recv_len, 0);
 #endif
 
                                                                 if (ret < 0)
@@ -1981,6 +2267,13 @@ void HTTP_Server_Task(void *pvParameters)
 
                                                         if(cgi_client_skip)
                                                         {
+                                                                if (HTTPd_WebSocketd_Client_List[i]->data_buff != NULL)
+                                                                {
+                                                                        mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
+                                                                        HTTPd_WebSocketd_Client_List[i]->data_buff = NULL;
+                                                                        HTTPd_WebSocketd_Client_List[i]->isLargeData = false;
+                                                                }
+
                                                                 mem_Free(http_cmd_buf);
                                                                 
                                                                 continue;
@@ -2034,20 +2327,6 @@ void HTTP_Server_Task(void *pvParameters)
                                                 break;
                                         }
                                         
-                                        if (HTTPd_WebSocketd_Client_List[i]->url != NULL)
-                                        {
-                                                if(HTTPd_WebSocketd_Client_List[i]->cgi != NULL)
-                                                {
-                                                        ret = HTTPd_WebSocketd_Client_List[i]->cgi(HTTPd_WebSocketd_Client_List[i]); //Execute cgi fn.
-                                                        if (ret == HTTPD_CGI_DONE) {
-                                                                //UART_Printf("[HTTPD %d] HTTPD_CGI_DONE\n", i);
-                                                        }
-                                                        if (ret == HTTPD_CGI_NOTFOUND || ret == HTTPD_CGI_AUTHENTICATED) {
-                                                                //UART_Printf("[HTTPD %d] ERROR! CGI fn returns code %d after sending data! Bad CGI!\n", i, ret);
-                                                        }
-                                                }
-                                        }
-
                                         if(HTTPd_WebSocketd_Client_List[i]->data_buff!=NULL)
                                         {
                                                 //UART_Printf("[HTTPD %d] HTTPd_WebSocketd_Client_List[i]->data_buff!=NULL\n", i);
@@ -2158,6 +2437,7 @@ void HTTP_Server_Task(void *pvParameters)
                                         if (ws_recv_len < rec_dat_len)
                                         {
                                                 mem_Free(WebSocketServerDataBuf);
+                                                HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
                                                 continue;
                                         }
 

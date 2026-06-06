@@ -68,11 +68,13 @@ int Network_CGI_Root(HTTPd_WebSocked_Client_Connection *connData)
             cJSON* netmask_item = cJSON_GetObjectItem(req_json, "netmask");
             if (ip_addr_item == NULL || gateway_item == NULL || netmask_item == NULL)
             {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
+                cJSON_Delete(req_json);
+                return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
             }
             if (ip_addr_item->type != cJSON_String || gateway_item->type != cJSON_String || netmask_item->type != cJSON_String)
             {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
+                cJSON_Delete(req_json);
+                return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
             }
 
             uint32_t ip_addr = ip_string_to_u32(ip_addr_item->valuestring);
@@ -694,27 +696,29 @@ void Process_Websocket_Incomming_Message(struct HTTPd_WebSocked_Client_Connectio
 	cJSON* method = cJSON_GetObjectItem(msg_json, "method");
 	cJSON* topic = cJSON_GetObjectItem(msg_json, "topic");
 	
-	if (NULL != method && method->type == cJSON_String) {
-              if (NULL != topic && topic->type == cJSON_String) {
-                      if (strcmp(method->valuestring, "POST") == 0)
-                      {
-                              Process_WebSocket_Post_Message(topic->valuestring, msg_json);
-                      }
-                      if (strcmp(method->valuestring, "GET") == 0)
-                      {
-                              cJSON* rsp_json = cJSON_CreateObject();
-                              if(rsp_json==NULL){
-                                    return;
-                              }
-                              if (Process_WebSocket_Get_Message(topic->valuestring, msg_json, rsp_json)>=0)
-                              {
-                                    WebsocketServer_SendJSONMessage(src, rsp_json, true);
-                              }
-                              else{
-                                    cJSON_Delete(rsp_json);
-                              }
-                      }
-              }
+	if (NULL != method && method->type == cJSON_String)
+        {
+                if (NULL != topic && topic->type == cJSON_String)
+                {
+                        if (strcmp(method->valuestring, "POST") == 0)
+                        {
+                                Process_WebSocket_Post_Message(topic->valuestring, msg_json);
+                        }
+                        if (strcmp(method->valuestring, "GET") == 0)
+                        {
+                                cJSON* rsp_json = cJSON_CreateObject();
+                                if(rsp_json!=NULL)
+                                {
+                                        if (Process_WebSocket_Get_Message(topic->valuestring, msg_json, rsp_json)>=0)
+                                        {
+                                                WebsocketServer_SendJSONMessage(src, rsp_json, true);
+                                        }
+                                        else{
+                                                cJSON_Delete(rsp_json);
+                                        }
+                                }
+                        }
+                }
 	}
 	
         //printf("cJSON_Delete(msg_json);\r\n");

@@ -55,14 +55,43 @@ env.Append(
 )
 
 if "BOARD" in env:
+
+    board_cfg = env.BoardConfig()
+
+    cpu = board_cfg.get("build.cpu", "cortex-m3")
+    fpu = board_cfg.get("build.fpu", None)
+    float_abi = board_cfg.get("build.float-abi", None)
+
+    asflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    ccflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    linkflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    if fpu and float_abi:
+        asflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        ccflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        linkflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
     env.Append(
-        ASFLAGS=[
-            "-mcpu=%s" % env.BoardConfig().get("build.cpu")
-        ],
-        CCFLAGS=[
-            "-mcpu=%s" % env.BoardConfig().get("build.cpu")
-        ],
-        LINKFLAGS=[
-            "-mcpu=%s" % env.BoardConfig().get("build.cpu")
-        ]
+        ASFLAGS=asflags,
+        CCFLAGS=ccflags,
+        LINKFLAGS=linkflags
     )

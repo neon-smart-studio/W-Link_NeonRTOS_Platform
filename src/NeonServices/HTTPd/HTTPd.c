@@ -28,7 +28,7 @@
 
 #define HTTPD_CMD_BUF_SIZE                   1024
 
-#define HTTP_STACK_SIZE                      2*1024
+#define HTTP_STACK_SIZE                      8*1024
 #define HTTPD_DAT_BUF_SIZE                   2*1024
 
 #define HTTPDVER "1.1"
@@ -56,6 +56,7 @@ typedef struct HTTPd_WebSocked_Client_Connection
 	uint32_t data_len;
         uint8_t* data_buff;
         char accept_encoding[64];
+        char auth_token[72];
 	char *getArgs;
 	const void *cgiArg;
 	cgiSendCallback cgi;
@@ -683,8 +684,22 @@ int HTTPd_Parse_InMsg_Headers(uint8_t *header, uint16_t header_len, HTTPd_WebSoc
                                         memset(connData->accept_encoding, 0, sizeof(connData->accept_encoding));
                                         memcpy(connData->accept_encoding, accept_encoding, accept_encoding_end_ptr-accept_encoding);
                                 }
-			}	
-                        
+			}
+
+                        /* Parse Authorization header */
+                        memset(connData->auth_token, 0, sizeof(connData->auth_token));
+                        uint8_t *auth_str = HTTPd_Get_Header_Value(second_line, (uint8_t*)HTTP_Authorization);
+                        if (auth_str != NULL)
+                        {
+                                uint8_t *auth_end = (uint8_t*)strstr((char*)auth_str, "\r\n");
+                                if (auth_end != NULL)
+                                {
+                                        size_t len = auth_end - auth_str;
+                                        if (len >= sizeof(connData->auth_token)) len = sizeof(connData->auth_token) - 1;
+                                        memcpy(connData->auth_token, auth_str, len);
+                                }
+                        }
+
 			uint8_t *cont_type = HTTPd_Get_Header_Value(second_line, (uint8_t*)HTTP_Content_Type);
 			if (cont_type != NULL)
 			{
@@ -798,6 +813,32 @@ const char* HTTPd_Get_CGI_Request_URL(HTTPd_WebSocked_Client_Connection *connDat
 const uint8_t* HTTPd_Get_CGI_Request_Data(HTTPd_WebSocked_Client_Connection *connData)
 {
       return (const uint8_t*) connData->data_buff;
+}
+
+uint32_t HTTPd_Get_CGI_Request_DataLen(HTTPd_WebSocked_Client_Connection *connData)
+{
+      if (connData == NULL) return 0;
+      return connData->data_len;
+}
+
+const char* HTTPd_Get_CGI_Request_AuthToken(HTTPd_WebSocked_Client_Connection *connData)
+{
+      if (connData == NULL) return NULL;
+      if (connData->auth_token[0] == '\0') return NULL;
+      return (const char*)connData->auth_token;
+}
+
+uint32_t HTTPd_Get_CGI_Client_IP(HTTPd_WebSocked_Client_Connection *connData)
+{
+      if (connData == NULL) return 0;
+      struct sockaddr_in *addr_in = (struct sockaddr_in*)&connData->client_socket_addr;
+      return addr_in->sin_addr.s_addr;  /* network byte order */
+}
+
+const char* HTTPd_Get_CGI_Request_Args(HTTPd_WebSocked_Client_Connection *connData)
+{
+      if (connData == NULL) return NULL;
+      return (const char*)connData->getArgs;
 }
 
 int HTTPd_CGI_PathStartsWith(const char *url,

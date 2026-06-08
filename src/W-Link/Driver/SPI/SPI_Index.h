@@ -2,6 +2,8 @@
 #ifndef SPI_MASTER_INDEX_H
 #define SPI_MASTER_INDEX_H
 
+#include "soc.h"
+
 #ifdef DEVICE_NUVOTON
 typedef enum hwSPI_Index_t
 {

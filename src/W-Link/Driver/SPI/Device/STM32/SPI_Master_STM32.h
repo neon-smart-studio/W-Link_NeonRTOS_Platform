@@ -21,6 +21,8 @@ extern bool Spi_Master_Init_Status[];
 SPI_TypeDef *SPI_Map_Soc_Base(hwSPI_Index index);
 hwSPI_Index SPI_IndexFromHandle(SPI_HandleTypeDef *hspi);
 
+int SPI_Master_Get_Clock_Freq(hwSPI_Index index);
+
 hwSPI_OpResult SPI_Instance_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_OpMode opMode);
 hwSPI_OpResult SPI_Instance_DeInit(hwSPI_Index index);
 

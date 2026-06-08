@@ -1,5 +1,5 @@
-#ifndef SPI_STM32_H
-#define SPI_STM32_H
+#ifndef SPI_RP2_H
+#define SPI_RP2_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -18,4 +18,4 @@ extern bool Spi_Master_Init_Status[];
 }
 #endif // __cplusplus
 
-#endif
+#endif // SPI_RP2_H

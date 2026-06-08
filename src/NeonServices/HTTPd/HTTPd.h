@@ -98,6 +98,10 @@ int HTTPd_UnRegister_CGI_URL_Callback(const char *url);
 HTTPd_Method HTTPd_Get_CGI_Request_Type(HTTPd_WebSocked_Client_Connection *connData);
 const char* HTTPd_Get_CGI_Request_URL(HTTPd_WebSocked_Client_Connection *connData);
 const uint8_t* HTTPd_Get_CGI_Request_Data(HTTPd_WebSocked_Client_Connection *connData);
+uint32_t HTTPd_Get_CGI_Request_DataLen(HTTPd_WebSocked_Client_Connection *connData);
+const char* HTTPd_Get_CGI_Request_AuthToken(HTTPd_WebSocked_Client_Connection *connData);
+uint32_t HTTPd_Get_CGI_Client_IP(HTTPd_WebSocked_Client_Connection *connData);
+const char* HTTPd_Get_CGI_Request_Args(HTTPd_WebSocked_Client_Connection *connData);
 int HTTPd_Send_CGI_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_t status_code, const char* rsp_type, uint8_t* rsp_data, uint64_t rsp_len);
 int HTTPd_Send_CGI_JSON_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_t status_code, cJSON* rsp_dat, bool need_delete_json);
 

@@ -58,6 +58,8 @@
 
 #include "cJSON.h"
 
+#include "NeonRTOS.h"
+
 /* define our own boolean type */
 #ifdef true
 #undef true
@@ -175,9 +177,9 @@ static void * CJSON_CDECL internal_realloc(void *pointer, size_t size)
     return realloc(pointer, size);
 }
 #else
-#define internal_malloc malloc
-#define internal_free free
-#define internal_realloc realloc
+#define internal_malloc mem_Malloc
+#define internal_free mem_Free
+#define internal_realloc mem_Realloc
 #endif
 
 /* strlen of character literals resolved at compile time */

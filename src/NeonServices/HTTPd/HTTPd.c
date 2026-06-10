@@ -28,7 +28,7 @@
 
 #define HTTPD_CMD_BUF_SIZE                   1024
 
-#define HTTP_STACK_SIZE                      8*1024
+#define HTTP_STACK_SIZE                      2*1024
 #define HTTPD_DAT_BUF_SIZE                   2*1024
 
 #define HTTPDVER "1.1"
@@ -401,7 +401,7 @@ void WebsocketServer_SendJSONMessage(struct HTTPd_WebSocked_Client_Connection* w
 {
         if (data == NULL){return;}
         
-	char* json_str = cJSON_Print(data);
+	char* json_str = cJSON_PrintUnformatted(data);
         
         if(json_str==NULL)
         {
@@ -411,8 +411,6 @@ void WebsocketServer_SendJSONMessage(struct HTTPd_WebSocked_Client_Connection* w
               }
               return;
         }
-        
-        cJSON_Minify(json_str);
         
 	if (need_delete_json == true)
 	{

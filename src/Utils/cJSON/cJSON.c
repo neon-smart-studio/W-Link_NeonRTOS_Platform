@@ -108,7 +108,7 @@ const char *parse_number(cJSON *item,const char *num)
 		while (*num>='0' && *num<='9') subscale=(subscale*10)+(*num++ - '0');	/* Number? */
 	}
 
-	n=sign*n*pow(10.0,(scale+subscale*signsubscale))/10;	/* number = +/- number.fraction * 10^+/- exponent  fix stm32h7 issue*/
+	n = sign * n * pow(10.0, scale + subscale * signsubscale);
 	
 	item->valuedouble=n;
 	item->valueint=(int)n;

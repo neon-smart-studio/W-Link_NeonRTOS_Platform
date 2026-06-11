@@ -55,6 +55,7 @@ a lot of data that needs to be copied, this should be set high. */
 
 #define mem_clib_malloc    mem_Malloc
 #define mem_clib_free      mem_Free
+#define mem_clib_calloc    mem_Calloc
 
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
    sends a lot of data out of ROM (or other static memory), this

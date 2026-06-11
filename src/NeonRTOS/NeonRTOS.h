@@ -105,6 +105,7 @@ size_t NeonRTOS_GetFreeHeapSize();
 void * mem_Malloc(uint64_t Size);
 void mem_Free(void *pMem);
 void *mem_Realloc(void *pMem, uint64_t newSize);
+void *mem_Calloc(size_t count, size_t size);
 void mem_set(void *pBuf,int Val,size_t Size);
 void mem_copy(void *pDst, void *pSrc,size_t Size);
 

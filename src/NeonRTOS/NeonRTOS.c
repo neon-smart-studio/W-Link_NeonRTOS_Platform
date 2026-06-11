@@ -613,6 +613,18 @@ void *mem_Realloc(void *pMem, uint64_t newSize)
     return (void *)(newRaw + sizeof(size_t));
 }
 
+void *mem_Calloc(size_t count, size_t size)
+{
+    size_t total = count * size;
+
+    void *p = mem_Malloc(total);
+    if (p != NULL) {
+        memset(p, 0, total);
+    }
+
+    return p;
+}
+
 size_t NeonRTOS_GetFreeHeapSize()
 {
     return xPortGetFreeHeapSize();

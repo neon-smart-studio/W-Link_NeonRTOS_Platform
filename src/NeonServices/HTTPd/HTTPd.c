@@ -426,7 +426,7 @@ void WebsocketServer_SendBrocastJSONMessage(cJSON* data, bool need_delete_json)
 {
         if (data == NULL){return;}
         
-	char* json_str = cJSON_Print(data);
+	char* json_str = cJSON_PrintUnformatted(data);
         if(json_str==NULL)
         {
               if (need_delete_json == true)
@@ -435,8 +435,6 @@ void WebsocketServer_SendBrocastJSONMessage(cJSON* data, bool need_delete_json)
               }
               return;
         }
-        
-        cJSON_Minify(json_str);
         
 	if (need_delete_json == true)
 	{

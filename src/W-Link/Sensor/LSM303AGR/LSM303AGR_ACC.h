@@ -66,23 +66,23 @@
 extern "C" {
 #endif
 
-LSM303AGR_OpStatus LSM303AGR_ACC_begin(void);
-LSM303AGR_OpStatus LSM303AGR_ACC_end(void);
-LSM303AGR_OpStatus LSM303AGR_ACC_Enable(void);
-LSM303AGR_OpStatus LSM303AGR_ACC_Disable(void);
-LSM303AGR_OpStatus LSM303AGR_ACC_ReadID(uint8_t *p_id);
-LSM303AGR_OpStatus LSM303AGR_ACC_GetAxes(int32_t *pData);
-LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity(float *pfData);
-LSM303AGR_OpStatus LSM303AGR_ACC_GetAxesRaw(int16_t *pData);
-LSM303AGR_OpStatus LSM303AGR_ACC_GetODR(float *odr);
-LSM303AGR_OpStatus LSM303AGR_ACC_SetODR(float odr);
-LSM303AGR_OpStatus LSM303AGR_ACC_GetFS(float *fullScale);
-LSM303AGR_OpStatus LSM303AGR_ACC_SetFS(float fullScale);
-LSM303AGR_OpStatus LSM303AGR_ACC_EnableSelfTest(bool self_test);
-LSM303AGR_OpStatus LSM303AGR_ACC_DisableSelfTest(void);
-LSM303AGR_OpStatus LSM303AGR_ACC_EnableTemperatureSensor(void);
-LSM303AGR_OpStatus LSM303AGR_ACC_DisableTemperatureSensor(void);
-LSM303AGR_OpStatus LSM303AGR_ACC_GetTemperature(float* temperature);
+LSM303AGR_OpResult LSM303AGR_ACC_begin(void);
+LSM303AGR_OpResult LSM303AGR_ACC_end(void);
+LSM303AGR_OpResult LSM303AGR_ACC_Enable(void);
+LSM303AGR_OpResult LSM303AGR_ACC_Disable(void);
+LSM303AGR_OpResult LSM303AGR_ACC_ReadID(uint8_t *p_id);
+LSM303AGR_OpResult LSM303AGR_ACC_GetAxes(int32_t *pData);
+LSM303AGR_OpResult LSM303AGR_ACC_GetSensitivity(float *pfData);
+LSM303AGR_OpResult LSM303AGR_ACC_GetAxesRaw(int16_t *pData);
+LSM303AGR_OpResult LSM303AGR_ACC_GetODR(float *odr);
+LSM303AGR_OpResult LSM303AGR_ACC_SetODR(float odr);
+LSM303AGR_OpResult LSM303AGR_ACC_GetFS(float *fullScale);
+LSM303AGR_OpResult LSM303AGR_ACC_SetFS(float fullScale);
+LSM303AGR_OpResult LSM303AGR_ACC_EnableSelfTest(bool self_test);
+LSM303AGR_OpResult LSM303AGR_ACC_DisableSelfTest(void);
+LSM303AGR_OpResult LSM303AGR_ACC_EnableTemperatureSensor(void);
+LSM303AGR_OpResult LSM303AGR_ACC_DisableTemperatureSensor(void);
+LSM303AGR_OpResult LSM303AGR_ACC_GetTemperature(float* temperature);
 
 #ifdef __cplusplus
 }

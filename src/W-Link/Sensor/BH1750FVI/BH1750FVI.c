@@ -35,7 +35,7 @@ typedef enum BH1750_MT_Command_t
     BH1750_MT_Low_Bit  = 0x60
 } BH1750_MT_Command;
 
-static BH1750FVI_OpStatus BH1750FVI_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
+static BH1750FVI_OpResult BH1750FVI_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -64,7 +64,7 @@ static BH1750FVI_OpStatus BH1750FVI_Map_I2C_HW_Error_Code(hwI2C_OpResult error_c
     }
 }
 
-static BH1750FVI_OpStatus BH1750FVI_Send_CMD(uint8_t cmd)
+static BH1750FVI_OpResult BH1750FVI_Send_CMD(uint8_t cmd)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -85,7 +85,7 @@ static BH1750FVI_OpStatus BH1750FVI_Send_CMD(uint8_t cmd)
     return BH1750FVI_OK;
 }
 
-static BH1750FVI_OpStatus BH1750FVI_Read_Data_16bit(uint8_t* byte1, uint8_t* byte2)
+static BH1750FVI_OpResult BH1750FVI_Read_Data_16bit(uint8_t* byte1, uint8_t* byte2)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -116,7 +116,7 @@ static BH1750FVI_OpStatus BH1750FVI_Read_Data_16bit(uint8_t* byte1, uint8_t* byt
     return BH1750FVI_OK;
 }
 
-static BH1750FVI_OpStatus BH1750FVI_Get_Mode(bool continuous, BH1750FVI_Resolution resolution, BH1750_Mode* mode)
+static BH1750FVI_OpResult BH1750FVI_Get_Mode(bool continuous, BH1750FVI_Resolution resolution, BH1750_Mode* mode)
 {
     if(mode == NULL)
     {
@@ -191,9 +191,9 @@ static uint16_t BH1750FVI_Get_Mode_Delay_ms(BH1750_Mode mode)
     }
 }
 
-BH1750FVI_OpStatus BH1750FVI_Init(void)
+BH1750FVI_OpResult BH1750FVI_Init(void)
 {
-    BH1750FVI_OpStatus status;
+    BH1750FVI_OpResult status;
 
     status = BH1750FVI_Send_CMD((uint8_t)BH1750_Power_On);
     if(status < BH1750FVI_OK)
@@ -210,9 +210,9 @@ BH1750FVI_OpStatus BH1750FVI_Init(void)
     return BH1750FVI_OK;
 }
 
-BH1750FVI_OpStatus BH1750FVI_Read_Lux(bool continuous, BH1750FVI_Resolution resolution, uint16_t* lux)
+BH1750FVI_OpResult BH1750FVI_Read_Lux(bool continuous, BH1750FVI_Resolution resolution, uint16_t* lux)
 {
-    BH1750FVI_OpStatus status;
+    BH1750FVI_OpResult status;
     BH1750_Mode mode;
     uint16_t delay_ms;
     uint8_t rd16b[2];

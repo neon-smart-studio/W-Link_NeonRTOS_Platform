@@ -46,7 +46,7 @@ typedef union HDC1080_Configuration_t
 
 } HDC1080_Configuration;
 
-static HDC1080_OpStatus HDC1080_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
+static HDC1080_OpResult HDC1080_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -75,7 +75,7 @@ static HDC1080_OpStatus HDC1080_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
     }
 }
 
-static HDC1080_OpStatus HDC1080_Write_Register(uint8_t reg, const uint8_t* data, uint8_t len)
+static HDC1080_OpResult HDC1080_Write_Register(uint8_t reg, const uint8_t* data, uint8_t len)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -111,7 +111,7 @@ static HDC1080_OpStatus HDC1080_Write_Register(uint8_t reg, const uint8_t* data,
     return HDC1080_OK;
 }
 
-static HDC1080_OpStatus HDC1080_Read_Register(uint8_t reg, uint8_t* data, uint8_t len)
+static HDC1080_OpResult HDC1080_Read_Register(uint8_t reg, uint8_t* data, uint8_t len)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -151,9 +151,9 @@ static HDC1080_OpStatus HDC1080_Read_Register(uint8_t reg, uint8_t* data, uint8_
     return HDC1080_OK;
 }
 
-static HDC1080_OpStatus HDC1080_Read_Register16(uint8_t reg, uint16_t* value)
+static HDC1080_OpResult HDC1080_Read_Register16(uint8_t reg, uint16_t* value)
 {
-    HDC1080_OpStatus status;
+    HDC1080_OpResult status;
 
     uint8_t buf[2];
 
@@ -173,7 +173,7 @@ static HDC1080_OpStatus HDC1080_Read_Register16(uint8_t reg, uint16_t* value)
     return HDC1080_OK;
 }
 
-static HDC1080_OpStatus HDC1080_Write_Register16(uint8_t reg, uint16_t value)
+static HDC1080_OpResult HDC1080_Write_Register16(uint8_t reg, uint16_t value)
 {
     uint8_t buf[2];
 
@@ -183,7 +183,7 @@ static HDC1080_OpStatus HDC1080_Write_Register16(uint8_t reg, uint16_t value)
     return HDC1080_Write_Register(reg, buf, 2);
 }
 
-static HDC1080_OpStatus HDC1080_Read_Measurement16(uint8_t reg, uint16_t* value)
+static HDC1080_OpResult HDC1080_Read_Measurement16(uint8_t reg, uint16_t* value)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -242,9 +242,9 @@ static HDC1080_OpStatus HDC1080_Read_Measurement16(uint8_t reg, uint16_t* value)
     return HDC1080_OK;
 }
 
-static HDC1080_OpStatus HDC1080_ReadConfiguration(HDC1080_Configuration* config_data)
+static HDC1080_OpResult HDC1080_ReadConfiguration(HDC1080_Configuration* config_data)
 {
-    HDC1080_OpStatus status;
+    HDC1080_OpResult status;
 
     uint16_t raw_config;
 
@@ -264,9 +264,9 @@ static HDC1080_OpStatus HDC1080_ReadConfiguration(HDC1080_Configuration* config_
     return HDC1080_OK;
 }
 
-static HDC1080_OpStatus HDC1080_WriteConfiguration(const HDC1080_Configuration* config_data)
+static HDC1080_OpResult HDC1080_WriteConfiguration(const HDC1080_Configuration* config_data)
 {
-    HDC1080_OpStatus status;
+    HDC1080_OpResult status;
 
     if(config_data == NULL)
     {
@@ -288,7 +288,7 @@ static HDC1080_OpStatus HDC1080_WriteConfiguration(const HDC1080_Configuration* 
     return HDC1080_OK;
 }
 
-HDC1080_OpStatus HDC1080_Init(void)
+HDC1080_OpResult HDC1080_Init(void)
 {
     return HDC1080_SetResolution(
         HDC1080_MeasurementResolution_14Bit,
@@ -296,12 +296,12 @@ HDC1080_OpStatus HDC1080_Init(void)
     );
 }
 
-HDC1080_OpStatus HDC1080_SetResolution(
+HDC1080_OpResult HDC1080_SetResolution(
     HDC1080_MeasurementResolution ms_temp_resolution,
     HDC1080_MeasurementResolution ms_hum_resolution
 )
 {
-    HDC1080_OpStatus status;
+    HDC1080_OpResult status;
     HDC1080_Configuration config;
 
     if(ms_temp_resolution >= HDC1080_MeasurementResolution_MAX ||
@@ -356,9 +356,9 @@ HDC1080_OpStatus HDC1080_SetResolution(
     return HDC1080_WriteConfiguration(&config);
 }
 
-HDC1080_OpStatus HDC1080_ReadSerialNumber(HDC1080_SerialNumber* sn)
+HDC1080_OpResult HDC1080_ReadSerialNumber(HDC1080_SerialNumber* sn)
 {
-    HDC1080_OpStatus status;
+    HDC1080_OpResult status;
 
     if(sn == NULL)
     {
@@ -386,9 +386,9 @@ HDC1080_OpStatus HDC1080_ReadSerialNumber(HDC1080_SerialNumber* sn)
     return HDC1080_OK;
 }
 
-HDC1080_OpStatus HDC1080_HeatUp(uint8_t seconds)
+HDC1080_OpResult HDC1080_HeatUp(uint8_t seconds)
 {
-    HDC1080_OpStatus status;
+    HDC1080_OpResult status;
     hwI2C_OpResult i2c_op_result;
 
     HDC1080_Configuration config;
@@ -462,9 +462,9 @@ HDC1080_OpStatus HDC1080_HeatUp(uint8_t seconds)
     return HDC1080_OK;
 }
 
-HDC1080_OpStatus HDC1080_ReadTemperature(double* temperature)
+HDC1080_OpResult HDC1080_ReadTemperature(double* temperature)
 {
-    HDC1080_OpStatus status;
+    HDC1080_OpResult status;
 
     uint16_t rawT;
 
@@ -484,9 +484,9 @@ HDC1080_OpStatus HDC1080_ReadTemperature(double* temperature)
     return HDC1080_OK;
 }
 
-HDC1080_OpStatus HDC1080_ReadHumidity(double* humidity)
+HDC1080_OpResult HDC1080_ReadHumidity(double* humidity)
 {
-    HDC1080_OpStatus status;
+    HDC1080_OpResult status;
 
     uint16_t rawH;
 
@@ -506,7 +506,7 @@ HDC1080_OpStatus HDC1080_ReadHumidity(double* humidity)
     return HDC1080_OK;
 }
 
-HDC1080_OpStatus HDC1080_ReadManufacturerId(uint16_t* manuID)
+HDC1080_OpResult HDC1080_ReadManufacturerId(uint16_t* manuID)
 {
     if(manuID == NULL)
     {
@@ -516,7 +516,7 @@ HDC1080_OpStatus HDC1080_ReadManufacturerId(uint16_t* manuID)
     return HDC1080_Read_Register16(HDC1080_Register_Manufacturer_ID, manuID);
 }
 
-HDC1080_OpStatus HDC1080_ReadDeviceId(uint16_t* devID)
+HDC1080_OpResult HDC1080_ReadDeviceId(uint16_t* devID)
 {
     if(devID == NULL)
     {

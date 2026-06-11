@@ -12,7 +12,7 @@ Modifications:
 #ifndef LSM6DSL_DEF_H
 #define LSM6DSL_DEF_H
 
-typedef enum LSM6DSL_OpStatus_t
+typedef enum LSM6DSL_OpResult_t
 {
   LSM6DSL_OK = 0,
   LSM6DSL_NotInit = -1,
@@ -22,7 +22,7 @@ typedef enum LSM6DSL_OpStatus_t
   LSM6DSL_SlaveTimeout = -5,
   LSM6DSL_IO_Error = -6,
   LSM6DSL_Unsupport = -7,
-} LSM6DSL_OpStatus;
+} LSM6DSL_OpResult;
 
 typedef enum LSM6DSL_Interrupt_Index_t
 {

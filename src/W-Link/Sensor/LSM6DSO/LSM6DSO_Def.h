@@ -12,7 +12,7 @@ Modifications:
 #ifndef LSM6DSO_DEF_H
 #define LSM6DSO_DEF_H
 
-typedef enum LSM6DSO_OpStatus_t
+typedef enum LSM6DSO_OpResult_t
 {
   LSM6DSO_OK = 0,
   LSM6DSO_NotInit = -1,
@@ -22,7 +22,7 @@ typedef enum LSM6DSO_OpStatus_t
   LSM6DSO_SlaveTimeout = -5,
   LSM6DSO_IO_Error = -6,
   LSM6DSO_Unsupport = -7,
-} LSM6DSO_OpStatus;
+} LSM6DSO_OpResult;
 
 typedef enum LSM6DSO_Interrupt_Index_t
 {

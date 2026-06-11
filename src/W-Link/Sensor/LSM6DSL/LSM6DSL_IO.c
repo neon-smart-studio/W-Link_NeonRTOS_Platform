@@ -22,7 +22,7 @@ Modifications:
 
 #define LSM6DSL_IO_TX_BUF_SIZE             32
 
-static LSM6DSL_OpStatus LSM6DSL_IO_Map_I2C_Error(hwI2C_OpResult error_code)
+static LSM6DSL_OpResult LSM6DSL_IO_Map_I2C_Error(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -53,25 +53,25 @@ static LSM6DSL_OpStatus LSM6DSL_IO_Map_I2C_Error(hwI2C_OpResult error_code)
     }
 }
 
-LSM6DSL_OpStatus LSM6DSL_Register_Interrupt_Handler(LSM6DSL_IO_Event_IRQ irq_callback)
+LSM6DSL_OpResult LSM6DSL_Register_Interrupt_Handler(LSM6DSL_IO_Event_IRQ irq_callback)
 {
     (void)irq_callback;
 
     return LSM6DSL_Unsupport;
 }
 
-LSM6DSL_OpStatus LSM6DSL_UnRegister_Interrupt_Handler(void)
+LSM6DSL_OpResult LSM6DSL_UnRegister_Interrupt_Handler(void)
 {
     return LSM6DSL_Unsupport;
 }
 
-LSM6DSL_OpStatus LSM6DSL_IO_Read(
+LSM6DSL_OpResult LSM6DSL_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 )
 {
-    LSM6DSL_OpStatus status;
+    LSM6DSL_OpResult status;
 
     if(pBuffer == NULL || NumByteToRead == 0)
     {
@@ -113,13 +113,13 @@ LSM6DSL_OpStatus LSM6DSL_IO_Read(
     return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_IO_Write(
+LSM6DSL_OpResult LSM6DSL_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 )
 {
-    LSM6DSL_OpStatus status;
+    LSM6DSL_OpResult status;
     uint8_t tx_buf[LSM6DSL_IO_TX_BUF_SIZE];
 
     if(pBuffer == NULL || NumByteToWrite == 0)
@@ -154,7 +154,7 @@ LSM6DSL_OpStatus LSM6DSL_IO_Write(
     return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
+LSM6DSL_OpResult LSM6DSL_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
 {
     if(value == NULL)
     {
@@ -164,7 +164,7 @@ LSM6DSL_OpStatus LSM6DSL_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
     return LSM6DSL_IO_Read(RegisterAddr, value, 1);
 }
 
-LSM6DSL_OpStatus LSM6DSL_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
+LSM6DSL_OpResult LSM6DSL_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
 {
     return LSM6DSL_IO_Write(RegisterAddr, &value, 1);
 }

@@ -12,7 +12,7 @@ Modifications:
 #ifndef HTS221_DEF_H
 #define HTS221_DEF_H
 
-typedef enum HTS221_OpStatus_t
+typedef enum HTS221_OpResult_t
 {
   HTS221_OK = 0,
   HTS221_NotInit = -1,
@@ -22,6 +22,6 @@ typedef enum HTS221_OpStatus_t
   HTS221_SlaveTimeout = -5,
   HTS221_IO_Error = -6,
   HTS221_Unsupport = -7,
-} HTS221_OpStatus;
+} HTS221_OpResult;
 
 #endif //HTS221_DEF_H

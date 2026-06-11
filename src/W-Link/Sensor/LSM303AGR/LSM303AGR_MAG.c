@@ -53,9 +53,9 @@
 #include "LSM303AGR_MAG_Register_Def.h"
 #include "LSM303AGR_MAG_Register.h"
 
-LSM303AGR_OpStatus LSM303AGR_MAG_Init(void)
+LSM303AGR_OpResult LSM303AGR_MAG_Init(void)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   /* Operating mode selection - power down */
   op_status = LSM303AGR_MAG_W_MD( LSM303AGR_MAG_MD_IDLE1_MODE );
@@ -92,9 +92,9 @@ LSM303AGR_OpStatus LSM303AGR_MAG_Init(void)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_DeInit(void)
+LSM303AGR_OpResult LSM303AGR_MAG_DeInit(void)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   op_status = LSM303AGR_MAG_Disable();
   if(op_status < LSM303AGR_OK)
@@ -105,23 +105,23 @@ LSM303AGR_OpStatus LSM303AGR_MAG_DeInit(void)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_Enable(void)
+LSM303AGR_OpResult LSM303AGR_MAG_Enable(void)
 {
   /* Operating mode selection */
   
   return LSM303AGR_MAG_W_MD( LSM303AGR_MAG_MD_CONTINUOS_MODE );
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_Disable(void)
+LSM303AGR_OpResult LSM303AGR_MAG_Disable(void)
 {
   /* Operating mode selection - power down */
   
   return LSM303AGR_MAG_W_MD( LSM303AGR_MAG_MD_IDLE1_MODE );
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_ReadID(uint8_t *p_id)
+LSM303AGR_OpResult LSM303AGR_MAG_ReadID(uint8_t *p_id)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   if(!p_id)
   { 
@@ -138,9 +138,9 @@ LSM303AGR_OpStatus LSM303AGR_MAG_ReadID(uint8_t *p_id)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_GetAxes(int32_t *pData)
+LSM303AGR_OpResult LSM303AGR_MAG_GetAxes(int32_t *pData)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   int16_t pDataRaw[3];
   float sensitivity = 0;
@@ -167,16 +167,16 @@ LSM303AGR_OpStatus LSM303AGR_MAG_GetAxes(int32_t *pData)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_GetSensitivity(float *pfData)
+LSM303AGR_OpResult LSM303AGR_MAG_GetSensitivity(float *pfData)
 {
   *pfData = 1.5f;
   
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_GetAxesRaw(int16_t *pData)
+LSM303AGR_OpResult LSM303AGR_MAG_GetAxesRaw(int16_t *pData)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   uint8_t regValue[6] = {0, 0, 0, 0, 0, 0};
   int16_t *regValueInt16;
@@ -198,9 +198,9 @@ LSM303AGR_OpStatus LSM303AGR_MAG_GetAxesRaw(int16_t *pData)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_GetODR(float* odr)
+LSM303AGR_OpResult LSM303AGR_MAG_GetODR(float* odr)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_MAG_ODR_t odr_low_level;
   
@@ -231,9 +231,9 @@ LSM303AGR_OpStatus LSM303AGR_MAG_GetODR(float* odr)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_SetODR(float odr)
+LSM303AGR_OpResult LSM303AGR_MAG_SetODR(float odr)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_MAG_ODR_t new_odr;
   
@@ -251,14 +251,14 @@ LSM303AGR_OpStatus LSM303AGR_MAG_SetODR(float odr)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_GetFS(float* fullScale)
+LSM303AGR_OpResult LSM303AGR_MAG_GetFS(float* fullScale)
 {
   *fullScale = 50.0f;
   
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_SetFS(float fullScale)
+LSM303AGR_OpResult LSM303AGR_MAG_SetFS(float fullScale)
 {
   (void)(fullScale);
 

@@ -77,7 +77,7 @@ static const BMP085_Pressure_Mode_Config BMP085_Pressure_Mode_Table[] =
     { BMP085_Resolution_Ultra_High, BMP085_Measure_Pressure_UHigh, 3, 26 },
 };
 
-static BMP085_OpStatus BMP085_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
+static BMP085_OpResult BMP085_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -106,7 +106,7 @@ static BMP085_OpStatus BMP085_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
     }
 }
 
-static BMP085_OpStatus BMP085_Write_Reg(uint8_t reg, uint8_t data)
+static BMP085_OpResult BMP085_Write_Reg(uint8_t reg, uint8_t data)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -132,7 +132,7 @@ static BMP085_OpStatus BMP085_Write_Reg(uint8_t reg, uint8_t data)
     return BMP085_OK;
 }
 
-static BMP085_OpStatus BMP085_Read_Reg(uint8_t reg, uint8_t* buf, uint8_t len)
+static BMP085_OpResult BMP085_Read_Reg(uint8_t reg, uint8_t* buf, uint8_t len)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -172,9 +172,9 @@ static BMP085_OpStatus BMP085_Read_Reg(uint8_t reg, uint8_t* buf, uint8_t len)
     return BMP085_OK;
 }
 
-static BMP085_OpStatus BMP085_Read_Reg_16Bit(uint8_t reg, uint16_t* data)
+static BMP085_OpResult BMP085_Read_Reg_16Bit(uint8_t reg, uint16_t* data)
 {
-    BMP085_OpStatus status;
+    BMP085_OpResult status;
 
     uint8_t buf[2];
 
@@ -194,9 +194,9 @@ static BMP085_OpStatus BMP085_Read_Reg_16Bit(uint8_t reg, uint16_t* data)
     return BMP085_OK;
 }
 
-static BMP085_OpStatus BMP085_Read_Reg_S16Bit(uint8_t reg, int16_t* data)
+static BMP085_OpResult BMP085_Read_Reg_S16Bit(uint8_t reg, int16_t* data)
 {
-    BMP085_OpStatus status;
+    BMP085_OpResult status;
 
     uint16_t raw;
 
@@ -216,7 +216,7 @@ static BMP085_OpStatus BMP085_Read_Reg_S16Bit(uint8_t reg, int16_t* data)
     return BMP085_OK;
 }
 
-static BMP085_OpStatus BMP085_Get_Pressure_Mode_Config(
+static BMP085_OpResult BMP085_Get_Pressure_Mode_Config(
     BMP085_Resolution resolution,
     const BMP085_Pressure_Mode_Config** config
 )
@@ -245,14 +245,14 @@ static BMP085_OpStatus BMP085_Get_Pressure_Mode_Config(
     return BMP085_InvalidParameter;
 }
 
-BMP085_OpStatus BMP085_Init(void)
+BMP085_OpResult BMP085_Init(void)
 {
     return BMP085_Calibration();
 }
 
-BMP085_OpStatus BMP085_Read_Temperature(double* temperature)
+BMP085_OpResult BMP085_Read_Temperature(double* temperature)
 {
-    BMP085_OpStatus status;
+    BMP085_OpResult status;
 
     uint16_t ut;
     int32_t x1;
@@ -290,9 +290,9 @@ BMP085_OpStatus BMP085_Read_Temperature(double* temperature)
     return BMP085_OK;
 }
 
-BMP085_OpStatus BMP085_Read_Measure_Pressure(BMP085_Resolution resolution, long* pressure)
+BMP085_OpResult BMP085_Read_Measure_Pressure(BMP085_Resolution resolution, long* pressure)
 {
-    BMP085_OpStatus status;
+    BMP085_OpResult status;
     
     const BMP085_Pressure_Mode_Config* config;
     uint8_t buf[3];
@@ -375,9 +375,9 @@ BMP085_OpStatus BMP085_Read_Measure_Pressure(BMP085_Resolution resolution, long*
     return BMP085_OK;
 }
 
-BMP085_OpStatus BMP085_Calibration(void)
+BMP085_OpResult BMP085_Calibration(void)
 {
-    BMP085_OpStatus status;
+    BMP085_OpResult status;
 
     status = BMP085_Read_Reg_S16Bit(BMP085_Register_Cal_AC1, &bmp085_cal.ac1);
     if(status < BMP085_OK) { return status; }

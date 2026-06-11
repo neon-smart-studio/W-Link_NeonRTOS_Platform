@@ -53,18 +53,18 @@
 #include "LSM303AGR_ACC_Register_Def.h"
 #include "LSM303AGR_ACC_Register.h"
 
-LSM303AGR_OpStatus LSM303AGR_ACC_SetODR_When_Enabled(float odr);
-LSM303AGR_OpStatus LSM303AGR_ACC_SetODR_When_Disabled(float odr);
-LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity_Normal_Mode( float *sensitivity );
-LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity_LP_Mode( float *sensitivity );
-LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity_HR_Mode( float *sensitivity );
+LSM303AGR_OpResult LSM303AGR_ACC_SetODR_When_Enabled(float odr);
+LSM303AGR_OpResult LSM303AGR_ACC_SetODR_When_Disabled(float odr);
+LSM303AGR_OpResult LSM303AGR_ACC_GetSensitivity_Normal_Mode( float *sensitivity );
+LSM303AGR_OpResult LSM303AGR_ACC_GetSensitivity_LP_Mode( float *sensitivity );
+LSM303AGR_OpResult LSM303AGR_ACC_GetSensitivity_HR_Mode( float *sensitivity );
 
 static uint8_t isEnabled;
 static float Last_ODR;
 
-LSM303AGR_OpStatus LSM303AGR_ACC_Init(void)
+LSM303AGR_OpResult LSM303AGR_ACC_Init(void)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   /* Enable BDU */
   op_status = LSM303AGR_ACC_W_BlockDataUpdate( LSM303AGR_ACC_BDU_ENABLED );
@@ -121,9 +121,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_Init(void)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_end(void)
+LSM303AGR_OpResult LSM303AGR_ACC_end(void)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   op_status = LSM303AGR_ACC_Disable();
   if(op_status < LSM303AGR_OK)
@@ -134,9 +134,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_end(void)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_Enable(void)
+LSM303AGR_OpResult LSM303AGR_ACC_Enable(void)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
    
   /* Check if the component is already enabled */
   if ( isEnabled == 1 )
@@ -156,9 +156,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_Enable(void)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_Disable(void)
+LSM303AGR_OpResult LSM303AGR_ACC_Disable(void)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
    
   /* Check if the component is already disabled */
   if ( isEnabled == 0 )
@@ -185,9 +185,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_Disable(void)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_ReadID(uint8_t *p_id)
+LSM303AGR_OpResult LSM303AGR_ACC_ReadID(uint8_t *p_id)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   if(!p_id)
   { 
@@ -204,9 +204,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_ReadID(uint8_t *p_id)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_GetAxes(int32_t *pData)
+LSM303AGR_OpResult LSM303AGR_ACC_GetAxes(int32_t *pData)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   int data[3];
   
@@ -225,9 +225,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_GetAxes(int32_t *pData)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity(float *pfData)
+LSM303AGR_OpResult LSM303AGR_ACC_GetSensitivity(float *pfData)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_ACC_LPEN_t lp_value;
   LSM303AGR_ACC_HR_t hr_value;
@@ -265,9 +265,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity(float *pfData)
   }
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity_Normal_Mode( float *sensitivity )
+LSM303AGR_OpResult LSM303AGR_ACC_GetSensitivity_Normal_Mode( float *sensitivity )
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_ACC_FS_t fullScale;
   
@@ -301,9 +301,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity_Normal_Mode( float *sensitivity 
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity_LP_Mode( float *sensitivity )
+LSM303AGR_OpResult LSM303AGR_ACC_GetSensitivity_LP_Mode( float *sensitivity )
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_ACC_FS_t fullScale;
   
@@ -337,9 +337,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity_LP_Mode( float *sensitivity )
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity_HR_Mode( float *sensitivity )
+LSM303AGR_OpResult LSM303AGR_ACC_GetSensitivity_HR_Mode( float *sensitivity )
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_ACC_FS_t fullScale;
   
@@ -373,9 +373,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_GetSensitivity_HR_Mode( float *sensitivity )
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_GetAxesRaw(int16_t *pData)
+LSM303AGR_OpResult LSM303AGR_ACC_GetAxesRaw(int16_t *pData)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   uint8_t regValue[6] = {0, 0, 0, 0, 0, 0};
   uint8_t shift = 0;
@@ -423,9 +423,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_GetAxesRaw(int16_t *pData)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_GetODR(float* odr)
+LSM303AGR_OpResult LSM303AGR_ACC_GetODR(float* odr)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_ACC_ODR_t odr_low_level;
   
@@ -469,9 +469,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_GetODR(float* odr)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_SetODR(float odr)
+LSM303AGR_OpResult LSM303AGR_ACC_SetODR(float odr)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   if(isEnabled == 1)
   {
@@ -490,9 +490,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_SetODR(float odr)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_SetODR_When_Enabled(float odr)
+LSM303AGR_OpResult LSM303AGR_ACC_SetODR_When_Enabled(float odr)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_ACC_ODR_t new_odr;
   
@@ -513,9 +513,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_SetODR_When_Enabled(float odr)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_SetODR_When_Disabled(float odr)
+LSM303AGR_OpResult LSM303AGR_ACC_SetODR_When_Disabled(float odr)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
    
   Last_ODR = ( odr <=    1.0f ) ?  1.0f
            : ( odr <=   10.0f ) ? 10.0f
@@ -528,9 +528,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_SetODR_When_Disabled(float odr)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_GetFS(float* fullScale)
+LSM303AGR_OpResult LSM303AGR_ACC_GetFS(float* fullScale)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_ACC_FS_t fs_low_level;
   
@@ -562,9 +562,9 @@ LSM303AGR_OpStatus LSM303AGR_ACC_GetFS(float* fullScale)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_SetFS(float fullScale)
+LSM303AGR_OpResult LSM303AGR_ACC_SetFS(float fullScale)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   LSM303AGR_ACC_FS_t new_fs;
   
@@ -582,7 +582,7 @@ LSM303AGR_OpStatus LSM303AGR_ACC_SetFS(float fullScale)
   return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_EnableSelfTest(bool self_test)
+LSM303AGR_OpResult LSM303AGR_ACC_EnableSelfTest(bool self_test)
 {
   // 4.2.4 Accelerometer self - test
   // The self-test allows the user to check the sensor functionality without moving it.When the
@@ -595,24 +595,24 @@ LSM303AGR_OpStatus LSM303AGR_ACC_EnableSelfTest(bool self_test)
   return LSM303AGR_ACC_W_SelfTest(self_test == 0 ? LSM303AGR_ACC_ST_SELF_TEST_0 : LSM303AGR_ACC_ST_SELF_TEST_1);   
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_DisableSelfTest(void)
+LSM303AGR_OpResult LSM303AGR_ACC_DisableSelfTest(void)
 {
   return LSM303AGR_ACC_W_SelfTest(LSM303AGR_ACC_ST_DISABLED);
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_EnableTemperatureSensor(void)
+LSM303AGR_OpResult LSM303AGR_ACC_EnableTemperatureSensor(void)
 {
   return LSM303AGR_ACC_W_TEMP_EN_bits(LSM303AGR_ACC_TEMP_EN_ENABLED);
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_DisableTemperatureSensor(void)
+LSM303AGR_OpResult LSM303AGR_ACC_DisableTemperatureSensor(void)
 {
   return LSM303AGR_ACC_W_TEMP_EN_bits(LSM303AGR_ACC_TEMP_EN_DISABLED);
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_GetTemperature(float *temperature)
+LSM303AGR_OpResult LSM303AGR_ACC_GetTemperature(float *temperature)
 {
-  LSM303AGR_OpStatus op_status;
+  LSM303AGR_OpResult op_status;
   
   uint16_t temp;
   uint8_t temp_low;

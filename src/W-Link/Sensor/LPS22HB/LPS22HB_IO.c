@@ -21,7 +21,7 @@ Modifications:
 
 #define LPS22HB_IO_TX_BUF_SIZE             32
 
-static LPS22HB_OpStatus LPS22HB_IO_Map_I2C_Error(hwI2C_OpResult error_code)
+static LPS22HB_OpResult LPS22HB_IO_Map_I2C_Error(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -52,13 +52,13 @@ static LPS22HB_OpStatus LPS22HB_IO_Map_I2C_Error(hwI2C_OpResult error_code)
     }
 }
 
-LPS22HB_OpStatus LPS22HB_IO_Read(
+LPS22HB_OpResult LPS22HB_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 )
 {
-    LPS22HB_OpStatus status;
+    LPS22HB_OpResult status;
 
     if(pBuffer == NULL || NumByteToRead == 0)
     {
@@ -100,13 +100,13 @@ LPS22HB_OpStatus LPS22HB_IO_Read(
     return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_IO_Write(
+LPS22HB_OpResult LPS22HB_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 )
 {
-    LPS22HB_OpStatus status;
+    LPS22HB_OpResult status;
     uint8_t tx_buf[LPS22HB_IO_TX_BUF_SIZE];
 
     if(pBuffer == NULL || NumByteToWrite == 0)
@@ -141,7 +141,7 @@ LPS22HB_OpStatus LPS22HB_IO_Write(
     return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
+LPS22HB_OpResult LPS22HB_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
 {
     if(value == NULL)
     {
@@ -151,7 +151,7 @@ LPS22HB_OpStatus LPS22HB_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
     return LPS22HB_IO_Read(RegisterAddr, value, 1);
 }
 
-LPS22HB_OpStatus LPS22HB_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
+LPS22HB_OpResult LPS22HB_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
 {
     return LPS22HB_IO_Write(RegisterAddr, &value, 1);
 }

@@ -52,9 +52,9 @@
 #include "HTS221_Register_Def.h"
 #include "HTS221_Register.h"
 
-HTS221_OpStatus HTS221_Init()
+HTS221_OpResult HTS221_Init()
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   /* Power down the device */
   op_status = HTS221_DeActivate();
@@ -79,9 +79,9 @@ HTS221_OpStatus HTS221_Init()
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_DeInit()
+HTS221_OpResult HTS221_DeInit()
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   /* Disable humidity and temperature sensor */
   op_status = HTS221_Disable();
@@ -93,9 +93,9 @@ HTS221_OpStatus HTS221_DeInit()
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Enable(void)
+HTS221_OpResult HTS221_Enable(void)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   /* Power up the device */
   op_status = HTS221_Activate();
@@ -107,9 +107,9 @@ HTS221_OpStatus HTS221_Enable(void)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Disable(void)
+HTS221_OpResult HTS221_Disable(void)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   /* Power off the device */
   op_status = HTS221_DeActivate();
@@ -121,9 +121,9 @@ HTS221_OpStatus HTS221_Disable(void)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_ReadID(uint8_t *ht_id)
+HTS221_OpResult HTS221_ReadID(uint8_t *ht_id)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   /* Read WHO AM I register */
   op_status = HTS221_Get_DeviceID(ht_id);
@@ -135,9 +135,9 @@ HTS221_OpStatus HTS221_ReadID(uint8_t *ht_id)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Reset(void)
+HTS221_OpResult HTS221_Reset(void)
 {
-    HTS221_OpStatus op_status;
+    HTS221_OpResult op_status;
   
     uint8_t tmpreg;
 
@@ -161,9 +161,9 @@ HTS221_OpStatus HTS221_Reset(void)
     return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_GetHumidity(float* pfData)
+HTS221_OpResult HTS221_GetHumidity(float* pfData)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint16_t uint16data = 0;
 
@@ -179,9 +179,9 @@ HTS221_OpStatus HTS221_GetHumidity(float* pfData)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_GetTemperature(float* pfData)
+HTS221_OpResult HTS221_GetTemperature(float* pfData)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   int16_t int16data = 0;
 
@@ -197,9 +197,9 @@ HTS221_OpStatus HTS221_GetTemperature(float* pfData)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_GetODR(float* odr)
+HTS221_OpResult HTS221_GetODR(float* odr)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   HTS221_Odr_et odr_low_level;
 
@@ -231,9 +231,9 @@ HTS221_OpStatus HTS221_GetODR(float* odr)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_SetODR(float odr)
+HTS221_OpResult HTS221_SetODR(float odr)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   HTS221_Odr_et new_odr;
 

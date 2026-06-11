@@ -42,46 +42,46 @@ Modifications:
 
 #define LSM303AGR_IO_TX_BUF_SIZE             32
 
-LSM303AGR_OpStatus LSM303AGR_ACC_IO_Read(
+LSM303AGR_OpResult LSM303AGR_ACC_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 );
 
-LSM303AGR_OpStatus LSM303AGR_ACC_IO_Write(
+LSM303AGR_OpResult LSM303AGR_ACC_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 );
 
-LSM303AGR_OpStatus LSM303AGR_ACC_IO_ReadByte(
+LSM303AGR_OpResult LSM303AGR_ACC_IO_ReadByte(
     uint8_t RegisterAddr,
     uint8_t* value
 );
 
-LSM303AGR_OpStatus LSM303AGR_ACC_IO_WriteByte(
+LSM303AGR_OpResult LSM303AGR_ACC_IO_WriteByte(
     uint8_t RegisterAddr,
     uint8_t value
 );
 
-LSM303AGR_OpStatus LSM303AGR_MAG_IO_Read(
+LSM303AGR_OpResult LSM303AGR_MAG_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 );
 
-LSM303AGR_OpStatus LSM303AGR_MAG_IO_Write(
+LSM303AGR_OpResult LSM303AGR_MAG_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 );
 
-LSM303AGR_OpStatus LSM303AGR_MAG_IO_ReadByte(
+LSM303AGR_OpResult LSM303AGR_MAG_IO_ReadByte(
     uint8_t RegisterAddr,
     uint8_t* value
 );
 
-LSM303AGR_OpStatus LSM303AGR_MAG_IO_WriteByte(
+LSM303AGR_OpResult LSM303AGR_MAG_IO_WriteByte(
     uint8_t RegisterAddr,
     uint8_t value
 );

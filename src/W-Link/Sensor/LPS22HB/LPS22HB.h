@@ -49,16 +49,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-LPS22HB_OpStatus LPS22HB_Init(void);
-LPS22HB_OpStatus LPS22HB_DeInit(void);
-LPS22HB_OpStatus LPS22HB_Enable(void);
-LPS22HB_OpStatus LPS22HB_Disable(void);
-LPS22HB_OpStatus LPS22HB_ReadID(uint8_t *ht_id);
-LPS22HB_OpStatus LPS22HB_Reset(void);
-LPS22HB_OpStatus LPS22HB_GetPressure(float *pfData);
-LPS22HB_OpStatus LPS22HB_GetTemperature(float *pfData);
-LPS22HB_OpStatus LPS22HB_GetODR(float *odr);
-LPS22HB_OpStatus LPS22HB_SetODR(float odr);
+LPS22HB_OpResult LPS22HB_Init(void);
+LPS22HB_OpResult LPS22HB_DeInit(void);
+LPS22HB_OpResult LPS22HB_Enable(void);
+LPS22HB_OpResult LPS22HB_Disable(void);
+LPS22HB_OpResult LPS22HB_ReadID(uint8_t *ht_id);
+LPS22HB_OpResult LPS22HB_Reset(void);
+LPS22HB_OpResult LPS22HB_GetPressure(float *pfData);
+LPS22HB_OpResult LPS22HB_GetTemperature(float *pfData);
+LPS22HB_OpResult LPS22HB_GetODR(float *odr);
+LPS22HB_OpResult LPS22HB_SetODR(float odr);
 #ifdef __cplusplus
 }
 #endif

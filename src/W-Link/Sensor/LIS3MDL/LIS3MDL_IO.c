@@ -21,7 +21,7 @@ Modifications:
 
 #define LIS3MDL_IO_TX_BUF_SIZE             32
 
-static LIS3MDL_OpStatus LIS3MDL_IO_Map_I2C_Error(hwI2C_OpResult error_code)
+static LIS3MDL_OpResult LIS3MDL_IO_Map_I2C_Error(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -52,13 +52,13 @@ static LIS3MDL_OpStatus LIS3MDL_IO_Map_I2C_Error(hwI2C_OpResult error_code)
     }
 }
 
-LIS3MDL_OpStatus LIS3MDL_IO_Read(
+LIS3MDL_OpResult LIS3MDL_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 )
 {
-    LIS3MDL_OpStatus status;
+    LIS3MDL_OpResult status;
 
     if(pBuffer == NULL || NumByteToRead == 0)
     {
@@ -100,13 +100,13 @@ LIS3MDL_OpStatus LIS3MDL_IO_Read(
     return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_IO_Write(
+LIS3MDL_OpResult LIS3MDL_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 )
 {
-    LIS3MDL_OpStatus status;
+    LIS3MDL_OpResult status;
     uint8_t tx_buf[LIS3MDL_IO_TX_BUF_SIZE];
 
     if(pBuffer == NULL || NumByteToWrite == 0)
@@ -141,7 +141,7 @@ LIS3MDL_OpStatus LIS3MDL_IO_Write(
     return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
+LIS3MDL_OpResult LIS3MDL_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
 {
     if(value == NULL)
     {
@@ -151,7 +151,7 @@ LIS3MDL_OpStatus LIS3MDL_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
     return LIS3MDL_IO_Read(RegisterAddr, value, 1);
 }
 
-LIS3MDL_OpStatus LIS3MDL_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
+LIS3MDL_OpResult LIS3MDL_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
 {
     return LIS3MDL_IO_Write(RegisterAddr, &value, 1);
 }

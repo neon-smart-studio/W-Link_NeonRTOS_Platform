@@ -50,24 +50,24 @@ Modifications:
 
 #define LIS3MDL_IO_TX_BUF_SIZE             32
 
-LIS3MDL_OpStatus LIS3MDL_IO_Read(
+LIS3MDL_OpResult LIS3MDL_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 );
 
-LIS3MDL_OpStatus LIS3MDL_IO_Write(
+LIS3MDL_OpResult LIS3MDL_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 );
 
-LIS3MDL_OpStatus LIS3MDL_IO_ReadByte(
+LIS3MDL_OpResult LIS3MDL_IO_ReadByte(
     uint8_t RegisterAddr,
     uint8_t* value
 );
 
-LIS3MDL_OpStatus LIS3MDL_IO_WriteByte(
+LIS3MDL_OpResult LIS3MDL_IO_WriteByte(
     uint8_t RegisterAddr,
     uint8_t value
 );

@@ -42,7 +42,7 @@ static int32_t hmc5883l_x_offset = 0;
 static int32_t hmc5883l_y_offset = 0;
 static float hmc5883l_mg_per_digit = 0.92f;
 
-static HMC5883L_OpStatus HMC5883L_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
+static HMC5883L_OpResult HMC5883L_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -71,10 +71,10 @@ static HMC5883L_OpStatus HMC5883L_Map_I2C_HW_Error_Code(hwI2C_OpResult error_cod
     }
 }
 
-static HMC5883L_OpStatus HMC5883L_Write_Byte(uint8_t reg, uint8_t value)
+static HMC5883L_OpResult HMC5883L_Write_Byte(uint8_t reg, uint8_t value)
 {
     hwI2C_OpResult i2c_op_result;
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
 
     uint8_t tx_buf[2];
 
@@ -98,10 +98,10 @@ static HMC5883L_OpStatus HMC5883L_Write_Byte(uint8_t reg, uint8_t value)
     return HMC5883L_OK;
 }
 
-static HMC5883L_OpStatus HMC5883L_Read(uint8_t reg, uint8_t* data, uint8_t len)
+static HMC5883L_OpResult HMC5883L_Read(uint8_t reg, uint8_t* data, uint8_t len)
 {
     hwI2C_OpResult i2c_op_result;
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
 
     if(data == NULL || len == 0)
     {
@@ -139,7 +139,7 @@ static HMC5883L_OpStatus HMC5883L_Read(uint8_t reg, uint8_t* data, uint8_t len)
     return HMC5883L_OK;
 }
 
-static HMC5883L_OpStatus HMC5883L_Read_Byte(uint8_t reg, uint8_t* value)
+static HMC5883L_OpResult HMC5883L_Read_Byte(uint8_t reg, uint8_t* value)
 {
     if(value == NULL)
     {
@@ -154,9 +154,9 @@ static int16_t HMC5883L_Make_Int16(uint8_t msb, uint8_t lsb)
     return (int16_t)(((uint16_t)msb << 8) | lsb);
 }
 
-static HMC5883L_OpStatus HMC5883L_Read_Raw_Internal(int16_t* x, int16_t* y, int16_t* z)
+static HMC5883L_OpResult HMC5883L_Read_Raw_Internal(int16_t* x, int16_t* y, int16_t* z)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     uint8_t buf[6];
 
     if(x == NULL || y == NULL || z == NULL)
@@ -177,9 +177,9 @@ static HMC5883L_OpStatus HMC5883L_Read_Raw_Internal(int16_t* x, int16_t* y, int1
     return HMC5883L_OK;
 }
 
-HMC5883L_OpStatus HMC5883L_ReadRaw(HMC5883L_Vector* vector)
+HMC5883L_OpResult HMC5883L_ReadRaw(HMC5883L_Vector* vector)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     int16_t raw_x;
     int16_t raw_y;
     int16_t raw_z;
@@ -202,9 +202,9 @@ HMC5883L_OpStatus HMC5883L_ReadRaw(HMC5883L_Vector* vector)
     return HMC5883L_OK;
 }
 
-HMC5883L_OpStatus HMC5883L_ReadNormalize(HMC5883L_Vector* vector)
+HMC5883L_OpResult HMC5883L_ReadNormalize(HMC5883L_Vector* vector)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     int16_t raw_x;
     int16_t raw_y;
     int16_t raw_z;
@@ -227,7 +227,7 @@ HMC5883L_OpStatus HMC5883L_ReadNormalize(HMC5883L_Vector* vector)
     return HMC5883L_OK;
 }
 
-HMC5883L_OpStatus HMC5883L_SetOffset(int xOff, int yOff)
+HMC5883L_OpResult HMC5883L_SetOffset(int xOff, int yOff)
 {
     hmc5883l_x_offset = xOff;
     hmc5883l_y_offset = yOff;
@@ -235,9 +235,9 @@ HMC5883L_OpStatus HMC5883L_SetOffset(int xOff, int yOff)
     return HMC5883L_OK;
 }
 
-HMC5883L_OpStatus HMC5883L_SetRange(HMC5883L_Range range)
+HMC5883L_OpResult HMC5883L_SetRange(HMC5883L_Range range)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     float mg_per_digit;
 
     if(range >= HMC5883L_Range_MAX)
@@ -298,9 +298,9 @@ HMC5883L_OpStatus HMC5883L_SetRange(HMC5883L_Range range)
     return HMC5883L_OK;
 }
 
-HMC5883L_OpStatus HMC5883L_GetRange(HMC5883L_Range* range)
+HMC5883L_OpResult HMC5883L_GetRange(HMC5883L_Range* range)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     uint8_t value;
 
     if(range == NULL)
@@ -319,9 +319,9 @@ HMC5883L_OpStatus HMC5883L_GetRange(HMC5883L_Range* range)
     return HMC5883L_OK;
 }
 
-HMC5883L_OpStatus HMC5883L_SetMeasurementMode(HMC5883L_Mode mode)
+HMC5883L_OpResult HMC5883L_SetMeasurementMode(HMC5883L_Mode mode)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     uint8_t value;
 
     if(mode >= HMC5883L_Mode_MAX)
@@ -341,9 +341,9 @@ HMC5883L_OpStatus HMC5883L_SetMeasurementMode(HMC5883L_Mode mode)
     return HMC5883L_Write_Byte(HMC5883L_Register_Mode, value);
 }
 
-HMC5883L_OpStatus HMC5883L_GetMeasurementMode(HMC5883L_Mode* mode)
+HMC5883L_OpResult HMC5883L_GetMeasurementMode(HMC5883L_Mode* mode)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     uint8_t value;
 
     if(mode == NULL)
@@ -362,9 +362,9 @@ HMC5883L_OpStatus HMC5883L_GetMeasurementMode(HMC5883L_Mode* mode)
     return HMC5883L_OK;
 }
 
-HMC5883L_OpStatus HMC5883L_SetDataRate(HMC5883L_DataRate dataRate)
+HMC5883L_OpResult HMC5883L_SetDataRate(HMC5883L_DataRate dataRate)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     uint8_t value;
 
     if(dataRate >= HMC5883L_DataRate_MAX)
@@ -384,9 +384,9 @@ HMC5883L_OpStatus HMC5883L_SetDataRate(HMC5883L_DataRate dataRate)
     return HMC5883L_Write_Byte(HMC5883L_Register_Config_A, value);
 }
 
-HMC5883L_OpStatus HMC5883L_GetDataRate(HMC5883L_DataRate* dataRate)
+HMC5883L_OpResult HMC5883L_GetDataRate(HMC5883L_DataRate* dataRate)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     uint8_t value;
 
     if(dataRate == NULL)
@@ -405,9 +405,9 @@ HMC5883L_OpStatus HMC5883L_GetDataRate(HMC5883L_DataRate* dataRate)
     return HMC5883L_OK;
 }
 
-HMC5883L_OpStatus HMC5883L_SetSamples(HMC5883L_Samples samples)
+HMC5883L_OpResult HMC5883L_SetSamples(HMC5883L_Samples samples)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     uint8_t value;
 
     if(samples >= HMC5883L_Samples_MAX)
@@ -427,9 +427,9 @@ HMC5883L_OpStatus HMC5883L_SetSamples(HMC5883L_Samples samples)
     return HMC5883L_Write_Byte(HMC5883L_Register_Config_A, value);
 }
 
-HMC5883L_OpStatus HMC5883L_GetSamples(HMC5883L_Samples* samples)
+HMC5883L_OpResult HMC5883L_GetSamples(HMC5883L_Samples* samples)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     uint8_t value;
 
     if(samples == NULL)
@@ -448,9 +448,9 @@ HMC5883L_OpStatus HMC5883L_GetSamples(HMC5883L_Samples* samples)
     return HMC5883L_OK;
 }
 
-HMC5883L_OpStatus HMC5883L_Init(void)
+HMC5883L_OpResult HMC5883L_Init(void)
 {
-    HMC5883L_OpStatus status;
+    HMC5883L_OpResult status;
     uint8_t id_a;
     uint8_t id_b;
     uint8_t id_c;

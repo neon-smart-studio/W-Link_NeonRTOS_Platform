@@ -28,10 +28,10 @@ static uint8_t gyro_is_enabled = false;
 static LSM6DSO_ODR_XL acc_odr;
 static LSM6DSO_ODR_G gyro_odr;
 
-LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_When_Enabled(float Odr);
-LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_When_Disabled(float Odr);
-LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_When_Enabled(float Odr);
-LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_When_Disabled(float Odr);
+LSM6DSO_OpResult LSM6DSO_Set_X_ODR_When_Enabled(float Odr);
+LSM6DSO_OpResult LSM6DSO_Set_X_ODR_When_Disabled(float Odr);
+LSM6DSO_OpResult LSM6DSO_Set_G_ODR_When_Enabled(float Odr);
+LSM6DSO_OpResult LSM6DSO_Set_G_ODR_When_Disabled(float Odr);
 
 //static LSM6DSO_Interrupt_Event_Callback LSM6DSO_INT_Event_Callback = NULL;
 
@@ -51,9 +51,9 @@ static void LSM6DSO_INT_IRQ_Handler(LSM6DSO_Interrupt_Index index)
 	NeonRTOS_PendingFunctionCall(LSM6DSO_INT_Pending_Function_Call, NULL, index);
 }
 
-LSM6DSO_OpStatus LSM6DSO_Init()
+LSM6DSO_OpResult LSM6DSO_Init()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Disable I3C */
   op_status = LSM6DSO_Reg_I3C_Disable_Set(LSM6DSO_I3C_DISABLE);
@@ -139,9 +139,9 @@ LSM6DSO_OpStatus LSM6DSO_Init()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_DeInit()
+LSM6DSO_OpResult LSM6DSO_DeInit()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
 	op_status = LSM6DSO_UnRegister_Interrupt_Handler();
   if(op_status<LSM6DSO_OK)
@@ -164,18 +164,18 @@ LSM6DSO_OpStatus LSM6DSO_DeInit()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_ReadID(uint8_t *Id)
+LSM6DSO_OpResult LSM6DSO_ReadID(uint8_t *Id)
 {
   if(Id==NULL)
   {
     return LSM6DSO_InvalidParameter;
   }
-  return (LSM6DSO_OpStatus)LSM6DSO_Reg_Device_ID_Get(Id);
+  return (LSM6DSO_OpResult)LSM6DSO_Reg_Device_ID_Get(Id);
 }
 
-LSM6DSO_OpStatus LSM6DSO_Enable_X()
+LSM6DSO_OpResult LSM6DSO_Enable_X()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Check if the component is already enabled */
   if (acc_is_enabled == 1U)
@@ -195,9 +195,9 @@ LSM6DSO_OpStatus LSM6DSO_Enable_X()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Disable_X()
+LSM6DSO_OpResult LSM6DSO_Disable_X()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Check if the component is already disabled */
   if (acc_is_enabled == 0U)
@@ -224,9 +224,9 @@ LSM6DSO_OpStatus LSM6DSO_Disable_X()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_X_Sensitivity(float *Sensitivity)
+LSM6DSO_OpResult LSM6DSO_Get_X_Sensitivity(float *Sensitivity)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_FS_XL full_scale;
 
   if(Sensitivity==NULL)
@@ -267,9 +267,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_Sensitivity(float *Sensitivity)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_X_ODR(float *Odr)
+LSM6DSO_OpResult LSM6DSO_Get_X_ODR(float *Odr)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_ODR_XL odr_low_level;
 
   if(Odr==NULL)
@@ -341,14 +341,14 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_ODR(float *Odr)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_X_ODR(float Odr)
+LSM6DSO_OpResult LSM6DSO_Set_X_ODR(float Odr)
 {
   return LSM6DSO_Set_X_ODR_With_Mode(Odr, LSM6DSO_ACC_HIGH_PERFORMANCE_MODE);
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mode Mode)
+LSM6DSO_OpResult LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mode Mode)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   switch (Mode)
   {
@@ -551,10 +551,10 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_With_Mode(float Odr, LSM6DSO_ACC_Operating_Mo
   }
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_When_Enabled(float Odr)
+LSM6DSO_OpResult LSM6DSO_Set_X_ODR_When_Enabled(float Odr)
 {
   LSM6DSO_ODR_XL new_odr;
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   new_odr = (Odr <=    1.6f) ? LSM6DSO_XL_ODR_1Hz6
           : (Odr <=   12.5f) ? LSM6DSO_XL_ODR_12Hz5
@@ -578,7 +578,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_When_Enabled(float Odr)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_When_Disabled(float Odr)
+LSM6DSO_OpResult LSM6DSO_Set_X_ODR_When_Disabled(float Odr)
 {
   acc_odr = (Odr <=    1.6f) ? LSM6DSO_XL_ODR_1Hz6
           : (Odr <=   12.5f) ? LSM6DSO_XL_ODR_12Hz5
@@ -596,10 +596,10 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_ODR_When_Disabled(float Odr)
 }
 
 
-LSM6DSO_OpStatus LSM6DSO_Get_X_FS(int32_t *FullScale)
+LSM6DSO_OpResult LSM6DSO_Get_X_FS(int32_t *FullScale)
 {
   LSM6DSO_FS_XL fs_low_level;
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   if(FullScale==NULL)
   {
@@ -638,10 +638,10 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_FS(int32_t *FullScale)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_X_FS(int32_t FullScale)
+LSM6DSO_OpResult LSM6DSO_Set_X_FS(int32_t FullScale)
 {
   LSM6DSO_FS_XL new_fs;
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Seems like MISRA C-2012 rule 14.3a violation but only from single file statical analysis point of view because
      the parameter passed to the function is not known at the moment of analysis */
@@ -659,10 +659,10 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_FS(int32_t FullScale)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_X_AxesRaw(int16_t *rawX, int16_t *rawY, int16_t *rawZ)
+LSM6DSO_OpResult LSM6DSO_Get_X_AxesRaw(int16_t *rawX, int16_t *rawY, int16_t *rawZ)
 {
   axis3bit16_t data_raw;
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   if(rawX==NULL || rawY==NULL || rawZ==NULL)
   {
@@ -684,10 +684,10 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_AxesRaw(int16_t *rawX, int16_t *rawY, int16_t *ra
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_X_Axes(float *accelerationX, float *accelerationY, float *accelerationZ)
+LSM6DSO_OpResult LSM6DSO_Get_X_Axes(float *accelerationX, float *accelerationY, float *accelerationZ)
 {
   axis3bit16_t data_raw;
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   float sensitivity = 0.0f;
 
   if(accelerationX==NULL || accelerationY==NULL || accelerationZ==NULL)
@@ -717,9 +717,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_Axes(float *accelerationX, float *accelerationY, 
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Enable_G()
+LSM6DSO_OpResult LSM6DSO_Enable_G()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Check if the component is already enabled */
   if (gyro_is_enabled == 1U)
@@ -739,9 +739,9 @@ LSM6DSO_OpStatus LSM6DSO_Enable_G()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Disable_G()
+LSM6DSO_OpResult LSM6DSO_Disable_G()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Check if the component is already disabled */
   if (gyro_is_enabled == 0U)
@@ -768,9 +768,9 @@ LSM6DSO_OpStatus LSM6DSO_Disable_G()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_G_Sensitivity(float *Sensitivity)
+LSM6DSO_OpResult LSM6DSO_Get_G_Sensitivity(float *Sensitivity)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_FS_G full_scale;
 
   if(Sensitivity==NULL)
@@ -815,9 +815,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_G_Sensitivity(float *Sensitivity)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_G_ODR(float *Odr)
+LSM6DSO_OpResult LSM6DSO_Get_G_ODR(float *Odr)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_ODR_G odr_low_level;
 
   if(Odr==NULL)
@@ -885,14 +885,14 @@ LSM6DSO_OpStatus LSM6DSO_Get_G_ODR(float *Odr)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_G_ODR(float Odr)
+LSM6DSO_OpResult LSM6DSO_Set_G_ODR(float Odr)
 {
   return LSM6DSO_Set_G_ODR_With_Mode(Odr, LSM6DSO_GYRO_HIGH_PERFORMANCE_MODE);
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_With_Mode(float Odr, LSM6DSO_GYRO_Operating_Mode Mode)
+LSM6DSO_OpResult LSM6DSO_Set_G_ODR_With_Mode(float Odr, LSM6DSO_GYRO_Operating_Mode Mode)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   switch (Mode)
   {
@@ -963,9 +963,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_With_Mode(float Odr, LSM6DSO_GYRO_Operating_M
   }
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_When_Enabled(float Odr)
+LSM6DSO_OpResult LSM6DSO_Set_G_ODR_When_Enabled(float Odr)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_ODR_G new_odr;
 
   new_odr = (Odr <=   12.5f) ? LSM6DSO_GY_ODR_12Hz5
@@ -989,7 +989,7 @@ LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_When_Enabled(float Odr)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_When_Disabled(float Odr)
+LSM6DSO_OpResult LSM6DSO_Set_G_ODR_When_Disabled(float Odr)
 {
   gyro_odr = (Odr <=   12.5f) ? LSM6DSO_GY_ODR_12Hz5
            : (Odr <=   26.0f) ? LSM6DSO_GY_ODR_26Hz
@@ -1005,9 +1005,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_G_ODR_When_Disabled(float Odr)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_G_FS(int32_t *FullScale)
+LSM6DSO_OpResult LSM6DSO_Get_G_FS(int32_t *FullScale)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_FS_G fs_low_level;
 
   if(FullScale==NULL)
@@ -1051,9 +1051,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_G_FS(int32_t *FullScale)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_G_FS(int32_t FullScale)
+LSM6DSO_OpResult LSM6DSO_Set_G_FS(int32_t FullScale)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_FS_G new_fs;
 
   new_fs = (FullScale <= 125)  ? LSM6DSO_125dps
@@ -1071,9 +1071,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_G_FS(int32_t FullScale)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_G_AxesRaw(int16_t *rawX, int16_t *rawY, int16_t *rawZ)
+LSM6DSO_OpResult LSM6DSO_Get_G_AxesRaw(int16_t *rawX, int16_t *rawY, int16_t *rawZ)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   axis3bit16_t data_raw;
 
   if(rawX==NULL || rawY==NULL || rawZ==NULL)
@@ -1096,9 +1096,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_G_AxesRaw(int16_t *rawX, int16_t *rawY, int16_t *ra
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_G_Axes(float *angularRateX, float *angularRateY, float *angularRateZ)
+LSM6DSO_OpResult LSM6DSO_Get_G_Axes(float *angularRateX, float *angularRateY, float *angularRateZ)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   axis3bit16_t data_raw;
   float sensitivity;
 
@@ -1129,9 +1129,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_G_Axes(float *angularRateX, float *angularRateY, fl
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_Interrupt_Latch(uint8_t Status)
+LSM6DSO_OpResult LSM6DSO_Set_Interrupt_Latch(uint8_t Status)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   if (Status > 1U)
   {
@@ -1147,9 +1147,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_Interrupt_Latch(uint8_t Status)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Enable_Free_Fall_Detection(LSM6DSO_SensorIntPin IntPin)
+LSM6DSO_OpResult LSM6DSO_Enable_Free_Fall_Detection(LSM6DSO_SensorIntPin IntPin)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -1237,9 +1237,9 @@ LSM6DSO_OpStatus LSM6DSO_Enable_Free_Fall_Detection(LSM6DSO_SensorIntPin IntPin)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Disable_Free_Fall_Detection()
+LSM6DSO_OpResult LSM6DSO_Disable_Free_Fall_Detection()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -1289,9 +1289,9 @@ LSM6DSO_OpStatus LSM6DSO_Disable_Free_Fall_Detection()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_Free_Fall_Threshold(uint8_t Threshold)
+LSM6DSO_OpResult LSM6DSO_Set_Free_Fall_Threshold(uint8_t Threshold)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   op_status = LSM6DSO_Reg_FF_Threshold_Set((LSM6DSO_FF_Ths)Threshold);
   if(op_status<LSM6DSO_OK)
@@ -1302,9 +1302,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_Free_Fall_Threshold(uint8_t Threshold)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_Free_Fall_Duration(uint8_t Duration)
+LSM6DSO_OpResult LSM6DSO_Set_Free_Fall_Duration(uint8_t Duration)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   op_status = LSM6DSO_Reg_FF_Dur_Set(Duration);
   if(op_status<LSM6DSO_OK)
@@ -1315,9 +1315,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_Free_Fall_Duration(uint8_t Duration)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Enable_Pedometer()
+LSM6DSO_OpResult LSM6DSO_Enable_Pedometer()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val;
   LSM6DSO_Emb_Sens emb_sens;
 
@@ -1386,9 +1386,9 @@ LSM6DSO_OpStatus LSM6DSO_Enable_Pedometer()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Disable_Pedometer()
+LSM6DSO_OpResult LSM6DSO_Disable_Pedometer()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Emb_Sens emb_sens;
 
@@ -1426,9 +1426,9 @@ LSM6DSO_OpStatus LSM6DSO_Disable_Pedometer()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_Step_Count(uint16_t *StepCount)
+LSM6DSO_OpResult LSM6DSO_Get_Step_Count(uint16_t *StepCount)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   
   if(StepCount==NULL)
   {
@@ -1444,9 +1444,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_Step_Count(uint16_t *StepCount)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Step_Counter_Reset()
+LSM6DSO_OpResult LSM6DSO_Step_Counter_Reset()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   
   op_status = LSM6DSO_Reg_Steps_Reset();
   if(op_status<LSM6DSO_OK)
@@ -1457,9 +1457,9 @@ LSM6DSO_OpStatus LSM6DSO_Step_Counter_Reset()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Enable_Tilt_Detection(LSM6DSO_SensorIntPin IntPin)
+LSM6DSO_OpResult LSM6DSO_Enable_Tilt_Detection(LSM6DSO_SensorIntPin IntPin)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
   LSM6DSO_Emb_Sens emb_sens;
@@ -1547,9 +1547,9 @@ LSM6DSO_OpStatus LSM6DSO_Enable_Tilt_Detection(LSM6DSO_SensorIntPin IntPin)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Disable_Tilt_Detection()
+LSM6DSO_OpResult LSM6DSO_Disable_Tilt_Detection()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
   LSM6DSO_Emb_Sens emb_sens;
@@ -1602,9 +1602,9 @@ LSM6DSO_OpStatus LSM6DSO_Disable_Tilt_Detection()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Enable_Wake_Up_Detection(LSM6DSO_SensorIntPin IntPin)
+LSM6DSO_OpResult LSM6DSO_Enable_Wake_Up_Detection(LSM6DSO_SensorIntPin IntPin)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -1678,9 +1678,9 @@ LSM6DSO_OpStatus LSM6DSO_Enable_Wake_Up_Detection(LSM6DSO_SensorIntPin IntPin)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Disable_Wake_Up_Detection()
+LSM6DSO_OpResult LSM6DSO_Disable_Wake_Up_Detection()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -1730,9 +1730,9 @@ LSM6DSO_OpStatus LSM6DSO_Disable_Wake_Up_Detection()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_Wake_Up_Threshold(uint8_t Threshold)
+LSM6DSO_OpResult LSM6DSO_Set_Wake_Up_Threshold(uint8_t Threshold)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Set wake up threshold. */
   op_status = LSM6DSO_Reg_WakeUp_Threshold_Set(Threshold);
@@ -1744,9 +1744,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_Wake_Up_Threshold(uint8_t Threshold)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_Wake_Up_Duration(uint8_t Duration)
+LSM6DSO_OpResult LSM6DSO_Set_Wake_Up_Duration(uint8_t Duration)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Set wake up duration. */
   op_status = LSM6DSO_Reg_WakeUp_Dur_Set(Duration);
@@ -1758,9 +1758,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_Wake_Up_Duration(uint8_t Duration)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Enable_Single_Tap_Detection(LSM6DSO_SensorIntPin IntPin)
+LSM6DSO_OpResult LSM6DSO_Enable_Single_Tap_Detection(LSM6DSO_SensorIntPin IntPin)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -1866,9 +1866,9 @@ LSM6DSO_OpStatus LSM6DSO_Enable_Single_Tap_Detection(LSM6DSO_SensorIntPin IntPin
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Disable_Single_Tap_Detection()
+LSM6DSO_OpResult LSM6DSO_Disable_Single_Tap_Detection()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -1946,9 +1946,9 @@ LSM6DSO_OpStatus LSM6DSO_Disable_Single_Tap_Detection()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Enable_Double_Tap_Detection(LSM6DSO_SensorIntPin IntPin)
+LSM6DSO_OpResult LSM6DSO_Enable_Double_Tap_Detection(LSM6DSO_SensorIntPin IntPin)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -2064,9 +2064,9 @@ LSM6DSO_OpStatus LSM6DSO_Enable_Double_Tap_Detection(LSM6DSO_SensorIntPin IntPin
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Disable_Double_Tap_Detection()
+LSM6DSO_OpResult LSM6DSO_Disable_Double_Tap_Detection()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -2158,9 +2158,9 @@ LSM6DSO_OpStatus LSM6DSO_Disable_Double_Tap_Detection()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_Tap_Threshold(uint8_t Threshold)
+LSM6DSO_OpResult LSM6DSO_Set_Tap_Threshold(uint8_t Threshold)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   
   /* Set tap threshold. */
   op_status = LSM6DSO_Reg_Tap_Threshold_X_Set(Threshold);
@@ -2172,9 +2172,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_Tap_Threshold(uint8_t Threshold)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_Tap_Shock_Time(uint8_t Time)
+LSM6DSO_OpResult LSM6DSO_Set_Tap_Shock_Time(uint8_t Time)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Set tap shock time window. */
   op_status = LSM6DSO_Reg_Tap_Shock_Set(Time);
@@ -2186,9 +2186,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_Tap_Shock_Time(uint8_t Time)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_Tap_Quiet_Time(uint8_t Time)
+LSM6DSO_OpResult LSM6DSO_Set_Tap_Quiet_Time(uint8_t Time)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Set tap quiet time window. */
   op_status = LSM6DSO_Reg_Tap_Quiet_Set(Time);
@@ -2200,9 +2200,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_Tap_Quiet_Time(uint8_t Time)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_Tap_Duration_Time(uint8_t Time)
+LSM6DSO_OpResult LSM6DSO_Set_Tap_Duration_Time(uint8_t Time)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Set tap duration time window. */
   op_status = LSM6DSO_Reg_Tap_Dur_Set(Time);
@@ -2214,9 +2214,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_Tap_Duration_Time(uint8_t Time)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Enable_6D_Orientation(LSM6DSO_SensorIntPin IntPin)
+LSM6DSO_OpResult LSM6DSO_Enable_6D_Orientation(LSM6DSO_SensorIntPin IntPin)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -2283,9 +2283,9 @@ LSM6DSO_OpStatus LSM6DSO_Enable_6D_Orientation(LSM6DSO_SensorIntPin IntPin)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Disable_6D_Orientation()
+LSM6DSO_OpResult LSM6DSO_Disable_6D_Orientation()
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Pin_Int1_Route val1;
   LSM6DSO_Pin_Int2_Route val2;
 
@@ -2328,9 +2328,9 @@ LSM6DSO_OpStatus LSM6DSO_Disable_6D_Orientation()
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_6D_Orientation_Threshold(uint8_t Threshold)
+LSM6DSO_OpResult LSM6DSO_Set_6D_Orientation_Threshold(uint8_t Threshold)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   
   op_status = LSM6DSO_Reg_6D_Threshold_Set((LSM6DSO_6D_Ths)Threshold);
   if (op_status < LSM6DSO_OK)
@@ -2341,9 +2341,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_6D_Orientation_Threshold(uint8_t Threshold)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_XL(uint8_t *XLow)
+LSM6DSO_OpResult LSM6DSO_Get_6D_Orientation_XL(uint8_t *XLow)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_D6D_Src data;
 
   if(XLow==NULL)
@@ -2362,9 +2362,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_XL(uint8_t *XLow)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_XH(uint8_t *XHigh)
+LSM6DSO_OpResult LSM6DSO_Get_6D_Orientation_XH(uint8_t *XHigh)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_D6D_Src data;
 
   if(XHigh==NULL)
@@ -2383,9 +2383,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_XH(uint8_t *XHigh)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_YL(uint8_t *YLow)
+LSM6DSO_OpResult LSM6DSO_Get_6D_Orientation_YL(uint8_t *YLow)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_D6D_Src data;
 
   if(YLow==NULL)
@@ -2404,9 +2404,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_YL(uint8_t *YLow)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_YH(uint8_t *YHigh)
+LSM6DSO_OpResult LSM6DSO_Get_6D_Orientation_YH(uint8_t *YHigh)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_D6D_Src data;
 
   if(YHigh==NULL)
@@ -2425,9 +2425,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_YH(uint8_t *YHigh)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_ZL(uint8_t *ZLow)
+LSM6DSO_OpResult LSM6DSO_Get_6D_Orientation_ZL(uint8_t *ZLow)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_D6D_Src data;
 
   if(ZLow==NULL)
@@ -2446,9 +2446,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_ZL(uint8_t *ZLow)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_ZH(uint8_t *ZHigh)
+LSM6DSO_OpResult LSM6DSO_Get_6D_Orientation_ZH(uint8_t *ZHigh)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_D6D_Src data;
 
   if(ZHigh==NULL)
@@ -2467,9 +2467,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_6D_Orientation_ZH(uint8_t *ZHigh)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_X_DRDY_Status(uint8_t *Status)
+LSM6DSO_OpResult LSM6DSO_Get_X_DRDY_Status(uint8_t *Status)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   
   if(Status==NULL)
   {
@@ -2485,7 +2485,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_DRDY_Status(uint8_t *Status)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_X_Event_Status(LSM6DSO_Event_Status *Status)
+LSM6DSO_OpResult LSM6DSO_Get_X_Event_Status(LSM6DSO_Event_Status *Status)
 {
   uint8_t tilt_ia = 0U;
   LSM6DSO_Wake_Up_Src wake_up_src;
@@ -2496,7 +2496,7 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_Event_Status(LSM6DSO_Event_Status *Status)
   LSM6DSO_MD2_Cfg md2_cfg;
   LSM6DSO_EMB_Func_Int1 int1_ctrl;
   LSM6DSO_EMB_Func_Int2 int2_ctrl;
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   if(Status==NULL)
   {
@@ -2630,9 +2630,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_X_Event_Status(LSM6DSO_Event_Status *Status)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_X_SelfTest(uint8_t val)
+LSM6DSO_OpResult LSM6DSO_Set_X_SelfTest(uint8_t val)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_ST_XL reg;
 
   reg = (val == 0U)  ? LSM6DSO_XL_ST_DISABLE
@@ -2649,9 +2649,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_X_SelfTest(uint8_t val)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_G_DRDY_Status(uint8_t *Status)
+LSM6DSO_OpResult LSM6DSO_Get_G_DRDY_Status(uint8_t *Status)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   
   if(Status==NULL)
   {
@@ -2667,9 +2667,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_G_DRDY_Status(uint8_t *Status)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_G_SelfTest(uint8_t val)
+LSM6DSO_OpResult LSM6DSO_Set_G_SelfTest(uint8_t val)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_ST_G reg;
 
   reg = (val == 0U)  ? LSM6DSO_GY_ST_DISABLE
@@ -2686,9 +2686,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_G_SelfTest(uint8_t val)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Num_Samples(uint16_t *NumSamples)
+LSM6DSO_OpResult LSM6DSO_Get_FIFO_Num_Samples(uint16_t *NumSamples)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   
   if(NumSamples==NULL)
   {
@@ -2704,9 +2704,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Num_Samples(uint16_t *NumSamples)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Full_Status(uint8_t *Status)
+LSM6DSO_OpResult LSM6DSO_Get_FIFO_Full_Status(uint8_t *Status)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Reg reg;
 
   if(Status==NULL)
@@ -2725,9 +2725,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Full_Status(uint8_t *Status)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_FIFO_INT1_FIFO_Full(uint8_t Status)
+LSM6DSO_OpResult LSM6DSO_Set_FIFO_INT1_FIFO_Full(uint8_t Status)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Reg reg;
 
   op_status = LSM6DSO_Read_Reg(LSM6DSO_INT1_CTRL, &reg.byte, 1);
@@ -2747,9 +2747,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_INT1_FIFO_Full(uint8_t Status)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_FIFO_INT2_FIFO_Full(uint8_t Status)
+LSM6DSO_OpResult LSM6DSO_Set_FIFO_INT2_FIFO_Full(uint8_t Status)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_Reg reg;
 
   op_status = LSM6DSO_Read_Reg(LSM6DSO_INT2_CTRL, &reg.byte, 1);
@@ -2769,9 +2769,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_INT2_FIFO_Full(uint8_t Status)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_FIFO_Watermark_Level(uint16_t Watermark)
+LSM6DSO_OpResult LSM6DSO_Set_FIFO_Watermark_Level(uint16_t Watermark)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   
   op_status = LSM6DSO_Reg_FIFO_WaterMark_Set(Watermark);
   if (op_status < LSM6DSO_OK)
@@ -2782,9 +2782,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_Watermark_Level(uint16_t Watermark)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Watermark_Level(uint16_t* Watermark)
+LSM6DSO_OpResult LSM6DSO_Get_FIFO_Watermark_Level(uint16_t* Watermark)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   
   if(Watermark==NULL)
   {
@@ -2800,9 +2800,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Watermark_Level(uint16_t* Watermark)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_FIFO_Stop_On_Fth(uint8_t Status)
+LSM6DSO_OpResult LSM6DSO_Set_FIFO_Stop_On_Fth(uint8_t Status)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   op_status = LSM6DSO_Reg_FIFO_Stop_On_WTM_Set(Status);
   if (op_status < LSM6DSO_OK)
@@ -2813,9 +2813,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_Stop_On_Fth(uint8_t Status)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_FIFO_Mode(uint8_t Mode)
+LSM6DSO_OpResult LSM6DSO_Set_FIFO_Mode(uint8_t Mode)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   /* Verify that the passed parameter contains one of the valid values. */
   switch ((LSM6DSO_FIFO_Mode)Mode)
@@ -2840,9 +2840,9 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_Mode(uint8_t Mode)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Tag(uint8_t *Tag)
+LSM6DSO_OpResult LSM6DSO_Get_FIFO_Tag(uint8_t *Tag)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_FIFO_Tag tag_local;
 
   if(Tag==NULL)
@@ -2861,9 +2861,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Tag(uint8_t *Tag)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Data_Raw(uint8_t *Data)
+LSM6DSO_OpResult LSM6DSO_Get_FIFO_Data_Raw(uint8_t *Data)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   if(Data==NULL)
   {
@@ -2879,13 +2879,13 @@ LSM6DSO_OpStatus LSM6DSO_Get_FIFO_Data_Raw(uint8_t *Data)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_FIFO_X_Axes(float *accelerationX, float *accelerationY, float *accelerationZ)
+LSM6DSO_OpResult LSM6DSO_Get_FIFO_X_Axes(float *accelerationX, float *accelerationY, float *accelerationZ)
 {
   uint8_t data[6];
   int16_t data_raw[3];
   float sensitivity = 0.0f;
   float acceleration_float[3];
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   if(accelerationX==NULL || accelerationY==NULL || accelerationZ==NULL)
   {
@@ -2915,9 +2915,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_FIFO_X_Axes(float *accelerationX, float *accelerati
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_FIFO_X_BDR(float Bdr)
+LSM6DSO_OpResult LSM6DSO_Set_FIFO_X_BDR(float Bdr)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_BDR_XL new_bdr;
 
   new_bdr = (Bdr <=    0.0f) ? LSM6DSO_XL_NOT_BATCHED
@@ -2941,12 +2941,12 @@ LSM6DSO_OpStatus LSM6DSO_Set_FIFO_X_BDR(float Bdr)
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Get_FIFO_G_Axes(float *angularVelocityX, float *angularVelocityY, float *angularVelocityZ)
+LSM6DSO_OpResult LSM6DSO_Get_FIFO_G_Axes(float *angularVelocityX, float *angularVelocityY, float *angularVelocityZ)
 {
   uint8_t data[6];
   int16_t data_raw[3];
   float sensitivity = 0.0f;
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
 
   if(angularVelocityX==NULL || angularVelocityY==NULL || angularVelocityZ==NULL)
   {
@@ -2976,9 +2976,9 @@ LSM6DSO_OpStatus LSM6DSO_Get_FIFO_G_Axes(float *angularVelocityX, float *angular
   return LSM6DSO_OK;
 }
 
-LSM6DSO_OpStatus LSM6DSO_Set_FIFO_G_BDR(float Bdr)
+LSM6DSO_OpResult LSM6DSO_Set_FIFO_G_BDR(float Bdr)
 {
-  LSM6DSO_OpStatus op_status;
+  LSM6DSO_OpResult op_status;
   LSM6DSO_BDR_Gy new_bdr;
 
   new_bdr = (Bdr <=    0.0f) ? LSM6DSO_GY_NOT_BATCHED

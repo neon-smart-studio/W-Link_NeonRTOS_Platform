@@ -53,9 +53,9 @@
 #include "LIS3MDL_MAG_Register_Def.h"
 #include "LIS3MDL_MAG_Register.h"
 
-LIS3MDL_OpStatus LIS3MDL_Init()
+LIS3MDL_OpResult LIS3MDL_Init()
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   /* Operating mode selection - power down */
   op_status = LIS3MDL_MAG_W_SystemOperatingMode( LIS3MDL_MAG_MD_POWER_DOWN );
@@ -100,9 +100,9 @@ LIS3MDL_OpStatus LIS3MDL_Init()
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_DeInit()
+LIS3MDL_OpResult LIS3MDL_DeInit()
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   /* Disable mag */
   op_status = LIS3MDL_Disable();
@@ -114,9 +114,9 @@ LIS3MDL_OpStatus LIS3MDL_DeInit()
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_Enable(void)
+LIS3MDL_OpResult LIS3MDL_Enable(void)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   /* Operating mode selection - continuous */
   op_status = LIS3MDL_MAG_W_SystemOperatingMode( LIS3MDL_MAG_MD_CONTINUOUS );
@@ -128,9 +128,9 @@ LIS3MDL_OpStatus LIS3MDL_Enable(void)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_Disable(void)
+LIS3MDL_OpResult LIS3MDL_Disable(void)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   /* Operating mode selection - power down */
   op_status = LIS3MDL_MAG_W_SystemOperatingMode( LIS3MDL_MAG_MD_POWER_DOWN );
@@ -142,9 +142,9 @@ LIS3MDL_OpStatus LIS3MDL_Disable(void)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_ReadID(uint8_t *p_id)
+LIS3MDL_OpResult LIS3MDL_ReadID(uint8_t *p_id)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   if(!p_id)
   {
@@ -161,9 +161,9 @@ LIS3MDL_OpStatus LIS3MDL_ReadID(uint8_t *p_id)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_GetAxes(int32_t *pData)
+LIS3MDL_OpResult LIS3MDL_GetAxes(int32_t *pData)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   int16_t pDataRaw[3];
   float sensitivity = 0;
@@ -190,9 +190,9 @@ LIS3MDL_OpStatus LIS3MDL_GetAxes(int32_t *pData)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_GetSensitivity(float *pfData)
+LIS3MDL_OpResult LIS3MDL_GetSensitivity(float *pfData)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   LIS3MDL_MAG_FS_t fullScale;
 
@@ -226,9 +226,9 @@ LIS3MDL_OpStatus LIS3MDL_GetSensitivity(float *pfData)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_GetAxesRaw(int16_t *pData)
+LIS3MDL_OpResult LIS3MDL_GetAxesRaw(int16_t *pData)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   uint8_t regValue[6] = {0, 0, 0, 0, 0, 0};
 
@@ -247,9 +247,9 @@ LIS3MDL_OpStatus LIS3MDL_GetAxesRaw(int16_t *pData)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_GetODR(float* odr)
+LIS3MDL_OpResult LIS3MDL_GetODR(float* odr)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   LIS3MDL_MAG_DO_t odr_low_level;
 
@@ -293,9 +293,9 @@ LIS3MDL_OpStatus LIS3MDL_GetODR(float* odr)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_SetODR(float odr)
+LIS3MDL_OpResult LIS3MDL_SetODR(float odr)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   LIS3MDL_MAG_DO_t new_odr;
 
@@ -317,9 +317,9 @@ LIS3MDL_OpStatus LIS3MDL_SetODR(float odr)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_GetFS(float* fullScale)
+LIS3MDL_OpResult LIS3MDL_GetFS(float* fullScale)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   LIS3MDL_MAG_FS_t fs_low_level;
 
@@ -351,9 +351,9 @@ LIS3MDL_OpStatus LIS3MDL_GetFS(float* fullScale)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_SetFS(float fullScale)
+LIS3MDL_OpResult LIS3MDL_SetFS(float fullScale)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
 
   LIS3MDL_MAG_FS_t new_fs;
 

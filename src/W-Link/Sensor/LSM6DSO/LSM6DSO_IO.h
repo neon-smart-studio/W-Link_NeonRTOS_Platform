@@ -58,27 +58,27 @@ typedef void (*LSM6DSO_IO_Event_IRQ)(LSM6DSO_Interrupt_Index index);
 
 /* Functions -----------------------------------------------------------------*/
 
-LSM6DSO_OpStatus LSM6DSO_Register_Interrupt_Handler(LSM6DSO_IO_Event_IRQ irq_callback);
-LSM6DSO_OpStatus LSM6DSO_UnRegister_Interrupt_Handler(void);
+LSM6DSO_OpResult LSM6DSO_Register_Interrupt_Handler(LSM6DSO_IO_Event_IRQ irq_callback);
+LSM6DSO_OpResult LSM6DSO_UnRegister_Interrupt_Handler(void);
 
-LSM6DSO_OpStatus LSM6DSO_IO_Read(
+LSM6DSO_OpResult LSM6DSO_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 );
 
-LSM6DSO_OpStatus LSM6DSO_IO_Write(
+LSM6DSO_OpResult LSM6DSO_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 );
 
-LSM6DSO_OpStatus LSM6DSO_IO_ReadByte(
+LSM6DSO_OpResult LSM6DSO_IO_ReadByte(
     uint8_t RegisterAddr,
     uint8_t* value
 );
 
-LSM6DSO_OpStatus LSM6DSO_IO_WriteByte(
+LSM6DSO_OpResult LSM6DSO_IO_WriteByte(
     uint8_t RegisterAddr,
     uint8_t value
 );

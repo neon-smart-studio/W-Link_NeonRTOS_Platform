@@ -26,7 +26,7 @@
 #define BH1750FVI_I2C_INDEX               CONFIG_BH1750FVI_I2C_PORT_INDEX
 #endif
 
-typedef enum BH1750FVI_OpStatus_t
+typedef enum BH1750FVI_OpResult_t
 {
   BH1750FVI_OK = 0,
   BH1750FVI_NotInit = -1,
@@ -35,7 +35,7 @@ typedef enum BH1750FVI_OpStatus_t
   BH1750FVI_MutexTimeout = -4,
   BH1750FVI_IO_Error = -5,
   BH1750FVI_Unsupport = -6
-} BH1750FVI_OpStatus;
+} BH1750FVI_OpResult;
 
 typedef enum BH1750FVI_Resolution_t
 {
@@ -45,7 +45,7 @@ typedef enum BH1750FVI_Resolution_t
   BH1750FVI_Resolution_MAX = 3,
 } BH1750FVI_Resolution;
 
-BH1750FVI_OpStatus BH1750FVI_Init();
-BH1750FVI_OpStatus BH1750FVI_Read_Lux(bool continuous, BH1750FVI_Resolution resolution, uint16_t* lux);
+BH1750FVI_OpResult BH1750FVI_Init();
+BH1750FVI_OpResult BH1750FVI_Read_Lux(bool continuous, BH1750FVI_Resolution resolution, uint16_t* lux);
 
 #endif //BH1750FVI_H

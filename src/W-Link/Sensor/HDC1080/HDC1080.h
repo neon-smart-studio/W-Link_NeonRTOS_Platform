@@ -12,7 +12,7 @@
 #define HDC1080_I2C_INDEX           CONFIG_HDC1080_I2C_INDEX
 #endif
 
-typedef enum HDC1080_OpStatus_t
+typedef enum HDC1080_OpResult_t
 {
   HDC1080_OK = 0,
   HDC1080_NotInit = -1,
@@ -21,7 +21,7 @@ typedef enum HDC1080_OpStatus_t
   HDC1080_MutexTimeout = -4,
   HDC1080_IO_Error = -5,
   HDC1080_Unsupport = -6
-} HDC1080_OpStatus;
+} HDC1080_OpResult;
 
 typedef enum HDC1080_MeasurementResolution_t{
 	HDC1080_MeasurementResolution_8Bit = 0,
@@ -39,13 +39,13 @@ typedef union HDC1080_SerialNumber_t{
 	};
 }HDC1080_SerialNumber;
 
-HDC1080_OpStatus HDC1080_Init();
-HDC1080_OpStatus HDC1080_SetResolution(HDC1080_MeasurementResolution ms_temp_resolution, HDC1080_MeasurementResolution ms_hum_resolution);
-HDC1080_OpStatus HDC1080_ReadSerialNumber(HDC1080_SerialNumber* sn);
-HDC1080_OpStatus HDC1080_HeatUp(uint8_t seconds);
-HDC1080_OpStatus HDC1080_ReadTemperature(double* temperature);
-HDC1080_OpStatus HDC1080_ReadHumidity(double* humidity);
-HDC1080_OpStatus HDC1080_ReadManufacturerId(uint16_t* manuID);
-HDC1080_OpStatus HDC1080_ReadDeviceId(uint16_t* devID);
+HDC1080_OpResult HDC1080_Init();
+HDC1080_OpResult HDC1080_SetResolution(HDC1080_MeasurementResolution ms_temp_resolution, HDC1080_MeasurementResolution ms_hum_resolution);
+HDC1080_OpResult HDC1080_ReadSerialNumber(HDC1080_SerialNumber* sn);
+HDC1080_OpResult HDC1080_HeatUp(uint8_t seconds);
+HDC1080_OpResult HDC1080_ReadTemperature(double* temperature);
+HDC1080_OpResult HDC1080_ReadHumidity(double* humidity);
+HDC1080_OpResult HDC1080_ReadManufacturerId(uint16_t* manuID);
+HDC1080_OpResult HDC1080_ReadDeviceId(uint16_t* devID);
 
 #endif //HDC1080_H

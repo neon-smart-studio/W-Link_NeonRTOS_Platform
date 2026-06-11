@@ -12,7 +12,7 @@ Modifications:
 #ifndef LSM303AGR_DEF_H
 #define LSM303AGR_DEF_H
 
-typedef enum LSM303AGR_OpStatus_t
+typedef enum LSM303AGR_OpResult_t
 {
   LSM303AGR_OK = 0,
   LSM303AGR_NotInit = -1,
@@ -22,7 +22,7 @@ typedef enum LSM303AGR_OpStatus_t
   LSM303AGR_SlaveTimeout = -5,
   LSM303AGR_IO_Error = -6,
   LSM303AGR_Unsupport = -7,
-} LSM303AGR_OpStatus;
+} LSM303AGR_OpResult;
 
 typedef enum LSM303AGR_Interrupt_Index_t
 {

@@ -57,16 +57,16 @@ typedef enum
 extern "C" {
 #endif
 
-HTS221_OpStatus HTS221_Init(void);
-HTS221_OpStatus HTS221_DeInit(void);
-HTS221_OpStatus HTS221_Enable(void);
-HTS221_OpStatus HTS221_Disable(void);
-HTS221_OpStatus HTS221_ReadID(uint8_t *ht_id);
-HTS221_OpStatus HTS221_Reset(void);
-HTS221_OpStatus HTS221_GetHumidity(float *pfData);
-HTS221_OpStatus HTS221_GetTemperature(float *pfData);
-HTS221_OpStatus HTS221_GetODR(float *odr);
-HTS221_OpStatus HTS221_SetODR(float odr);
+HTS221_OpResult HTS221_Init(void);
+HTS221_OpResult HTS221_DeInit(void);
+HTS221_OpResult HTS221_Enable(void);
+HTS221_OpResult HTS221_Disable(void);
+HTS221_OpResult HTS221_ReadID(uint8_t *ht_id);
+HTS221_OpResult HTS221_Reset(void);
+HTS221_OpResult HTS221_GetHumidity(float *pfData);
+HTS221_OpResult HTS221_GetTemperature(float *pfData);
+HTS221_OpResult HTS221_GetODR(float *odr);
+HTS221_OpResult HTS221_SetODR(float odr);
 
 #ifdef __cplusplus
 }

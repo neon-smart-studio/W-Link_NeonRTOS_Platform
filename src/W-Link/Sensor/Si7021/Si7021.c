@@ -44,7 +44,7 @@ typedef enum Si7021_Revision_Code_t
     Si7021_Revision_Code_2                     = 0x20
 } Si7021_Revision_Code;
 
-static Si7021_OpStatus Si7021_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
+static Si7021_OpResult Si7021_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -73,7 +73,7 @@ static Si7021_OpStatus Si7021_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
     }
 }
 
-static Si7021_OpStatus Si7021_Write_Command(Si7021_Command command)
+static Si7021_OpResult Si7021_Write_Command(Si7021_Command command)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -94,7 +94,7 @@ static Si7021_OpStatus Si7021_Write_Command(Si7021_Command command)
     return Si7021_OK;
 }
 
-static Si7021_OpStatus Si7021_Write_Command16(Si7021_Command16 command)
+static Si7021_OpResult Si7021_Write_Command16(Si7021_Command16 command)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -120,7 +120,7 @@ static Si7021_OpStatus Si7021_Write_Command16(Si7021_Command16 command)
     return Si7021_OK;
 }
 
-static Si7021_OpStatus Si7021_Read(uint8_t* data, uint16_t len)
+static Si7021_OpResult Si7021_Read(uint8_t* data, uint16_t len)
 {
     hwI2C_OpResult i2c_op_result;
 
@@ -146,9 +146,9 @@ static Si7021_OpStatus Si7021_Read(uint8_t* data, uint16_t len)
     return Si7021_OK;
 }
 
-static Si7021_OpStatus Si7021_Read_Measurement(uint8_t command, uint16_t* raw_value)
+static Si7021_OpResult Si7021_Read_Measurement(uint8_t command, uint16_t* raw_value)
 {
-    Si7021_OpStatus status;
+    Si7021_OpResult status;
     uint8_t rx_buf[3];
     uint16_t timeout_ms = 0;
 
@@ -187,9 +187,9 @@ static Si7021_OpStatus Si7021_Read_Measurement(uint8_t command, uint16_t* raw_va
     return Si7021_OK;
 }
 
-Si7021_OpStatus Si7021_Init(void)
+Si7021_OpResult Si7021_Init(void)
 {
-    Si7021_OpStatus status;
+    Si7021_OpResult status;
 
     status = Si7021_Write_Command(Si7021_Command_Reset);
     if(status < Si7021_OK)
@@ -202,9 +202,9 @@ Si7021_OpStatus Si7021_Init(void)
     return Si7021_OK;
 }
 
-Si7021_OpStatus Si7021_ReadMeasureTemperature(float* temperature)
+Si7021_OpResult Si7021_ReadMeasureTemperature(float* temperature)
 {
-    Si7021_OpStatus status;
+    Si7021_OpResult status;
     uint16_t raw_temp;
 
     if(temperature == NULL)
@@ -227,9 +227,9 @@ Si7021_OpStatus Si7021_ReadMeasureTemperature(float* temperature)
     return Si7021_OK;
 }
 
-Si7021_OpStatus Si7021_ReadMeasureHumidity(float* humidity)
+Si7021_OpResult Si7021_ReadMeasureHumidity(float* humidity)
 {
-    Si7021_OpStatus status;
+    Si7021_OpResult status;
     uint16_t raw_humidity;
 
     if(humidity == NULL)
@@ -252,9 +252,9 @@ Si7021_OpStatus Si7021_ReadMeasureHumidity(float* humidity)
     return Si7021_OK;
 }
 
-Si7021_OpStatus Si7021_ReadPreviousMeasureTemperature(float* temperature)
+Si7021_OpResult Si7021_ReadPreviousMeasureTemperature(float* temperature)
 {
-    Si7021_OpStatus status;
+    Si7021_OpResult status;
     uint8_t rx_buf[3];
     uint16_t raw_temp;
 
@@ -282,9 +282,9 @@ Si7021_OpStatus Si7021_ReadPreviousMeasureTemperature(float* temperature)
     return Si7021_OK;
 }
 
-Si7021_OpStatus Si7021_ReadRevision(Si_Sensor_Rev* revision)
+Si7021_OpResult Si7021_ReadRevision(Si_Sensor_Rev* revision)
 {
-    Si7021_OpStatus status;
+    Si7021_OpResult status;
     uint8_t rx_buf[1];
 
     if(revision == NULL)
@@ -321,13 +321,13 @@ Si7021_OpStatus Si7021_ReadRevision(Si_Sensor_Rev* revision)
     return Si7021_OK;
 }
 
-Si7021_OpStatus Si7021_ReadSerialNumber(
+Si7021_OpResult Si7021_ReadSerialNumber(
     Si_Sensor_Model* model,
     uint8_t ID_A[4],
     uint8_t ID_B[4]
 )
 {
-    Si7021_OpStatus status;
+    Si7021_OpResult status;
     uint8_t rx_buf[8];
     uint8_t sensor_model;
 

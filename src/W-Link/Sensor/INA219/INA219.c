@@ -18,7 +18,7 @@ static float INA219_PowerMultiplier_mW = 0.0f;
 
 static uint8_t INA219_Initialized = 0;
 
-static INA219_Result INA219_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
+static INA219_OpResult INA219_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -47,7 +47,7 @@ static INA219_Result INA219_Map_I2C_HW_Error_Code(hwI2C_OpResult error_code)
     }
 }
 
-static INA219_Result INA219_WriteRegister(
+static INA219_OpResult INA219_WriteRegister(
     INA219_Register reg,
     uint16_t value
 )
@@ -72,7 +72,7 @@ static INA219_Result INA219_WriteRegister(
     return INA219_Map_I2C_HW_Error_Code(i2c_op_result);
 }
 
-static INA219_Result INA219_ReadRegister(
+static INA219_OpResult INA219_ReadRegister(
     INA219_Register reg,
     uint16_t *value
 )
@@ -133,7 +133,7 @@ static int INA219_RewriteCalibration(void)
     );
 }
 
-INA219_Result INA219_SetCalibration(INA219_CalibrationMode mode)
+INA219_OpResult INA219_SetCalibration(INA219_CalibrationMode mode)
 {
     int status;
     uint16_t config;
@@ -194,7 +194,7 @@ INA219_Result INA219_SetCalibration(INA219_CalibrationMode mode)
     );
 }
 
-INA219_Result INA219_Init(void)
+INA219_OpResult INA219_Init(void)
 {
     INA219_CalValue = 0;
     INA219_CurrentDivider_mA = 0.0f;
@@ -205,7 +205,7 @@ INA219_Result INA219_Init(void)
     return INA219_SetCalibration(INA219_Calibration_32V_2A);
 }
 
-INA219_Result INA219_EnterPowerSave(void)
+INA219_OpResult INA219_EnterPowerSave(void)
 {
     int status;
     uint16_t config;
@@ -224,7 +224,7 @@ INA219_Result INA219_EnterPowerSave(void)
     );
 }
 
-INA219_Result INA219_ExitPowerSave(void)
+INA219_OpResult INA219_ExitPowerSave(void)
 {
     int status;
     uint16_t config;
@@ -243,7 +243,7 @@ INA219_Result INA219_ExitPowerSave(void)
     );
 }
 
-INA219_Result INA219_GetShuntVoltage_mV(float *value)
+INA219_OpResult INA219_GetShuntVoltage_mV(float *value)
 {
     int status;
     uint16_t reg;
@@ -269,7 +269,7 @@ INA219_Result INA219_GetShuntVoltage_mV(float *value)
     return INA219_OK;
 }
 
-INA219_Result INA219_GetBusVoltage_V(float *value)
+INA219_OpResult INA219_GetBusVoltage_V(float *value)
 {
     int status;
     uint16_t reg;
@@ -292,7 +292,7 @@ INA219_Result INA219_GetBusVoltage_V(float *value)
     return INA219_OK;
 }
 
-INA219_Result INA219_GetAmperage_mA(float *value)
+INA219_OpResult INA219_GetAmperage_mA(float *value)
 {
     int status;
     uint16_t reg;
@@ -327,7 +327,7 @@ INA219_Result INA219_GetAmperage_mA(float *value)
     return INA219_OK;
 }
 
-INA219_Result INA219_GetPower_mW(float *value)
+INA219_OpResult INA219_GetPower_mW(float *value)
 {
     int status;
     uint16_t reg;

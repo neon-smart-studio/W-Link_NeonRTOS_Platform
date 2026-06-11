@@ -12,7 +12,7 @@ Modifications:
 #ifndef LIS3MDL_DEF_H
 #define LIS3MDL_DEF_H
 
-typedef enum LIS3MDL_OpStatus_t
+typedef enum LIS3MDL_OpResult_t
 {
   LIS3MDL_OK = 0,
   LIS3MDL_NotInit = -1,
@@ -22,7 +22,7 @@ typedef enum LIS3MDL_OpStatus_t
   LIS3MDL_SlaveTimeout = -5,
   LIS3MDL_IO_Error = -6,
   LIS3MDL_Unsupport = -7,
-} LIS3MDL_OpStatus;
+} LIS3MDL_OpResult;
 
 typedef enum LIS3MDL_Interrupt_Index_t
 {

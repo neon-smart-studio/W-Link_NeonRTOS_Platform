@@ -12,7 +12,7 @@
 #define HMC5883L_I2C_INDEX           CONFIG_HMC5883L_I2C_INDEX
 #endif
 
-typedef enum HMC5883L_OpStatus_t
+typedef enum HMC5883L_OpResult_t
 {
   HMC5883L_OK = 0,
   HMC5883L_NotInit = -1,
@@ -21,7 +21,7 @@ typedef enum HMC5883L_OpStatus_t
   HMC5883L_MutexTimeout = -5,
   HMC5883L_IO_Error = -5,
   HMC5883L_Unsupport = -6
-} HMC5883L_OpStatus;
+} HMC5883L_OpResult;
 
 typedef enum HMC5883L_Samples_t
 {
@@ -72,17 +72,17 @@ typedef struct HMC5883L_Vector_t
     float ZAxis;
 } HMC5883L_Vector;
 
-HMC5883L_OpStatus HMC5883L_Init();
-HMC5883L_OpStatus HMC5883L_ReadRaw(HMC5883L_Vector* vector);
-HMC5883L_OpStatus HMC5883L_ReadNormalize(HMC5883L_Vector* vector);
-HMC5883L_OpStatus HMC5883L_SetOffset(int xOff, int yOff);
-HMC5883L_OpStatus HMC5883L_SetRange(HMC5883L_Range range);
-HMC5883L_OpStatus HMC5883L_GetRange(HMC5883L_Range* range);
-HMC5883L_OpStatus HMC5883L_SetMeasurementMode(HMC5883L_Mode mode);
-HMC5883L_OpStatus HMC5883L_GetMeasurementMode(HMC5883L_Mode* mode);
-HMC5883L_OpStatus HMC5883L_SetDataRate(HMC5883L_DataRate dataRate);
-HMC5883L_OpStatus HMC5883L_GetDataRate(HMC5883L_DataRate* dataRate);
-HMC5883L_OpStatus HMC5883L_SetSamples(HMC5883L_Samples samples);
-HMC5883L_OpStatus HMC5883L_GetSamples(HMC5883L_Samples* samples);
+HMC5883L_OpResult HMC5883L_Init();
+HMC5883L_OpResult HMC5883L_ReadRaw(HMC5883L_Vector* vector);
+HMC5883L_OpResult HMC5883L_ReadNormalize(HMC5883L_Vector* vector);
+HMC5883L_OpResult HMC5883L_SetOffset(int xOff, int yOff);
+HMC5883L_OpResult HMC5883L_SetRange(HMC5883L_Range range);
+HMC5883L_OpResult HMC5883L_GetRange(HMC5883L_Range* range);
+HMC5883L_OpResult HMC5883L_SetMeasurementMode(HMC5883L_Mode mode);
+HMC5883L_OpResult HMC5883L_GetMeasurementMode(HMC5883L_Mode* mode);
+HMC5883L_OpResult HMC5883L_SetDataRate(HMC5883L_DataRate dataRate);
+HMC5883L_OpResult HMC5883L_GetDataRate(HMC5883L_DataRate* dataRate);
+HMC5883L_OpResult HMC5883L_SetSamples(HMC5883L_Samples samples);
+HMC5883L_OpResult HMC5883L_GetSamples(HMC5883L_Samples* samples);
 
 #endif //HMC5883L_H

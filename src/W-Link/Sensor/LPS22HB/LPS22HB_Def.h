@@ -12,7 +12,7 @@ Modifications:
 #ifndef LPS22HB_DEF_H
 #define LPS22HB_DEF_H
 
-typedef enum LPS22HB_OpStatus_t
+typedef enum LPS22HB_OpResult_t
 {
   LPS22HB_OK = 0,
   LPS22HB_NotInit = -1,
@@ -22,7 +22,7 @@ typedef enum LPS22HB_OpStatus_t
   LPS22HB_SlaveTimeout = -5,
   LPS22HB_IO_Error = -6,
   LPS22HB_Unsupport = -7,
-} LPS22HB_OpStatus;
+} LPS22HB_OpResult;
 
 typedef enum LPS22HB_Interrupt_Index_t
 {

@@ -32,7 +32,7 @@ typedef enum {
     INA219_IO_Error = -5,
     INA219_Unsupport = -6,
     INA219_NotCalibrated = -7
-} INA219_Result;
+} INA219_OpResult;
 
 typedef enum {
     INA219_Register_Config       = 0x00,
@@ -78,18 +78,18 @@ typedef enum {
     INA219_Calibration_16V_400mA
 } INA219_CalibrationMode;
 
-INA219_Result INA219_Init(void);
+INA219_OpResult INA219_Init(void);
 
-INA219_Result INA219_SetCalibration(
+INA219_OpResult INA219_SetCalibration(
     INA219_CalibrationMode mode
 );
 
-INA219_Result INA219_EnterPowerSave(void);
-INA219_Result INA219_ExitPowerSave(void);
+INA219_OpResult INA219_EnterPowerSave(void);
+INA219_OpResult INA219_ExitPowerSave(void);
 
-INA219_Result INA219_GetShuntVoltage_mV(float *value);
-INA219_Result INA219_GetBusVoltage_V(float *value);
-INA219_Result INA219_GetAmperage_mA(float *value);
-INA219_Result INA219_GetPower_mW(float *value);
+INA219_OpResult INA219_GetShuntVoltage_mV(float *value);
+INA219_OpResult INA219_GetBusVoltage_V(float *value);
+INA219_OpResult INA219_GetAmperage_mA(float *value);
+INA219_OpResult INA219_GetPower_mW(float *value);
 
 #endif

@@ -22,7 +22,7 @@ Modifications:
 
 #define LSM303AGR_IO_TX_BUF_SIZE             32
 
-static LSM303AGR_OpStatus LSM303AGR_IO_Map_I2C_Error(hwI2C_OpResult error_code)
+static LSM303AGR_OpResult LSM303AGR_IO_Map_I2C_Error(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -53,13 +53,13 @@ static LSM303AGR_OpStatus LSM303AGR_IO_Map_I2C_Error(hwI2C_OpResult error_code)
     }
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_IO_Read(
+LSM303AGR_OpResult LSM303AGR_ACC_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 )
 {
-    LSM303AGR_OpStatus status;
+    LSM303AGR_OpResult status;
 
     if(pBuffer == NULL || NumByteToRead == 0)
     {
@@ -101,13 +101,13 @@ LSM303AGR_OpStatus LSM303AGR_ACC_IO_Read(
     return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_IO_Write(
+LSM303AGR_OpResult LSM303AGR_ACC_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 )
 {
-    LSM303AGR_OpStatus status;
+    LSM303AGR_OpResult status;
     uint8_t tx_buf[LSM303AGR_IO_TX_BUF_SIZE];
 
     if(pBuffer == NULL || NumByteToWrite == 0)
@@ -142,7 +142,7 @@ LSM303AGR_OpStatus LSM303AGR_ACC_IO_Write(
     return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
+LSM303AGR_OpResult LSM303AGR_ACC_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
 {
     if(value == NULL)
     {
@@ -152,18 +152,18 @@ LSM303AGR_OpStatus LSM303AGR_ACC_IO_ReadByte(uint8_t RegisterAddr, uint8_t* valu
     return LSM303AGR_ACC_IO_Read(RegisterAddr, value, 1);
 }
 
-LSM303AGR_OpStatus LSM303AGR_ACC_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
+LSM303AGR_OpResult LSM303AGR_ACC_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
 {
     return LSM303AGR_ACC_IO_Write(RegisterAddr, &value, 1);
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_IO_Read(
+LSM303AGR_OpResult LSM303AGR_MAG_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 )
 {
-    LSM303AGR_OpStatus status;
+    LSM303AGR_OpResult status;
 
     if(pBuffer == NULL || NumByteToRead == 0)
     {
@@ -205,13 +205,13 @@ LSM303AGR_OpStatus LSM303AGR_MAG_IO_Read(
     return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_IO_Write(
+LSM303AGR_OpResult LSM303AGR_MAG_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 )
 {
-    LSM303AGR_OpStatus status;
+    LSM303AGR_OpResult status;
     uint8_t tx_buf[LSM303AGR_IO_TX_BUF_SIZE];
 
     if(pBuffer == NULL || NumByteToWrite == 0)
@@ -246,7 +246,7 @@ LSM303AGR_OpStatus LSM303AGR_MAG_IO_Write(
     return LSM303AGR_OK;
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
+LSM303AGR_OpResult LSM303AGR_MAG_IO_ReadByte(uint8_t RegisterAddr, uint8_t* value)
 {
     if(value == NULL)
     {
@@ -256,7 +256,7 @@ LSM303AGR_OpStatus LSM303AGR_MAG_IO_ReadByte(uint8_t RegisterAddr, uint8_t* valu
     return LSM303AGR_MAG_IO_Read(RegisterAddr, value, 1);
 }
 
-LSM303AGR_OpStatus LSM303AGR_MAG_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
+LSM303AGR_OpResult LSM303AGR_MAG_IO_WriteByte(uint8_t RegisterAddr, uint8_t value)
 {
     return LSM303AGR_MAG_IO_Write(RegisterAddr, &value, 1);
 }

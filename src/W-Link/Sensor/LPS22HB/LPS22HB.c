@@ -56,12 +56,12 @@
 static uint8_t isEnabled;
 static float Last_ODR;
 
-LPS22HB_OpStatus LPS22HB_SetODR_When_Enabled(float odr);
-LPS22HB_OpStatus LPS22HB_SetODR_When_Disabled(float odr);
+LPS22HB_OpResult LPS22HB_SetODR_When_Enabled(float odr);
+LPS22HB_OpResult LPS22HB_SetODR_When_Disabled(float odr);
 
-LPS22HB_OpStatus LPS22HB_Init(void)
+LPS22HB_OpResult LPS22HB_Init(void)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   op_status = LPS22HB_Set_PowerMode(LPS22HB_LowPower);
   if(op_status < LPS22HB_OK)
@@ -107,9 +107,9 @@ LPS22HB_OpStatus LPS22HB_Init(void)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_DeInit(void)
+LPS22HB_OpResult LPS22HB_DeInit(void)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   /* Disable pressure and temperature sensor */
 
@@ -122,9 +122,9 @@ LPS22HB_OpStatus LPS22HB_DeInit(void)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Enable(void)
+LPS22HB_OpResult LPS22HB_Enable(void)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   /* Check if the component is already enabled */
   if ( isEnabled == 1 )
@@ -142,9 +142,9 @@ LPS22HB_OpStatus LPS22HB_Enable(void)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Disable(void)
+LPS22HB_OpResult LPS22HB_Disable(void)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   /* Check if the component is already disabled */
   if ( isEnabled == 0 )
@@ -164,9 +164,9 @@ LPS22HB_OpStatus LPS22HB_Disable(void)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_ReadID(uint8_t *p_id)
+LPS22HB_OpResult LPS22HB_ReadID(uint8_t *p_id)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   if(!p_id)
   {
@@ -183,9 +183,9 @@ LPS22HB_OpStatus LPS22HB_ReadID(uint8_t *p_id)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Reset(void)
+LPS22HB_OpResult LPS22HB_Reset(void)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   /* Read WHO AM I register */
   op_status = LPS22HB_MemoryBoot();
@@ -197,9 +197,9 @@ LPS22HB_OpStatus LPS22HB_Reset(void)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_GetPressure(float* pfData)
+LPS22HB_OpResult LPS22HB_GetPressure(float* pfData)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   int32_t int32data = 0;
 
@@ -215,9 +215,9 @@ LPS22HB_OpStatus LPS22HB_GetPressure(float* pfData)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_GetTemperature(float *pfData)
+LPS22HB_OpResult LPS22HB_GetTemperature(float *pfData)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   int16_t int16data = 0;
 
@@ -233,9 +233,9 @@ LPS22HB_OpStatus LPS22HB_GetTemperature(float *pfData)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_GetODR(float* odr)
+LPS22HB_OpResult LPS22HB_GetODR(float* odr)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   LPS22HB_Odr_et odr_low_level;
 
@@ -273,9 +273,9 @@ LPS22HB_OpStatus LPS22HB_GetODR(float* odr)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_SetODR(float odr)
+LPS22HB_OpResult LPS22HB_SetODR(float odr)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   if(isEnabled == 1)
   {
@@ -297,9 +297,9 @@ LPS22HB_OpStatus LPS22HB_SetODR(float odr)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_SetODR_When_Enabled(float odr)
+LPS22HB_OpResult LPS22HB_SetODR_When_Enabled(float odr)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   LPS22HB_Odr_et new_odr;
 
@@ -324,7 +324,7 @@ LPS22HB_OpStatus LPS22HB_SetODR_When_Enabled(float odr)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_SetODR_When_Disabled(float odr)
+LPS22HB_OpResult LPS22HB_SetODR_When_Disabled(float odr)
 {
   Last_ODR = ( odr <=  1.0f ) ? 1.0f
            : ( odr <= 10.0f ) ? 10.0f

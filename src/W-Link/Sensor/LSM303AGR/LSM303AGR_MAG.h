@@ -53,20 +53,20 @@
 extern "C" {
 #endif
 
-LSM303AGR_OpStatus LSM303AGR_MAG_Init(void);
-LSM303AGR_OpStatus LSM303AGR_MAG_DeInit(void);
-LSM303AGR_OpStatus LSM303AGR_MAG_Enable(void);
-LSM303AGR_OpStatus LSM303AGR_MAG_Disable(void);
-LSM303AGR_OpStatus LSM303AGR_MAG_ReadID(uint8_t *p_id);
-LSM303AGR_OpStatus LSM303AGR_MAG_GetAxes(int32_t *pData);
-LSM303AGR_OpStatus LSM303AGR_MAG_GetSensitivity (float *pfData);
-LSM303AGR_OpStatus LSM303AGR_MAG_GetAxesRaw(int16_t *pData);
-LSM303AGR_OpStatus LSM303AGR_MAG_GetODR(float *odr);
-LSM303AGR_OpStatus LSM303AGR_MAG_SetODR(float odr);
-LSM303AGR_OpStatus LSM303AGR_MAG_GetFS(float *fullScale);
-LSM303AGR_OpStatus LSM303AGR_MAG_SetFS(float fullScale);
-LSM303AGR_OpStatus LSM303AGR_MAG_ReadReg(uint8_t reg, uint8_t *data);
-LSM303AGR_OpStatus LSM303AGR_MAG_WriteReg(uint8_t reg, uint8_t data);
+LSM303AGR_OpResult LSM303AGR_MAG_Init(void);
+LSM303AGR_OpResult LSM303AGR_MAG_DeInit(void);
+LSM303AGR_OpResult LSM303AGR_MAG_Enable(void);
+LSM303AGR_OpResult LSM303AGR_MAG_Disable(void);
+LSM303AGR_OpResult LSM303AGR_MAG_ReadID(uint8_t *p_id);
+LSM303AGR_OpResult LSM303AGR_MAG_GetAxes(int32_t *pData);
+LSM303AGR_OpResult LSM303AGR_MAG_GetSensitivity (float *pfData);
+LSM303AGR_OpResult LSM303AGR_MAG_GetAxesRaw(int16_t *pData);
+LSM303AGR_OpResult LSM303AGR_MAG_GetODR(float *odr);
+LSM303AGR_OpResult LSM303AGR_MAG_SetODR(float odr);
+LSM303AGR_OpResult LSM303AGR_MAG_GetFS(float *fullScale);
+LSM303AGR_OpResult LSM303AGR_MAG_SetFS(float fullScale);
+LSM303AGR_OpResult LSM303AGR_MAG_ReadReg(uint8_t reg, uint8_t *data);
+LSM303AGR_OpResult LSM303AGR_MAG_WriteReg(uint8_t reg, uint8_t data);
 
 #ifdef __cplusplus
 }

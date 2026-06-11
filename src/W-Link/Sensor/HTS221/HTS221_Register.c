@@ -53,9 +53,9 @@
 #include "HTS221_Register_Def.h"
 #include "HTS221_Register.h"
 
-HTS221_OpStatus HTS221_ReadReg(uint8_t RegAddr, uint16_t NumByteToRead, uint8_t *p_data)
+HTS221_OpResult HTS221_ReadReg(uint8_t RegAddr, uint16_t NumByteToRead, uint8_t *p_data)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   if ( NumByteToRead > 1 ) RegAddr |= 0x80;
 
@@ -68,9 +68,9 @@ HTS221_OpStatus HTS221_ReadReg(uint8_t RegAddr, uint16_t NumByteToRead, uint8_t 
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_WriteReg(uint8_t RegAddr, uint16_t NumByteToWrite, uint8_t *p_data)
+HTS221_OpResult HTS221_WriteReg(uint8_t RegAddr, uint16_t NumByteToWrite, uint8_t *p_data)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   if ( NumByteToWrite > 1 ) RegAddr |= 0x80;
 
@@ -83,7 +83,7 @@ HTS221_OpStatus HTS221_WriteReg(uint8_t RegAddr, uint16_t NumByteToWrite, uint8_
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_DriverVersion(HTS221_DriverVersion_st* version)
+HTS221_OpResult HTS221_Get_DriverVersion(HTS221_DriverVersion_st* version)
 {
   version->Major = HTS221_DRIVER_VERSION_MAJOR;
   version->Minor = HTS221_DRIVER_VERSION_MINOR;
@@ -92,9 +92,9 @@ HTS221_OpStatus HTS221_Get_DriverVersion(HTS221_DriverVersion_st* version)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_DeviceID(uint8_t* deviceid)
+HTS221_OpResult HTS221_Get_DeviceID(uint8_t* deviceid)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   op_status = HTS221_ReadReg(HTS221_WHO_AM_I_REG, 1, deviceid);
   if(op_status < HTS221_OK)
@@ -105,9 +105,9 @@ HTS221_OpStatus HTS221_Get_DeviceID(uint8_t* deviceid)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_InitConfig(HTS221_Init_st* pxInit)
+HTS221_OpResult HTS221_Set_InitConfig(HTS221_Init_st* pxInit)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t buffer[3];
 
@@ -154,9 +154,9 @@ HTS221_OpStatus HTS221_Set_InitConfig(HTS221_Init_st* pxInit)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_InitConfig(HTS221_Init_st* pxInit)
+HTS221_OpResult HTS221_Get_InitConfig(HTS221_Init_st* pxInit)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t buffer[3];
 
@@ -186,9 +186,9 @@ HTS221_OpStatus HTS221_Get_InitConfig(HTS221_Init_st* pxInit)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Clear_InitConfig()
+HTS221_OpResult HTS221_Clear_InitConfig()
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t buffer[4];
 
@@ -220,9 +220,9 @@ HTS221_OpStatus HTS221_Clear_InitConfig()
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_Measurement(uint16_t* humidity, int16_t* temperature)
+HTS221_OpResult HTS221_Get_Measurement(uint16_t* humidity, int16_t* temperature)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   op_status = HTS221_Get_Temperature( temperature );
   if(op_status < HTS221_OK)
@@ -238,9 +238,9 @@ HTS221_OpStatus HTS221_Get_Measurement(uint16_t* humidity, int16_t* temperature)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_RawMeasurement(int16_t* humidity, int16_t* temperature)
+HTS221_OpResult HTS221_Get_RawMeasurement(int16_t* humidity, int16_t* temperature)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t buffer[4];
 
@@ -256,9 +256,9 @@ HTS221_OpStatus HTS221_Get_RawMeasurement(int16_t* humidity, int16_t* temperatur
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_Humidity(uint16_t* value)
+HTS221_OpResult HTS221_Get_Humidity(uint16_t* value)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   int16_t H0_T0_out, H1_T0_out, H_T_out;
   int16_t H0_rh, H1_rh;
@@ -308,9 +308,9 @@ HTS221_OpStatus HTS221_Get_Humidity(uint16_t* value)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_HumidityRaw(int16_t* value)
+HTS221_OpResult HTS221_Get_HumidityRaw(int16_t* value)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t buffer[2];
 
@@ -325,9 +325,9 @@ HTS221_OpStatus HTS221_Get_HumidityRaw(int16_t* value)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_Temperature(int16_t *value)
+HTS221_OpResult HTS221_Get_Temperature(int16_t *value)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   int16_t T0_out, T1_out, T_out, T0_degC_x8_u16, T1_degC_x8_u16;
   int16_t T0_degC, T1_degC;
@@ -375,9 +375,9 @@ HTS221_OpStatus HTS221_Get_Temperature(int16_t *value)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_TemperatureRaw(int16_t* value)
+HTS221_OpResult HTS221_Get_TemperatureRaw(int16_t* value)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t buffer[2];
 
@@ -392,9 +392,9 @@ HTS221_OpStatus HTS221_Get_TemperatureRaw(int16_t* value)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_DataStatus(HTS221_BitStatus_et* humidity, HTS221_BitStatus_et* temperature)
+HTS221_OpResult HTS221_Get_DataStatus(HTS221_BitStatus_et* humidity, HTS221_BitStatus_et* temperature)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -410,9 +410,9 @@ HTS221_OpStatus HTS221_Get_DataStatus(HTS221_BitStatus_et* humidity, HTS221_BitS
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Activate()
+HTS221_OpResult HTS221_Activate()
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -433,9 +433,9 @@ HTS221_OpStatus HTS221_Activate()
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_DeActivate()
+HTS221_OpResult HTS221_DeActivate()
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -456,9 +456,9 @@ HTS221_OpStatus HTS221_DeActivate()
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_IsMeasurementCompleted(HTS221_BitStatus_et* Is_Measurement_Completed)
+HTS221_OpResult HTS221_IsMeasurementCompleted(HTS221_BitStatus_et* Is_Measurement_Completed)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -476,9 +476,9 @@ HTS221_OpStatus HTS221_IsMeasurementCompleted(HTS221_BitStatus_et* Is_Measuremen
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_AvgHT(HTS221_Avgh_et avgh, HTS221_Avgt_et avgt)
+HTS221_OpResult HTS221_Set_AvgHT(HTS221_Avgh_et avgh, HTS221_Avgt_et avgt)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -501,9 +501,9 @@ HTS221_OpStatus HTS221_Set_AvgHT(HTS221_Avgh_et avgh, HTS221_Avgt_et avgt)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_AvgH(HTS221_Avgh_et avgh)
+HTS221_OpResult HTS221_Set_AvgH(HTS221_Avgh_et avgh)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -525,9 +525,9 @@ HTS221_OpStatus HTS221_Set_AvgH(HTS221_Avgh_et avgh)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_AvgT(HTS221_Avgt_et avgt)
+HTS221_OpResult HTS221_Set_AvgT(HTS221_Avgt_et avgt)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -549,9 +549,9 @@ HTS221_OpStatus HTS221_Set_AvgT(HTS221_Avgt_et avgt)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_AvgHT(HTS221_Avgh_et* avgh, HTS221_Avgt_et* avgt)
+HTS221_OpResult HTS221_Get_AvgHT(HTS221_Avgh_et* avgh, HTS221_Avgt_et* avgt)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -567,9 +567,9 @@ HTS221_OpStatus HTS221_Get_AvgHT(HTS221_Avgh_et* avgh, HTS221_Avgt_et* avgt)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_BduMode(HTS221_State_et status)
+HTS221_OpResult HTS221_Set_BduMode(HTS221_State_et status)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -591,9 +591,9 @@ HTS221_OpStatus HTS221_Set_BduMode(HTS221_State_et status)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_BduMode(HTS221_State_et* status)
+HTS221_OpResult HTS221_Get_BduMode(HTS221_State_et* status)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -608,9 +608,9 @@ HTS221_OpStatus HTS221_Get_BduMode(HTS221_State_et* status)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_PowerDownMode(HTS221_BitStatus_et status)
+HTS221_OpResult HTS221_Set_PowerDownMode(HTS221_BitStatus_et status)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -632,9 +632,9 @@ HTS221_OpStatus HTS221_Set_PowerDownMode(HTS221_BitStatus_et status)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_PowerDownMode(HTS221_BitStatus_et* status)
+HTS221_OpResult HTS221_Get_PowerDownMode(HTS221_BitStatus_et* status)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -649,9 +649,9 @@ HTS221_OpStatus HTS221_Get_PowerDownMode(HTS221_BitStatus_et* status)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_Odr(HTS221_Odr_et odr)
+HTS221_OpResult HTS221_Set_Odr(HTS221_Odr_et odr)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -673,9 +673,9 @@ HTS221_OpStatus HTS221_Set_Odr(HTS221_Odr_et odr)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_Odr(HTS221_Odr_et* odr)
+HTS221_OpResult HTS221_Get_Odr(HTS221_Odr_et* odr)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -691,9 +691,9 @@ HTS221_OpStatus HTS221_Get_Odr(HTS221_Odr_et* odr)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_MemoryBoot()
+HTS221_OpResult HTS221_MemoryBoot()
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -714,9 +714,9 @@ HTS221_OpStatus HTS221_MemoryBoot()
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_HeaterState(HTS221_State_et status)
+HTS221_OpResult HTS221_Set_HeaterState(HTS221_State_et status)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -738,9 +738,9 @@ HTS221_OpStatus HTS221_Set_HeaterState(HTS221_State_et status)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_HeaterState(HTS221_State_et* status)
+HTS221_OpResult HTS221_Get_HeaterState(HTS221_State_et* status)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -755,9 +755,9 @@ HTS221_OpStatus HTS221_Get_HeaterState(HTS221_State_et* status)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_StartOneShotMeasurement()
+HTS221_OpResult HTS221_StartOneShotMeasurement()
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -779,9 +779,9 @@ HTS221_OpStatus HTS221_StartOneShotMeasurement()
 
 }
 
-HTS221_OpStatus HTS221_Set_IrqActiveLevel(HTS221_DrdyLevel_et value)
+HTS221_OpResult HTS221_Set_IrqActiveLevel(HTS221_DrdyLevel_et value)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -803,9 +803,9 @@ HTS221_OpStatus HTS221_Set_IrqActiveLevel(HTS221_DrdyLevel_et value)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_IrqActiveLevel(HTS221_DrdyLevel_et* value)
+HTS221_OpResult HTS221_Get_IrqActiveLevel(HTS221_DrdyLevel_et* value)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -820,9 +820,9 @@ HTS221_OpStatus HTS221_Get_IrqActiveLevel(HTS221_DrdyLevel_et* value)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_IrqOutputType(HTS221_OutputType_et value)
+HTS221_OpResult HTS221_Set_IrqOutputType(HTS221_OutputType_et value)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -844,9 +844,9 @@ HTS221_OpStatus HTS221_Set_IrqOutputType(HTS221_OutputType_et value)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_IrqOutputType(HTS221_OutputType_et* value)
+HTS221_OpResult HTS221_Get_IrqOutputType(HTS221_OutputType_et* value)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -861,9 +861,9 @@ HTS221_OpStatus HTS221_Get_IrqOutputType(HTS221_OutputType_et* value)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Set_IrqEnable(HTS221_State_et status)
+HTS221_OpResult HTS221_Set_IrqEnable(HTS221_State_et status)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 
@@ -885,9 +885,9 @@ HTS221_OpStatus HTS221_Set_IrqEnable(HTS221_State_et status)
   return HTS221_OK;
 }
 
-HTS221_OpStatus HTS221_Get_IrqEnable(HTS221_State_et* status)
+HTS221_OpResult HTS221_Get_IrqEnable(HTS221_State_et* status)
 {
-  HTS221_OpStatus op_status;
+  HTS221_OpResult op_status;
   
   uint8_t tmp;
 

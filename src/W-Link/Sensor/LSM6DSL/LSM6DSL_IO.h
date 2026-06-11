@@ -58,27 +58,27 @@ typedef void (*LSM6DSL_IO_Event_IRQ)(LSM6DSL_Interrupt_Index index);
 
 /* Functions -----------------------------------------------------------------*/
 
-LSM6DSL_OpStatus LSM6DSL_Register_Interrupt_Handler(LSM6DSL_IO_Event_IRQ irq_callback);
-LSM6DSL_OpStatus LSM6DSL_UnRegister_Interrupt_Handler(void);
+LSM6DSL_OpResult LSM6DSL_Register_Interrupt_Handler(LSM6DSL_IO_Event_IRQ irq_callback);
+LSM6DSL_OpResult LSM6DSL_UnRegister_Interrupt_Handler(void);
 
-LSM6DSL_OpStatus LSM6DSL_IO_Read(
+LSM6DSL_OpResult LSM6DSL_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 );
 
-LSM6DSL_OpStatus LSM6DSL_IO_Write(
+LSM6DSL_OpResult LSM6DSL_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 );
 
-LSM6DSL_OpStatus LSM6DSL_IO_ReadByte(
+LSM6DSL_OpResult LSM6DSL_IO_ReadByte(
     uint8_t RegisterAddr,
     uint8_t* value
 );
 
-LSM6DSL_OpStatus LSM6DSL_IO_WriteByte(
+LSM6DSL_OpResult LSM6DSL_IO_WriteByte(
     uint8_t RegisterAddr,
     uint8_t value
 );

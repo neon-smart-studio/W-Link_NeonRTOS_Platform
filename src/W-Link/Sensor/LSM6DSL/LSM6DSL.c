@@ -58,14 +58,14 @@ static float X_Last_ODR;
 static uint8_t G_isEnabled;
 static float G_Last_ODR;
 
-LSM6DSL_OpStatus LSM6DSL_Set_X_ODR_When_Enabled(float odr);
-LSM6DSL_OpStatus LSM6DSL_Set_X_ODR_When_Disabled(float odr);
-LSM6DSL_OpStatus LSM6DSL_Set_G_ODR_When_Enabled(float odr);
-LSM6DSL_OpStatus LSM6DSL_Set_G_ODR_When_Disabled(float odr);
+LSM6DSL_OpResult LSM6DSL_Set_X_ODR_When_Enabled(float odr);
+LSM6DSL_OpResult LSM6DSL_Set_X_ODR_When_Disabled(float odr);
+LSM6DSL_OpResult LSM6DSL_Set_G_ODR_When_Enabled(float odr);
+LSM6DSL_OpResult LSM6DSL_Set_G_ODR_When_Disabled(float odr);
 
-LSM6DSL_OpStatus LSM6DSL_Init()
+LSM6DSL_OpResult LSM6DSL_Init()
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Enable register address automatically incremented during a multiple byte
      access with a serial interface. */
@@ -128,9 +128,9 @@ LSM6DSL_OpStatus LSM6DSL_Init()
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_DeInit()
+LSM6DSL_OpResult LSM6DSL_DeInit()
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Disable both acc and gyro */
   op_status = LSM6DSL_Disable_X();
@@ -148,9 +148,9 @@ LSM6DSL_OpStatus LSM6DSL_DeInit()
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Enable_X(void)
+LSM6DSL_OpResult LSM6DSL_Enable_X(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Check if the component is already enabled */
   if (X_isEnabled == 1)
@@ -170,9 +170,9 @@ LSM6DSL_OpStatus LSM6DSL_Enable_X(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Enable_G(void)
+LSM6DSL_OpResult LSM6DSL_Enable_G(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Check if the component is already enabled */
   if (G_isEnabled == 1)
@@ -192,9 +192,9 @@ LSM6DSL_OpStatus LSM6DSL_Enable_G(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Disable_X(void)
+LSM6DSL_OpResult LSM6DSL_Disable_X(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Check if the component is already disabled */
   if (X_isEnabled == 0)
@@ -221,9 +221,9 @@ LSM6DSL_OpStatus LSM6DSL_Disable_X(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Disable_G(void)
+LSM6DSL_OpResult LSM6DSL_Disable_G(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Check if the component is already disabled */
   if (G_isEnabled == 0)
@@ -250,9 +250,9 @@ LSM6DSL_OpStatus LSM6DSL_Disable_G(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ReadID(uint8_t *p_id)
+LSM6DSL_OpResult LSM6DSL_ReadID(uint8_t *p_id)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   if(!p_id)
   {
@@ -269,9 +269,9 @@ LSM6DSL_OpStatus LSM6DSL_ReadID(uint8_t *p_id)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_X_Axes(int32_t *pData)
+LSM6DSL_OpResult LSM6DSL_Get_X_Axes(int32_t *pData)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   int16_t dataRaw[3];
   float sensitivity = 0;
@@ -298,9 +298,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_X_Axes(int32_t *pData)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_G_Axes(int32_t *pData)
+LSM6DSL_OpResult LSM6DSL_Get_G_Axes(int32_t *pData)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   int16_t dataRaw[3];
   float sensitivity = 0;
@@ -327,9 +327,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_G_Axes(int32_t *pData)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_X_Sensitivity(float *pfData)
+LSM6DSL_OpResult LSM6DSL_Get_X_Sensitivity(float *pfData)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_FS_XL_t fullScale;
 
@@ -363,9 +363,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_X_Sensitivity(float *pfData)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_G_Sensitivity(float *pfData)
+LSM6DSL_OpResult LSM6DSL_Get_G_Sensitivity(float *pfData)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_FS_125_t fullScale125;
   LSM6DSL_ACC_GYRO_FS_G_t   fullScale;
@@ -415,9 +415,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_G_Sensitivity(float *pfData)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_X_AxesRaw(int16_t *pData)
+LSM6DSL_OpResult LSM6DSL_Get_X_AxesRaw(int16_t *pData)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t regValue[6] = {0, 0, 0, 0, 0, 0};
 
@@ -436,9 +436,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_X_AxesRaw(int16_t *pData)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_G_AxesRaw(int16_t *pData)
+LSM6DSL_OpResult LSM6DSL_Get_G_AxesRaw(int16_t *pData)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t regValue[6] = {0, 0, 0, 0, 0, 0};
 
@@ -457,9 +457,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_G_AxesRaw(int16_t *pData)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_X_ODR(float* odr)
+LSM6DSL_OpResult LSM6DSL_Get_X_ODR(float* odr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_ODR_XL_t odr_low_level;
 
@@ -512,9 +512,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_X_ODR(float* odr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_G_ODR(float* odr)
+LSM6DSL_OpResult LSM6DSL_Get_G_ODR(float* odr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_ODR_G_t odr_low_level;
 
@@ -567,9 +567,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_G_ODR(float* odr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_X_ODR(float odr)
+LSM6DSL_OpResult LSM6DSL_Set_X_ODR(float odr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   if(X_isEnabled == 1)
   {
@@ -591,9 +591,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_X_ODR(float odr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_X_ODR_When_Enabled(float odr)
+LSM6DSL_OpResult LSM6DSL_Set_X_ODR_When_Enabled(float odr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_ODR_XL_t new_odr;
 
@@ -617,9 +617,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_X_ODR_When_Enabled(float odr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_X_ODR_When_Disabled(float odr)
+LSM6DSL_OpResult LSM6DSL_Set_X_ODR_When_Disabled(float odr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   X_Last_ODR = (odr <=   13.0f) ? 13.0f
              : (odr <=   26.0f) ? 26.0f
@@ -635,9 +635,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_X_ODR_When_Disabled(float odr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_G_ODR(float odr)
+LSM6DSL_OpResult LSM6DSL_Set_G_ODR(float odr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   if(G_isEnabled == 1)
   {
@@ -659,9 +659,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_G_ODR(float odr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_G_ODR_When_Enabled(float odr)
+LSM6DSL_OpResult LSM6DSL_Set_G_ODR_When_Enabled(float odr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_ODR_G_t new_odr;
 
@@ -685,9 +685,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_G_ODR_When_Enabled(float odr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_G_ODR_When_Disabled(float odr)
+LSM6DSL_OpResult LSM6DSL_Set_G_ODR_When_Disabled(float odr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   G_Last_ODR = (odr <=  13.0f)  ? 13.0f
              : (odr <=  26.0f)  ? 26.0f
@@ -703,9 +703,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_G_ODR_When_Disabled(float odr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_X_FS(float* fullScale)
+LSM6DSL_OpResult LSM6DSL_Get_X_FS(float* fullScale)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_FS_XL_t fs_low_level;
 
@@ -737,9 +737,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_X_FS(float* fullScale)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_G_FS(float* fullScale)
+LSM6DSL_OpResult LSM6DSL_Get_G_FS(float* fullScale)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_FS_G_t fs_low_level;
   LSM6DSL_ACC_GYRO_FS_125_t fs_125;
@@ -785,9 +785,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_G_FS(float* fullScale)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_X_FS(float fullScale)
+LSM6DSL_OpResult LSM6DSL_Set_X_FS(float fullScale)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_FS_XL_t new_fs;
 
@@ -805,9 +805,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_X_FS(float fullScale)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_G_FS(float fullScale)
+LSM6DSL_OpResult LSM6DSL_Set_G_FS(float fullScale)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_FS_G_t new_fs;
 
@@ -841,9 +841,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_G_FS(float fullScale)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Enable_Free_Fall_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
+LSM6DSL_OpResult LSM6DSL_Enable_Free_Fall_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Output Data Rate selection */
   op_status = LSM6DSL_Set_X_ODR(416.0f);
@@ -927,9 +927,9 @@ LSM6DSL_OpStatus LSM6DSL_Enable_Free_Fall_Detection(LSM6DSL_Interrupt_Pin_t int_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Disable_Free_Fall_Detection(void)
+LSM6DSL_OpResult LSM6DSL_Disable_Free_Fall_Detection(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Disable free fall event on INT1 pin */
   op_status = LSM6DSL_ACC_GYRO_W_FFEvOnInt1(LSM6DSL_ACC_GYRO_INT1_FF_DISABLED);
@@ -969,9 +969,9 @@ LSM6DSL_OpStatus LSM6DSL_Disable_Free_Fall_Detection(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_Free_Fall_Threshold(uint8_t thr)
+LSM6DSL_OpResult LSM6DSL_Set_Free_Fall_Threshold(uint8_t thr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
 
   op_status = LSM6DSL_ACC_GYRO_W_FF_THS((LSM6DSL_ACC_GYRO_FF_THS_t)thr);
@@ -983,9 +983,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_Free_Fall_Threshold(uint8_t thr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Enable_Pedometer(void)
+LSM6DSL_OpResult LSM6DSL_Enable_Pedometer(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Output Data Rate selection */
   op_status = LSM6DSL_Set_X_ODR(26.0f);
@@ -1032,9 +1032,9 @@ LSM6DSL_OpStatus LSM6DSL_Enable_Pedometer(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Disable_Pedometer(void)
+LSM6DSL_OpResult LSM6DSL_Disable_Pedometer(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Disable pedometer on INT1. */
   op_status = LSM6DSL_ACC_GYRO_W_STEP_DET_on_INT1(LSM6DSL_ACC_GYRO_INT1_PEDO_DISABLED);
@@ -1067,9 +1067,9 @@ LSM6DSL_OpStatus LSM6DSL_Disable_Pedometer(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_Step_Counter(uint16_t *step_count)
+LSM6DSL_OpResult LSM6DSL_Get_Step_Counter(uint16_t *step_count)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_Get_GetStepCounter((uint8_t*)step_count);
   if(op_status < LSM6DSL_OK)
@@ -1080,9 +1080,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_Step_Counter(uint16_t *step_count)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Reset_Step_Counter(void)
+LSM6DSL_OpResult LSM6DSL_Reset_Step_Counter(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_W_PedoStepReset(LSM6DSL_ACC_GYRO_PEDO_RST_STEP_ENABLED);
   if(op_status < LSM6DSL_OK)
@@ -1101,9 +1101,9 @@ LSM6DSL_OpStatus LSM6DSL_Reset_Step_Counter(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_Pedometer_Threshold(uint8_t thr)
+LSM6DSL_OpResult LSM6DSL_Set_Pedometer_Threshold(uint8_t thr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_W_PedoThreshold(thr);
   if(op_status < LSM6DSL_OK)
@@ -1114,9 +1114,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_Pedometer_Threshold(uint8_t thr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Enable_Tilt_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
+LSM6DSL_OpResult LSM6DSL_Enable_Tilt_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Output Data Rate selection */
   op_status = LSM6DSL_Set_X_ODR(26.0f);
@@ -1172,9 +1172,9 @@ LSM6DSL_OpStatus LSM6DSL_Enable_Tilt_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Disable_Tilt_Detection(void)
+LSM6DSL_OpResult LSM6DSL_Disable_Tilt_Detection(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Disable tilt event on INT1. */
   op_status = LSM6DSL_ACC_GYRO_W_TiltEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TILT_DISABLED);
@@ -1207,9 +1207,9 @@ LSM6DSL_OpStatus LSM6DSL_Disable_Tilt_Detection(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Enable_Wake_Up_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
+LSM6DSL_OpResult LSM6DSL_Enable_Wake_Up_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Output Data Rate selection */
   op_status = LSM6DSL_Set_X_ODR(416.0f);
@@ -1272,9 +1272,9 @@ LSM6DSL_OpStatus LSM6DSL_Enable_Wake_Up_Detection(LSM6DSL_Interrupt_Pin_t int_pi
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Disable_Wake_Up_Detection(void)
+LSM6DSL_OpResult LSM6DSL_Disable_Wake_Up_Detection(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Disable wake up event on INT1 */
   op_status = LSM6DSL_ACC_GYRO_W_WUEvOnInt1(LSM6DSL_ACC_GYRO_INT1_WU_DISABLED);
@@ -1314,9 +1314,9 @@ LSM6DSL_OpStatus LSM6DSL_Disable_Wake_Up_Detection(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_Wake_Up_Threshold(uint8_t thr)
+LSM6DSL_OpResult LSM6DSL_Set_Wake_Up_Threshold(uint8_t thr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_W_WK_THS(thr);
   if(op_status < LSM6DSL_OK)
@@ -1327,9 +1327,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_Wake_Up_Threshold(uint8_t thr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Enable_Single_Tap_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
+LSM6DSL_OpResult LSM6DSL_Enable_Single_Tap_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Output Data Rate selection */
   op_status = LSM6DSL_Set_X_ODR(416.0f);
@@ -1424,9 +1424,9 @@ LSM6DSL_OpStatus LSM6DSL_Enable_Single_Tap_Detection(LSM6DSL_Interrupt_Pin_t int
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Disable_Single_Tap_Detection(void)
+LSM6DSL_OpResult LSM6DSL_Disable_Single_Tap_Detection(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Disable single tap interrupt on INT1 pin. */
   op_status = LSM6DSL_ACC_GYRO_W_SingleTapOnInt1(LSM6DSL_ACC_GYRO_INT1_SINGLE_TAP_DISABLED);
@@ -1498,9 +1498,9 @@ LSM6DSL_OpStatus LSM6DSL_Disable_Single_Tap_Detection(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Enable_Double_Tap_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
+LSM6DSL_OpResult LSM6DSL_Enable_Double_Tap_Detection(LSM6DSL_Interrupt_Pin_t int_pin)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Output Data Rate selection */
   op_status = LSM6DSL_Set_X_ODR(416.0f);
@@ -1605,9 +1605,9 @@ LSM6DSL_OpStatus LSM6DSL_Enable_Double_Tap_Detection(LSM6DSL_Interrupt_Pin_t int
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Disable_Double_Tap_Detection(void)
+LSM6DSL_OpResult LSM6DSL_Disable_Double_Tap_Detection(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Disable double tap interrupt on INT1 pin. */
   op_status = LSM6DSL_ACC_GYRO_W_TapEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TAP_DISABLED);
@@ -1689,9 +1689,9 @@ LSM6DSL_OpStatus LSM6DSL_Disable_Double_Tap_Detection(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_Tap_Threshold(uint8_t thr)
+LSM6DSL_OpResult LSM6DSL_Set_Tap_Threshold(uint8_t thr)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_W_TAP_THS(thr);
   if(op_status < LSM6DSL_OK)
@@ -1702,9 +1702,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_Tap_Threshold(uint8_t thr)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_Tap_Shock_Time(uint8_t time)
+LSM6DSL_OpResult LSM6DSL_Set_Tap_Shock_Time(uint8_t time)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_W_SHOCK_Duration(time);
   if(op_status < LSM6DSL_OK)
@@ -1715,9 +1715,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_Tap_Shock_Time(uint8_t time)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_Tap_Quiet_Time(uint8_t time)
+LSM6DSL_OpResult LSM6DSL_Set_Tap_Quiet_Time(uint8_t time)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_W_QUIET_Duration(time);
   if(op_status < LSM6DSL_OK)
@@ -1728,9 +1728,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_Tap_Quiet_Time(uint8_t time)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Set_Tap_Duration_Time(uint8_t time)
+LSM6DSL_OpResult LSM6DSL_Set_Tap_Duration_Time(uint8_t time)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_W_DUR(time);
   if(op_status < LSM6DSL_OK)
@@ -1741,9 +1741,9 @@ LSM6DSL_OpStatus LSM6DSL_Set_Tap_Duration_Time(uint8_t time)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Enable_6D_Orientation(LSM6DSL_Interrupt_Pin_t int_pin)
+LSM6DSL_OpResult LSM6DSL_Enable_6D_Orientation(LSM6DSL_Interrupt_Pin_t int_pin)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Output Data Rate selection */
   op_status = LSM6DSL_Set_X_ODR(416.0f);
@@ -1799,9 +1799,9 @@ LSM6DSL_OpStatus LSM6DSL_Enable_6D_Orientation(LSM6DSL_Interrupt_Pin_t int_pin)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Disable_6D_Orientation(void)
+LSM6DSL_OpResult LSM6DSL_Disable_6D_Orientation(void)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Disable 6D orientation interrupt on INT1 pin. */
   op_status = LSM6DSL_ACC_GYRO_W_6DEvOnInt1(LSM6DSL_ACC_GYRO_INT1_6D_DISABLED);
@@ -1834,9 +1834,9 @@ LSM6DSL_OpStatus LSM6DSL_Disable_6D_Orientation(void)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_XL(uint8_t *xl)
+LSM6DSL_OpResult LSM6DSL_Get_6D_Orientation_XL(uint8_t *xl)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_DSD_XL_t xl_raw;
 
@@ -1861,9 +1861,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_XL(uint8_t *xl)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_XH(uint8_t *xh)
+LSM6DSL_OpResult LSM6DSL_Get_6D_Orientation_XH(uint8_t *xh)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_DSD_XH_t xh_raw;
 
@@ -1888,9 +1888,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_XH(uint8_t *xh)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_YL(uint8_t *yl)
+LSM6DSL_OpResult LSM6DSL_Get_6D_Orientation_YL(uint8_t *yl)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_DSD_YL_t yl_raw;
 
@@ -1915,9 +1915,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_YL(uint8_t *yl)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_YH(uint8_t *yh)
+LSM6DSL_OpResult LSM6DSL_Get_6D_Orientation_YH(uint8_t *yh)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_DSD_YH_t yh_raw;
 
@@ -1942,9 +1942,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_YH(uint8_t *yh)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_ZL(uint8_t *zl)
+LSM6DSL_OpResult LSM6DSL_Get_6D_Orientation_ZL(uint8_t *zl)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_DSD_ZL_t zl_raw;
 
@@ -1969,9 +1969,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_ZL(uint8_t *zl)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_ZH(uint8_t *zh)
+LSM6DSL_OpResult LSM6DSL_Get_6D_Orientation_ZH(uint8_t *zh)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_DSD_ZH_t zh_raw;
 
@@ -1996,9 +1996,9 @@ LSM6DSL_OpStatus LSM6DSL_Get_6D_Orientation_ZH(uint8_t *zh)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_Get_Event_Status(LSM6DSL_Event_Status_t *status)
+LSM6DSL_OpResult LSM6DSL_Get_Event_Status(LSM6DSL_Event_Status_t *status)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t Wake_Up_Src = 0, Tap_Src = 0, D6D_Src = 0, Func_Src = 0, Md1_Cfg = 0, Md2_Cfg = 0, Int1_Ctrl = 0;
 

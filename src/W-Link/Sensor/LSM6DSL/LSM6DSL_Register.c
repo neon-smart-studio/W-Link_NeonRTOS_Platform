@@ -68,9 +68,9 @@ typedef union{
 	uint8_t u8bit[4];
 } Type1Axis32bit_U;
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_ReadReg(uint8_t reg, uint8_t* p_data, uint16_t len)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_ReadReg(uint8_t reg, uint8_t* p_data, uint16_t len)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_IO_Read(reg, p_data, len);
 
@@ -82,9 +82,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_ReadReg(uint8_t reg, uint8_t* p_data, uint16_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_WriteReg(uint8_t reg, uint8_t *p_data, uint16_t len)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_WriteReg(uint8_t reg, uint8_t *p_data, uint16_t len)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_IO_Write(reg, p_data, len);
 
@@ -96,9 +96,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_WriteReg(uint8_t reg, uint8_t *p_data, uint16_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WHO_AM_I(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_WHO_AM_I(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WHO_AM_I_REG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -112,9 +112,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WHO_AM_I(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BDU(LSM6DSL_ACC_GYRO_BDU_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_BDU(LSM6DSL_ACC_GYRO_BDU_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -136,9 +136,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BDU(LSM6DSL_ACC_GYRO_BDU_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BDU(LSM6DSL_ACC_GYRO_BDU_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_BDU(LSM6DSL_ACC_GYRO_BDU_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL3_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -151,9 +151,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BDU(LSM6DSL_ACC_GYRO_BDU_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FS_XL(LSM6DSL_ACC_GYRO_FS_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FS_XL(LSM6DSL_ACC_GYRO_FS_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -175,9 +175,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FS_XL(LSM6DSL_ACC_GYRO_FS_XL_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FS_XL(LSM6DSL_ACC_GYRO_FS_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FS_XL(LSM6DSL_ACC_GYRO_FS_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL1_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -190,9 +190,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FS_XL(LSM6DSL_ACC_GYRO_FS_XL_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_GetRawAccData(uint8_t *buff)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_GetRawAccData(uint8_t *buff)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t i, j, k;
   uint8_t numberOfByteForDimension;
@@ -227,9 +227,9 @@ static const long long LSM6DSL_ACC_Sensitivity_List[4] = {
       244,	/* FS @8g */
       488,	/* FS @16g */
 };
-LSM6DSL_OpStatus LSM6DSL_ACC_Get_Acceleration(int *buff, bool from_fifo)
+LSM6DSL_OpResult LSM6DSL_ACC_Get_Acceleration(int *buff, bool from_fifo)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_FS_XL_t fs;
   long long sensitivity = 0;
@@ -294,9 +294,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_Get_Acceleration(int *buff, bool from_fifo)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ODR_XL(LSM6DSL_ACC_GYRO_ODR_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_ODR_XL(LSM6DSL_ACC_GYRO_ODR_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -318,9 +318,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ODR_XL(LSM6DSL_ACC_GYRO_ODR_XL_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ODR_XL(LSM6DSL_ACC_GYRO_ODR_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_ODR_XL(LSM6DSL_ACC_GYRO_ODR_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL1_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -333,9 +333,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ODR_XL(LSM6DSL_ACC_GYRO_ODR_XL_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_translate_ODR_XL(LSM6DSL_ACC_GYRO_ODR_XL_t value, uint16_t *odr_hz_val)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_translate_ODR_XL(LSM6DSL_ACC_GYRO_ODR_XL_t value, uint16_t *odr_hz_val)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   switch(value) {
   case LSM6DSL_ACC_GYRO_ODR_XL_POWER_DOWN:
@@ -381,9 +381,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_translate_ODR_XL(LSM6DSL_ACC_GYRO_ODR_XL_t val
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FS_G(LSM6DSL_ACC_GYRO_FS_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FS_G(LSM6DSL_ACC_GYRO_FS_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -405,9 +405,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FS_G(LSM6DSL_ACC_GYRO_FS_G_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FS_G(LSM6DSL_ACC_GYRO_FS_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FS_G(LSM6DSL_ACC_GYRO_FS_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL2_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -420,9 +420,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FS_G(LSM6DSL_ACC_GYRO_FS_G_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_GetRawGyroData(uint8_t *buff)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_GetRawGyroData(uint8_t *buff)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t i, j, k;
   uint8_t numberOfByteForDimension;
@@ -458,9 +458,9 @@ static const long long LSM6DSL_GYRO_Sensitivity_List[5] = {
       35000,	/* FS @1000 */
       70000,	/* FS @2000 */
 };
-LSM6DSL_OpStatus LSM6DSL_ACC_Get_AngularRate(int *buff, uint8_t from_fifo)
+LSM6DSL_OpResult LSM6DSL_ACC_Get_AngularRate(int *buff, uint8_t from_fifo)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_FS_125_t fs_125;
   LSM6DSL_ACC_GYRO_FS_G_t fs;
@@ -512,9 +512,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_Get_AngularRate(int *buff, uint8_t from_fifo)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ODR_G(LSM6DSL_ACC_GYRO_ODR_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_ODR_G(LSM6DSL_ACC_GYRO_ODR_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -536,9 +536,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ODR_G(LSM6DSL_ACC_GYRO_ODR_G_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ODR_G(LSM6DSL_ACC_GYRO_ODR_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_ODR_G(LSM6DSL_ACC_GYRO_ODR_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL2_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -551,9 +551,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ODR_G(LSM6DSL_ACC_GYRO_ODR_G_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_translate_ODR_G(LSM6DSL_ACC_GYRO_ODR_G_t value, uint16_t *odr_hz_val)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_translate_ODR_G(LSM6DSL_ACC_GYRO_ODR_G_t value, uint16_t *odr_hz_val)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   switch(value) {
   case LSM6DSL_ACC_GYRO_ODR_G_POWER_DOWN:
@@ -599,9 +599,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_translate_ODR_G(LSM6DSL_ACC_GYRO_ODR_G_t value
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FS_125(LSM6DSL_ACC_GYRO_FS_125_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FS_125(LSM6DSL_ACC_GYRO_FS_125_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -623,9 +623,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FS_125(LSM6DSL_ACC_GYRO_FS_125_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FS_125(LSM6DSL_ACC_GYRO_FS_125_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FS_125(LSM6DSL_ACC_GYRO_FS_125_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL2_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -638,9 +638,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FS_125(LSM6DSL_ACC_GYRO_FS_125_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BW_SEL(LSM6DSL_ACC_GYRO_BW_SEL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_BW_SEL(LSM6DSL_ACC_GYRO_BW_SEL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -662,9 +662,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BW_SEL(LSM6DSL_ACC_GYRO_BW_SEL_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BW_SEL(LSM6DSL_ACC_GYRO_BW_SEL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_BW_SEL(LSM6DSL_ACC_GYRO_BW_SEL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL1_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -677,9 +677,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BW_SEL(LSM6DSL_ACC_GYRO_BW_SEL_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BLE(LSM6DSL_ACC_GYRO_BLE_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_BLE(LSM6DSL_ACC_GYRO_BLE_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -701,9 +701,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BLE(LSM6DSL_ACC_GYRO_BLE_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BLE(LSM6DSL_ACC_GYRO_BLE_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_BLE(LSM6DSL_ACC_GYRO_BLE_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL3_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -716,9 +716,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BLE(LSM6DSL_ACC_GYRO_BLE_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_EmbeddedAccess(LSM6DSL_ACC_GYRO_EMB_ACC_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_EmbeddedAccess(LSM6DSL_ACC_GYRO_EMB_ACC_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -740,9 +740,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_EmbeddedAccess(LSM6DSL_ACC_GYRO_EMB_ACC_t ne
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_EmbeddedAccess(LSM6DSL_ACC_GYRO_EMB_ACC_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_EmbeddedAccess(LSM6DSL_ACC_GYRO_EMB_ACC_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FUNC_CFG_ACCESS, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -755,9 +755,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_EmbeddedAccess(LSM6DSL_ACC_GYRO_EMB_ACC_t *p
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SYNC_RES_RATIO(LSM6DSL_ACC_GYRO_SYNC_RES_RATIO_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SYNC_RES_RATIO(LSM6DSL_ACC_GYRO_SYNC_RES_RATIO_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -779,9 +779,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SYNC_RES_RATIO(LSM6DSL_ACC_GYRO_SYNC_RES_RAT
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SYNC_RES_RATIO(LSM6DSL_ACC_GYRO_SYNC_RES_RATIO_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SYNC_RES_RATIO(LSM6DSL_ACC_GYRO_SYNC_RES_RATIO_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_SENSOR_RES_RATIO, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -794,9 +794,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SYNC_RES_RATIO(LSM6DSL_ACC_GYRO_SYNC_RES_RAT
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_Stamping_Time_Frame(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_Stamping_Time_Frame(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -821,9 +821,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_Stamping_Time_Frame(uint8_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Stamping_Time_Frame(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_Stamping_Time_Frame(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_SENSOR_SYNC_TIME, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -837,9 +837,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Stamping_Time_Frame(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_Watermark(uint16_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FIFO_Watermark(uint16_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t valueH, valueL;
   uint8_t value;
@@ -888,9 +888,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_Watermark(uint16_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_Watermark(uint16_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FIFO_Watermark(uint16_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t valueH, valueL;
 
@@ -919,9 +919,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_Watermark(uint16_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_TEMP(LSM6DSL_ACC_GYRO_FIFO_TEMP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FIFO_TEMP(LSM6DSL_ACC_GYRO_FIFO_TEMP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -943,9 +943,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_TEMP(LSM6DSL_ACC_GYRO_FIFO_TEMP_t newVa
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_TEMP(LSM6DSL_ACC_GYRO_FIFO_TEMP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FIFO_TEMP(LSM6DSL_ACC_GYRO_FIFO_TEMP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -958,9 +958,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_TEMP(LSM6DSL_ACC_GYRO_FIFO_TEMP_t *p_va
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TIM_PEDO_FIFO_Write_En(LSM6DSL_ACC_GYRO_TIM_PEDO_FIFO_DRDY_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TIM_PEDO_FIFO_Write_En(LSM6DSL_ACC_GYRO_TIM_PEDO_FIFO_DRDY_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -982,9 +982,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TIM_PEDO_FIFO_Write_En(LSM6DSL_ACC_GYRO_TIM_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TIM_PEDO_FIFO_Write_En(LSM6DSL_ACC_GYRO_TIM_PEDO_FIFO_DRDY_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TIM_PEDO_FIFO_Write_En(LSM6DSL_ACC_GYRO_TIM_PEDO_FIFO_DRDY_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -997,9 +997,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TIM_PEDO_FIFO_Write_En(LSM6DSL_ACC_GYRO_TIM_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TIM_PEDO_FIFO_En(LSM6DSL_ACC_GYRO_TIM_PEDO_FIFO_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TIM_PEDO_FIFO_En(LSM6DSL_ACC_GYRO_TIM_PEDO_FIFO_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1021,9 +1021,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TIM_PEDO_FIFO_En(LSM6DSL_ACC_GYRO_TIM_PEDO_F
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TIM_PEDO_FIFO_En(LSM6DSL_ACC_GYRO_TIM_PEDO_FIFO_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TIM_PEDO_FIFO_En(LSM6DSL_ACC_GYRO_TIM_PEDO_FIFO_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1036,9 +1036,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TIM_PEDO_FIFO_En(LSM6DSL_ACC_GYRO_TIM_PEDO_F
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_XL(LSM6DSL_ACC_GYRO_DEC_FIFO_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DEC_FIFO_XL(LSM6DSL_ACC_GYRO_DEC_FIFO_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1060,9 +1060,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_XL(LSM6DSL_ACC_GYRO_DEC_FIFO_XL_t n
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_XL_val(uint16_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DEC_FIFO_XL_val(uint16_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   switch(newValue) {
   case 0:
@@ -1104,9 +1104,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_XL_val(uint16_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEC_FIFO_XL(LSM6DSL_ACC_GYRO_DEC_FIFO_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DEC_FIFO_XL(LSM6DSL_ACC_GYRO_DEC_FIFO_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL3, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1119,9 +1119,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEC_FIFO_XL(LSM6DSL_ACC_GYRO_DEC_FIFO_XL_t *
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_G(LSM6DSL_ACC_GYRO_DEC_FIFO_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DEC_FIFO_G(LSM6DSL_ACC_GYRO_DEC_FIFO_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1143,9 +1143,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_G(LSM6DSL_ACC_GYRO_DEC_FIFO_G_t new
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_G_val(uint16_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DEC_FIFO_G_val(uint16_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   switch(newValue) {
   case 0:
@@ -1187,9 +1187,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_G_val(uint16_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEC_FIFO_G(LSM6DSL_ACC_GYRO_DEC_FIFO_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DEC_FIFO_G(LSM6DSL_ACC_GYRO_DEC_FIFO_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL3, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1202,9 +1202,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEC_FIFO_G(LSM6DSL_ACC_GYRO_DEC_FIFO_G_t *p_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_DS3(LSM6DSL_ACC_GYRO_DEC_FIFO_DS3_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DEC_FIFO_DS3(LSM6DSL_ACC_GYRO_DEC_FIFO_DS3_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1226,9 +1226,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_DS3(LSM6DSL_ACC_GYRO_DEC_FIFO_DS3_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEC_FIFO_DS3(LSM6DSL_ACC_GYRO_DEC_FIFO_DS3_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DEC_FIFO_DS3(LSM6DSL_ACC_GYRO_DEC_FIFO_DS3_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL4, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1241,9 +1241,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEC_FIFO_DS3(LSM6DSL_ACC_GYRO_DEC_FIFO_DS3_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_DS4(LSM6DSL_ACC_GYRO_DEC_FIFO_DS4_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DEC_FIFO_DS4(LSM6DSL_ACC_GYRO_DEC_FIFO_DS4_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1265,9 +1265,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEC_FIFO_DS4(LSM6DSL_ACC_GYRO_DEC_FIFO_DS4_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEC_FIFO_DS4(LSM6DSL_ACC_GYRO_DEC_FIFO_DS4_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DEC_FIFO_DS4(LSM6DSL_ACC_GYRO_DEC_FIFO_DS4_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL4, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1280,9 +1280,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEC_FIFO_DS4(LSM6DSL_ACC_GYRO_DEC_FIFO_DS4_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HI_DATA_ONLY(LSM6DSL_ACC_GYRO_HI_DATA_ONLY_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_HI_DATA_ONLY(LSM6DSL_ACC_GYRO_HI_DATA_ONLY_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1304,9 +1304,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HI_DATA_ONLY(LSM6DSL_ACC_GYRO_HI_DATA_ONLY_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HI_DATA_ONLY(LSM6DSL_ACC_GYRO_HI_DATA_ONLY_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_HI_DATA_ONLY(LSM6DSL_ACC_GYRO_HI_DATA_ONLY_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL4, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1319,9 +1319,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HI_DATA_ONLY(LSM6DSL_ACC_GYRO_HI_DATA_ONLY_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_STOP_ON_FTH(LSM6DSL_ACC_GYRO_STOP_ON_FTH_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_STOP_ON_FTH(LSM6DSL_ACC_GYRO_STOP_ON_FTH_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1343,9 +1343,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_STOP_ON_FTH(LSM6DSL_ACC_GYRO_STOP_ON_FTH_t n
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STOP_ON_FTH(LSM6DSL_ACC_GYRO_STOP_ON_FTH_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_STOP_ON_FTH(LSM6DSL_ACC_GYRO_STOP_ON_FTH_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL4, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1358,9 +1358,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STOP_ON_FTH(LSM6DSL_ACC_GYRO_STOP_ON_FTH_t *
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_MODE(LSM6DSL_ACC_GYRO_FIFO_MODE_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FIFO_MODE(LSM6DSL_ACC_GYRO_FIFO_MODE_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1382,9 +1382,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_MODE(LSM6DSL_ACC_GYRO_FIFO_MODE_t newVa
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_MODE(LSM6DSL_ACC_GYRO_FIFO_MODE_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FIFO_MODE(LSM6DSL_ACC_GYRO_FIFO_MODE_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL5, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1397,9 +1397,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_MODE(LSM6DSL_ACC_GYRO_FIFO_MODE_t *p_va
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ODR_FIFO(LSM6DSL_ACC_GYRO_ODR_FIFO_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_ODR_FIFO(LSM6DSL_ACC_GYRO_ODR_FIFO_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1421,9 +1421,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ODR_FIFO(LSM6DSL_ACC_GYRO_ODR_FIFO_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ODR_FIFO(LSM6DSL_ACC_GYRO_ODR_FIFO_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_ODR_FIFO(LSM6DSL_ACC_GYRO_ODR_FIFO_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_CTRL5, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1436,9 +1436,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ODR_FIFO(LSM6DSL_ACC_GYRO_ODR_FIFO_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_PULSE(LSM6DSL_ACC_GYRO_DRDY_PULSE_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DRDY_PULSE(LSM6DSL_ACC_GYRO_DRDY_PULSE_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1460,9 +1460,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_PULSE(LSM6DSL_ACC_GYRO_DRDY_PULSE_t new
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_PULSE(LSM6DSL_ACC_GYRO_DRDY_PULSE_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DRDY_PULSE(LSM6DSL_ACC_GYRO_DRDY_PULSE_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_DRDY_PULSE_CFG_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1475,9 +1475,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_PULSE(LSM6DSL_ACC_GYRO_DRDY_PULSE_t *p_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_XL_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DRDY_XL_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1499,9 +1499,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_XL_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_X
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_XL_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DRDY_XL_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT1_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1514,9 +1514,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_XL_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_X
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_G_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DRDY_G_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1538,9 +1538,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_G_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_G_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_G_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DRDY_G_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT1_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1553,9 +1553,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_G_on_INT1(LSM6DSL_ACC_GYRO_INT1_DRDY_G_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BOOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_BOOT_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_BOOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_BOOT_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1577,9 +1577,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BOOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_BOOT_t ne
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BOOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_BOOT_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_BOOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_BOOT_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT1_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1592,9 +1592,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BOOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_BOOT_t *p
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_TSHLD_on_INT1(LSM6DSL_ACC_GYRO_INT1_FTH_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FIFO_TSHLD_on_INT1(LSM6DSL_ACC_GYRO_INT1_FTH_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1616,9 +1616,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_TSHLD_on_INT1(LSM6DSL_ACC_GYRO_INT1_FTH
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_TSHLD_on_INT1(LSM6DSL_ACC_GYRO_INT1_FTH_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FIFO_TSHLD_on_INT1(LSM6DSL_ACC_GYRO_INT1_FTH_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT1_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1631,9 +1631,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_TSHLD_on_INT1(LSM6DSL_ACC_GYRO_INT1_FTH
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_OVERRUN_on_INT1(LSM6DSL_ACC_GYRO_INT1_OVR_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_OVERRUN_on_INT1(LSM6DSL_ACC_GYRO_INT1_OVR_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1655,9 +1655,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_OVERRUN_on_INT1(LSM6DSL_ACC_GYRO_INT1_OVR_t 
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_OVERRUN_on_INT1(LSM6DSL_ACC_GYRO_INT1_OVR_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_OVERRUN_on_INT1(LSM6DSL_ACC_GYRO_INT1_OVR_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT1_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1670,9 +1670,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_OVERRUN_on_INT1(LSM6DSL_ACC_GYRO_INT1_OVR_t 
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FULL_FLAG_on_INT1(LSM6DSL_ACC_GYRO_INT1_FULL_FLAG_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FULL_FLAG_on_INT1(LSM6DSL_ACC_GYRO_INT1_FULL_FLAG_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1694,9 +1694,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FULL_FLAG_on_INT1(LSM6DSL_ACC_GYRO_INT1_FULL
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FULL_FLAG_on_INT1(LSM6DSL_ACC_GYRO_INT1_FULL_FLAG_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FULL_FLAG_on_INT1(LSM6DSL_ACC_GYRO_INT1_FULL_FLAG_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT1_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1709,9 +1709,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FULL_FLAG_on_INT1(LSM6DSL_ACC_GYRO_INT1_FULL
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SIGN_MOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_SIGN_MOT_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SIGN_MOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_SIGN_MOT_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1733,9 +1733,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SIGN_MOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_SIGN_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SIGN_MOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_SIGN_MOT_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SIGN_MOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_SIGN_MOT_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT1_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1748,9 +1748,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SIGN_MOT_on_INT1(LSM6DSL_ACC_GYRO_INT1_SIGN_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_STEP_DET_on_INT1(LSM6DSL_ACC_GYRO_INT1_PEDO_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_STEP_DET_on_INT1(LSM6DSL_ACC_GYRO_INT1_PEDO_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1772,9 +1772,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_STEP_DET_on_INT1(LSM6DSL_ACC_GYRO_INT1_PEDO_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_DET_on_INT1(LSM6DSL_ACC_GYRO_INT1_PEDO_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_STEP_DET_on_INT1(LSM6DSL_ACC_GYRO_INT1_PEDO_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT1_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1787,9 +1787,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_DET_on_INT1(LSM6DSL_ACC_GYRO_INT1_PEDO_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_XL_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DRDY_XL_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1811,9 +1811,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_XL_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_X
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_XL_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DRDY_XL_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT2_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1826,9 +1826,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_XL_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_X
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_G_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DRDY_G_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1850,9 +1850,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_G_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_G_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_G_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DRDY_G_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT2_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1865,9 +1865,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_G_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_G_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_TEMP_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_TEMP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DRDY_TEMP_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_TEMP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1889,9 +1889,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_TEMP_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_TEMP_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_TEMP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DRDY_TEMP_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY_TEMP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT2_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1904,9 +1904,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_TEMP_on_INT2(LSM6DSL_ACC_GYRO_INT2_DRDY
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_TSHLD_on_INT2(LSM6DSL_ACC_GYRO_INT2_FTH_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FIFO_TSHLD_on_INT2(LSM6DSL_ACC_GYRO_INT2_FTH_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1928,9 +1928,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FIFO_TSHLD_on_INT2(LSM6DSL_ACC_GYRO_INT2_FTH
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_TSHLD_on_INT2(LSM6DSL_ACC_GYRO_INT2_FTH_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FIFO_TSHLD_on_INT2(LSM6DSL_ACC_GYRO_INT2_FTH_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT2_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1943,9 +1943,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFO_TSHLD_on_INT2(LSM6DSL_ACC_GYRO_INT2_FTH
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_OVERRUN_on_INT2(LSM6DSL_ACC_GYRO_INT2_OVR_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_OVERRUN_on_INT2(LSM6DSL_ACC_GYRO_INT2_OVR_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -1967,9 +1967,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_OVERRUN_on_INT2(LSM6DSL_ACC_GYRO_INT2_OVR_t 
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_OVERRUN_on_INT2(LSM6DSL_ACC_GYRO_INT2_OVR_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_OVERRUN_on_INT2(LSM6DSL_ACC_GYRO_INT2_OVR_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT2_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -1982,9 +1982,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_OVERRUN_on_INT2(LSM6DSL_ACC_GYRO_INT2_OVR_t 
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FULL_FLAG_on_INT2(LSM6DSL_ACC_GYRO_INT2_FULL_FLAG_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FULL_FLAG_on_INT2(LSM6DSL_ACC_GYRO_INT2_FULL_FLAG_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2006,9 +2006,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FULL_FLAG_on_INT2(LSM6DSL_ACC_GYRO_INT2_FULL
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FULL_FLAG_on_INT2(LSM6DSL_ACC_GYRO_INT2_FULL_FLAG_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FULL_FLAG_on_INT2(LSM6DSL_ACC_GYRO_INT2_FULL_FLAG_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT2_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2021,9 +2021,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FULL_FLAG_on_INT2(LSM6DSL_ACC_GYRO_INT2_FULL
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_STEP_COUNT_OV_on_INT2(LSM6DSL_ACC_GYRO_INT2_STEP_COUNT_OV_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_STEP_COUNT_OV_on_INT2(LSM6DSL_ACC_GYRO_INT2_STEP_COUNT_OV_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2045,9 +2045,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_STEP_COUNT_OV_on_INT2(LSM6DSL_ACC_GYRO_INT2_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_COUNT_OV_on_INT2(LSM6DSL_ACC_GYRO_INT2_STEP_COUNT_OV_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_STEP_COUNT_OV_on_INT2(LSM6DSL_ACC_GYRO_INT2_STEP_COUNT_OV_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT2_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2060,9 +2060,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_COUNT_OV_on_INT2(LSM6DSL_ACC_GYRO_INT2_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_STEP_DELTA_on_INT2(LSM6DSL_ACC_GYRO_INT2_STEP_DELTA_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_STEP_DELTA_on_INT2(LSM6DSL_ACC_GYRO_INT2_STEP_DELTA_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2084,9 +2084,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_STEP_DELTA_on_INT2(LSM6DSL_ACC_GYRO_INT2_STE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_DELTA_on_INT2(LSM6DSL_ACC_GYRO_INT2_STEP_DELTA_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_STEP_DELTA_on_INT2(LSM6DSL_ACC_GYRO_INT2_STEP_DELTA_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT2_CTRL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2099,9 +2099,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_DELTA_on_INT2(LSM6DSL_ACC_GYRO_INT2_STE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SW_RESET(LSM6DSL_ACC_GYRO_SW_RESET_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SW_RESET(LSM6DSL_ACC_GYRO_SW_RESET_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2123,9 +2123,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SW_RESET(LSM6DSL_ACC_GYRO_SW_RESET_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SW_RESET(LSM6DSL_ACC_GYRO_SW_RESET_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SW_RESET(LSM6DSL_ACC_GYRO_SW_RESET_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL3_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2138,9 +2138,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SW_RESET(LSM6DSL_ACC_GYRO_SW_RESET_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_IF_Addr_Incr(LSM6DSL_ACC_GYRO_IF_INC_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_IF_Addr_Incr(LSM6DSL_ACC_GYRO_IF_INC_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2162,9 +2162,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_IF_Addr_Incr(LSM6DSL_ACC_GYRO_IF_INC_t newVa
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_IF_Addr_Incr(LSM6DSL_ACC_GYRO_IF_INC_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_IF_Addr_Incr(LSM6DSL_ACC_GYRO_IF_INC_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL3_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2177,9 +2177,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_IF_Addr_Incr(LSM6DSL_ACC_GYRO_IF_INC_t *p_va
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SPI_Mode(LSM6DSL_ACC_GYRO_SIM_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SPI_Mode(LSM6DSL_ACC_GYRO_SIM_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2201,9 +2201,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SPI_Mode(LSM6DSL_ACC_GYRO_SIM_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SPI_Mode(LSM6DSL_ACC_GYRO_SIM_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SPI_Mode(LSM6DSL_ACC_GYRO_SIM_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL3_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2216,9 +2216,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SPI_Mode(LSM6DSL_ACC_GYRO_SIM_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PadSel(LSM6DSL_ACC_GYRO_PP_OD_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_PadSel(LSM6DSL_ACC_GYRO_PP_OD_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2240,9 +2240,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PadSel(LSM6DSL_ACC_GYRO_PP_OD_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PadSel(LSM6DSL_ACC_GYRO_PP_OD_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_PadSel(LSM6DSL_ACC_GYRO_PP_OD_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL3_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2255,9 +2255,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PadSel(LSM6DSL_ACC_GYRO_PP_OD_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_INT_ACT_LEVEL(LSM6DSL_ACC_GYRO_INT_ACT_LEVEL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_INT_ACT_LEVEL(LSM6DSL_ACC_GYRO_INT_ACT_LEVEL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2279,9 +2279,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_INT_ACT_LEVEL(LSM6DSL_ACC_GYRO_INT_ACT_LEVEL
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_INT_ACT_LEVEL(LSM6DSL_ACC_GYRO_INT_ACT_LEVEL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_INT_ACT_LEVEL(LSM6DSL_ACC_GYRO_INT_ACT_LEVEL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL3_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2294,9 +2294,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_INT_ACT_LEVEL(LSM6DSL_ACC_GYRO_INT_ACT_LEVEL
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BOOT(LSM6DSL_ACC_GYRO_BOOT_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_BOOT(LSM6DSL_ACC_GYRO_BOOT_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2318,9 +2318,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BOOT(LSM6DSL_ACC_GYRO_BOOT_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BOOT(LSM6DSL_ACC_GYRO_BOOT_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_BOOT(LSM6DSL_ACC_GYRO_BOOT_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL3_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2333,9 +2333,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BOOT(LSM6DSL_ACC_GYRO_BOOT_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LPF1_SEL_G(LSM6DSL_ACC_GYRO_LPF1_SEL_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_LPF1_SEL_G(LSM6DSL_ACC_GYRO_LPF1_SEL_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2357,9 +2357,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LPF1_SEL_G(LSM6DSL_ACC_GYRO_LPF1_SEL_G_t new
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LPF1_SEL_G(LSM6DSL_ACC_GYRO_LPF1_SEL_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_LPF1_SEL_G(LSM6DSL_ACC_GYRO_LPF1_SEL_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL4_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2372,9 +2372,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LPF1_SEL_G(LSM6DSL_ACC_GYRO_LPF1_SEL_G_t *p_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_I2C_DISABLE(LSM6DSL_ACC_GYRO_I2C_DISABLE_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_I2C_DISABLE(LSM6DSL_ACC_GYRO_I2C_DISABLE_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2396,9 +2396,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_I2C_DISABLE(LSM6DSL_ACC_GYRO_I2C_DISABLE_t n
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_I2C_DISABLE(LSM6DSL_ACC_GYRO_I2C_DISABLE_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_I2C_DISABLE(LSM6DSL_ACC_GYRO_I2C_DISABLE_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL4_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2411,9 +2411,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_I2C_DISABLE(LSM6DSL_ACC_GYRO_I2C_DISABLE_t *
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_MSK(LSM6DSL_ACC_GYRO_DRDY_MSK_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DRDY_MSK(LSM6DSL_ACC_GYRO_DRDY_MSK_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2435,9 +2435,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_MSK(LSM6DSL_ACC_GYRO_DRDY_MSK_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_MSK(LSM6DSL_ACC_GYRO_DRDY_MSK_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DRDY_MSK(LSM6DSL_ACC_GYRO_DRDY_MSK_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL4_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2450,9 +2450,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_MSK(LSM6DSL_ACC_GYRO_DRDY_MSK_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_INT2_ON_INT1(LSM6DSL_ACC_GYRO_INT2_ON_INT1_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_INT2_ON_INT1(LSM6DSL_ACC_GYRO_INT2_ON_INT1_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2474,9 +2474,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_INT2_ON_INT1(LSM6DSL_ACC_GYRO_INT2_ON_INT1_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_INT2_ON_INT1(LSM6DSL_ACC_GYRO_INT2_ON_INT1_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_INT2_ON_INT1(LSM6DSL_ACC_GYRO_INT2_ON_INT1_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL4_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2489,9 +2489,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_INT2_ON_INT1(LSM6DSL_ACC_GYRO_INT2_ON_INT1_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SleepMode_G(LSM6DSL_ACC_GYRO_SLEEP_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SleepMode_G(LSM6DSL_ACC_GYRO_SLEEP_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2513,9 +2513,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SleepMode_G(LSM6DSL_ACC_GYRO_SLEEP_G_t newVa
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SleepMode_G(LSM6DSL_ACC_GYRO_SLEEP_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SleepMode_G(LSM6DSL_ACC_GYRO_SLEEP_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL4_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2528,9 +2528,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SleepMode_G(LSM6DSL_ACC_GYRO_SLEEP_G_t *p_va
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SelfTest_XL(LSM6DSL_ACC_GYRO_ST_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SelfTest_XL(LSM6DSL_ACC_GYRO_ST_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2552,9 +2552,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SelfTest_XL(LSM6DSL_ACC_GYRO_ST_XL_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SelfTest_XL(LSM6DSL_ACC_GYRO_ST_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SelfTest_XL(LSM6DSL_ACC_GYRO_ST_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL5_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2567,9 +2567,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SelfTest_XL(LSM6DSL_ACC_GYRO_ST_XL_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SelfTest_G(LSM6DSL_ACC_GYRO_ST_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SelfTest_G(LSM6DSL_ACC_GYRO_ST_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2591,9 +2591,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SelfTest_G(LSM6DSL_ACC_GYRO_ST_G_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SelfTest_G(LSM6DSL_ACC_GYRO_ST_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SelfTest_G(LSM6DSL_ACC_GYRO_ST_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL5_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2606,9 +2606,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SelfTest_G(LSM6DSL_ACC_GYRO_ST_G_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEN_Polarity(LSM6DSL_ACC_GYRO_DEN_LH_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DEN_Polarity(LSM6DSL_ACC_GYRO_DEN_LH_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2630,9 +2630,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEN_Polarity(LSM6DSL_ACC_GYRO_DEN_LH_t newVa
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEN_Polarity(LSM6DSL_ACC_GYRO_DEN_LH_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DEN_Polarity(LSM6DSL_ACC_GYRO_DEN_LH_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL5_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2645,9 +2645,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEN_Polarity(LSM6DSL_ACC_GYRO_DEN_LH_t *p_va
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_CircularBurstMode(LSM6DSL_ACC_GYRO_ROUNDING_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_CircularBurstMode(LSM6DSL_ACC_GYRO_ROUNDING_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2669,9 +2669,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_CircularBurstMode(LSM6DSL_ACC_GYRO_ROUNDING_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_CircularBurstMode(LSM6DSL_ACC_GYRO_ROUNDING_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_CircularBurstMode(LSM6DSL_ACC_GYRO_ROUNDING_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL5_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2684,9 +2684,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_CircularBurstMode(LSM6DSL_ACC_GYRO_ROUNDING_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LP_BW_G(LSM6DSL_ACC_GYRO_FTYPE_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_LP_BW_G(LSM6DSL_ACC_GYRO_FTYPE_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2708,9 +2708,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LP_BW_G(LSM6DSL_ACC_GYRO_FTYPE_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LP_BW_G(LSM6DSL_ACC_GYRO_FTYPE_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_LP_BW_G(LSM6DSL_ACC_GYRO_FTYPE_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL6_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2723,9 +2723,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LP_BW_G(LSM6DSL_ACC_GYRO_FTYPE_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_UserOffsetWeight(LSM6DSL_ACC_GYRO_USR_OFF_W_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_UserOffsetWeight(LSM6DSL_ACC_GYRO_USR_OFF_W_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2747,9 +2747,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_UserOffsetWeight(LSM6DSL_ACC_GYRO_USR_OFF_W_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_UserOffsetWeight(LSM6DSL_ACC_GYRO_USR_OFF_W_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_UserOffsetWeight(LSM6DSL_ACC_GYRO_USR_OFF_W_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL6_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2762,9 +2762,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_UserOffsetWeight(LSM6DSL_ACC_GYRO_USR_OFF_W_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LowPower_XL(LSM6DSL_ACC_GYRO_LP_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_LowPower_XL(LSM6DSL_ACC_GYRO_LP_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2786,9 +2786,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LowPower_XL(LSM6DSL_ACC_GYRO_LP_XL_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LowPower_XL(LSM6DSL_ACC_GYRO_LP_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_LowPower_XL(LSM6DSL_ACC_GYRO_LP_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL6_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2801,9 +2801,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LowPower_XL(LSM6DSL_ACC_GYRO_LP_XL_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEN_LVL2_EN(LSM6DSL_ACC_GYRO_DEN_LVL2_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DEN_LVL2_EN(LSM6DSL_ACC_GYRO_DEN_LVL2_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2825,9 +2825,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEN_LVL2_EN(LSM6DSL_ACC_GYRO_DEN_LVL2_EN_t n
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEN_LVL2_EN(LSM6DSL_ACC_GYRO_DEN_LVL2_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DEN_LVL2_EN(LSM6DSL_ACC_GYRO_DEN_LVL2_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL6_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2840,9 +2840,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEN_LVL2_EN(LSM6DSL_ACC_GYRO_DEN_LVL2_EN_t *
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEN_LVL_EN(LSM6DSL_ACC_GYRO_DEN_LVL_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DEN_LVL_EN(LSM6DSL_ACC_GYRO_DEN_LVL_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2864,9 +2864,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DEN_LVL_EN(LSM6DSL_ACC_GYRO_DEN_LVL_EN_t new
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEN_LVL_EN(LSM6DSL_ACC_GYRO_DEN_LVL_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DEN_LVL_EN(LSM6DSL_ACC_GYRO_DEN_LVL_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL6_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2879,9 +2879,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DEN_LVL_EN(LSM6DSL_ACC_GYRO_DEN_LVL_EN_t *p_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ExternalTrigger(LSM6DSL_ACC_GYRO_DEN_EDGE_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_ExternalTrigger(LSM6DSL_ACC_GYRO_DEN_EDGE_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2903,9 +2903,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ExternalTrigger(LSM6DSL_ACC_GYRO_DEN_EDGE_EN
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ExternalTrigger(LSM6DSL_ACC_GYRO_DEN_EDGE_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_ExternalTrigger(LSM6DSL_ACC_GYRO_DEN_EDGE_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL6_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2918,9 +2918,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ExternalTrigger(LSM6DSL_ACC_GYRO_DEN_EDGE_EN
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HPM_G(LSM6DSL_ACC_GYRO_HPM_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_HPM_G(LSM6DSL_ACC_GYRO_HPM_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2942,9 +2942,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HPM_G(LSM6DSL_ACC_GYRO_HPM_G_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HPM_G(LSM6DSL_ACC_GYRO_HPM_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_HPM_G(LSM6DSL_ACC_GYRO_HPM_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL7_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2957,9 +2957,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HPM_G(LSM6DSL_ACC_GYRO_HPM_G_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_RoundingOnStatusRegisters(LSM6DSL_ACC_GYRO_RND_STATUS_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_RoundingOnStatusRegisters(LSM6DSL_ACC_GYRO_RND_STATUS_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -2981,9 +2981,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_RoundingOnStatusRegisters(LSM6DSL_ACC_GYRO_R
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_RoundingOnStatusRegisters(LSM6DSL_ACC_GYRO_RND_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_RoundingOnStatusRegisters(LSM6DSL_ACC_GYRO_RND_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL7_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -2996,9 +2996,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_RoundingOnStatusRegisters(LSM6DSL_ACC_GYRO_R
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HPFilter_En(LSM6DSL_ACC_GYRO_HP_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_HPFilter_En(LSM6DSL_ACC_GYRO_HP_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3020,9 +3020,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HPFilter_En(LSM6DSL_ACC_GYRO_HP_EN_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HPFilter_En(LSM6DSL_ACC_GYRO_HP_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_HPFilter_En(LSM6DSL_ACC_GYRO_HP_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL7_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3035,9 +3035,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HPFilter_En(LSM6DSL_ACC_GYRO_HP_EN_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LP_Mode(LSM6DSL_ACC_GYRO_LP_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_LP_Mode(LSM6DSL_ACC_GYRO_LP_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3059,9 +3059,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LP_Mode(LSM6DSL_ACC_GYRO_LP_EN_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LP_Mode(LSM6DSL_ACC_GYRO_LP_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_LP_Mode(LSM6DSL_ACC_GYRO_LP_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL7_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3074,9 +3074,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LP_Mode(LSM6DSL_ACC_GYRO_LP_EN_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ROUNDING_STATUS(LSM6DSL_ACC_GYRO_ROUNDING_STATUS_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_ROUNDING_STATUS(LSM6DSL_ACC_GYRO_ROUNDING_STATUS_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3098,9 +3098,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_ROUNDING_STATUS(LSM6DSL_ACC_GYRO_ROUNDING_ST
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ROUNDING_STATUS(LSM6DSL_ACC_GYRO_ROUNDING_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_ROUNDING_STATUS(LSM6DSL_ACC_GYRO_ROUNDING_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL7_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3113,9 +3113,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_ROUNDING_STATUS(LSM6DSL_ACC_GYRO_ROUNDING_ST
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HP_G_RST(LSM6DSL_ACC_GYRO_HP_G_RST_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_HP_G_RST(LSM6DSL_ACC_GYRO_HP_G_RST_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3137,9 +3137,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HP_G_RST(LSM6DSL_ACC_GYRO_HP_G_RST_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HP_G_RST(LSM6DSL_ACC_GYRO_HP_G_RST_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_HP_G_RST(LSM6DSL_ACC_GYRO_HP_G_RST_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL7_G, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3152,9 +3152,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HP_G_RST(LSM6DSL_ACC_GYRO_HP_G_RST_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_InComposit(LSM6DSL_ACC_GYRO_IN_COMP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_InComposit(LSM6DSL_ACC_GYRO_IN_COMP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3176,9 +3176,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_InComposit(LSM6DSL_ACC_GYRO_IN_COMP_t newVal
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_InComposit(LSM6DSL_ACC_GYRO_IN_COMP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_InComposit(LSM6DSL_ACC_GYRO_IN_COMP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL8_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3191,9 +3191,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_InComposit(LSM6DSL_ACC_GYRO_IN_COMP_t *p_val
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HPfilterReference(LSM6DSL_ACC_GYRO_HP_REF_MODE_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_HPfilterReference(LSM6DSL_ACC_GYRO_HP_REF_MODE_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3215,9 +3215,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HPfilterReference(LSM6DSL_ACC_GYRO_HP_REF_MO
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HPfilterReference(LSM6DSL_ACC_GYRO_HP_REF_MODE_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_HPfilterReference(LSM6DSL_ACC_GYRO_HP_REF_MODE_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL8_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3230,9 +3230,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HPfilterReference(LSM6DSL_ACC_GYRO_HP_REF_MO
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HPCF_XL(LSM6DSL_ACC_GYRO_HPCF_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_HPCF_XL(LSM6DSL_ACC_GYRO_HPCF_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3254,9 +3254,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HPCF_XL(LSM6DSL_ACC_GYRO_HPCF_XL_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HPCF_XL(LSM6DSL_ACC_GYRO_HPCF_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_HPCF_XL(LSM6DSL_ACC_GYRO_HPCF_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL8_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3269,9 +3269,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HPCF_XL(LSM6DSL_ACC_GYRO_HPCF_XL_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LowPassFiltSel_XL(LSM6DSL_ACC_GYRO_LPF2_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_LowPassFiltSel_XL(LSM6DSL_ACC_GYRO_LPF2_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3293,9 +3293,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LowPassFiltSel_XL(LSM6DSL_ACC_GYRO_LPF2_XL_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LowPassFiltSel_XL(LSM6DSL_ACC_GYRO_LPF2_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_LowPassFiltSel_XL(LSM6DSL_ACC_GYRO_LPF2_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL8_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3308,9 +3308,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LowPassFiltSel_XL(LSM6DSL_ACC_GYRO_LPF2_XL_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LOW_PASS_ON_6D(LSM6DSL_ACC_GYRO_LOW_PASS_ON_6D_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_LOW_PASS_ON_6D(LSM6DSL_ACC_GYRO_LOW_PASS_ON_6D_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3332,9 +3332,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LOW_PASS_ON_6D(LSM6DSL_ACC_GYRO_LOW_PASS_ON_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LOW_PASS_ON_6D(LSM6DSL_ACC_GYRO_LOW_PASS_ON_6D_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_LOW_PASS_ON_6D(LSM6DSL_ACC_GYRO_LOW_PASS_ON_6D_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL8_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3347,9 +3347,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LOW_PASS_ON_6D(LSM6DSL_ACC_GYRO_LOW_PASS_ON_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HP_SLOPE_XL(LSM6DSL_ACC_GYRO_HP_SLOPE_XL_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_HP_SLOPE_XL(LSM6DSL_ACC_GYRO_HP_SLOPE_XL_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3371,9 +3371,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_HP_SLOPE_XL(LSM6DSL_ACC_GYRO_HP_SLOPE_XL_t n
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HP_SLOPE_XL(LSM6DSL_ACC_GYRO_HP_SLOPE_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_HP_SLOPE_XL(LSM6DSL_ACC_GYRO_HP_SLOPE_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL8_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3386,9 +3386,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HP_SLOPE_XL(LSM6DSL_ACC_GYRO_HP_SLOPE_XL_t *
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SOFT(LSM6DSL_ACC_GYRO_SOFT_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SOFT(LSM6DSL_ACC_GYRO_SOFT_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3410,9 +3410,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SOFT(LSM6DSL_ACC_GYRO_SOFT_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SOFT(LSM6DSL_ACC_GYRO_SOFT_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SOFT(LSM6DSL_ACC_GYRO_SOFT_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL9_XL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3425,9 +3425,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SOFT(LSM6DSL_ACC_GYRO_SOFT_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SignifcantMotion(LSM6DSL_ACC_GYRO_SIGN_MOTION_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SignifcantMotion(LSM6DSL_ACC_GYRO_SIGN_MOTION_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3449,9 +3449,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SignifcantMotion(LSM6DSL_ACC_GYRO_SIGN_MOTIO
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SignifcantMotion(LSM6DSL_ACC_GYRO_SIGN_MOTION_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SignifcantMotion(LSM6DSL_ACC_GYRO_SIGN_MOTION_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL10_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3464,9 +3464,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SignifcantMotion(LSM6DSL_ACC_GYRO_SIGN_MOTIO
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PedoStepReset(LSM6DSL_ACC_GYRO_PEDO_RST_STEP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_PedoStepReset(LSM6DSL_ACC_GYRO_PEDO_RST_STEP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3488,9 +3488,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PedoStepReset(LSM6DSL_ACC_GYRO_PEDO_RST_STEP
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PedoStepReset(LSM6DSL_ACC_GYRO_PEDO_RST_STEP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_PedoStepReset(LSM6DSL_ACC_GYRO_PEDO_RST_STEP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL10_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3503,9 +3503,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PedoStepReset(LSM6DSL_ACC_GYRO_PEDO_RST_STEP
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TILT(LSM6DSL_ACC_GYRO_TILT_G_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TILT(LSM6DSL_ACC_GYRO_TILT_G_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3527,9 +3527,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TILT(LSM6DSL_ACC_GYRO_TILT_G_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TILT(LSM6DSL_ACC_GYRO_TILT_G_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TILT(LSM6DSL_ACC_GYRO_TILT_G_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL10_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3542,9 +3542,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TILT(LSM6DSL_ACC_GYRO_TILT_G_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PEDO(LSM6DSL_ACC_GYRO_PEDO_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_PEDO(LSM6DSL_ACC_GYRO_PEDO_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3566,9 +3566,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PEDO(LSM6DSL_ACC_GYRO_PEDO_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PEDO(LSM6DSL_ACC_GYRO_PEDO_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_PEDO(LSM6DSL_ACC_GYRO_PEDO_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL10_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3581,9 +3581,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PEDO(LSM6DSL_ACC_GYRO_PEDO_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TIMER(LSM6DSL_ACC_GYRO_TIMER_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TIMER(LSM6DSL_ACC_GYRO_TIMER_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3605,9 +3605,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TIMER(LSM6DSL_ACC_GYRO_TIMER_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TIMER(LSM6DSL_ACC_GYRO_TIMER_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TIMER(LSM6DSL_ACC_GYRO_TIMER_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL10_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3620,9 +3620,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TIMER(LSM6DSL_ACC_GYRO_TIMER_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FUNC_EN(LSM6DSL_ACC_GYRO_FUNC_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FUNC_EN(LSM6DSL_ACC_GYRO_FUNC_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3644,9 +3644,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FUNC_EN(LSM6DSL_ACC_GYRO_FUNC_EN_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FUNC_EN(LSM6DSL_ACC_GYRO_FUNC_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FUNC_EN(LSM6DSL_ACC_GYRO_FUNC_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_CTRL10_C, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3659,9 +3659,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FUNC_EN(LSM6DSL_ACC_GYRO_FUNC_EN_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_I2C_MASTER_Enable(LSM6DSL_ACC_GYRO_MASTER_ON_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_I2C_MASTER_Enable(LSM6DSL_ACC_GYRO_MASTER_ON_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3683,9 +3683,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_I2C_MASTER_Enable(LSM6DSL_ACC_GYRO_MASTER_ON
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_I2C_MASTER_Enable(LSM6DSL_ACC_GYRO_MASTER_ON_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_I2C_MASTER_Enable(LSM6DSL_ACC_GYRO_MASTER_ON_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MASTER_CONFIG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3698,9 +3698,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_I2C_MASTER_Enable(LSM6DSL_ACC_GYRO_MASTER_ON
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_IronCorrection_EN(LSM6DSL_ACC_GYRO_IRON_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_IronCorrection_EN(LSM6DSL_ACC_GYRO_IRON_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3722,9 +3722,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_IronCorrection_EN(LSM6DSL_ACC_GYRO_IRON_EN_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_IronCorrection_EN(LSM6DSL_ACC_GYRO_IRON_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_IronCorrection_EN(LSM6DSL_ACC_GYRO_IRON_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MASTER_CONFIG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3737,9 +3737,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_IronCorrection_EN(LSM6DSL_ACC_GYRO_IRON_EN_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PASS_THRU_MODE(LSM6DSL_ACC_GYRO_PASS_THRU_MODE_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_PASS_THRU_MODE(LSM6DSL_ACC_GYRO_PASS_THRU_MODE_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3761,9 +3761,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PASS_THRU_MODE(LSM6DSL_ACC_GYRO_PASS_THRU_MO
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PASS_THRU_MODE(LSM6DSL_ACC_GYRO_PASS_THRU_MODE_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_PASS_THRU_MODE(LSM6DSL_ACC_GYRO_PASS_THRU_MODE_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MASTER_CONFIG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3776,9 +3776,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PASS_THRU_MODE(LSM6DSL_ACC_GYRO_PASS_THRU_MO
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PULL_UP_EN(LSM6DSL_ACC_GYRO_PULL_UP_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_PULL_UP_EN(LSM6DSL_ACC_GYRO_PULL_UP_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3800,9 +3800,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PULL_UP_EN(LSM6DSL_ACC_GYRO_PULL_UP_EN_t new
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PULL_UP_EN(LSM6DSL_ACC_GYRO_PULL_UP_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_PULL_UP_EN(LSM6DSL_ACC_GYRO_PULL_UP_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MASTER_CONFIG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3815,9 +3815,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PULL_UP_EN(LSM6DSL_ACC_GYRO_PULL_UP_EN_t *p_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SensorHUB_Trigger_Sel(LSM6DSL_ACC_GYRO_START_CONFIG_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SensorHUB_Trigger_Sel(LSM6DSL_ACC_GYRO_START_CONFIG_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3839,9 +3839,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SensorHUB_Trigger_Sel(LSM6DSL_ACC_GYRO_START
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SensorHUB_Trigger_Sel(LSM6DSL_ACC_GYRO_START_CONFIG_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SensorHUB_Trigger_Sel(LSM6DSL_ACC_GYRO_START_CONFIG_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MASTER_CONFIG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3854,9 +3854,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SensorHUB_Trigger_Sel(LSM6DSL_ACC_GYRO_START
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DATA_VAL_SEL_FIFO(LSM6DSL_ACC_GYRO_DATA_VAL_SEL_FIFO_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DATA_VAL_SEL_FIFO(LSM6DSL_ACC_GYRO_DATA_VAL_SEL_FIFO_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3878,9 +3878,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DATA_VAL_SEL_FIFO(LSM6DSL_ACC_GYRO_DATA_VAL_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DATA_VAL_SEL_FIFO(LSM6DSL_ACC_GYRO_DATA_VAL_SEL_FIFO_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DATA_VAL_SEL_FIFO(LSM6DSL_ACC_GYRO_DATA_VAL_SEL_FIFO_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MASTER_CONFIG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3893,9 +3893,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DATA_VAL_SEL_FIFO(LSM6DSL_ACC_GYRO_DATA_VAL_
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_ON_INT1(LSM6DSL_ACC_GYRO_DRDY_ON_INT1_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DRDY_ON_INT1(LSM6DSL_ACC_GYRO_DRDY_ON_INT1_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -3917,9 +3917,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DRDY_ON_INT1(LSM6DSL_ACC_GYRO_DRDY_ON_INT1_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_ON_INT1(LSM6DSL_ACC_GYRO_DRDY_ON_INT1_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DRDY_ON_INT1(LSM6DSL_ACC_GYRO_DRDY_ON_INT1_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MASTER_CONFIG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3932,9 +3932,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DRDY_ON_INT1(LSM6DSL_ACC_GYRO_DRDY_ON_INT1_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Z_WU(LSM6DSL_ACC_GYRO_Z_WU_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_Z_WU(LSM6DSL_ACC_GYRO_Z_WU_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3947,9 +3947,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Z_WU(LSM6DSL_ACC_GYRO_Z_WU_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Y_WU(LSM6DSL_ACC_GYRO_Y_WU_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_Y_WU(LSM6DSL_ACC_GYRO_Y_WU_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3962,9 +3962,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Y_WU(LSM6DSL_ACC_GYRO_Y_WU_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_X_WU(LSM6DSL_ACC_GYRO_X_WU_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_X_WU(LSM6DSL_ACC_GYRO_X_WU_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3977,9 +3977,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_X_WU(LSM6DSL_ACC_GYRO_X_WU_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WU_EV_STATUS(LSM6DSL_ACC_GYRO_WU_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_WU_EV_STATUS(LSM6DSL_ACC_GYRO_WU_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -3992,9 +3992,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WU_EV_STATUS(LSM6DSL_ACC_GYRO_WU_EV_STATUS_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SLEEP_EV_STATUS(LSM6DSL_ACC_GYRO_SLEEP_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SLEEP_EV_STATUS(LSM6DSL_ACC_GYRO_SLEEP_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4007,9 +4007,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SLEEP_EV_STATUS(LSM6DSL_ACC_GYRO_SLEEP_EV_ST
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FF_EV_STATUS(LSM6DSL_ACC_GYRO_FF_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FF_EV_STATUS(LSM6DSL_ACC_GYRO_FF_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4022,9 +4022,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FF_EV_STATUS(LSM6DSL_ACC_GYRO_FF_EV_STATUS_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Z_TAP(LSM6DSL_ACC_GYRO_Z_TAP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_Z_TAP(LSM6DSL_ACC_GYRO_Z_TAP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4037,9 +4037,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Z_TAP(LSM6DSL_ACC_GYRO_Z_TAP_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Y_TAP(LSM6DSL_ACC_GYRO_Y_TAP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_Y_TAP(LSM6DSL_ACC_GYRO_Y_TAP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4052,9 +4052,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_Y_TAP(LSM6DSL_ACC_GYRO_Y_TAP_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_X_TAP(LSM6DSL_ACC_GYRO_X_TAP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_X_TAP(LSM6DSL_ACC_GYRO_X_TAP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4067,9 +4067,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_X_TAP(LSM6DSL_ACC_GYRO_X_TAP_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_SIGN(LSM6DSL_ACC_GYRO_TAP_SIGN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TAP_SIGN(LSM6DSL_ACC_GYRO_TAP_SIGN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4082,9 +4082,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_SIGN(LSM6DSL_ACC_GYRO_TAP_SIGN_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DOUBLE_TAP_EV_STATUS(LSM6DSL_ACC_GYRO_DOUBLE_TAP_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DOUBLE_TAP_EV_STATUS(LSM6DSL_ACC_GYRO_DOUBLE_TAP_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4097,9 +4097,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DOUBLE_TAP_EV_STATUS(LSM6DSL_ACC_GYRO_DOUBLE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SINGLE_TAP_EV_STATUS(LSM6DSL_ACC_GYRO_SINGLE_TAP_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SINGLE_TAP_EV_STATUS(LSM6DSL_ACC_GYRO_SINGLE_TAP_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4112,9 +4112,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SINGLE_TAP_EV_STATUS(LSM6DSL_ACC_GYRO_SINGLE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_EV_STATUS(LSM6DSL_ACC_GYRO_TAP_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TAP_EV_STATUS(LSM6DSL_ACC_GYRO_TAP_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4127,9 +4127,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_EV_STATUS(LSM6DSL_ACC_GYRO_TAP_EV_STATUS
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_XL(LSM6DSL_ACC_GYRO_DSD_XL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DSD_XL(LSM6DSL_ACC_GYRO_DSD_XL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_D6D_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4142,9 +4142,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_XL(LSM6DSL_ACC_GYRO_DSD_XL_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_XH(LSM6DSL_ACC_GYRO_DSD_XH_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DSD_XH(LSM6DSL_ACC_GYRO_DSD_XH_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_D6D_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4157,9 +4157,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_XH(LSM6DSL_ACC_GYRO_DSD_XH_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_YL(LSM6DSL_ACC_GYRO_DSD_YL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DSD_YL(LSM6DSL_ACC_GYRO_DSD_YL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_D6D_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4172,9 +4172,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_YL(LSM6DSL_ACC_GYRO_DSD_YL_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_YH(LSM6DSL_ACC_GYRO_DSD_YH_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DSD_YH(LSM6DSL_ACC_GYRO_DSD_YH_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_D6D_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4187,9 +4187,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_YH(LSM6DSL_ACC_GYRO_DSD_YH_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_ZL(LSM6DSL_ACC_GYRO_DSD_ZL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DSD_ZL(LSM6DSL_ACC_GYRO_DSD_ZL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_D6D_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4202,9 +4202,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_ZL(LSM6DSL_ACC_GYRO_DSD_ZL_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_ZH(LSM6DSL_ACC_GYRO_DSD_ZH_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DSD_ZH(LSM6DSL_ACC_GYRO_DSD_ZH_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_D6D_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4217,9 +4217,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DSD_ZH(LSM6DSL_ACC_GYRO_DSD_ZH_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_D6D_EV_STATUS(LSM6DSL_ACC_GYRO_D6D_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_D6D_EV_STATUS(LSM6DSL_ACC_GYRO_D6D_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_D6D_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4232,9 +4232,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_D6D_EV_STATUS(LSM6DSL_ACC_GYRO_D6D_EV_STATUS
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_XLDA(LSM6DSL_ACC_GYRO_XLDA_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_XLDA(LSM6DSL_ACC_GYRO_XLDA_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_STATUS_REG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4247,9 +4247,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_XLDA(LSM6DSL_ACC_GYRO_XLDA_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_GDA(LSM6DSL_ACC_GYRO_GDA_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_GDA(LSM6DSL_ACC_GYRO_GDA_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_STATUS_REG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4262,9 +4262,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_GDA(LSM6DSL_ACC_GYRO_GDA_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TDA(LSM6DSL_ACC_GYRO_TDA_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TDA(LSM6DSL_ACC_GYRO_TDA_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_STATUS_REG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4277,9 +4277,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TDA(LSM6DSL_ACC_GYRO_TDA_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFONumOfEntries(uint16_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FIFONumOfEntries(uint16_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t valueH, valueL;
 
@@ -4308,9 +4308,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFONumOfEntries(uint16_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFOEmpty(LSM6DSL_ACC_GYRO_FIFO_EMPTY_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FIFOEmpty(LSM6DSL_ACC_GYRO_FIFO_EMPTY_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_STATUS2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4323,9 +4323,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFOEmpty(LSM6DSL_ACC_GYRO_FIFO_EMPTY_t *p_v
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFOFull(LSM6DSL_ACC_GYRO_FIFO_FULL_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FIFOFull(LSM6DSL_ACC_GYRO_FIFO_FULL_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_STATUS2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4338,9 +4338,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFOFull(LSM6DSL_ACC_GYRO_FIFO_FULL_t *p_val
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_OVERRUN(LSM6DSL_ACC_GYRO_OVERRUN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_OVERRUN(LSM6DSL_ACC_GYRO_OVERRUN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_STATUS2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4353,9 +4353,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_OVERRUN(LSM6DSL_ACC_GYRO_OVERRUN_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WaterMark(LSM6DSL_ACC_GYRO_WTM_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_WaterMark(LSM6DSL_ACC_GYRO_WTM_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FIFO_STATUS2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4368,9 +4368,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WaterMark(LSM6DSL_ACC_GYRO_WTM_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFOPattern(uint16_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FIFOPattern(uint16_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t valueH, valueL;
 
@@ -4399,9 +4399,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FIFOPattern(uint16_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SENS_HUB_END(LSM6DSL_ACC_GYRO_SENS_HUB_END_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SENS_HUB_END(LSM6DSL_ACC_GYRO_SENS_HUB_END_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FUNC_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4414,9 +4414,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SENS_HUB_END(LSM6DSL_ACC_GYRO_SENS_HUB_END_t
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SOFT_IRON_END(LSM6DSL_ACC_GYRO_SOFT_IRON_END_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SOFT_IRON_END(LSM6DSL_ACC_GYRO_SOFT_IRON_END_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FUNC_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4429,9 +4429,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SOFT_IRON_END(LSM6DSL_ACC_GYRO_SOFT_IRON_END
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HardIron(LSM6DSL_ACC_GYRO_SOFT_HARD_IRON_STAT_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_HardIron(LSM6DSL_ACC_GYRO_SOFT_HARD_IRON_STAT_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FUNC_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4444,9 +4444,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_HardIron(LSM6DSL_ACC_GYRO_SOFT_HARD_IRON_STA
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_OVERFLOW(LSM6DSL_ACC_GYRO_STEP_OVERFLOW_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_STEP_OVERFLOW(LSM6DSL_ACC_GYRO_STEP_OVERFLOW_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FUNC_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4459,9 +4459,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_OVERFLOW(LSM6DSL_ACC_GYRO_STEP_OVERFLOW
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_COUNT_DELTA(LSM6DSL_ACC_GYRO_STEP_COUNT_DELTA_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_STEP_COUNT_DELTA(LSM6DSL_ACC_GYRO_STEP_COUNT_DELTA_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FUNC_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4474,9 +4474,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_STEP_COUNT_DELTA(LSM6DSL_ACC_GYRO_STEP_COUNT
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PEDO_EV_STATUS(LSM6DSL_ACC_GYRO_PEDO_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_PEDO_EV_STATUS(LSM6DSL_ACC_GYRO_PEDO_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FUNC_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4489,9 +4489,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_PEDO_EV_STATUS(LSM6DSL_ACC_GYRO_PEDO_EV_STAT
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TILT_EV_STATUS(LSM6DSL_ACC_GYRO_TILT_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TILT_EV_STATUS(LSM6DSL_ACC_GYRO_TILT_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FUNC_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4504,9 +4504,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TILT_EV_STATUS(LSM6DSL_ACC_GYRO_TILT_EV_STAT
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SIGN_MOT_EV_STATUS(LSM6DSL_ACC_GYRO_SIGN_MOT_EV_STATUS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SIGN_MOT_EV_STATUS(LSM6DSL_ACC_GYRO_SIGN_MOT_EV_STATUS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FUNC_SRC, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4519,9 +4519,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SIGN_MOT_EV_STATUS(LSM6DSL_ACC_GYRO_SIGN_MOT
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LIR(LSM6DSL_ACC_GYRO_LIR_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_LIR(LSM6DSL_ACC_GYRO_LIR_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4543,9 +4543,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_LIR(LSM6DSL_ACC_GYRO_LIR_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LIR(LSM6DSL_ACC_GYRO_LIR_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_LIR(LSM6DSL_ACC_GYRO_LIR_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_CFG1, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4558,9 +4558,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_LIR(LSM6DSL_ACC_GYRO_LIR_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TAP_Z_EN(LSM6DSL_ACC_GYRO_TAP_Z_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TAP_Z_EN(LSM6DSL_ACC_GYRO_TAP_Z_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4582,9 +4582,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TAP_Z_EN(LSM6DSL_ACC_GYRO_TAP_Z_EN_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_Z_EN(LSM6DSL_ACC_GYRO_TAP_Z_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TAP_Z_EN(LSM6DSL_ACC_GYRO_TAP_Z_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_CFG1, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4597,9 +4597,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_Z_EN(LSM6DSL_ACC_GYRO_TAP_Z_EN_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TAP_Y_EN(LSM6DSL_ACC_GYRO_TAP_Y_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TAP_Y_EN(LSM6DSL_ACC_GYRO_TAP_Y_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4621,9 +4621,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TAP_Y_EN(LSM6DSL_ACC_GYRO_TAP_Y_EN_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_Y_EN(LSM6DSL_ACC_GYRO_TAP_Y_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TAP_Y_EN(LSM6DSL_ACC_GYRO_TAP_Y_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_CFG1, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4636,9 +4636,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_Y_EN(LSM6DSL_ACC_GYRO_TAP_Y_EN_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TAP_X_EN(LSM6DSL_ACC_GYRO_TAP_X_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TAP_X_EN(LSM6DSL_ACC_GYRO_TAP_X_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4660,9 +4660,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TAP_X_EN(LSM6DSL_ACC_GYRO_TAP_X_EN_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_X_EN(LSM6DSL_ACC_GYRO_TAP_X_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TAP_X_EN(LSM6DSL_ACC_GYRO_TAP_X_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_CFG1, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4675,9 +4675,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_X_EN(LSM6DSL_ACC_GYRO_TAP_X_EN_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SLOPE_FDS(LSM6DSL_ACC_GYRO_SLOPE_FDS_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SLOPE_FDS(LSM6DSL_ACC_GYRO_SLOPE_FDS_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4699,9 +4699,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SLOPE_FDS(LSM6DSL_ACC_GYRO_SLOPE_FDS_t newVa
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SLOPE_FDS(LSM6DSL_ACC_GYRO_SLOPE_FDS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SLOPE_FDS(LSM6DSL_ACC_GYRO_SLOPE_FDS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_CFG1, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4714,9 +4714,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SLOPE_FDS(LSM6DSL_ACC_GYRO_SLOPE_FDS_t *p_va
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BASIC_INT(LSM6DSL_ACC_GYRO_INT_EN_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_BASIC_INT(LSM6DSL_ACC_GYRO_INT_EN_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4738,9 +4738,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_BASIC_INT(LSM6DSL_ACC_GYRO_INT_EN_t newValue
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BASIC_INT(LSM6DSL_ACC_GYRO_INT_EN_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_BASIC_INT(LSM6DSL_ACC_GYRO_INT_EN_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_CFG1, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4753,9 +4753,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_BASIC_INT(LSM6DSL_ACC_GYRO_INT_EN_t *p_value
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TAP_THS(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TAP_THS(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4780,9 +4780,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TAP_THS(uint8_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_THS(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TAP_THS(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_THS_6D, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4796,9 +4796,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TAP_THS(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SIXD_THS(LSM6DSL_ACC_GYRO_SIXD_THS_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SIXD_THS(LSM6DSL_ACC_GYRO_SIXD_THS_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4820,9 +4820,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SIXD_THS(LSM6DSL_ACC_GYRO_SIXD_THS_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SIXD_THS(LSM6DSL_ACC_GYRO_SIXD_THS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SIXD_THS(LSM6DSL_ACC_GYRO_SIXD_THS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_THS_6D, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4835,9 +4835,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SIXD_THS(LSM6DSL_ACC_GYRO_SIXD_THS_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_D4D(LSM6DSL_ACC_GYRO_D4D_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_D4D(LSM6DSL_ACC_GYRO_D4D_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4859,9 +4859,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_D4D(LSM6DSL_ACC_GYRO_D4D_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_D4D(LSM6DSL_ACC_GYRO_D4D_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_D4D(LSM6DSL_ACC_GYRO_D4D_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_TAP_THS_6D, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4874,9 +4874,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_D4D(LSM6DSL_ACC_GYRO_D4D_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SHOCK_Duration(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SHOCK_Duration(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4901,9 +4901,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SHOCK_Duration(uint8_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SHOCK_Duration(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SHOCK_Duration(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT_DUR2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4917,9 +4917,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SHOCK_Duration(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_QUIET_Duration(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_QUIET_Duration(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4944,9 +4944,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_QUIET_Duration(uint8_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_QUIET_Duration(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_QUIET_Duration(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT_DUR2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -4960,9 +4960,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_QUIET_Duration(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DUR(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_DUR(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -4987,9 +4987,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_DUR(uint8_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DUR(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_DUR(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_INT_DUR2, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5003,9 +5003,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_DUR(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_WK_THS(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_WK_THS(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5030,9 +5030,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_WK_THS(uint8_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WK_THS(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_WK_THS(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_THS, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5046,9 +5046,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WK_THS(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SINGLE_DOUBLE_TAP_EV(LSM6DSL_ACC_GYRO_SINGLE_DOUBLE_TAP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SINGLE_DOUBLE_TAP_EV(LSM6DSL_ACC_GYRO_SINGLE_DOUBLE_TAP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5070,9 +5070,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SINGLE_DOUBLE_TAP_EV(LSM6DSL_ACC_GYRO_SINGLE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SINGLE_DOUBLE_TAP_EV(LSM6DSL_ACC_GYRO_SINGLE_DOUBLE_TAP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SINGLE_DOUBLE_TAP_EV(LSM6DSL_ACC_GYRO_SINGLE_DOUBLE_TAP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_THS, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5085,9 +5085,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SINGLE_DOUBLE_TAP_EV(LSM6DSL_ACC_GYRO_SINGLE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SLEEP_DUR(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SLEEP_DUR(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5112,9 +5112,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SLEEP_DUR(uint8_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SLEEP_DUR(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SLEEP_DUR(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_DUR, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5128,9 +5128,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SLEEP_DUR(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TIMER_HR(LSM6DSL_ACC_GYRO_TIMER_HR_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TIMER_HR(LSM6DSL_ACC_GYRO_TIMER_HR_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5152,9 +5152,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TIMER_HR(LSM6DSL_ACC_GYRO_TIMER_HR_t newValu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TIMER_HR(LSM6DSL_ACC_GYRO_TIMER_HR_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TIMER_HR(LSM6DSL_ACC_GYRO_TIMER_HR_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_DUR, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5167,9 +5167,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TIMER_HR(LSM6DSL_ACC_GYRO_TIMER_HR_t *p_valu
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_WAKE_DUR(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_WAKE_DUR(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5194,9 +5194,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_WAKE_DUR(uint8_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WAKE_DUR(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_WAKE_DUR(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_WAKE_UP_DUR, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5210,9 +5210,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WAKE_DUR(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FF_THS(LSM6DSL_ACC_GYRO_FF_THS_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FF_THS(LSM6DSL_ACC_GYRO_FF_THS_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5234,9 +5234,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FF_THS(LSM6DSL_ACC_GYRO_FF_THS_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FF_THS(LSM6DSL_ACC_GYRO_FF_THS_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FF_THS(LSM6DSL_ACC_GYRO_FF_THS_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_FREE_FALL, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5249,9 +5249,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FF_THS(LSM6DSL_ACC_GYRO_FF_THS_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FF_Duration(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FF_Duration(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t valueH, valueL;
   uint8_t value;
@@ -5300,9 +5300,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FF_Duration(uint8_t newValue)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FF_Duration(uint8_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FF_Duration(uint8_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t valueH, valueL;
 
@@ -5331,9 +5331,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FF_Duration(uint8_t *p_value)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TimerEvRouteInt1(LSM6DSL_ACC_GYRO_INT1_TIMER_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TimerEvRouteInt1(LSM6DSL_ACC_GYRO_INT1_TIMER_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5355,9 +5355,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TimerEvRouteInt1(LSM6DSL_ACC_GYRO_INT1_TIMER
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TimerEvRouteInt1(LSM6DSL_ACC_GYRO_INT1_TIMER_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TimerEvRouteInt1(LSM6DSL_ACC_GYRO_INT1_TIMER_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD1_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5370,9 +5370,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TimerEvRouteInt1(LSM6DSL_ACC_GYRO_INT1_TIMER
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TiltEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TILT_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TiltEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TILT_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5394,9 +5394,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TiltEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TILT_t ne
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TiltEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TILT_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TiltEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TILT_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD1_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5409,9 +5409,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TiltEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TILT_t *p
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_6DEvOnInt1(LSM6DSL_ACC_GYRO_INT1_6D_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_6DEvOnInt1(LSM6DSL_ACC_GYRO_INT1_6D_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5433,9 +5433,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_6DEvOnInt1(LSM6DSL_ACC_GYRO_INT1_6D_t newVal
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_6DEvOnInt1(LSM6DSL_ACC_GYRO_INT1_6D_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_6DEvOnInt1(LSM6DSL_ACC_GYRO_INT1_6D_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD1_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5448,9 +5448,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_6DEvOnInt1(LSM6DSL_ACC_GYRO_INT1_6D_t *p_val
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TapEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TAP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TapEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TAP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5472,9 +5472,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TapEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TAP_t newV
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TapEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TAP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TapEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TAP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD1_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5487,9 +5487,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TapEvOnInt1(LSM6DSL_ACC_GYRO_INT1_TAP_t *p_v
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FFEvOnInt1(LSM6DSL_ACC_GYRO_INT1_FF_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FFEvOnInt1(LSM6DSL_ACC_GYRO_INT1_FF_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5511,9 +5511,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FFEvOnInt1(LSM6DSL_ACC_GYRO_INT1_FF_t newVal
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FFEvOnInt1(LSM6DSL_ACC_GYRO_INT1_FF_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FFEvOnInt1(LSM6DSL_ACC_GYRO_INT1_FF_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD1_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5526,9 +5526,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FFEvOnInt1(LSM6DSL_ACC_GYRO_INT1_FF_t *p_val
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_WUEvOnInt1(LSM6DSL_ACC_GYRO_INT1_WU_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_WUEvOnInt1(LSM6DSL_ACC_GYRO_INT1_WU_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5550,9 +5550,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_WUEvOnInt1(LSM6DSL_ACC_GYRO_INT1_WU_t newVal
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WUEvOnInt1(LSM6DSL_ACC_GYRO_INT1_WU_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_WUEvOnInt1(LSM6DSL_ACC_GYRO_INT1_WU_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD1_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5565,9 +5565,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WUEvOnInt1(LSM6DSL_ACC_GYRO_INT1_WU_t *p_val
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SingleTapOnInt1(LSM6DSL_ACC_GYRO_INT1_SINGLE_TAP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SingleTapOnInt1(LSM6DSL_ACC_GYRO_INT1_SINGLE_TAP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5589,9 +5589,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SingleTapOnInt1(LSM6DSL_ACC_GYRO_INT1_SINGLE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SingleTapOnInt1(LSM6DSL_ACC_GYRO_INT1_SINGLE_TAP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SingleTapOnInt1(LSM6DSL_ACC_GYRO_INT1_SINGLE_TAP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD1_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5604,9 +5604,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SingleTapOnInt1(LSM6DSL_ACC_GYRO_INT1_SINGLE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SleepEvOnInt1(LSM6DSL_ACC_GYRO_INT1_SLEEP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SleepEvOnInt1(LSM6DSL_ACC_GYRO_INT1_SLEEP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5628,9 +5628,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SleepEvOnInt1(LSM6DSL_ACC_GYRO_INT1_SLEEP_t 
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SleepEvOnInt1(LSM6DSL_ACC_GYRO_INT1_SLEEP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SleepEvOnInt1(LSM6DSL_ACC_GYRO_INT1_SLEEP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD1_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5643,9 +5643,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SleepEvOnInt1(LSM6DSL_ACC_GYRO_INT1_SLEEP_t 
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_MagCorrection_Int2(LSM6DSL_ACC_GYRO_INT2_IRON_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_MagCorrection_Int2(LSM6DSL_ACC_GYRO_INT2_IRON_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5667,9 +5667,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_MagCorrection_Int2(LSM6DSL_ACC_GYRO_INT2_IRO
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_MagCorrection_Int2(LSM6DSL_ACC_GYRO_INT2_IRON_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_MagCorrection_Int2(LSM6DSL_ACC_GYRO_INT2_IRON_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD2_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5682,9 +5682,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_MagCorrection_Int2(LSM6DSL_ACC_GYRO_INT2_IRO
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TiltEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TILT_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TiltEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TILT_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5706,9 +5706,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TiltEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TILT_t ne
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TiltEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TILT_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TiltEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TILT_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD2_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5721,9 +5721,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TiltEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TILT_t *p
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_6DEvOnInt2(LSM6DSL_ACC_GYRO_INT2_6D_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_6DEvOnInt2(LSM6DSL_ACC_GYRO_INT2_6D_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5745,9 +5745,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_6DEvOnInt2(LSM6DSL_ACC_GYRO_INT2_6D_t newVal
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_6DEvOnInt2(LSM6DSL_ACC_GYRO_INT2_6D_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_6DEvOnInt2(LSM6DSL_ACC_GYRO_INT2_6D_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD2_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5760,9 +5760,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_6DEvOnInt2(LSM6DSL_ACC_GYRO_INT2_6D_t *p_val
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TapEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TAP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_TapEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TAP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5784,9 +5784,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_TapEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TAP_t newV
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TapEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TAP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_TapEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TAP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD2_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5799,9 +5799,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_TapEvOnInt2(LSM6DSL_ACC_GYRO_INT2_TAP_t *p_v
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FFEvOnInt2(LSM6DSL_ACC_GYRO_INT2_FF_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_FFEvOnInt2(LSM6DSL_ACC_GYRO_INT2_FF_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5823,9 +5823,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_FFEvOnInt2(LSM6DSL_ACC_GYRO_INT2_FF_t newVal
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FFEvOnInt2(LSM6DSL_ACC_GYRO_INT2_FF_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_FFEvOnInt2(LSM6DSL_ACC_GYRO_INT2_FF_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD2_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5838,9 +5838,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_FFEvOnInt2(LSM6DSL_ACC_GYRO_INT2_FF_t *p_val
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_WUEvOnInt2(LSM6DSL_ACC_GYRO_INT2_WU_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_WUEvOnInt2(LSM6DSL_ACC_GYRO_INT2_WU_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5862,9 +5862,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_WUEvOnInt2(LSM6DSL_ACC_GYRO_INT2_WU_t newVal
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WUEvOnInt2(LSM6DSL_ACC_GYRO_INT2_WU_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_WUEvOnInt2(LSM6DSL_ACC_GYRO_INT2_WU_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD2_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5877,9 +5877,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_WUEvOnInt2(LSM6DSL_ACC_GYRO_INT2_WU_t *p_val
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SingleTapOnInt2(LSM6DSL_ACC_GYRO_INT2_SINGLE_TAP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SingleTapOnInt2(LSM6DSL_ACC_GYRO_INT2_SINGLE_TAP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5901,9 +5901,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SingleTapOnInt2(LSM6DSL_ACC_GYRO_INT2_SINGLE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SingleTapOnInt2(LSM6DSL_ACC_GYRO_INT2_SINGLE_TAP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SingleTapOnInt2(LSM6DSL_ACC_GYRO_INT2_SINGLE_TAP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD2_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5916,9 +5916,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SingleTapOnInt2(LSM6DSL_ACC_GYRO_INT2_SINGLE
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SleepEvOnInt2(LSM6DSL_ACC_GYRO_INT2_SLEEP_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_SleepEvOnInt2(LSM6DSL_ACC_GYRO_INT2_SLEEP_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -5940,9 +5940,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_SleepEvOnInt2(LSM6DSL_ACC_GYRO_INT2_SLEEP_t 
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SleepEvOnInt2(LSM6DSL_ACC_GYRO_INT2_SLEEP_t *p_value)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_R_SleepEvOnInt2(LSM6DSL_ACC_GYRO_INT2_SLEEP_t *p_value)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   op_status = LSM6DSL_ACC_GYRO_ReadReg(LSM6DSL_ACC_GYRO_MD2_CFG, (uint8_t *)p_value, 1);
   if (op_status < LSM6DSL_OK)
@@ -5955,9 +5955,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_R_SleepEvOnInt2(LSM6DSL_ACC_GYRO_INT2_SLEEP_t 
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_Get_GetFIFOData(uint8_t *buff)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_Get_GetFIFOData(uint8_t *buff)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t i, j, k;
   uint8_t numberOfByteForDimension;
@@ -5982,9 +5982,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_Get_GetFIFOData(uint8_t *buff)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_Get_GetTimestamp(uint8_t *buff)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_Get_GetTimestamp(uint8_t *buff)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t i, j, k;
   uint8_t numberOfByteForDimension;
@@ -6009,9 +6009,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_Get_GetTimestamp(uint8_t *buff)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_Get_GetStepCounter(uint8_t *buff)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_Get_GetStepCounter(uint8_t *buff)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t i, j, k;
   uint8_t numberOfByteForDimension;
@@ -6036,9 +6036,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_Get_GetStepCounter(uint8_t *buff)
   return LSM6DSL_OK;
 }
 
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PedoThreshold(uint8_t newValue)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_W_PedoThreshold(uint8_t newValue)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   uint8_t value;
 
@@ -6082,9 +6082,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_W_PedoThreshold(uint8_t newValue)
  * The SI_Matrix buffer must provide coefficients
  * in xx, xy, xz, yx, yy, yz, zx, zy, zz order.
  */
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_SH_init_SI_Matrix(uint8_t *SI_matrix)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_SH_init_SI_Matrix(uint8_t *SI_matrix)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Open Embedded Function Register page*/
   op_status = LSM6DSL_ACC_GYRO_W_EmbeddedAccess(LSM6DSL_ACC_GYRO_EMBEDDED_ACCESS_ENABLED);
@@ -6111,9 +6111,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_SH_init_SI_Matrix(uint8_t *SI_matrix)
 }
 
 /* Read a remote device through I2C Sensor Hub Slave 0 */
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_SH0_Program(uint8_t SlvAddr, uint8_t reg, uint8_t len)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_SH0_Program(uint8_t SlvAddr, uint8_t reg, uint8_t len)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   /* Open Embedded Function Register page*/
   op_status = LSM6DSL_ACC_GYRO_W_EmbeddedAccess(LSM6DSL_ACC_GYRO_EMBEDDED_ACCESS_ENABLED);
@@ -6175,9 +6175,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_SH0_Program(uint8_t SlvAddr, uint8_t reg, uint
 }
 
 /* Read a remote device through I2C Sensor Hub Slave 0 */
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_SH0_ReadMem(uint8_t SlvAddr, uint8_t reg, uint8_t *Bufp, uint8_t len, uint8_t stop)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_SH0_ReadMem(uint8_t SlvAddr, uint8_t reg, uint8_t *Bufp, uint8_t len, uint8_t stop)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_SENS_HUB_END_t op_cmpl = LSM6DSL_ACC_GYRO_SENS_HUB_END_STILL_ONGOING;
   LSM6DSL_ACC_GYRO_XLDA_t op_update = LSM6DSL_ACC_GYRO_XLDA_NO_DATA_AVAIL;
@@ -6255,9 +6255,9 @@ LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_SH0_ReadMem(uint8_t SlvAddr, uint8_t reg, uint
 }
 
 /* Write a remote device through I2C Sensor Hub Slave 0 */
-LSM6DSL_OpStatus LSM6DSL_ACC_GYRO_SH0_WriteByte(uint8_t SlvAddr, uint8_t reg, uint8_t Bufp)
+LSM6DSL_OpResult LSM6DSL_ACC_GYRO_SH0_WriteByte(uint8_t SlvAddr, uint8_t reg, uint8_t Bufp)
 {
-  LSM6DSL_OpStatus op_status;
+  LSM6DSL_OpResult op_status;
 
   LSM6DSL_ACC_GYRO_SENS_HUB_END_t op_cmpl = LSM6DSL_ACC_GYRO_SENS_HUB_END_STILL_ONGOING;
   LSM6DSL_ACC_GYRO_XLDA_t op_update = LSM6DSL_ACC_GYRO_XLDA_NO_DATA_AVAIL;

@@ -37,24 +37,24 @@ Modifications:
 
 #define LPS22HB_IO_TX_BUF_SIZE             32
 
-LPS22HB_OpStatus LPS22HB_IO_Read(
+LPS22HB_OpResult LPS22HB_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 );
 
-LPS22HB_OpStatus LPS22HB_IO_Write(
+LPS22HB_OpResult LPS22HB_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 );
 
-LPS22HB_OpStatus LPS22HB_IO_ReadByte(
+LPS22HB_OpResult LPS22HB_IO_ReadByte(
     uint8_t RegisterAddr,
     uint8_t* value
 );
 
-LPS22HB_OpStatus LPS22HB_IO_WriteByte(
+LPS22HB_OpResult LPS22HB_IO_WriteByte(
     uint8_t RegisterAddr,
     uint8_t value
 );

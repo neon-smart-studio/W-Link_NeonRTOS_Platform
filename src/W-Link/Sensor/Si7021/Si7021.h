@@ -12,7 +12,7 @@
 #define SI7021_I2C_INDEX                   CONFIG_SI7021_I2C_INDEX
 #endif
 
-typedef enum Si7021_OpStatus_t
+typedef enum Si7021_OpResult_t
 {
   Si7021_OK = 0,
   Si7021_NotInit = -1,
@@ -21,7 +21,7 @@ typedef enum Si7021_OpStatus_t
   Si7021_MutexTimeout = -4,
   Si7021_IO_Error = -5,
   Si7021_Unsupport = -6
-} Si7021_OpStatus;
+} Si7021_OpResult;
 
 typedef enum Si_Sensor_Model_t {
   Si_Sensor_Model_Engineering_Samples = 0,
@@ -37,11 +37,11 @@ typedef enum Si_Sensor_Rev_t {
   Si_Sensor_Rev_MAX = 2,
 }Si_Sensor_Rev;
 
-Si7021_OpStatus Si7021_Init();
-Si7021_OpStatus Si7021_ReadMeasureTemperature(float* temperature);
-Si7021_OpStatus Si7021_ReadMeasureHumidity(float* humidity);
-Si7021_OpStatus Si7021_ReadPreviousMeasureTemperature(float* temperature);
-Si7021_OpStatus Si7021_ReadRevision(Si_Sensor_Rev* revision);
-Si7021_OpStatus Si7021_ReadSerialNumber(Si_Sensor_Model* model, uint8_t ID_A[4], uint8_t ID_B[4]);
+Si7021_OpResult Si7021_Init();
+Si7021_OpResult Si7021_ReadMeasureTemperature(float* temperature);
+Si7021_OpResult Si7021_ReadMeasureHumidity(float* humidity);
+Si7021_OpResult Si7021_ReadPreviousMeasureTemperature(float* temperature);
+Si7021_OpResult Si7021_ReadRevision(Si_Sensor_Rev* revision);
+Si7021_OpResult Si7021_ReadSerialNumber(Si_Sensor_Model* model, uint8_t ID_A[4], uint8_t ID_B[4]);
 
 #endif //SI7021_H

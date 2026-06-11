@@ -37,24 +37,24 @@ Modifications:
 
 #define HTS221_IO_TX_BUF_SIZE             32
 
-HTS221_OpStatus HTS221_IO_Read(
+HTS221_OpResult HTS221_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToRead
 );
 
-HTS221_OpStatus HTS221_IO_Write(
+HTS221_OpResult HTS221_IO_Write(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,
     uint16_t NumByteToWrite
 );
 
-HTS221_OpStatus HTS221_IO_ReadByte(
+HTS221_OpResult HTS221_IO_ReadByte(
     uint8_t RegisterAddr,
     uint8_t* value
 );
 
-HTS221_OpStatus HTS221_IO_WriteByte(
+HTS221_OpResult HTS221_IO_WriteByte(
     uint8_t RegisterAddr,
     uint8_t value
 );

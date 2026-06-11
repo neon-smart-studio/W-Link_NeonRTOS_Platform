@@ -53,9 +53,9 @@
 #include "LPS22HB_Register_Def.h"
 #include "LPS22HB_Register.h"
 
-LPS22HB_OpStatus LPS22HB_ReadReg( uint8_t RegAddr, uint16_t NumByteToRead, uint8_t *p_data )
+LPS22HB_OpResult LPS22HB_ReadReg( uint8_t RegAddr, uint16_t NumByteToRead, uint8_t *p_data )
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   int i = 0;
 
@@ -71,9 +71,9 @@ LPS22HB_OpStatus LPS22HB_ReadReg( uint8_t RegAddr, uint16_t NumByteToRead, uint8
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_WriteReg( uint8_t RegAddr, uint16_t NumByteToWrite, uint8_t *p_data )
+LPS22HB_OpResult LPS22HB_WriteReg( uint8_t RegAddr, uint16_t NumByteToWrite, uint8_t *p_data )
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   int i = 0;
 
@@ -89,9 +89,9 @@ LPS22HB_OpStatus LPS22HB_WriteReg( uint8_t RegAddr, uint16_t NumByteToWrite, uin
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_DeviceID(uint8_t* deviceid)
+LPS22HB_OpResult LPS22HB_Get_DeviceID(uint8_t* deviceid)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   op_status = LPS22HB_ReadReg(LPS22HB_WHO_AM_I_REG, 1, deviceid);
   if(op_status < LPS22HB_OK)
@@ -102,7 +102,7 @@ LPS22HB_OpStatus LPS22HB_Get_DeviceID(uint8_t* deviceid)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_DriverVersion(LPS22HB_DriverVersion_st *Version)
+LPS22HB_OpResult LPS22HB_Get_DriverVersion(LPS22HB_DriverVersion_st *Version)
 {
   Version->Major = LPS22HB_DriverVersion_Major;
   Version->Minor = LPS22HB_DriverVersion_Minor;
@@ -111,9 +111,9 @@ LPS22HB_OpStatus LPS22HB_Get_DriverVersion(LPS22HB_DriverVersion_st *Version)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_PowerMode(LPS22HB_PowerMode_et mode)
+LPS22HB_OpResult LPS22HB_Set_PowerMode(LPS22HB_PowerMode_et mode)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -135,9 +135,9 @@ LPS22HB_OpStatus LPS22HB_Set_PowerMode(LPS22HB_PowerMode_et mode)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_PowerMode(LPS22HB_PowerMode_et* mode)
+LPS22HB_OpResult LPS22HB_Get_PowerMode(LPS22HB_PowerMode_et* mode)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -152,9 +152,9 @@ LPS22HB_OpStatus LPS22HB_Get_PowerMode(LPS22HB_PowerMode_et* mode)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_Odr(LPS22HB_Odr_et odr)
+LPS22HB_OpResult LPS22HB_Set_Odr(LPS22HB_Odr_et odr)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -176,9 +176,9 @@ LPS22HB_OpStatus LPS22HB_Set_Odr(LPS22HB_Odr_et odr)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_Odr(LPS22HB_Odr_et* odr)
+LPS22HB_OpResult LPS22HB_Get_Odr(LPS22HB_Odr_et* odr)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -193,9 +193,9 @@ LPS22HB_OpStatus LPS22HB_Get_Odr(LPS22HB_Odr_et* odr)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_LowPassFilter(LPS22HB_State_et state)
+LPS22HB_OpResult LPS22HB_Set_LowPassFilter(LPS22HB_State_et state)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -219,9 +219,9 @@ LPS22HB_OpStatus LPS22HB_Set_LowPassFilter(LPS22HB_State_et state)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_LowPassFilterCutoff(LPS22HB_LPF_Cutoff_et cutoff){
+LPS22HB_OpResult LPS22HB_Set_LowPassFilterCutoff(LPS22HB_LPF_Cutoff_et cutoff){
 
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
   uint8_t tmp;
 
@@ -243,9 +243,9 @@ LPS22HB_OpStatus LPS22HB_Set_LowPassFilterCutoff(LPS22HB_LPF_Cutoff_et cutoff){
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_Bdu(LPS22HB_Bdu_et bdu)
+LPS22HB_OpResult LPS22HB_Set_Bdu(LPS22HB_Bdu_et bdu)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -267,9 +267,9 @@ LPS22HB_OpStatus LPS22HB_Set_Bdu(LPS22HB_Bdu_et bdu)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_Bdu(LPS22HB_Bdu_et* bdu)
+LPS22HB_OpResult LPS22HB_Get_Bdu(LPS22HB_Bdu_et* bdu)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -284,9 +284,9 @@ LPS22HB_OpStatus LPS22HB_Get_Bdu(LPS22HB_Bdu_et* bdu)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_SpiInterface(LPS22HB_SPIMode_et spimode)
+LPS22HB_OpResult LPS22HB_Set_SpiInterface(LPS22HB_SPIMode_et spimode)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -308,9 +308,9 @@ LPS22HB_OpStatus LPS22HB_Set_SpiInterface(LPS22HB_SPIMode_et spimode)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_ClockTreeConfifuration(LPS22HB_CTE_et mode)
+LPS22HB_OpResult LPS22HB_Set_ClockTreeConfifuration(LPS22HB_CTE_et mode)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -332,9 +332,9 @@ LPS22HB_OpStatus LPS22HB_Set_ClockTreeConfifuration(LPS22HB_CTE_et mode)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_SpiInterface(LPS22HB_SPIMode_et* spimode)
+LPS22HB_OpResult LPS22HB_Get_SpiInterface(LPS22HB_SPIMode_et* spimode)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -349,9 +349,9 @@ LPS22HB_OpStatus LPS22HB_Get_SpiInterface(LPS22HB_SPIMode_et* spimode)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_SwReset()
+LPS22HB_OpResult LPS22HB_SwReset()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -372,9 +372,9 @@ LPS22HB_OpStatus LPS22HB_SwReset()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_MemoryBoot()
+LPS22HB_OpResult LPS22HB_MemoryBoot()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -395,9 +395,9 @@ LPS22HB_OpStatus LPS22HB_MemoryBoot()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_SwResetAndMemoryBoot()
+LPS22HB_OpResult LPS22HB_SwResetAndMemoryBoot()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -418,9 +418,9 @@ LPS22HB_OpStatus LPS22HB_SwResetAndMemoryBoot()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_FifoModeUse(LPS22HB_State_et status)
+LPS22HB_OpResult LPS22HB_Set_FifoModeUse(LPS22HB_State_et status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -442,9 +442,9 @@ LPS22HB_OpStatus LPS22HB_Set_FifoModeUse(LPS22HB_State_et status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_FifoWatermarkLevelUse(LPS22HB_State_et status)
+LPS22HB_OpResult LPS22HB_Set_FifoWatermarkLevelUse(LPS22HB_State_et status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -466,9 +466,9 @@ LPS22HB_OpStatus LPS22HB_Set_FifoWatermarkLevelUse(LPS22HB_State_et status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_AutomaticIncrementRegAddress(LPS22HB_State_et status){
+LPS22HB_OpResult LPS22HB_Set_AutomaticIncrementRegAddress(LPS22HB_State_et status){
 
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -490,9 +490,9 @@ LPS22HB_OpStatus LPS22HB_Set_AutomaticIncrementRegAddress(LPS22HB_State_et statu
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_I2C(LPS22HB_State_et statei2c)
+LPS22HB_OpResult LPS22HB_Set_I2C(LPS22HB_State_et statei2c)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -515,9 +515,9 @@ LPS22HB_OpStatus LPS22HB_Set_I2C(LPS22HB_State_et statei2c)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_StartOneShotMeasurement()
+LPS22HB_OpResult LPS22HB_StartOneShotMeasurement()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -541,9 +541,9 @@ LPS22HB_OpStatus LPS22HB_StartOneShotMeasurement()
 
 }
 
-LPS22HB_OpStatus LPS22HB_Set_InterruptActiveLevel(LPS22HB_InterruptActiveLevel_et mode)
+LPS22HB_OpResult LPS22HB_Set_InterruptActiveLevel(LPS22HB_InterruptActiveLevel_et mode)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -565,9 +565,9 @@ LPS22HB_OpStatus LPS22HB_Set_InterruptActiveLevel(LPS22HB_InterruptActiveLevel_e
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_InterruptOutputType(LPS22HB_OutputType_et output)
+LPS22HB_OpResult LPS22HB_Set_InterruptOutputType(LPS22HB_OutputType_et output)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -589,9 +589,9 @@ LPS22HB_OpStatus LPS22HB_Set_InterruptOutputType(LPS22HB_OutputType_et output)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_InterruptControlConfig(LPS22HB_OutputSignalConfig_et config)
+LPS22HB_OpResult LPS22HB_Set_InterruptControlConfig(LPS22HB_OutputSignalConfig_et config)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -613,9 +613,9 @@ LPS22HB_OpStatus LPS22HB_Set_InterruptControlConfig(LPS22HB_OutputSignalConfig_e
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_DRDYInterrupt(LPS22HB_State_et status)
+LPS22HB_OpResult LPS22HB_Set_DRDYInterrupt(LPS22HB_State_et status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -637,9 +637,9 @@ LPS22HB_OpStatus LPS22HB_Set_DRDYInterrupt(LPS22HB_State_et status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_FIFO_OVR_Interrupt(LPS22HB_State_et status)
+LPS22HB_OpResult LPS22HB_Set_FIFO_OVR_Interrupt(LPS22HB_State_et status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -661,9 +661,9 @@ LPS22HB_OpStatus LPS22HB_Set_FIFO_OVR_Interrupt(LPS22HB_State_et status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_FIFO_FTH_Interrupt(LPS22HB_State_et status)
+LPS22HB_OpResult LPS22HB_Set_FIFO_FTH_Interrupt(LPS22HB_State_et status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -685,9 +685,9 @@ LPS22HB_OpStatus LPS22HB_Set_FIFO_FTH_Interrupt(LPS22HB_State_et status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_FIFO_FULL_Interrupt(LPS22HB_State_et status)
+LPS22HB_OpResult LPS22HB_Set_FIFO_FULL_Interrupt(LPS22HB_State_et status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -709,9 +709,9 @@ LPS22HB_OpStatus LPS22HB_Set_FIFO_FULL_Interrupt(LPS22HB_State_et status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_AutoRifP()
+LPS22HB_OpResult LPS22HB_Set_AutoRifP()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -732,9 +732,9 @@ LPS22HB_OpStatus LPS22HB_Set_AutoRifP()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_ResetAutoRifP()
+LPS22HB_OpResult LPS22HB_ResetAutoRifP()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -755,9 +755,9 @@ LPS22HB_OpStatus LPS22HB_ResetAutoRifP()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_AutoZeroFunction()
+LPS22HB_OpResult LPS22HB_Set_AutoZeroFunction()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -778,9 +778,9 @@ LPS22HB_OpStatus LPS22HB_Set_AutoZeroFunction()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_ResetAutoZeroFunction()
+LPS22HB_OpResult LPS22HB_ResetAutoZeroFunction()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -804,9 +804,9 @@ LPS22HB_OpStatus LPS22HB_ResetAutoZeroFunction()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_InterruptDifferentialGeneration(LPS22HB_State_et diff_en)
+LPS22HB_OpResult LPS22HB_Set_InterruptDifferentialGeneration(LPS22HB_State_et diff_en)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -828,9 +828,9 @@ LPS22HB_OpStatus LPS22HB_Set_InterruptDifferentialGeneration(LPS22HB_State_et di
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_InterruptDifferentialGeneration(LPS22HB_State_et* diff_en)
+LPS22HB_OpResult LPS22HB_Get_InterruptDifferentialGeneration(LPS22HB_State_et* diff_en)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -845,9 +845,9 @@ LPS22HB_OpStatus LPS22HB_Get_InterruptDifferentialGeneration(LPS22HB_State_et* d
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_LatchInterruptRequest(LPS22HB_State_et status)
+LPS22HB_OpResult LPS22HB_LatchInterruptRequest(LPS22HB_State_et status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -869,9 +869,9 @@ LPS22HB_OpStatus LPS22HB_LatchInterruptRequest(LPS22HB_State_et status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_PLE(LPS22HB_State_et status)
+LPS22HB_OpResult LPS22HB_Set_PLE(LPS22HB_State_et status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -893,9 +893,9 @@ LPS22HB_OpStatus LPS22HB_Set_PLE(LPS22HB_State_et status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_PHE(LPS22HB_State_et status)
+LPS22HB_OpResult LPS22HB_Set_PHE(LPS22HB_State_et status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -917,9 +917,9 @@ LPS22HB_OpStatus LPS22HB_Set_PHE(LPS22HB_State_et status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_InterruptDifferentialEventStatus(LPS22HB_InterruptDiffStatus_st* interruptsource)
+LPS22HB_OpResult LPS22HB_Get_InterruptDifferentialEventStatus(LPS22HB_InterruptDiffStatus_st* interruptsource)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -937,9 +937,9 @@ LPS22HB_OpStatus LPS22HB_Get_InterruptDifferentialEventStatus(LPS22HB_InterruptD
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_DataStatus(LPS22HB_DataStatus_st* datastatus)
+LPS22HB_OpResult LPS22HB_Get_DataStatus(LPS22HB_DataStatus_st* datastatus)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -957,9 +957,9 @@ LPS22HB_OpStatus LPS22HB_Get_DataStatus(LPS22HB_DataStatus_st* datastatus)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_RawPressure(int32_t *raw_press)
+LPS22HB_OpResult LPS22HB_Get_RawPressure(int32_t *raw_press)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t buffer[3];
   uint32_t tmp = 0;
@@ -984,9 +984,9 @@ LPS22HB_OpStatus LPS22HB_Get_RawPressure(int32_t *raw_press)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_Pressure(int32_t* Pout)
+LPS22HB_OpResult LPS22HB_Get_Pressure(int32_t* Pout)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   int32_t raw_press;
 
@@ -1001,9 +1001,9 @@ LPS22HB_OpStatus LPS22HB_Get_Pressure(int32_t* Pout)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_RawTemperature(int16_t* raw_data)
+LPS22HB_OpResult LPS22HB_Get_RawTemperature(int16_t* raw_data)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t buffer[2];
   uint16_t tmp;
@@ -1022,9 +1022,9 @@ LPS22HB_OpStatus LPS22HB_Get_RawTemperature(int16_t* raw_data)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_Temperature(int16_t* Tout)
+LPS22HB_OpResult LPS22HB_Get_Temperature(int16_t* Tout)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   int16_t raw_data;
 
@@ -1039,9 +1039,9 @@ LPS22HB_OpStatus LPS22HB_Get_Temperature(int16_t* Tout)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_PressureThreshold(int16_t* P_ths)
+LPS22HB_OpResult LPS22HB_Get_PressureThreshold(int16_t* P_ths)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tempReg[2];
 
@@ -1056,9 +1056,9 @@ LPS22HB_OpStatus LPS22HB_Get_PressureThreshold(int16_t* P_ths)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_PressureThreshold(int16_t P_ths)
+LPS22HB_OpResult LPS22HB_Set_PressureThreshold(int16_t P_ths)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t buffer[2];
 
@@ -1074,9 +1074,9 @@ LPS22HB_OpStatus LPS22HB_Set_PressureThreshold(int16_t P_ths)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_FifoMode(LPS22HB_FifoMode_et fifomode)
+LPS22HB_OpResult LPS22HB_Set_FifoMode(LPS22HB_FifoMode_et fifomode)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -1098,9 +1098,9 @@ LPS22HB_OpStatus LPS22HB_Set_FifoMode(LPS22HB_FifoMode_et fifomode)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_FifoMode(LPS22HB_FifoMode_et* fifomode)
+LPS22HB_OpResult LPS22HB_Get_FifoMode(LPS22HB_FifoMode_et* fifomode)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -1116,9 +1116,9 @@ LPS22HB_OpStatus LPS22HB_Get_FifoMode(LPS22HB_FifoMode_et* fifomode)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_FifoWatermarkLevel(uint8_t wtmlevel)
+LPS22HB_OpResult LPS22HB_Set_FifoWatermarkLevel(uint8_t wtmlevel)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -1140,9 +1140,9 @@ LPS22HB_OpStatus LPS22HB_Set_FifoWatermarkLevel(uint8_t wtmlevel)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_FifoWatermarkLevel(uint8_t *wtmlevel)
+LPS22HB_OpResult LPS22HB_Get_FifoWatermarkLevel(uint8_t *wtmlevel)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   op_status = LPS22HB_ReadReg(LPS22HB_CTRL_FIFO_REG, 1, wtmlevel);
   if(op_status < LPS22HB_OK)
@@ -1155,9 +1155,9 @@ LPS22HB_OpStatus LPS22HB_Get_FifoWatermarkLevel(uint8_t *wtmlevel)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_FifoStatus(LPS22HB_FifoStatus_st* status)
+LPS22HB_OpResult LPS22HB_Get_FifoStatus(LPS22HB_FifoStatus_st* status)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
 
@@ -1185,9 +1185,9 @@ LPS22HB_OpStatus LPS22HB_Get_FifoStatus(LPS22HB_FifoStatus_st* status)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_PressureOffsetValue(int16_t *pressoffset)
+LPS22HB_OpResult LPS22HB_Get_PressureOffsetValue(int16_t *pressoffset)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t buffer[2];
   int16_t raw_press;
@@ -1205,9 +1205,9 @@ LPS22HB_OpStatus LPS22HB_Get_PressureOffsetValue(int16_t *pressoffset)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_ReferencePressure(int32_t* RefP)
+LPS22HB_OpResult LPS22HB_Get_ReferencePressure(int32_t* RefP)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t buffer[3];
   uint32_t tempVal=0;
@@ -1235,9 +1235,9 @@ LPS22HB_OpStatus LPS22HB_Get_ReferencePressure(int32_t* RefP)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_IsMeasurementCompleted(uint8_t* Is_Measurement_Completed)
+LPS22HB_OpResult LPS22HB_IsMeasurementCompleted(uint8_t* Is_Measurement_Completed)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   uint8_t tmp;
   LPS22HB_DataStatus_st datastatus;
@@ -1256,9 +1256,9 @@ LPS22HB_OpStatus LPS22HB_IsMeasurementCompleted(uint8_t* Is_Measurement_Complete
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_Measurement(LPS22HB_MeasureTypeDef_st *Measurement_Value)
+LPS22HB_OpResult LPS22HB_Get_Measurement(LPS22HB_MeasureTypeDef_st *Measurement_Value)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   int16_t Tout;
   int32_t Pout;
@@ -1282,9 +1282,9 @@ LPS22HB_OpStatus LPS22HB_Get_Measurement(LPS22HB_MeasureTypeDef_st *Measurement_
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_InitConfig()
+LPS22HB_OpResult LPS22HB_Set_InitConfig()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   LPS22HB_ConfigTypeDef_st pLPS22HBInit;
 
@@ -1313,9 +1313,9 @@ LPS22HB_OpStatus LPS22HB_Set_InitConfig()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Clear_InitConfig()
+LPS22HB_OpResult LPS22HB_Clear_InitConfig()
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   LPS22HB_MeasureTypeDef_st Measurement_Value;
 
@@ -1336,9 +1336,9 @@ LPS22HB_OpStatus LPS22HB_Clear_InitConfig()
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_GenericConfig(LPS22HB_ConfigTypeDef_st* pxLPS22HBInit)
+LPS22HB_OpResult LPS22HB_Set_GenericConfig(LPS22HB_ConfigTypeDef_st* pxLPS22HBInit)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
 
   /* Enable Low Current Mode (low Power) or Low Noise Mode*/
@@ -1402,9 +1402,9 @@ LPS22HB_OpStatus LPS22HB_Set_GenericConfig(LPS22HB_ConfigTypeDef_st* pxLPS22HBIn
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_GenericConfig(LPS22HB_ConfigTypeDef_st* pxLPS22HBInit)
+LPS22HB_OpResult LPS22HB_Get_GenericConfig(LPS22HB_ConfigTypeDef_st* pxLPS22HBInit)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
 
   uint8_t tmp;
@@ -1441,9 +1441,9 @@ LPS22HB_OpStatus LPS22HB_Get_GenericConfig(LPS22HB_ConfigTypeDef_st* pxLPS22HBIn
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_InterruptConfig(LPS22HB_InterruptTypeDef_st* pLPS22HBInt)
+LPS22HB_OpResult LPS22HB_Set_InterruptConfig(LPS22HB_InterruptTypeDef_st* pLPS22HBInt)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
   /* Enable Low Current Mode (low Power) or Low Noise Mode*/
   op_status = LPS22HB_Set_InterruptActiveLevel(pLPS22HBInt->INT_H_L);
@@ -1604,9 +1604,9 @@ LPS22HB_OpStatus LPS22HB_Set_InterruptConfig(LPS22HB_InterruptTypeDef_st* pLPS22
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_InterruptConfig(LPS22HB_InterruptTypeDef_st* pLPS22HBInt)
+LPS22HB_OpResult LPS22HB_Get_InterruptConfig(LPS22HB_InterruptTypeDef_st* pLPS22HBInt)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
    uint8_t tmp;
 
@@ -1647,9 +1647,9 @@ LPS22HB_OpStatus LPS22HB_Get_InterruptConfig(LPS22HB_InterruptTypeDef_st* pLPS22
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Set_FifoConfig(LPS22HB_FIFOTypeDef_st* pLPS22HBFIFO)
+LPS22HB_OpResult LPS22HB_Set_FifoConfig(LPS22HB_FIFOTypeDef_st* pLPS22HBFIFO)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
 
    if(pLPS22HBFIFO->FIFO_MODE == LPS22HB_FIFO_BYPASS_MODE) {
     /* FIFO Disable-> FIFO_EN bit=0 in CTRL_REG2*/
@@ -1711,9 +1711,9 @@ LPS22HB_OpStatus LPS22HB_Set_FifoConfig(LPS22HB_FIFOTypeDef_st* pLPS22HBFIFO)
   return LPS22HB_OK;
 }
 
-LPS22HB_OpStatus LPS22HB_Get_FifoConfig(LPS22HB_FIFOTypeDef_st* pLPS22HBFIFO)
+LPS22HB_OpResult LPS22HB_Get_FifoConfig(LPS22HB_FIFOTypeDef_st* pLPS22HBFIFO)
 {
-  LPS22HB_OpStatus op_status;
+  LPS22HB_OpResult op_status;
   
    uint8_t tmp;
 

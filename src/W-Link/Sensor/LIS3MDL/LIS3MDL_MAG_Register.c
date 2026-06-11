@@ -68,9 +68,9 @@ typedef union{
 	uint8_t u8bit[4];
 } Type1Axis32bit_U;
 
-LIS3MDL_OpStatus LIS3MDL_MAG_WriteReg(uint8_t Reg, uint8_t *Bufp, uint16_t len)
+LIS3MDL_OpResult LIS3MDL_MAG_WriteReg(uint8_t Reg, uint8_t *Bufp, uint16_t len)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_IO_Write(Reg, Bufp, len );
   if (op_status < LIS3MDL_OK)
@@ -81,9 +81,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_WriteReg(uint8_t Reg, uint8_t *Bufp, uint16_t len)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_ReadReg(uint8_t Reg, uint8_t *Bufp, uint16_t len)
+LIS3MDL_OpResult LIS3MDL_MAG_ReadReg(uint8_t Reg, uint8_t *Bufp, uint16_t len)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_IO_Read(Reg, Bufp, len );
   if (op_status < LIS3MDL_OK)
@@ -94,9 +94,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_ReadReg(uint8_t Reg, uint8_t *Bufp, uint16_t len)
   return LIS3MDL_OK;                                   
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_WHO_AM_I_(uint8_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_WHO_AM_I_(uint8_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_WHO_AM_I_REG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -110,9 +110,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_WHO_AM_I_(uint8_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_SystemOperatingMode(LIS3MDL_MAG_MD_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_SystemOperatingMode(LIS3MDL_MAG_MD_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -134,9 +134,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_SystemOperatingMode(LIS3MDL_MAG_MD_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_SystemOperatingMode(LIS3MDL_MAG_MD_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_SystemOperatingMode(LIS3MDL_MAG_MD_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG3, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -149,9 +149,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_SystemOperatingMode(LIS3MDL_MAG_MD_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_BlockDataUpdate(LIS3MDL_MAG_BDU_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_BlockDataUpdate(LIS3MDL_MAG_BDU_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -173,9 +173,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_BlockDataUpdate(LIS3MDL_MAG_BDU_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_BlockDataUpdate(LIS3MDL_MAG_BDU_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_BlockDataUpdate(LIS3MDL_MAG_BDU_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG5, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -188,9 +188,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_BlockDataUpdate(LIS3MDL_MAG_BDU_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_FullScale(LIS3MDL_MAG_FS_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_FullScale(LIS3MDL_MAG_FS_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -212,9 +212,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_FullScale(LIS3MDL_MAG_FS_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_FullScale(LIS3MDL_MAG_FS_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_FullScale(LIS3MDL_MAG_FS_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG2, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -227,9 +227,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_FullScale(LIS3MDL_MAG_FS_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_OutputDataRate(LIS3MDL_MAG_DO_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_OutputDataRate(LIS3MDL_MAG_DO_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -251,9 +251,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_OutputDataRate(LIS3MDL_MAG_DO_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_OutputDataRate(LIS3MDL_MAG_DO_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_OutputDataRate(LIS3MDL_MAG_DO_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG1, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -266,9 +266,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_OutputDataRate(LIS3MDL_MAG_DO_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_Get_Magnetic(uint8_t *buff) 
+LIS3MDL_OpResult LIS3MDL_MAG_Get_Magnetic(uint8_t *buff) 
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t i, j, k;
   uint8_t numberOfByteForDimension;
@@ -292,9 +292,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_Get_Magnetic(uint8_t *buff)
   return LIS3MDL_OK; 
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_SelfTest(LIS3MDL_MAG_ST_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_SelfTest(LIS3MDL_MAG_ST_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -316,9 +316,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_SelfTest(LIS3MDL_MAG_ST_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_SelfTest(LIS3MDL_MAG_ST_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_SelfTest(LIS3MDL_MAG_ST_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG1, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -331,9 +331,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_SelfTest(LIS3MDL_MAG_ST_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_OperatingModeXY(LIS3MDL_MAG_OM_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_OperatingModeXY(LIS3MDL_MAG_OM_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -355,9 +355,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_OperatingModeXY(LIS3MDL_MAG_OM_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_OperatingModeXY(LIS3MDL_MAG_OM_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_OperatingModeXY(LIS3MDL_MAG_OM_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG1, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -370,9 +370,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_OperatingModeXY(LIS3MDL_MAG_OM_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_TemperatureSensor(LIS3MDL_MAG_TEMP_EN_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_TemperatureSensor(LIS3MDL_MAG_TEMP_EN_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -394,9 +394,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_TemperatureSensor(LIS3MDL_MAG_TEMP_EN_t newValue
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_TemperatureSensor(LIS3MDL_MAG_TEMP_EN_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_TemperatureSensor(LIS3MDL_MAG_TEMP_EN_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG1, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -409,9 +409,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_TemperatureSensor(LIS3MDL_MAG_TEMP_EN_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_SoftRST(LIS3MDL_MAG_SOFT_RST_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_SoftRST(LIS3MDL_MAG_SOFT_RST_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -433,9 +433,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_SoftRST(LIS3MDL_MAG_SOFT_RST_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_SoftRST(LIS3MDL_MAG_SOFT_RST_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_SoftRST(LIS3MDL_MAG_SOFT_RST_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG2, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -448,9 +448,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_SoftRST(LIS3MDL_MAG_SOFT_RST_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_Reboot(LIS3MDL_MAG_REBOOT_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_Reboot(LIS3MDL_MAG_REBOOT_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -472,9 +472,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_Reboot(LIS3MDL_MAG_REBOOT_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_Reboot(LIS3MDL_MAG_REBOOT_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_Reboot(LIS3MDL_MAG_REBOOT_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG2, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -487,9 +487,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_Reboot(LIS3MDL_MAG_REBOOT_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_SerialInterfaceMode(LIS3MDL_MAG_SIM_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_SerialInterfaceMode(LIS3MDL_MAG_SIM_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -511,9 +511,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_SerialInterfaceMode(LIS3MDL_MAG_SIM_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_SerialInterfaceMode(LIS3MDL_MAG_SIM_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_SerialInterfaceMode(LIS3MDL_MAG_SIM_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG3, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -526,9 +526,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_SerialInterfaceMode(LIS3MDL_MAG_SIM_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_FastLowPowerXYZ(LIS3MDL_MAG_LP_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_FastLowPowerXYZ(LIS3MDL_MAG_LP_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -550,9 +550,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_FastLowPowerXYZ(LIS3MDL_MAG_LP_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_FastLowPowerXYZ(LIS3MDL_MAG_LP_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_FastLowPowerXYZ(LIS3MDL_MAG_LP_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG3, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -565,9 +565,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_FastLowPowerXYZ(LIS3MDL_MAG_LP_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_LittleBigEndianInversion(LIS3MDL_MAG_BLE_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_LittleBigEndianInversion(LIS3MDL_MAG_BLE_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -589,9 +589,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_LittleBigEndianInversion(LIS3MDL_MAG_BLE_t newVa
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_LittleBigEndianInversion(LIS3MDL_MAG_BLE_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_LittleBigEndianInversion(LIS3MDL_MAG_BLE_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG4, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -604,9 +604,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_LittleBigEndianInversion(LIS3MDL_MAG_BLE_t *value
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_OperatingModeZ(LIS3MDL_MAG_OMZ_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_OperatingModeZ(LIS3MDL_MAG_OMZ_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -628,9 +628,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_OperatingModeZ(LIS3MDL_MAG_OMZ_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_OperatingModeZ(LIS3MDL_MAG_OMZ_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_OperatingModeZ(LIS3MDL_MAG_OMZ_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_CTRL_REG4, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -643,9 +643,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_OperatingModeZ(LIS3MDL_MAG_OMZ_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_NewXData(LIS3MDL_MAG_XDA_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_NewXData(LIS3MDL_MAG_XDA_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_STATUS_REG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -658,9 +658,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_NewXData(LIS3MDL_MAG_XDA_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_NewYData(LIS3MDL_MAG_YDA_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_NewYData(LIS3MDL_MAG_YDA_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_STATUS_REG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -673,9 +673,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_NewYData(LIS3MDL_MAG_YDA_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_NewZData(LIS3MDL_MAG_ZDA_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_NewZData(LIS3MDL_MAG_ZDA_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_STATUS_REG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -688,9 +688,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_NewZData(LIS3MDL_MAG_ZDA_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_NewXYZData(LIS3MDL_MAG_ZYXDA_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_NewXYZData(LIS3MDL_MAG_ZYXDA_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_STATUS_REG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -703,9 +703,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_NewXYZData(LIS3MDL_MAG_ZYXDA_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_DataXOverrun(LIS3MDL_MAG_XOR_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_DataXOverrun(LIS3MDL_MAG_XOR_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_STATUS_REG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -718,9 +718,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_DataXOverrun(LIS3MDL_MAG_XOR_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_DataYOverrun(LIS3MDL_MAG_YOR_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_DataYOverrun(LIS3MDL_MAG_YOR_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_STATUS_REG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -733,9 +733,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_DataYOverrun(LIS3MDL_MAG_YOR_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_DataZOverrun(LIS3MDL_MAG_ZOR_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_DataZOverrun(LIS3MDL_MAG_ZOR_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_STATUS_REG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -748,9 +748,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_DataZOverrun(LIS3MDL_MAG_ZOR_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_DataXYZOverrun(LIS3MDL_MAG_ZYXOR_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_DataXYZOverrun(LIS3MDL_MAG_ZYXOR_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_STATUS_REG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -763,9 +763,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_DataXYZOverrun(LIS3MDL_MAG_ZYXOR_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptEnable(LIS3MDL_MAG_IEN_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_InterruptEnable(LIS3MDL_MAG_IEN_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -787,9 +787,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptEnable(LIS3MDL_MAG_IEN_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptEnable(LIS3MDL_MAG_IEN_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_InterruptEnable(LIS3MDL_MAG_IEN_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_CFG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -802,9 +802,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptEnable(LIS3MDL_MAG_IEN_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_LatchInterruptRq(LIS3MDL_MAG_LIR_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_LatchInterruptRq(LIS3MDL_MAG_LIR_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -826,9 +826,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_LatchInterruptRq(LIS3MDL_MAG_LIR_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_LatchInterruptRq(LIS3MDL_MAG_LIR_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_LatchInterruptRq(LIS3MDL_MAG_LIR_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_CFG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -841,9 +841,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_LatchInterruptRq(LIS3MDL_MAG_LIR_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptActive(LIS3MDL_MAG_IEA_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_InterruptActive(LIS3MDL_MAG_IEA_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -865,9 +865,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptActive(LIS3MDL_MAG_IEA_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptActive(LIS3MDL_MAG_IEA_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_InterruptActive(LIS3MDL_MAG_IEA_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_CFG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -880,9 +880,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptActive(LIS3MDL_MAG_IEA_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptOnZ(LIS3MDL_MAG_ZIEN_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_InterruptOnZ(LIS3MDL_MAG_ZIEN_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -904,9 +904,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptOnZ(LIS3MDL_MAG_ZIEN_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptOnZ(LIS3MDL_MAG_ZIEN_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_InterruptOnZ(LIS3MDL_MAG_ZIEN_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_CFG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -919,9 +919,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptOnZ(LIS3MDL_MAG_ZIEN_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptOnY(LIS3MDL_MAG_YIEN_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_InterruptOnY(LIS3MDL_MAG_YIEN_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -943,9 +943,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptOnY(LIS3MDL_MAG_YIEN_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptOnY(LIS3MDL_MAG_YIEN_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_InterruptOnY(LIS3MDL_MAG_YIEN_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_CFG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -958,9 +958,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptOnY(LIS3MDL_MAG_YIEN_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptOnX(LIS3MDL_MAG_XIEN_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_InterruptOnX(LIS3MDL_MAG_XIEN_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -982,9 +982,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptOnX(LIS3MDL_MAG_XIEN_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptOnX(LIS3MDL_MAG_XIEN_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_InterruptOnX(LIS3MDL_MAG_XIEN_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_CFG, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -997,9 +997,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptOnX(LIS3MDL_MAG_XIEN_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptFlag(LIS3MDL_MAG_INT_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_InterruptFlag(LIS3MDL_MAG_INT_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -1021,9 +1021,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_InterruptFlag(LIS3MDL_MAG_INT_t newValue)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptFlag(LIS3MDL_MAG_INT_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_InterruptFlag(LIS3MDL_MAG_INT_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_SRC, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -1036,9 +1036,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_InterruptFlag(LIS3MDL_MAG_INT_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_MagneticFieldOverflow(LIS3MDL_MAG_MROI_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_MagneticFieldOverflow(LIS3MDL_MAG_MROI_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -1060,9 +1060,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_MagneticFieldOverflow(LIS3MDL_MAG_MROI_t newValu
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_MagneticFieldOverflow(LIS3MDL_MAG_MROI_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_MagneticFieldOverflow(LIS3MDL_MAG_MROI_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_SRC, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -1075,9 +1075,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_MagneticFieldOverflow(LIS3MDL_MAG_MROI_t *value)
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_NegativeThresholdFlagZ(LIS3MDL_MAG_NTH_Z_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_NegativeThresholdFlagZ(LIS3MDL_MAG_NTH_Z_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -1099,9 +1099,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_NegativeThresholdFlagZ(LIS3MDL_MAG_NTH_Z_t newVa
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_NegativeThresholdFlagZ(LIS3MDL_MAG_NTH_Z_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_NegativeThresholdFlagZ(LIS3MDL_MAG_NTH_Z_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_SRC, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -1114,9 +1114,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_NegativeThresholdFlagZ(LIS3MDL_MAG_NTH_Z_t *value
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_NegativeThresholdFlagY(LIS3MDL_MAG_NTH_Y_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_NegativeThresholdFlagY(LIS3MDL_MAG_NTH_Y_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -1138,9 +1138,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_NegativeThresholdFlagY(LIS3MDL_MAG_NTH_Y_t newVa
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_NegativeThresholdFlagY(LIS3MDL_MAG_NTH_Y_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_NegativeThresholdFlagY(LIS3MDL_MAG_NTH_Y_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_SRC, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -1153,9 +1153,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_NegativeThresholdFlagY(LIS3MDL_MAG_NTH_Y_t *value
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_NegativeThresholdFlagX(LIS3MDL_MAG_NTH_X_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_NegativeThresholdFlagX(LIS3MDL_MAG_NTH_X_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -1177,9 +1177,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_NegativeThresholdFlagX(LIS3MDL_MAG_NTH_X_t newVa
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_NegativeThresholdFlagX(LIS3MDL_MAG_NTH_X_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_NegativeThresholdFlagX(LIS3MDL_MAG_NTH_X_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_SRC, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -1192,9 +1192,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_NegativeThresholdFlagX(LIS3MDL_MAG_NTH_X_t *value
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_PositiveThresholdFlagZ(LIS3MDL_MAG_PTH_Z_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_PositiveThresholdFlagZ(LIS3MDL_MAG_PTH_Z_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -1216,9 +1216,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_PositiveThresholdFlagZ(LIS3MDL_MAG_PTH_Z_t newVa
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_PositiveThresholdFlagZ(LIS3MDL_MAG_PTH_Z_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_PositiveThresholdFlagZ(LIS3MDL_MAG_PTH_Z_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_SRC, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -1231,9 +1231,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_PositiveThresholdFlagZ(LIS3MDL_MAG_PTH_Z_t *value
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_PositiveThresholdFlagY(LIS3MDL_MAG_PTH_Y_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_PositiveThresholdFlagY(LIS3MDL_MAG_PTH_Y_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -1255,9 +1255,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_PositiveThresholdFlagY(LIS3MDL_MAG_PTH_Y_t newVa
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_PositiveThresholdFlagY(LIS3MDL_MAG_PTH_Y_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_PositiveThresholdFlagY(LIS3MDL_MAG_PTH_Y_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_SRC, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -1270,9 +1270,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_PositiveThresholdFlagY(LIS3MDL_MAG_PTH_Y_t *value
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus  LIS3MDL_MAG_W_PositiveThresholdFlagX(LIS3MDL_MAG_PTH_X_t newValue)
+LIS3MDL_OpResult  LIS3MDL_MAG_W_PositiveThresholdFlagX(LIS3MDL_MAG_PTH_X_t newValue)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t value;
 
@@ -1294,9 +1294,9 @@ LIS3MDL_OpStatus  LIS3MDL_MAG_W_PositiveThresholdFlagX(LIS3MDL_MAG_PTH_X_t newVa
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_R_PositiveThresholdFlagX(LIS3MDL_MAG_PTH_X_t *value)
+LIS3MDL_OpResult LIS3MDL_MAG_R_PositiveThresholdFlagX(LIS3MDL_MAG_PTH_X_t *value)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   op_status = LIS3MDL_MAG_ReadReg(LIS3MDL_MAG_INT_SRC, (uint8_t *)value, 1);
   if (op_status < LIS3MDL_OK)
@@ -1309,9 +1309,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_R_PositiveThresholdFlagX(LIS3MDL_MAG_PTH_X_t *value
   return LIS3MDL_OK;
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_Get_Temperature(uint8_t *buff) 
+LIS3MDL_OpResult LIS3MDL_MAG_Get_Temperature(uint8_t *buff) 
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t i, j, k;
   uint8_t numberOfByteForDimension;
@@ -1335,9 +1335,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_Get_Temperature(uint8_t *buff)
   return LIS3MDL_OK; 
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_Set_MagneticThreshold(uint8_t *buff) 
+LIS3MDL_OpResult LIS3MDL_MAG_Set_MagneticThreshold(uint8_t *buff) 
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t  i;
 
@@ -1352,9 +1352,9 @@ LIS3MDL_OpStatus LIS3MDL_MAG_Set_MagneticThreshold(uint8_t *buff)
   return LIS3MDL_OK;  
 }
 
-LIS3MDL_OpStatus LIS3MDL_MAG_Get_MagneticThreshold(uint8_t *buff) 
+LIS3MDL_OpResult LIS3MDL_MAG_Get_MagneticThreshold(uint8_t *buff) 
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t i, j, k;
   uint8_t numberOfByteForDimension;
@@ -1380,7 +1380,7 @@ LIS3MDL_OpStatus LIS3MDL_MAG_Get_MagneticThreshold(uint8_t *buff)
 
 void LIS3MDL_MAG_SwapHighLowByte(uint8_t *bufferToSwap, uint8_t numberOfByte, uint8_t dimension)
 {
-  LIS3MDL_OpStatus op_status;
+  LIS3MDL_OpResult op_status;
   
   uint8_t numberOfByteForDimension, i, j;
   uint8_t tempValue[10];

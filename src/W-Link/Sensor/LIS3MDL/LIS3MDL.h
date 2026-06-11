@@ -57,20 +57,20 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-LIS3MDL_OpStatus LIS3MDL_Init(void);
-LIS3MDL_OpStatus LIS3MDL_DeInit(void);
-LIS3MDL_OpStatus LIS3MDL_Enable(void);
-LIS3MDL_OpStatus LIS3MDL_Disable(void);
-LIS3MDL_OpStatus LIS3MDL_ReadID(uint8_t *p_id);
-LIS3MDL_OpStatus LIS3MDL_GetAxes(int32_t *pData);
-LIS3MDL_OpStatus LIS3MDL_GetSensitivity(float *pfData);
-LIS3MDL_OpStatus LIS3MDL_GetAxesRaw(int16_t *pData);
-LIS3MDL_OpStatus LIS3MDL_GetODR(float *odr);
-LIS3MDL_OpStatus LIS3MDL_SetODR(float odr);
-LIS3MDL_OpStatus LIS3MDL_GetFS(float *fullScale);
-LIS3MDL_OpStatus LIS3MDL_SetFS(float fullScale);
-LIS3MDL_OpStatus LIS3MDL_ReadReg(uint8_t reg, uint8_t *data);
-LIS3MDL_OpStatus LIS3MDL_WriteReg(uint8_t reg, uint8_t data);
+LIS3MDL_OpResult LIS3MDL_Init(void);
+LIS3MDL_OpResult LIS3MDL_DeInit(void);
+LIS3MDL_OpResult LIS3MDL_Enable(void);
+LIS3MDL_OpResult LIS3MDL_Disable(void);
+LIS3MDL_OpResult LIS3MDL_ReadID(uint8_t *p_id);
+LIS3MDL_OpResult LIS3MDL_GetAxes(int32_t *pData);
+LIS3MDL_OpResult LIS3MDL_GetSensitivity(float *pfData);
+LIS3MDL_OpResult LIS3MDL_GetAxesRaw(int16_t *pData);
+LIS3MDL_OpResult LIS3MDL_GetODR(float *odr);
+LIS3MDL_OpResult LIS3MDL_SetODR(float odr);
+LIS3MDL_OpResult LIS3MDL_GetFS(float *fullScale);
+LIS3MDL_OpResult LIS3MDL_SetFS(float fullScale);
+LIS3MDL_OpResult LIS3MDL_ReadReg(uint8_t reg, uint8_t *data);
+LIS3MDL_OpResult LIS3MDL_WriteReg(uint8_t reg, uint8_t data);
 #ifdef __cplusplus
 }
 #endif

@@ -2,7 +2,6 @@
 #ifndef LWIP_CONFIG_H
 #define LWIP_CONFIG_H
 
-#define CONFIG_LWIP_HEAP_SIZE             (96 * 1024)
 #define CONFIG_LWIP_NUM_NETCONN           16
 #define CONFIG_LWIP_NUM_PBUF              64
 #define CONFIG_LWIP_NUM_TCP_PCB           16

@@ -23,6 +23,8 @@
 
 #include "Driver_Config.h"
 
+#include "NeonRTOS.h"
+
 /**
  * NO_SYS==1: Provides VERY minimal functionality. Otherwise,
  * use lwIP facilities.
@@ -48,7 +50,11 @@
 
 /* MEM_SIZE: the size of the heap memory. If the application will send
 a lot of data that needs to be copied, this should be set high. */
-#define MEM_SIZE                (CONFIG_LWIP_HEAP_SIZE)
+#define MEM_LIBC_MALLOC    1
+#define MEMP_MEM_MALLOC    1
+
+#define mem_clib_malloc    mem_Malloc
+#define mem_clib_free      mem_Free
 
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
    sends a lot of data out of ROM (or other static memory), this

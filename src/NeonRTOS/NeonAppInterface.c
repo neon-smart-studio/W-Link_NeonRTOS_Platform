@@ -727,6 +727,7 @@ void Process_Websocket_Incomming_Message(struct HTTPd_WebSocked_Client_Connectio
 
 void Init_Thread(void* p)
 {
+#ifdef CONFIG_SUPPORT_INTERNET
     NeonTCPIP_init(NULL, NULL, NULL);
 
     HTTPd_Init();
@@ -735,6 +736,7 @@ void Init_Thread(void* p)
     HTTPd_Register_CGI_URL_Callback("/Network/IP_Addr", Network_CGI_IpAddr, NULL);
     HTTPd_Register_CGI_URL_Callback("/Network/Gateway", Network_CGI_Gateway, NULL);
     HTTPd_Register_CGI_URL_Callback("/Network/Netmask", Network_CGI_Netmask, NULL);
+#endif
 
     Neon_APP_Device_Init();
 
@@ -746,6 +748,7 @@ void Init_Thread(void* p)
 
     while (1)
     {
+#ifdef CONFIG_SUPPORT_INTERNET
         if(NeonTCPIP_IF_isLinkUp())
         {
 #if LWIP_DHCP
@@ -781,6 +784,9 @@ void Init_Thread(void* p)
             GPIO_Pin_Write(LED_R, 0);
             NeonRTOS_Sleep(200);  
         }
+#else
+        NeonRTOS_Sleep(1000);  
+#endif
 
         size_t freeHeapSize = NeonRTOS_GetFreeHeapSize();
         UART_Printf("Remain Heap Size %d bytes\n", freeHeapSize);
@@ -791,7 +797,9 @@ void Neon_App_Init(void)
 {
         UART_Open(LOG_UART_INDEX, 115200, false);
 
+#ifdef CONFIG_SUPPORT_INTERNET
         WebsocketServer_RegisterMsgCallback(Process_Websocket_Incomming_Message);
+#endif
     
 #if INIT_THREAD_DEBUG==1
         printf("[Init Thread] Creating Threaf: Init_Thread()\n");

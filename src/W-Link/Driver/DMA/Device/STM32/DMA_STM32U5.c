@@ -34,13 +34,13 @@ static const hwDMA_Channel_Index UART_DMA_Channel_Map[hwUART_Index_MAX][hwDMA_Pe
     {hwDMA_Channel_Index_2, hwDMA_Channel_Index_3},
 #endif
 #if defined (UART3_BASE) || defined(USART3_BASE)
-    {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5},=
+    {hwDMA_Channel_Index_4, hwDMA_Channel_Index_5},
 #endif
 #if defined (UART4_BASE) || defined(USART4_BASE)
-    {hwDMA_Channel_Index_6, hwDMA_Channel_Index_7},=
+    {hwDMA_Channel_Index_6, hwDMA_Channel_Index_7},
 #endif
 #if defined (UART5_BASE) || defined(USART5_BASE)
-    {hwDMA_Channel_Index_8, hwDMA_Channel_Index_9},=
+    {hwDMA_Channel_Index_8, hwDMA_Channel_Index_9},
 #endif
 #if defined (UART6_BASE) || defined(USART6_BASE)
     {hwDMA_Channel_Index_14, hwDMA_Channel_Index_15},

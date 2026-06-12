@@ -53,18 +53,6 @@ static LSM6DSO_OpResult LSM6DSO_IO_Map_I2C_Error(hwI2C_OpResult error_code)
     }
 }
 
-LSM6DSO_OpResult LSM6DSO_Register_Interrupt_Handler(LSM6DSO_IO_Event_IRQ irq_callback)
-{
-    (void)irq_callback;
-
-    return LSM6DSO_Unsupport;
-}
-
-LSM6DSO_OpResult LSM6DSO_UnRegister_Interrupt_Handler(void)
-{
-    return LSM6DSO_Unsupport;
-}
-
 LSM6DSO_OpResult LSM6DSO_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,

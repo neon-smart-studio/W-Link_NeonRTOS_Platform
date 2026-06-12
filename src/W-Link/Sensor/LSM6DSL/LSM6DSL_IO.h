@@ -52,15 +52,7 @@ Modifications:
 
 #define LSM6DSL_IO_TX_BUF_SIZE             32
 
-/* Typedefs ------------------------------------------------------------------*/
-
-typedef void (*LSM6DSL_IO_Event_IRQ)(LSM6DSL_Interrupt_Index index);
-
 /* Functions -----------------------------------------------------------------*/
-
-LSM6DSL_OpResult LSM6DSL_Register_Interrupt_Handler(LSM6DSL_IO_Event_IRQ irq_callback);
-LSM6DSL_OpResult LSM6DSL_UnRegister_Interrupt_Handler(void);
-
 LSM6DSL_OpResult LSM6DSL_IO_Read(
     uint8_t RegisterAddr,
     uint8_t* pBuffer,

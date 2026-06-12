@@ -1,0 +1,1361 @@
+/**
+ ******************************************************************************
+ * @file    vl53l0x_class.cpp
+ * @author  IMG
+ * @version V0.0.1
+ * @date    14-December-2018
+ * @brief   Implementation file for the VL53L1X driver class
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *   1. Redistributions of source code must retain the above copyright notice,
+ *      this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright notice,
+ *      this list of conditions and the following disclaimer in the documentation
+ *      and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its contributors
+ *      may be used to endorse or promote products derived from this software
+ *      without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ ******************************************************************************
+*/
+
+/* Includes */
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "NeonRTOS.h"
+
+#include "VL53l1X_Def.h"
+#include "VL53l1X_IO.h"
+#include "VL53l1X.h"
+
+#define ALGO__PART_TO_PART_RANGE_OFFSET_MM	0x001E
+#define MM_CONFIG__INNER_OFFSET_MM			0x0020
+#define MM_CONFIG__OUTER_OFFSET_MM 			0x0022
+
+#define VL53L1X_I2C_SLAVE__DEVICE_ADDRESS					0x0001
+#define VL53L1X_VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND        0x0008
+#define ALGO__CROSSTALK_COMPENSATION_PLANE_OFFSET_KCPS 		0x0016
+#define ALGO__CROSSTALK_COMPENSATION_X_PLANE_GRADIENT_KCPS 	0x0018
+#define ALGO__CROSSTALK_COMPENSATION_Y_PLANE_GRADIENT_KCPS 	0x001A
+#define ALGO__PART_TO_PART_RANGE_OFFSET_MM					0x001E
+#define MM_CONFIG__INNER_OFFSET_MM							0x0020
+#define MM_CONFIG__OUTER_OFFSET_MM 							0x0022
+#define GPIO_HV_MUX__CTRL									0x0030
+#define GPIO__TIO_HV_STATUS       							0x0031
+#define SYSTEM__INTERRUPT_CONFIG_GPIO 						0x0046
+#define PHASECAL_CONFIG__TIMEOUT_MACROP     				0x004B
+#define RANGE_CONFIG__TIMEOUT_MACROP_A_HI   				0x005E
+#define RANGE_CONFIG__VCSEL_PERIOD_A        				0x0060
+#define RANGE_CONFIG__VCSEL_PERIOD_B						0x0063
+#define RANGE_CONFIG__TIMEOUT_MACROP_B_HI  					0x0061
+#define RANGE_CONFIG__TIMEOUT_MACROP_B_LO  					0x0062
+#define RANGE_CONFIG__SIGMA_THRESH 							0x0064
+#define RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS			0x0066
+#define RANGE_CONFIG__VALID_PHASE_HIGH      				0x0069
+#define VL53L1X_SYSTEM__INTERMEASUREMENT_PERIOD				0x006C
+#define SYSTEM__THRESH_HIGH 								0x0072
+#define SYSTEM__THRESH_LOW 									0x0074
+#define SD_CONFIG__WOI_SD0                  				0x0078
+#define SD_CONFIG__INITIAL_PHASE_SD0        				0x007A
+#define ROI_CONFIG__USER_ROI_CENTRE_SPAD					0x007F
+#define ROI_CONFIG__USER_ROI_REQUESTED_GLOBAL_XY_SIZE		0x0080
+#define SYSTEM__SEQUENCE_CONFIG								0x0081
+#define VL53L1X_SYSTEM__GROUPED_PARAMETER_HOLD 				0x0082
+#define SYSTEM__INTERRUPT_CLEAR       						0x0086
+#define SYSTEM__MODE_START                 					0x0087
+#define VL53L1X_RESULT__RANGE_STATUS							0x0089
+#define VL53L1X_RESULT__DSS_ACTUAL_EFFECTIVE_SPADS_SD0		0x008C
+#define RESULT__AMBIENT_COUNT_RATE_MCPS_SD					0x0090
+#define VL53L1X_RESULT__FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0				0x0096
+#define VL53L1X_RESULT__PEAK_SIGNAL_COUNT_RATE_CROSSTALK_CORRECTED_MCPS_SD0 	0x0098
+#define VL53L1X_RESULT__OSC_CALIBRATE_VAL					0x00DE
+#define VL53L1X_FIRMWARE__SYSTEM_STATUS                      0x00E5
+#define VL53L1X_IDENTIFICATION__MODEL_ID                     0x010F
+#define VL53L1X_ROI_CONFIG__MODE_ROI_CENTRE_SPAD				0x013E
+
+
+const uint8_t VL51L1X_Default_Config[] =
+{
+   0x00, /* 0x2d : set bit 2 and 5 to 1 for fast plus mode (1MHz I2C), else don't touch */
+   0x00, /* 0x2e : bit 0 if I2C pulled up at 1.8V, else set bit 0 to 1 (pull up at AVDD) */
+   0x00, /* 0x2f : bit 0 if GPIO pulled up at 1.8V, else set bit 0 to 1 (pull up at AVDD) */
+   0x01, /* 0x30 : set bit 4 to 0 for active high interrupt and 1 for active low (bits 3:0 must be 0x1), use SetInterruptPolarity() */
+   0x02, /* 0x31 : bit 1 = interrupt depending on the polarity, use CheckForDataReady() */
+   0x00, /* 0x32 : not user-modifiable */
+   0x02, /* 0x33 : not user-modifiable */
+   0x08, /* 0x34 : not user-modifiable */
+   0x00, /* 0x35 : not user-modifiable */
+   0x08, /* 0x36 : not user-modifiable */
+   0x10, /* 0x37 : not user-modifiable */
+   0x01, /* 0x38 : not user-modifiable */
+   0x01, /* 0x39 : not user-modifiable */
+   0x00, /* 0x3a : not user-modifiable */
+   0x00, /* 0x3b : not user-modifiable */
+   0x00, /* 0x3c : not user-modifiable */
+   0x00, /* 0x3d : not user-modifiable */
+   0xff, /* 0x3e : not user-modifiable */
+   0x00, /* 0x3f : not user-modifiable */
+   0x0F, /* 0x40 : not user-modifiable */
+   0x00, /* 0x41 : not user-modifiable */
+   0x00, /* 0x42 : not user-modifiable */
+   0x00, /* 0x43 : not user-modifiable */
+   0x00, /* 0x44 : not user-modifiable */
+   0x00, /* 0x45 : not user-modifiable */
+   0x20, /* 0x46 : interrupt configuration 0->level low detection, 1-> level high, 2-> Out of window, 3->In window, 0x20-> New sample ready , TBC */
+   0x0b, /* 0x47 : not user-modifiable */
+   0x00, /* 0x48 : not user-modifiable */
+   0x00, /* 0x49 : not user-modifiable */
+   0x02, /* 0x4a : not user-modifiable */
+   0x0a, /* 0x4b : not user-modifiable */
+   0x21, /* 0x4c : not user-modifiable */
+   0x00, /* 0x4d : not user-modifiable */
+   0x00, /* 0x4e : not user-modifiable */
+   0x05, /* 0x4f : not user-modifiable */
+   0x00, /* 0x50 : not user-modifiable */
+   0x00, /* 0x51 : not user-modifiable */
+   0x00, /* 0x52 : not user-modifiable */
+   0x00, /* 0x53 : not user-modifiable */
+   0xc8, /* 0x54 : not user-modifiable */
+   0x00, /* 0x55 : not user-modifiable */
+   0x00, /* 0x56 : not user-modifiable */
+   0x38, /* 0x57 : not user-modifiable */
+   0xff, /* 0x58 : not user-modifiable */
+   0x01, /* 0x59 : not user-modifiable */
+   0x00, /* 0x5a : not user-modifiable */
+   0x08, /* 0x5b : not user-modifiable */
+   0x00, /* 0x5c : not user-modifiable */
+   0x00, /* 0x5d : not user-modifiable */
+   0x01, /* 0x5e : not user-modifiable */
+   0xcc, /* 0x5f : not user-modifiable */
+   0x0f, /* 0x60 : not user-modifiable */
+   0x01, /* 0x61 : not user-modifiable */
+   0xf1, /* 0x62 : not user-modifiable */
+   0x0d, /* 0x63 : not user-modifiable */
+   0x01, /* 0x64 : Sigma threshold MSB (mm in 14.2 format for MSB+LSB), use SetSigmaThreshold(), default value 90 mm  */
+   0x68, /* 0x65 : Sigma threshold LSB */
+   0x00, /* 0x66 : Min count Rate MSB (MCPS in 9.7 format for MSB+LSB), use SetSignalThreshold() */
+   0x80, /* 0x67 : Min count Rate LSB */
+   0x08, /* 0x68 : not user-modifiable */
+   0xb8, /* 0x69 : not user-modifiable */
+   0x00, /* 0x6a : not user-modifiable */
+   0x00, /* 0x6b : not user-modifiable */
+   0x00, /* 0x6c : Intermeasurement period MSB, 32 bits register, use SetIntermeasurementInMs() */
+   0x00, /* 0x6d : Intermeasurement period */
+   0x0f, /* 0x6e : Intermeasurement period */
+   0x89, /* 0x6f : Intermeasurement period LSB */
+   0x00, /* 0x70 : not user-modifiable */
+   0x00, /* 0x71 : not user-modifiable */
+   0x00, /* 0x72 : distance threshold high MSB (in mm, MSB+LSB), use SetD:tanceThreshold() */
+   0x00, /* 0x73 : distance threshold high LSB */
+   0x00, /* 0x74 : distance threshold low MSB ( in mm, MSB+LSB), use SetD:tanceThreshold() */
+   0x00, /* 0x75 : distance threshold low LSB */
+   0x00, /* 0x76 : not user-modifiable */
+   0x01, /* 0x77 : not user-modifiable */
+   0x0f, /* 0x78 : not user-modifiable */
+   0x0d, /* 0x79 : not user-modifiable */
+   0x0e, /* 0x7a : not user-modifiable */
+   0x0e, /* 0x7b : not user-modifiable */
+   0x00, /* 0x7c : not user-modifiable */
+   0x00, /* 0x7d : not user-modifiable */
+   0x02, /* 0x7e : not user-modifiable */
+   0xc7, /* 0x7f : ROI center, use SetROI() */
+   0xff, /* 0x80 : XY ROI (X=Width, Y=Height), use SetROI() */
+   0x9B, /* 0x81 : not user-modifiable */
+   0x00, /* 0x82 : not user-modifiable */
+   0x00, /* 0x83 : not user-modifiable */
+   0x00, /* 0x84 : not user-modifiable */
+   0x01, /* 0x85 : not user-modifiable */
+   0x00, /* 0x86 : clear interrupt, use ClearInterrupt() */
+   0x00  /* 0x87 : start ranging, use StartRanging() or StopRanging(), If you want an automatic start after VL53L1X_init() call, put 0x40 in location 0x87 */
+};
+
+/*
+VL53L1X_OpResult VL53L1X_SetI2CAddress(uint8_t new_address)
+{
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Write_Byte(VL53L1X_I2C_SLAVE__DEVICE_ADDRESS, new_address >> 1);
+   Device->I2cDevAddr = new_address;
+
+
+   return status;
+}
+*/
+
+VL53L1X_OpResult VL53L1X_SensorInit()
+{
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Power_Off();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Power_On();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   uint8_t sensorState = 0;
+
+   do
+   {
+      status = VL53L1X_BootState(&sensorState);
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+      NeonRTOS_Sleep(2);
+   }while (!sensorState);
+
+   uint8_t Addr = 0x00, tmp=0;
+
+   for (Addr = 0x2D; Addr <= 0x87; Addr++)
+   {
+      status = VL53L1X_IO_Write_Byte(Addr, VL51L1X_Default_Config[Addr - 0x2D]);
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+   }
+
+   status = VL53L1X_StartRanging();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   while(tmp==0)
+   {
+      status = VL53L1X_CheckForDataReady(&tmp);
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+   }
+
+   tmp  = 0;
+
+   status = VL53L1X_ClearInterrupt();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_StopRanging();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   status = VL53L1X_IO_Write_Byte(VL53L1X_VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND, 0x09); /* two bounds VHV */
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Byte(0x0B, 0); /* start VHV from the previous temperature */
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_ClearInterrupt()
+{
+   return VL53L1X_IO_Write_Byte(SYSTEM__INTERRUPT_CLEAR, 0x01);
+}
+
+VL53L1X_OpResult VL53L1X_SetInterruptPolarity(uint8_t NewPolarity)
+{
+   uint8_t Temp;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Read_Byte(GPIO_HV_MUX__CTRL, &Temp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   Temp = Temp & 0xEF;
+
+   status = VL53L1X_IO_Write_Byte(GPIO_HV_MUX__CTRL, Temp | (!(NewPolarity & 1)) << 4);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetInterruptPolarity(uint8_t *pInterruptPolarity)
+{
+   uint8_t Temp;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Read_Byte(GPIO_HV_MUX__CTRL, &Temp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   Temp = Temp & 0x10;
+
+   *pInterruptPolarity = !(Temp>>4);
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_StartRanging()
+{
+   return VL53L1X_IO_Write_Byte(SYSTEM__MODE_START, 0x40);	/* Enable VL53L1X */
+}
+
+VL53L1X_OpResult VL53L1X_StopRanging()
+{
+   return VL53L1X_IO_Write_Byte(SYSTEM__MODE_START, 0x00);	/* Disable VL53L1X */
+}
+
+VL53L1X_OpResult VL53L1X_CheckForDataReady(uint8_t *isDataReady)
+{
+   uint8_t Temp;
+   uint8_t IntPol;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_GetInterruptPolarity(&IntPol);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Read_Byte(GPIO__TIO_HV_STATUS, &Temp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   /* Read in the register to check if a new value is available */
+   if ((Temp & 1) == IntPol)
+   {
+      *isDataReady = 1;
+   }
+   else
+   {
+      *isDataReady = 0;
+   }
+
+   return VL53L1X_OK;
+}
+
+
+VL53L1X_OpResult VL53L1X_SetTimingBudgetInMs(uint16_t TimingBudgetInMs)
+{
+   uint16_t DM;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_GetDistanceMode(&DM);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   if (DM == 0)
+   {
+      return VL53L1X_ModeNotSupported;
+   }
+   else if (DM == 1)  	/* Short DistanceMode */
+   {
+      switch (TimingBudgetInMs)
+      {
+      case 15: /* only available in short distance mode */
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x01D);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x0027);
+         break;
+      case 20:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x0051);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x006E);
+         break;
+      case 33:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x00D6);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x006E);
+         break;
+      case 50:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x1AE);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x01E8);
+         break;
+      case 100:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x02E1);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x0388);
+         break;
+      case 200:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x03E1);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x0496);
+         break;
+      case 500:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x0591);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x05C1);
+         break;
+      default:
+         return VL53L1X_InvalidParameter;
+      }
+   }
+   else
+   {
+      switch (TimingBudgetInMs)
+      {
+      case 20:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x001E);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x0022);
+         break;
+      case 33:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x0060);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x006E);
+         break;
+      case 50:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x00AD);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x00C6);
+         break;
+      case 100:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x01CC);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x01EA);
+         break;
+      case 200:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x02D9);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x02F8);
+         break;
+      case 500:
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, 0x048F);
+         VL53L1X_IO_Write_Word(RANGE_CONFIG__TIMEOUT_MACROP_B_HI, 0x04A4);
+         break;
+      default:
+         return VL53L1X_InvalidParameter;
+      }
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetTimingBudgetInMs(uint16_t *pTimingBudget)
+{
+   uint16_t Temp;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Read_Word(RANGE_CONFIG__TIMEOUT_MACROP_A_HI, &Temp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   
+   switch (Temp)
+   {
+   case 0x001D :
+      *pTimingBudget = 15;
+      break;
+   case 0x0051 :
+   case 0x001E :
+      *pTimingBudget = 20;
+      break;
+   case 0x00D6 :
+   case 0x0060 :
+      *pTimingBudget = 33;
+      break;
+   case 0x1AE :
+   case 0x00AD :
+      *pTimingBudget = 50;
+      break;
+   case 0x02E1 :
+   case 0x01CC :
+      *pTimingBudget = 100;
+      break;
+   case 0x03E1 :
+   case 0x02D9 :
+      *pTimingBudget = 200;
+      break;
+   case 0x0591 :
+   case 0x048F :
+      *pTimingBudget = 500;
+      break;
+   default:
+      *pTimingBudget = 0;
+      break;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_SetDistanceMode(uint16_t DM)
+{
+   uint16_t TB;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_GetTimingBudgetInMs(&TB);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   switch (DM)
+   {
+   case 1:
+      status = VL53L1X_IO_Write_Byte(PHASECAL_CONFIG__TIMEOUT_MACROP, 0x14);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Byte(RANGE_CONFIG__VCSEL_PERIOD_A, 0x07);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Byte(RANGE_CONFIG__VCSEL_PERIOD_B, 0x05);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Byte(RANGE_CONFIG__VALID_PHASE_HIGH, 0x38);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Word(SD_CONFIG__WOI_SD0, 0x0705);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Word(SD_CONFIG__INITIAL_PHASE_SD0, 0x0606);
+      if(status < VL53L1X_OK) { return status; }
+      break;
+   case 2:
+      status = VL53L1X_IO_Write_Byte(PHASECAL_CONFIG__TIMEOUT_MACROP, 0x0A);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Byte(RANGE_CONFIG__VCSEL_PERIOD_A, 0x0F);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Byte(RANGE_CONFIG__VCSEL_PERIOD_B, 0x0D);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Byte(RANGE_CONFIG__VALID_PHASE_HIGH, 0xB8);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Word(SD_CONFIG__WOI_SD0, 0x0F0D);
+      if(status < VL53L1X_OK) { return status; }
+      status = VL53L1X_IO_Write_Word(SD_CONFIG__INITIAL_PHASE_SD0, 0x0E0E);
+      if(status < VL53L1X_OK) { return status; }
+      break;
+   default:
+      break;
+   }
+
+   status = VL53L1X_SetTimingBudgetInMs(TB);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetDistanceMode(uint16_t *DM)
+{
+   uint8_t TempDM;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Read_Byte(PHASECAL_CONFIG__TIMEOUT_MACROP, &TempDM);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   if (TempDM == 0x14)
+   {
+      *DM=1;
+   }
+   if(TempDM == 0x0A)
+   {
+      *DM=2;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_SetInterMeasurementInMs(uint16_t InterMeasMs)
+{
+   uint16_t ClockPLL;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Read_Word(VL53L1X_RESULT__OSC_CALIBRATE_VAL, &ClockPLL);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   ClockPLL = ClockPLL&0x3FF;
+
+   status = VL53L1X_IO_Write_DWord(VL53L1X_SYSTEM__INTERMEASUREMENT_PERIOD, (uint32_t)(ClockPLL * InterMeasMs * 1.075));
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetInterMeasurementInMs(uint16_t *pIM)
+{
+   uint16_t ClockPLL;
+   VL53L1X_OpResult status;
+   uint32_t tmp;
+
+   status = VL53L1X_IO_Read_DWord(VL53L1X_SYSTEM__INTERMEASUREMENT_PERIOD, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *pIM = (uint16_t)tmp;
+
+   status = VL53L1X_IO_Read_Word(VL53L1X_RESULT__OSC_CALIBRATE_VAL, &ClockPLL);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   ClockPLL = ClockPLL&0x3FF;
+   *pIM= (uint16_t)(*pIM/(ClockPLL*1.065));
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_BootState(uint8_t *state)
+{
+   VL53L1X_OpResult status;
+   uint8_t tmp = 0;
+
+   status = VL53L1X_IO_Read_Byte(VL53L1X_FIRMWARE__SYSTEM_STATUS, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *state = tmp;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetSensorId(uint16_t *sensorId)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp = 0;
+
+   status = VL53L1X_IO_Read_Word(VL53L1X_IDENTIFICATION__MODEL_ID, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *sensorId = tmp;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetDistance(uint16_t *distance)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp = 0;
+
+   status = (VL53L1X_IO_Read_Word(VL53L1X_RESULT__FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0, &tmp));
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *distance = tmp;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetSignalPerSpad(uint16_t *signalRate)
+{
+   VL53L1X_OpResult status;
+   uint16_t SpNb=1, signal;
+
+   status = VL53L1X_IO_Read_Word(VL53L1X_RESULT__PEAK_SIGNAL_COUNT_RATE_CROSSTALK_CORRECTED_MCPS_SD0, &signal);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Read_Word(VL53L1X_RESULT__DSS_ACTUAL_EFFECTIVE_SPADS_SD0, &SpNb);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *signalRate = (uint16_t) (2000.0*signal/SpNb);
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetAmbientPerSpad(uint16_t *ambPerSp)
+{
+   VL53L1X_OpResult status=0;
+   uint16_t AmbientRate, SpNb=1;
+
+   status = VL53L1X_IO_Read_Word(RESULT__AMBIENT_COUNT_RATE_MCPS_SD, &AmbientRate);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Read_Word(VL53L1X_RESULT__DSS_ACTUAL_EFFECTIVE_SPADS_SD0, &SpNb);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *ambPerSp=(uint16_t) (2000.0 * AmbientRate / SpNb);
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetSignalRate(uint16_t *signal)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp;
+
+   status = VL53L1X_IO_Read_Word(VL53L1X_RESULT__PEAK_SIGNAL_COUNT_RATE_CROSSTALK_CORRECTED_MCPS_SD0, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *signal = tmp*8;
+
+   return VL53L1X_OK;
+}
+
+
+VL53L1X_OpResult VL53L1X_GetSpadNb(uint16_t *spNb)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp;
+
+   status = VL53L1X_IO_Read_Word(VL53L1X_RESULT__DSS_ACTUAL_EFFECTIVE_SPADS_SD0, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *spNb = tmp >> 8;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetAmbientRate(uint16_t *ambRate)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp;
+
+   status = VL53L1X_IO_Read_Word(RESULT__AMBIENT_COUNT_RATE_MCPS_SD, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *ambRate = tmp*8;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetRangeStatus(uint8_t *rangeStatus)
+{
+   VL53L1X_OpResult status;
+   uint8_t RgSt;
+
+   status = VL53L1X_IO_Read_Byte(VL53L1X_RESULT__RANGE_STATUS, &RgSt);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   RgSt = RgSt&0x1F;
+
+   switch (RgSt)
+   {
+   case 9:
+      RgSt = 0;
+      break;
+   case 6:
+      RgSt = 1;
+      break;
+   case 4:
+      RgSt = 2;
+      break;
+   case 8:
+      RgSt = 3;
+      break;
+   case 5:
+      RgSt = 4;
+      break;
+   case 3:
+      RgSt = 5;
+      break;
+   case 19:
+      RgSt = 6;
+      break;
+   case 7:
+      RgSt = 7;
+      break;
+   case 12:
+      RgSt = 9;
+      break;
+   case 18:
+      RgSt = 10;
+      break;
+   case 22:
+      RgSt = 11;
+      break;
+   case 23:
+      RgSt = 12;
+      break;
+   case 13:
+      RgSt = 13;
+      break;
+   default:
+      RgSt = 255;
+      break;
+   }
+
+   *rangeStatus = RgSt;
+
+   return VL53L1X_OK;
+}
+
+
+VL53L1X_OpResult VL53L1X_SetOffset(int16_t OffsetValue)
+{
+   VL53L1X_OpResult status;
+   int16_t Temp;
+
+   Temp = (OffsetValue*4);
+
+   status = VL53L1X_IO_Write_Word(ALGO__PART_TO_PART_RANGE_OFFSET_MM, (uint16_t)Temp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Word(MM_CONFIG__INNER_OFFSET_MM, 0x0);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Word(MM_CONFIG__OUTER_OFFSET_MM, 0x0);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetOffset(int16_t *offset)
+{
+   VL53L1X_OpResult status;
+   uint16_t Temp;
+
+   status = VL53L1X_IO_Read_Word(ALGO__PART_TO_PART_RANGE_OFFSET_MM, &Temp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   Temp = Temp<<3;
+   *offset = (int16_t)(Temp);
+   *offset = *offset / 32;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_SetXtalk(uint16_t XtalkValue)
+{
+   /* XTalkValue in count per second to avoid float type */
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Write_Word(ALGO__CROSSTALK_COMPENSATION_X_PLANE_GRADIENT_KCPS, 0x0000);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Word(ALGO__CROSSTALK_COMPENSATION_Y_PLANE_GRADIENT_KCPS, 0x0000);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Word(ALGO__CROSSTALK_COMPENSATION_PLANE_OFFSET_KCPS, (XtalkValue<<9)/1000); /* * << 9 (7.9 format) and /1000 to convert cps to kpcs */
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetXtalk(uint16_t *xtalk)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp;
+
+   status = VL53L1X_IO_Read_Word(ALGO__CROSSTALK_COMPENSATION_PLANE_OFFSET_KCPS, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *xtalk = (tmp*1000)>>9; /* * 1000 to convert kcps to cps and >> 9 (7.9 format) */
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_SetDistanceThreshold(uint16_t ThreshLow, uint16_t ThreshHigh, uint8_t Window, uint8_t IntOnNoTarget)
+{
+   VL53L1X_OpResult status;
+   uint8_t Temp = 0;
+
+   status = VL53L1X_IO_Read_Byte(SYSTEM__INTERRUPT_CONFIG_GPIO, &Temp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   Temp = Temp & 0x47;
+
+   if (IntOnNoTarget == 0)
+   {
+      status = VL53L1X_IO_Write_Byte(SYSTEM__INTERRUPT_CONFIG_GPIO, (Temp | (Window & 0x07)));
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+   }
+   else
+   {
+      status = VL53L1X_IO_Write_Byte(SYSTEM__INTERRUPT_CONFIG_GPIO, ((Temp | (Window & 0x07)) | 0x40));
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+   }
+
+   status = VL53L1X_IO_Write_Word(SYSTEM__THRESH_HIGH, ThreshHigh);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Word(SYSTEM__THRESH_LOW, ThreshLow);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetDistanceThresholdWindow(uint16_t *window)
+{
+   VL53L1X_OpResult status;
+   uint8_t tmp;
+
+   status = VL53L1X_IO_Read_Byte(SYSTEM__INTERRUPT_CONFIG_GPIO, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *window = (uint16_t)(tmp & 0x7);
+
+   return VL53L1X_OK;
+}
+
+
+VL53L1X_OpResult VL53L1X_GetDistanceThresholdLow(uint16_t *low)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp;
+
+   status = VL53L1X_IO_Read_Word(SYSTEM__THRESH_LOW, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *low = tmp;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetDistanceThresholdHigh(uint16_t *high)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp;
+
+   status = VL53L1X_IO_Read_Word(SYSTEM__THRESH_HIGH, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *high = tmp;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_SetROI(uint16_t X, uint16_t Y)
+{
+   uint8_t OpticalCenter;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Read_Byte(VL53L1X_ROI_CONFIG__MODE_ROI_CENTRE_SPAD, &OpticalCenter);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   if (X > 16)
+   {
+      X = 16;
+   }
+   if (Y > 16)
+   {
+      Y = 16;
+   }
+   if (X > 10 || Y > 10)
+   {
+      OpticalCenter = 199;
+   }
+
+   status = VL53L1X_IO_Write_Byte(ROI_CONFIG__USER_ROI_CENTRE_SPAD, OpticalCenter);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Byte(ROI_CONFIG__USER_ROI_REQUESTED_GLOBAL_XY_SIZE,    (Y - 1) << 4 | (X - 1));
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetROI_XY(uint16_t *ROI_X, uint16_t *ROI_Y)
+{
+   VL53L1X_OpResult status;
+   uint8_t tmp;
+
+   status = VL53L1X_IO_Read_Byte(ROI_CONFIG__USER_ROI_REQUESTED_GLOBAL_XY_SIZE, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *ROI_X = ((uint16_t)tmp & 0x0F) + 1;
+   *ROI_Y = (((uint16_t)tmp & 0xF0) >> 4) + 1;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_SetROICenter(uint8_t ROICenter)
+{
+   return VL53L1X_IO_Write_Byte(ROI_CONFIG__USER_ROI_CENTRE_SPAD, ROICenter);
+}
+
+VL53L1X_OpResult VL53L1X_GetROICenter(uint8_t *ROICenter)
+{
+   VL53L1X_OpResult status;
+   uint8_t tmp;
+
+   status = VL53L1X_IO_Read_Byte(ROI_CONFIG__USER_ROI_CENTRE_SPAD, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *ROICenter = tmp;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_SetSignalThreshold(uint16_t Signal)
+{
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Write_Word(RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS, Signal>>3);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetSignalThreshold(uint16_t *signal)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp;
+
+   status = VL53L1X_IO_Read_Word(RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *signal = tmp <<3;
+
+   return VL53L1X_OK;
+}
+
+
+VL53L1X_OpResult VL53L1X_SetSigmaThreshold(uint16_t Sigma)
+{
+   VL53L1X_OpResult status;
+
+   if(Sigma>(0xFFFF>>2))
+   {
+      return 1;
+   }
+   /* 16 bits register 14.2 format */
+   status = VL53L1X_IO_Write_Word(RANGE_CONFIG__SIGMA_THRESH,Sigma<<2);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_GetSigmaThreshold(uint16_t *sigma)
+{
+   VL53L1X_OpResult status;
+   uint16_t tmp;
+
+   status = VL53L1X_IO_Read_Word(RANGE_CONFIG__SIGMA_THRESH, &tmp);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   *sigma = tmp >> 2;
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_StartTemperatureUpdate()
+{
+   VL53L1X_OpResult status;
+   uint8_t tmp=0;
+
+   status = VL53L1X_IO_Write_Byte(VL53L1X_VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND, 0x81); /* full VHV */
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Byte(0x0B, 0x92);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_StartRanging();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   while(tmp==0)
+   {
+      status = VL53L1X_CheckForDataReady(&tmp);
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+   }
+
+   tmp = 0;
+
+   status = VL53L1X_ClearInterrupt();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_StopRanging();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Byte(VL53L1X_VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND, 0x09); /* two bounds VHV */
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Byte(0x0B, 0); /* start VHV from the previous temperature */
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+/* VL53L1X_calibration.h functions */
+VL53L1X_OpResult VL53L1X_CalibrateOffset(uint16_t TargetDistInMm, int16_t *offset)
+{
+   uint8_t tmp;
+   int16_t AverageDistance = 0;
+   uint16_t distance;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Write_Word(ALGO__PART_TO_PART_RANGE_OFFSET_MM, 0x0);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Word(MM_CONFIG__INNER_OFFSET_MM, 0x0);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_IO_Write_Word(MM_CONFIG__OUTER_OFFSET_MM, 0x0);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+   status = VL53L1X_StartRanging();	/* Enable VL53L1X sensor */
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   for (uint8_t i = 0; i < 50; i++)
+   {
+      while (tmp == 0)
+      {
+         status = VL53L1X_CheckForDataReady(&tmp);
+         if(status < VL53L1X_OK)
+         {
+            return status;
+         }
+      }
+      tmp = 0;
+      status = VL53L1X_GetDistance(&distance);
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+      status = VL53L1X_ClearInterrupt();
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+      AverageDistance = AverageDistance + distance;
+   }
+
+   status = VL53L1X_StopRanging();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   AverageDistance = AverageDistance / 50;
+   *offset = TargetDistInMm - AverageDistance;
+
+   status = VL53L1X_IO_Write_Word(ALGO__PART_TO_PART_RANGE_OFFSET_MM, *offset*4);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}
+
+VL53L1X_OpResult VL53L1X_CalibrateXtalk(uint16_t TargetDistInMm, uint16_t *xtalk)
+{
+   uint8_t i, tmp= 0;
+   float AverageSignalRate = 0;
+   float AverageDistance = 0;
+   float AverageSpadNb = 0;
+   uint16_t distance = 0, spadNum;
+   uint16_t sr;
+   VL53L1X_OpResult status;
+
+   status = VL53L1X_IO_Write_Word(0x0016,0);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   status = VL53L1X_StartRanging();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   for (i = 0; i < 50; i++)
+   {
+      while (tmp == 0)
+      {
+         status = VL53L1X_CheckForDataReady(&tmp);
+         if(status < VL53L1X_OK)
+         {
+            return status;
+         }
+      }
+
+      tmp=0;
+
+      status= VL53L1X_GetSignalRate(&sr);
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+      status= VL53L1X_GetDistance(&distance);
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+      status = VL53L1X_ClearInterrupt();
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+
+      AverageDistance = AverageDistance + distance;
+
+      status = VL53L1X_GetSpadNb(&spadNum);
+      if(status < VL53L1X_OK)
+      {
+         return status;
+      }
+
+      AverageSpadNb = AverageSpadNb + spadNum;
+      AverageSignalRate = AverageSignalRate + sr;
+   }
+
+   status = VL53L1X_StopRanging();
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   AverageDistance = AverageDistance / 50;
+   AverageSpadNb = AverageSpadNb / 50;
+   AverageSignalRate = AverageSignalRate / 50;
+
+   /* Calculate Xtalk value */
+   *xtalk = (uint16_t)(512*(AverageSignalRate*(1-(AverageDistance/TargetDistInMm)))/AverageSpadNb);
+
+   status = VL53L1X_IO_Write_Word(0x0016, *xtalk);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
+   return VL53L1X_OK;
+}

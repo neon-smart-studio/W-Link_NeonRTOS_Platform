@@ -588,6 +588,7 @@ int Process_LED_PWM_APP_Incoming_JSON_GET_Msg(App_Interface_Protocol protocol, c
 
 int Neon_APP_Device_Init()
 {
+        /*
         HTTPd_Register_CGI_URL_Callback("/LED_PWM", LED_PWM_CGI_Root, NULL);
         HTTPd_Register_CGI_URL_Callback("/LED_PWM/Num", LED_PWM_CGI_LED_Num, NULL);
         HTTPd_Register_CGI_URL_Callback("/LED_PWM/*", LED_PWM_CGI_LED_Any_Number, NULL);
@@ -597,4 +598,5 @@ int Neon_APP_Device_Init()
         LED_PWM_Init();
 
         return Register_Neon_APP_Interface_Msg_CallBack(APP_TOPIC_NAME, Process_LED_PWM_APP_Incoming_JSON_POST_Msg, Process_LED_PWM_APP_Incoming_JSON_GET_Msg);
+        */
 }

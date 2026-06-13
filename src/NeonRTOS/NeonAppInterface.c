@@ -471,7 +471,7 @@ int Network_On_GET_Callback(App_Interface_Protocol protocol, cJSON *in_json, cJS
                 uint32_t gw;
                 uint32_t netmask;
                 uint32_t dns;
-                uint32_t mac[6];
+                uint8_t mac[6];
                 
                 char ip_addr_str[20];
                 char gw_str[20];

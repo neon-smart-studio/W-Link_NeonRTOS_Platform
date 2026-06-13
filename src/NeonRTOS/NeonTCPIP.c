@@ -426,12 +426,8 @@ void NeonTCPIP_DHCP_Disable(void)
 {
     DHCP_enabled = 0;
 
-    if (netif_is_link_up(&gnetif)) {
-        DHCP_state = DHCP_ASK_RELEASE;
-    } else {
-        dhcp_stop(&gnetif);
-        DHCP_state = DHCP_OFF;
-    }
+    /* 只切換模式，不釋放目前 DHCP IP */
+    DHCP_state = DHCP_OFF;
 }
 
 bool NeonTCPIP_DHCP_IsEnabled(void)
@@ -449,7 +445,7 @@ void NeonTCPIP_IF_Update_Addresses(uint32_t ip, uint32_t netmask, uint32_t gw)
 #if LWIP_DHCP
         NeonTCPIP_DHCP_Enable();
 #endif
-        return -1;
+        return;
     }
 
     ip4_addr_set_u32(&ipaddr, ip);
@@ -464,7 +460,7 @@ void NeonTCPIP_IF_Update_Addresses(uint32_t ip, uint32_t netmask, uint32_t gw)
 
     netif_set_addr(&gnetif, &ipaddr, &nm, &gwaddr);
 
-    return 0;
+    return;
 }
 
 uint32_t NeonTCPIP_IF_Get_IP_Address(void)

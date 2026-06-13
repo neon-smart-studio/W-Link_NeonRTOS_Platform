@@ -97,12 +97,12 @@ uint32_t NeonTCPIP_IF_Get_Gateway_Address(void);
 void NeonTCPIP_IF_Set_Gateway_Address(uint32_t gateway);
 uint32_t NeonTCPIP_IF_Get_NetMask_Address(void);
 void NeonTCPIP_IF_Set_NetMask_Address(uint32_t net_mask);
-uint32_t NeonTCPIP_IF_Get_DNS_Address(void);
 #if LWIP_DHCP
 uint32_t NeonTCPIP_IF_Get_DHCP_Address(void);
 #endif
 
-void NeonTCPIP_DNS_Init(const uint8_t *dnsaddr);
+uint32_t NeonTCPIP_IF_Get_DNS_Address(void);
+void NeonTCPIP_IF_Set_DNS_Address(const uint8_t *dnsaddr);
 int8_t NeonTCPIP_DNS_GetHostByName(const char *hostname, uint32_t *ipaddr);
 
 uint32_t ip_string_to_u32(const char *ip_str);

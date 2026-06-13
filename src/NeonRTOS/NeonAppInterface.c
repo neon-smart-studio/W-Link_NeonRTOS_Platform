@@ -40,14 +40,17 @@ int Network_CGI_Root(HTTPd_WebSocked_Client_Connection *connData)
     uint32_t ip_addr;
     uint32_t gw;
     uint32_t netmask;
+    uint32_t dns;
     
     char ip_addr_str[20];
     char gw_str[20];
     char netmask_str[20];
+    char dns_str[20];
 
     memset(ip_addr_str, 0, 20);
     memset(gw_str, 0, 20);
     memset(netmask_str, 0, 20);
+    memset(dns_str, 0, 20);
 
     if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_POST)
     {
@@ -66,12 +69,9 @@ int Network_CGI_Root(HTTPd_WebSocked_Client_Connection *connData)
             cJSON* ip_addr_item = cJSON_GetObjectItem(req_json, "ip_addr");
             cJSON* gateway_item = cJSON_GetObjectItem(req_json, "gateway");
             cJSON* netmask_item = cJSON_GetObjectItem(req_json, "netmask");
-            if (ip_addr_item == NULL || gateway_item == NULL || netmask_item == NULL)
-            {
-                cJSON_Delete(req_json);
-                return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            if (ip_addr_item->type != cJSON_String || gateway_item->type != cJSON_String || netmask_item->type != cJSON_String)
+            cJSON* dns_item = cJSON_GetObjectItem(req_json, "DNS");
+
+            if (!cJSON_IsString(ip_addr_item) || !cJSON_IsString(gateway_item) || !cJSON_IsString(netmask_item))
             {
                 cJSON_Delete(req_json);
                 return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
@@ -94,6 +94,12 @@ int Network_CGI_Root(HTTPd_WebSocked_Client_Connection *connData)
             status = HTTPd_Send_CGI_JSON_Response(connData, 201, rsp_json, true);
 
             NeonTCPIP_IF_Update_Addresses(ip_addr, netmask, gw);
+
+            if(cJSON_IsString(dns_item))
+            {
+                uint32_t dns = ip_string_to_u32(dns_item->valuestring);
+                NeonTCPIP_IF_Set_DNS_Address(&dns);
+            }
     }
     else if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_GET)
     {
@@ -106,14 +112,17 @@ int Network_CGI_Root(HTTPd_WebSocked_Client_Connection *connData)
             ip_addr = NeonTCPIP_IF_Get_IP_Address();
             gw = NeonTCPIP_IF_Get_Gateway_Address();
             netmask = NeonTCPIP_IF_Get_NetMask_Address();
+            dns = NeonTCPIP_IF_Get_DNS_Address();
 
             ip_u32_to_string(ip_addr, ip_addr_str, sizeof(ip_addr_str));
             ip_u32_to_string(gw, gw_str, sizeof(gw_str));
             ip_u32_to_string(netmask, netmask_str, sizeof(netmask_str));
+            ip_u32_to_string(dns, dns_str, sizeof(dns_str));
 
 	    cJSON_AddStringToObject(rsp_json, "ip_addr", ip_addr_str);
 	    cJSON_AddStringToObject(rsp_json, "gateway", gw_str);
 	    cJSON_AddStringToObject(rsp_json, "netmask", netmask_str);
+	    cJSON_AddStringToObject(rsp_json, "DNS", dns_str);
             
             status = HTTPd_Send_CGI_JSON_Response(connData, 200, rsp_json, true);
     }
@@ -264,6 +273,81 @@ int Network_CGI_Gateway(HTTPd_WebSocked_Client_Connection *connData)
             ip_u32_to_string(gw, gw_str, sizeof(gw_str));
 
 	    cJSON_AddStringToObject(rsp_json, "gateway", gw_str);
+            
+            status = HTTPd_Send_CGI_JSON_Response(connData, 200, rsp_json, true);
+    }
+    else{
+            status = HTTPd_Send_CGI_Response(connData, 404, "txt", NULL, 0);
+    }
+    
+    return status;
+}
+
+int Network_CGI_DNS(HTTPd_WebSocked_Client_Connection *connData)
+{
+    if(connData==NULL) return HTTPD_CGI_DONE;
+    
+    int status = HTTPD_CGI_DONE;
+    
+    uint32_t dns;
+    
+    char dns_str[20];
+
+    memset(dns_str, 0, 20);
+
+    if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_POST)
+    {
+            const uint8_t* req_data = HTTPd_Get_CGI_Request_Data(connData);
+            if(req_data==NULL)
+            {
+                    return HTTPd_Send_CGI_Response(connData, 400, "txt", NULL, 0);
+            }
+            
+            cJSON* req_json = cJSON_Parse((const char*)req_data);
+            if (req_json==NULL)
+            {
+                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
+            }
+            
+            cJSON* gateway_item = cJSON_GetObjectItem(req_json, "DNS");
+            if (gateway_item == NULL)
+            {
+                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
+            }
+            if (gateway_item->type != cJSON_String)
+            {
+                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
+            }
+
+            uint32_t dns = ip_string_to_u32(gateway_item->valuestring);
+            
+            cJSON_Delete(req_json);
+            
+            cJSON* rsp_json = cJSON_CreateObject();
+            if(rsp_json==NULL)
+            {
+                    return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
+            }
+            
+	    cJSON_AddStringToObject(rsp_json, "status", "success");
+            
+            status = HTTPd_Send_CGI_JSON_Response(connData, 201, rsp_json, true);
+        
+            NeonTCPIP_IF_Set_DNS_Address(&dns);
+    }
+    else if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_GET)
+    {
+            cJSON* rsp_json = cJSON_CreateObject();
+            if(rsp_json==NULL)
+            {
+                  return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
+            }
+            
+            dns = NeonTCPIP_IF_Get_DNS_Address();
+
+            ip_u32_to_string(dns, dns_str, sizeof(dns_str));
+
+	    cJSON_AddStringToObject(rsp_json, "DNS", dns_str);
             
             status = HTTPd_Send_CGI_JSON_Response(connData, 200, rsp_json, true);
     }
@@ -725,9 +809,99 @@ void Process_Websocket_Incomming_Message(struct HTTPd_WebSocked_Client_Connectio
 	cJSON_Delete(msg_json);
 }
 
+int Network_On_POST_Callback(App_Interface_Protocol protocol, cJSON *in_json)
+{
+        cJSON* cmd = cJSON_GetObjectItem(in_json, "command");
+
+        if (!cJSON_IsString(cmd))
+        {
+                return -1;
+        }
+
+        if (strcmp(cmd->valuestring, "set network status") == 0)
+        {
+            cJSON* ip_addr_item = cJSON_GetObjectItem(in_json, "ip_addr");
+            cJSON* gateway_item = cJSON_GetObjectItem(in_json, "gateway");
+            cJSON* netmask_item = cJSON_GetObjectItem(in_json, "netmask");
+            cJSON* dns_item = cJSON_GetObjectItem(in_json, "DNS");
+
+            if (!cJSON_IsString(ip_addr_item) || !cJSON_IsString(gateway_item) || !cJSON_IsString(netmask_item))
+            {
+                return -1;
+            }
+
+            uint32_t ip_addr = ip_string_to_u32(ip_addr_item->valuestring);
+            uint32_t gw = ip_string_to_u32(gateway_item->valuestring);
+            uint32_t netmask = ip_string_to_u32(netmask_item->valuestring);
+
+            NeonTCPIP_IF_Update_Addresses(ip_addr, netmask, gw);
+
+            if(cJSON_IsString(dns_item))
+            {
+                uint32_t dns = ip_string_to_u32(dns_item->valuestring);
+                NeonTCPIP_IF_Set_DNS_Address(&dns);
+            }
+        }
+        else
+        {
+                return -1;
+        }
+        
+	return 0;
+}
+
+int Network_On_GET_Callback(App_Interface_Protocol protocol, cJSON *in_json, cJSON *rsp_json)
+{
+        cJSON* cmd = cJSON_GetObjectItem(in_json, "command");
+
+        if (!cJSON_IsString(cmd))
+        {
+                return -1;
+        }
+
+        if (strcmp(cmd->valuestring, "get network status") == 0)
+        {
+                uint32_t ip_addr;
+                uint32_t gw;
+                uint32_t netmask;
+                uint32_t dns;
+                
+                char ip_addr_str[20];
+                char gw_str[20];
+                char netmask_str[20];
+                char dns_str[20];
+
+                memset(ip_addr_str, 0, 20);
+                memset(gw_str, 0, 20);
+                memset(netmask_str, 0, 20);
+                memset(dns_str, 0, 20);
+
+                ip_addr = NeonTCPIP_IF_Get_IP_Address();
+                gw = NeonTCPIP_IF_Get_Gateway_Address();
+                netmask = NeonTCPIP_IF_Get_NetMask_Address();
+                dns = NeonTCPIP_IF_Get_DNS_Address();
+
+                ip_u32_to_string(ip_addr, ip_addr_str, sizeof(ip_addr_str));
+                ip_u32_to_string(gw, gw_str, sizeof(gw_str));
+                ip_u32_to_string(netmask, netmask_str, sizeof(netmask_str));
+                ip_u32_to_string(dns, dns_str, sizeof(dns_str));
+
+                cJSON_AddStringToObject(rsp_json, "ip_addr", ip_addr_str);
+                cJSON_AddStringToObject(rsp_json, "gateway", gw_str);
+                cJSON_AddStringToObject(rsp_json, "netmask", netmask_str);
+                cJSON_AddStringToObject(rsp_json, "DNS", dns_str);
+        }
+        else
+        {
+                return -1;
+        }
+
+	return 0;
+}
+
+
 void Init_Thread(void* p)
 {
-#ifdef CONFIG_SUPPORT_INTERNET
     NeonTCPIP_init(NULL, NULL, NULL);
 
     HTTPd_Init();
@@ -736,7 +910,9 @@ void Init_Thread(void* p)
     HTTPd_Register_CGI_URL_Callback("/Network/IP_Addr", Network_CGI_IpAddr, NULL);
     HTTPd_Register_CGI_URL_Callback("/Network/Gateway", Network_CGI_Gateway, NULL);
     HTTPd_Register_CGI_URL_Callback("/Network/Netmask", Network_CGI_Netmask, NULL);
-#endif
+    HTTPd_Register_CGI_URL_Callback("/Network/DNS", Network_CGI_DNS, NULL);
+
+    Register_Neon_APP_Interface_Msg_CallBack("Network", Network_On_POST_Callback, Network_On_GET_Callback);
 
     Neon_APP_Device_Init();
 
@@ -748,7 +924,6 @@ void Init_Thread(void* p)
 
     while (1)
     {
-#ifdef CONFIG_SUPPORT_INTERNET
         if(NeonTCPIP_IF_isLinkUp())
         {
 #if LWIP_DHCP
@@ -784,9 +959,6 @@ void Init_Thread(void* p)
             GPIO_Pin_Write(LED_R, 0);
             NeonRTOS_Sleep(200);  
         }
-#else
-        NeonRTOS_Sleep(1000);  
-#endif
 
         size_t freeHeapSize = NeonRTOS_GetFreeHeapSize();
         UART_Printf("Remain Heap Size %d bytes\n", freeHeapSize);
@@ -797,9 +969,7 @@ void Neon_App_Init(void)
 {
         UART_Open(LOG_UART_INDEX, 115200, false);
 
-#ifdef CONFIG_SUPPORT_INTERNET
         WebsocketServer_RegisterMsgCallback(Process_Websocket_Incomming_Message);
-#endif
     
 #if INIT_THREAD_DEBUG==1
         printf("[Init Thread] Creating Threaf: Init_Thread()\n");

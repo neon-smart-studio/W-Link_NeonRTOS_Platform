@@ -417,12 +417,6 @@ void NeonTCPIP_IF_Set_NetMask_Address(uint32_t net_mask)
     netif_set_addr(&gnetif, &ipaddr, &netmask, &gw);
 }
 
-uint32_t NeonTCPIP_IF_Get_DNS_Address(void)
-{
-  const ip_addr_t *tmp = dns_getserver(0);
-  return ip4_addr_get_u32(tmp);
-}
-
 #if LWIP_DHCP
 uint32_t NeonTCPIP_IF_Get_DHCP_Address(void)
 {
@@ -454,7 +448,13 @@ void ethernetif_notify_conn_changed(struct netif *netif)
 
 #if LWIP_DNS
 
-void NeonTCPIP_DNS_Init(const uint8_t *dnsaddr)
+uint32_t NeonTCPIP_IF_Get_DNS_Address(void)
+{
+  const ip_addr_t *tmp = dns_getserver(0);
+  return ip4_addr_get_u32(tmp);
+}
+
+void NeonTCPIP_IF_Set_DNS_Address(const uint8_t *dnsaddr)
 {
   ip_addr_t ip;
 

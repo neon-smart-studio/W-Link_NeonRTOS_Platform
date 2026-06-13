@@ -97,8 +97,12 @@ uint32_t NeonTCPIP_IF_Get_Gateway_Address(void);
 void NeonTCPIP_IF_Set_Gateway_Address(uint32_t gateway);
 uint32_t NeonTCPIP_IF_Get_NetMask_Address(void);
 void NeonTCPIP_IF_Set_NetMask_Address(uint32_t net_mask);
+void NeonTCPIP_IF_Get_Mac_Address(uint8_t mac[6]);
 #if LWIP_DHCP
 uint32_t NeonTCPIP_IF_Get_DHCP_Address(void);
+void NeonTCPIP_DHCP_Enable(void);
+void NeonTCPIP_DHCP_Disable(void);
+bool NeonTCPIP_DHCP_IsEnabled(void);
 #endif
 
 uint32_t NeonTCPIP_IF_Get_DNS_Address(void);

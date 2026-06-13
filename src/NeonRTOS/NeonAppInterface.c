@@ -31,408 +31,6 @@ typedef struct APP_Topic_CallBack_Item_Inf_t
 
 APP_Topic_CallBack_Item_Inf* app_if_callback_inf_lst = NULL;
 
-int Network_CGI_Root(HTTPd_WebSocked_Client_Connection *connData)
-{
-    if(connData==NULL) return HTTPD_CGI_DONE;
-    
-    int status = HTTPD_CGI_DONE;
-    
-    uint32_t ip_addr;
-    uint32_t gw;
-    uint32_t netmask;
-    uint32_t dns;
-    
-    char ip_addr_str[20];
-    char gw_str[20];
-    char netmask_str[20];
-    char dns_str[20];
-
-    memset(ip_addr_str, 0, 20);
-    memset(gw_str, 0, 20);
-    memset(netmask_str, 0, 20);
-    memset(dns_str, 0, 20);
-
-    if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_POST)
-    {
-            const uint8_t* req_data = HTTPd_Get_CGI_Request_Data(connData);
-            if(req_data==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 400, "txt", NULL, 0);
-            }
-            
-            cJSON* req_json = cJSON_Parse((const char*)req_data);
-            if (req_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            
-            cJSON* ip_addr_item = cJSON_GetObjectItem(req_json, "ip_addr");
-            cJSON* gateway_item = cJSON_GetObjectItem(req_json, "gateway");
-            cJSON* netmask_item = cJSON_GetObjectItem(req_json, "netmask");
-            cJSON* dns_item = cJSON_GetObjectItem(req_json, "DNS");
-
-            if (!cJSON_IsString(ip_addr_item) || !cJSON_IsString(gateway_item) || !cJSON_IsString(netmask_item))
-            {
-                cJSON_Delete(req_json);
-                return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-
-            uint32_t ip_addr = ip_string_to_u32(ip_addr_item->valuestring);
-            uint32_t gw = ip_string_to_u32(gateway_item->valuestring);
-            uint32_t netmask = ip_string_to_u32(netmask_item->valuestring);
-
-            cJSON_Delete(req_json);
-            
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-	    cJSON_AddStringToObject(rsp_json, "status", "success");
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 201, rsp_json, true);
-
-            NeonTCPIP_IF_Update_Addresses(ip_addr, netmask, gw);
-
-            if(cJSON_IsString(dns_item))
-            {
-                uint32_t dns = ip_string_to_u32(dns_item->valuestring);
-                NeonTCPIP_IF_Set_DNS_Address(&dns);
-            }
-    }
-    else if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_GET)
-    {
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                  return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-            ip_addr = NeonTCPIP_IF_Get_IP_Address();
-            gw = NeonTCPIP_IF_Get_Gateway_Address();
-            netmask = NeonTCPIP_IF_Get_NetMask_Address();
-            dns = NeonTCPIP_IF_Get_DNS_Address();
-
-            ip_u32_to_string(ip_addr, ip_addr_str, sizeof(ip_addr_str));
-            ip_u32_to_string(gw, gw_str, sizeof(gw_str));
-            ip_u32_to_string(netmask, netmask_str, sizeof(netmask_str));
-            ip_u32_to_string(dns, dns_str, sizeof(dns_str));
-
-	    cJSON_AddStringToObject(rsp_json, "ip_addr", ip_addr_str);
-	    cJSON_AddStringToObject(rsp_json, "gateway", gw_str);
-	    cJSON_AddStringToObject(rsp_json, "netmask", netmask_str);
-	    cJSON_AddStringToObject(rsp_json, "DNS", dns_str);
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 200, rsp_json, true);
-    }
-    else{
-            status = HTTPd_Send_CGI_Response(connData, 404, "txt", NULL, 0);
-    }
-    
-    return status;
-}
-
-int Network_CGI_IpAddr(HTTPd_WebSocked_Client_Connection *connData)
-{
-    if(connData==NULL) return HTTPD_CGI_DONE;
-    
-    int status = HTTPD_CGI_DONE;
-    
-    uint32_t ip_addr;
-    
-    char ip_addr_str[20];
-
-    memset(ip_addr_str, 0, 20);
-
-    if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_POST)
-    {
-            const uint8_t* req_data = HTTPd_Get_CGI_Request_Data(connData);
-            if(req_data==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 400, "txt", NULL, 0);
-            }
-            
-            cJSON* req_json = cJSON_Parse((const char*)req_data);
-            if (req_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            
-            cJSON* ip_addr_item = cJSON_GetObjectItem(req_json, "ip_addr");
-            if (ip_addr_item == NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            if (ip_addr_item->type != cJSON_String)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-
-            uint32_t ip_addr = ip_string_to_u32(ip_addr_item->valuestring);
-            
-            cJSON_Delete(req_json);
-            
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-	    cJSON_AddStringToObject(rsp_json, "status", "success");
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 201, rsp_json, true);
-        
-            NeonTCPIP_IF_Set_IP_Address(ip_addr);
-    }
-    else if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_GET)
-    {
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                  return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-            ip_addr = NeonTCPIP_IF_Get_IP_Address();
-
-            ip_u32_to_string(ip_addr, ip_addr_str, sizeof(ip_addr_str));
-
-	    cJSON_AddStringToObject(rsp_json, "ip_addr", ip_addr_str);
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 200, rsp_json, true);
-    }
-    else{
-            status = HTTPd_Send_CGI_Response(connData, 404, "txt", NULL, 0);
-    }
-    
-    return status;
-}
-
-int Network_CGI_Gateway(HTTPd_WebSocked_Client_Connection *connData)
-{
-    if(connData==NULL) return HTTPD_CGI_DONE;
-    
-    int status = HTTPD_CGI_DONE;
-    
-    uint32_t gw;
-    
-    char gw_str[20];
-
-    memset(gw_str, 0, 20);
-
-    if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_POST)
-    {
-            const uint8_t* req_data = HTTPd_Get_CGI_Request_Data(connData);
-            if(req_data==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 400, "txt", NULL, 0);
-            }
-            
-            cJSON* req_json = cJSON_Parse((const char*)req_data);
-            if (req_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            
-            cJSON* gateway_item = cJSON_GetObjectItem(req_json, "gateway");
-            if (gateway_item == NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            if (gateway_item->type != cJSON_String)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-
-            uint32_t gw = ip_string_to_u32(gateway_item->valuestring);
-            
-            cJSON_Delete(req_json);
-            
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-	    cJSON_AddStringToObject(rsp_json, "status", "success");
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 201, rsp_json, true);
-        
-            NeonTCPIP_IF_Set_Gateway_Address(gw);
-    }
-    else if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_GET)
-    {
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                  return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-            gw = NeonTCPIP_IF_Get_Gateway_Address();
-
-            ip_u32_to_string(gw, gw_str, sizeof(gw_str));
-
-	    cJSON_AddStringToObject(rsp_json, "gateway", gw_str);
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 200, rsp_json, true);
-    }
-    else{
-            status = HTTPd_Send_CGI_Response(connData, 404, "txt", NULL, 0);
-    }
-    
-    return status;
-}
-
-int Network_CGI_DNS(HTTPd_WebSocked_Client_Connection *connData)
-{
-    if(connData==NULL) return HTTPD_CGI_DONE;
-    
-    int status = HTTPD_CGI_DONE;
-    
-    uint32_t dns;
-    
-    char dns_str[20];
-
-    memset(dns_str, 0, 20);
-
-    if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_POST)
-    {
-            const uint8_t* req_data = HTTPd_Get_CGI_Request_Data(connData);
-            if(req_data==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 400, "txt", NULL, 0);
-            }
-            
-            cJSON* req_json = cJSON_Parse((const char*)req_data);
-            if (req_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            
-            cJSON* gateway_item = cJSON_GetObjectItem(req_json, "DNS");
-            if (gateway_item == NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            if (gateway_item->type != cJSON_String)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-
-            uint32_t dns = ip_string_to_u32(gateway_item->valuestring);
-            
-            cJSON_Delete(req_json);
-            
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-	    cJSON_AddStringToObject(rsp_json, "status", "success");
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 201, rsp_json, true);
-        
-            NeonTCPIP_IF_Set_DNS_Address(&dns);
-    }
-    else if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_GET)
-    {
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                  return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-            dns = NeonTCPIP_IF_Get_DNS_Address();
-
-            ip_u32_to_string(dns, dns_str, sizeof(dns_str));
-
-	    cJSON_AddStringToObject(rsp_json, "DNS", dns_str);
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 200, rsp_json, true);
-    }
-    else{
-            status = HTTPd_Send_CGI_Response(connData, 404, "txt", NULL, 0);
-    }
-    
-    return status;
-}
-
-int Network_CGI_Netmask(HTTPd_WebSocked_Client_Connection *connData)
-{
-    if(connData==NULL) return HTTPD_CGI_DONE;
-    
-    int status = HTTPD_CGI_DONE;
-    
-    uint32_t netmask;
-    
-    char netmask_str[20];
-
-    memset(netmask_str, 0, 20);
-
-    if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_POST)
-    {
-            const uint8_t* req_data = HTTPd_Get_CGI_Request_Data(connData);
-            if(req_data==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 400, "txt", NULL, 0);
-            }
-            
-            cJSON* req_json = cJSON_Parse((const char*)req_data);
-            if (req_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            
-            cJSON* netmask_item = cJSON_GetObjectItem(req_json, "netmask");
-            if (netmask_item == NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-            if (netmask_item->type != cJSON_String)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 422, "txt", NULL, 0);
-            }
-
-            uint32_t netmask = ip_string_to_u32(netmask_item->valuestring);
-            
-            cJSON_Delete(req_json);
-            
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                    return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-	    cJSON_AddStringToObject(rsp_json, "status", "success");
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 201, rsp_json, true);
-        
-            NeonTCPIP_IF_Set_NetMask_Address(netmask);
-    }
-    else if(HTTPd_Get_CGI_Request_Type(connData)==HTTPd_Method_GET)
-    {
-            cJSON* rsp_json = cJSON_CreateObject();
-            if(rsp_json==NULL)
-            {
-                  return HTTPd_Send_CGI_Response(connData, 500, "txt", NULL, 0);
-            }
-            
-            netmask = NeonTCPIP_IF_Get_NetMask_Address();
-
-            ip_u32_to_string(netmask, netmask_str, sizeof(netmask_str));
-
-	    cJSON_AddStringToObject(rsp_json, "netmask", netmask_str);
-            
-            status = HTTPd_Send_CGI_JSON_Response(connData, 200, rsp_json, true);
-    }
-    else{
-            status = HTTPd_Send_CGI_Response(connData, 404, "txt", NULL, 0);
-    }
-    
-    return status;
-}
-
 /*
 int App_Interface_Process_MQTT_Post_Message(MQTT_Address_Type address_mode, const char* callDevice_ID, const char* msg_topic, cJSON* in_msg)
 {
@@ -842,6 +440,14 @@ int Network_On_POST_Callback(App_Interface_Protocol protocol, cJSON *in_json)
                 NeonTCPIP_IF_Set_DNS_Address(&dns);
             }
         }
+        else if (strcmp(cmd->valuestring, "enable DHCP") == 0)
+        {
+                NeonTCPIP_DHCP_Enable();
+        }
+        else if (strcmp(cmd->valuestring, "disable DHCP") == 0)
+        {
+                NeonTCPIP_DHCP_Disable();
+        }
         else
         {
                 return -1;
@@ -865,31 +471,38 @@ int Network_On_GET_Callback(App_Interface_Protocol protocol, cJSON *in_json, cJS
                 uint32_t gw;
                 uint32_t netmask;
                 uint32_t dns;
+                uint32_t mac[6];
                 
                 char ip_addr_str[20];
                 char gw_str[20];
                 char netmask_str[20];
                 char dns_str[20];
+                char mac_str[20];
 
                 memset(ip_addr_str, 0, 20);
                 memset(gw_str, 0, 20);
                 memset(netmask_str, 0, 20);
                 memset(dns_str, 0, 20);
+                memset(mac_str, 0, 20);
 
                 ip_addr = NeonTCPIP_IF_Get_IP_Address();
                 gw = NeonTCPIP_IF_Get_Gateway_Address();
                 netmask = NeonTCPIP_IF_Get_NetMask_Address();
                 dns = NeonTCPIP_IF_Get_DNS_Address();
+                NeonTCPIP_IF_Get_Mac_Address(mac);
 
                 ip_u32_to_string(ip_addr, ip_addr_str, sizeof(ip_addr_str));
                 ip_u32_to_string(gw, gw_str, sizeof(gw_str));
                 ip_u32_to_string(netmask, netmask_str, sizeof(netmask_str));
                 ip_u32_to_string(dns, dns_str, sizeof(dns_str));
+                sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
                 cJSON_AddStringToObject(rsp_json, "ip_addr", ip_addr_str);
                 cJSON_AddStringToObject(rsp_json, "gateway", gw_str);
                 cJSON_AddStringToObject(rsp_json, "netmask", netmask_str);
                 cJSON_AddStringToObject(rsp_json, "DNS", dns_str);
+                cJSON_AddStringToObject(rsp_json, "MAC", mac_str);
+                cJSON_AddBoolToObject(rsp_json, "DHCP", NeonTCPIP_DHCP_IsEnabled());
         }
         else
         {
@@ -905,12 +518,6 @@ void Init_Thread(void* p)
     NeonTCPIP_init(NULL, NULL, NULL);
 
     HTTPd_Init();
-
-    HTTPd_Register_CGI_URL_Callback("/Network", Network_CGI_Root, NULL);
-    HTTPd_Register_CGI_URL_Callback("/Network/IP_Addr", Network_CGI_IpAddr, NULL);
-    HTTPd_Register_CGI_URL_Callback("/Network/Gateway", Network_CGI_Gateway, NULL);
-    HTTPd_Register_CGI_URL_Callback("/Network/Netmask", Network_CGI_Netmask, NULL);
-    HTTPd_Register_CGI_URL_Callback("/Network/DNS", Network_CGI_DNS, NULL);
 
     Register_Neon_APP_Interface_Msg_CallBack("Network", Network_On_POST_Callback, Network_On_GET_Callback);
 

@@ -34,8 +34,11 @@
  *
  ******************************************************************************
 */
+/*
+ * Based on STMicroelectronics VL53L1X driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
-/* Includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -46,10 +49,12 @@
 #include "GPIO/GPIO.h"
 #include "I2C/I2C_Master.h"
 
-#include "VL53l1X_Def.h"
-#include "VL53l1X_IO.h"
+#include "VL53L1X_Def.h"
+#include "VL53L1X_IO.h"
 
-static VL53L1X_OpResult VL53L1X_IO_IO_Map_GPIO_Error(hwGPIO_OpResult error_code)
+static sw_i2c_address = VL53L1X_ACC_I2C_ADDRESS;
+
+static VL53L1X_OpResult VL53L1X_IO_Map_GPIO_Error(hwGPIO_OpResult error_code)
 {
     switch(error_code)
     {
@@ -71,7 +76,7 @@ static VL53L1X_OpResult VL53L1X_IO_IO_Map_GPIO_Error(hwGPIO_OpResult error_code)
     }
 }
 
-static VL53L1X_OpResult VL53L1X_IO_IO_Map_I2C_Error(hwI2C_OpResult error_code)
+static VL53L1X_OpResult VL53L1X_IO_Map_I2C_Error(hwI2C_OpResult error_code)
 {
     switch(error_code)
     {
@@ -118,7 +123,7 @@ static VL53L1X_OpResult VL53L1X_IO_I2C_Write(uint16_t RegisterAddr, uint8_t* pBu
    status = VL53L1X_IO_Map_I2C_Error(
         I2C_Master_Write(
             VL53L1X_I2C_INDEX,
-            VL53L1X_ACC_I2C_ADDRESS >> 1,
+            sw_i2c_address >> 1,
             buffer,
             2,
             false,
@@ -134,7 +139,7 @@ static VL53L1X_OpResult VL53L1X_IO_I2C_Write(uint16_t RegisterAddr, uint8_t* pBu
     status = VL53L1X_IO_Map_I2C_Error(
         I2C_Master_Read(
             VL53L1X_I2C_INDEX,
-            VL53L1X_ACC_I2C_ADDRESS >> 1,
+            sw_i2c_address >> 1,
             pBuffer,
             NumByteToWrite,
             true,
@@ -166,7 +171,7 @@ static VL53L1X_OpResult VL53L1X_IO_I2C_Read(uint16_t RegisterAddr, uint8_t* pBuf
    status = VL53L1X_IO_Map_I2C_Error(
         I2C_Master_Write(
             VL53L1X_I2C_INDEX,
-            VL53L1X_ACC_I2C_ADDRESS >> 1,
+            sw_i2c_address >> 1,
             buffer,
             2,
             false,
@@ -182,7 +187,7 @@ static VL53L1X_OpResult VL53L1X_IO_I2C_Read(uint16_t RegisterAddr, uint8_t* pBuf
     status = VL53L1X_IO_Map_I2C_Error(
         I2C_Master_Read(
             VL53L1X_I2C_INDEX,
-            VL53L1X_ACC_I2C_ADDRESS >> 1,
+            sw_i2c_address >> 1,
             pBuffer,
             NumByteToRead,
             true,
@@ -234,7 +239,7 @@ VL53L1X_OpResult VL53L1X_IO_Power_On()
       return VL53L1X_IO_Map_GPIO_Error(gpio_status);
    }
 
-   delay(10);
+   NeonRTOS_Sleep(10);
 
    return VL53L1X_OK;
 }
@@ -249,24 +254,30 @@ VL53L1X_OpResult VL53L1X_IO_Power_Off()
       return VL53L1X_IO_Map_GPIO_Error(gpio_status);
    }
 
-   delay(10);
+   NeonRTOS_Sleep(10);
 
    return VL53L1X_OK;
 }
 
+VL53L1X_OpResult VL53L1X_IO_SetI2CAddress(uint8_t new_address)
+{
+   sw_i2c_address = new_address;
+   return VL53L1X_IO_Write_Byte(VL53L1X_I2C_SLAVE__DEVICE_ADDRESS, new_address >> 1);
+}
+
 VL53L1X_OpResult VL53L1X_IO_Write_Multi(uint16_t RegisterAddr, uint8_t *pdata, uint32_t count)
 {
-   return VL53L1X_I2C_Write(RegisterAddr, pdata, (uint16_t)count);
+   return VL53L1X_IO_I2C_Write(RegisterAddr, pdata, (uint16_t)count);
 }
 
 VL53L1X_OpResult VL53L1X_IO_Read_Multi(uint16_t RegisterAddr, uint8_t *pdata, uint32_t count)
 {
-   return VL53L1X_I2C_Read(RegisterAddr, pdata, (uint16_t)count);
+   return VL53L1X_IO_I2C_Read(RegisterAddr, pdata, (uint16_t)count);
 }
 
 VL53L1X_OpResult VL53L1X_IO_Write_Byte(uint16_t RegisterAddr, uint8_t data)
 {
-   return VL53L1X_I2C_Write(RegisterAddr, &data, 1);
+   return VL53L1X_IO_I2C_Write(RegisterAddr, &data, 1);
 }
 
 VL53L1X_OpResult VL53L1X_IO_Write_Word(uint16_t RegisterAddr, uint16_t data)
@@ -276,7 +287,7 @@ VL53L1X_OpResult VL53L1X_IO_Write_Word(uint16_t RegisterAddr, uint16_t data)
    buffer[0] = data >> 8;
    buffer[1] = data & 0x00FF;
 
-   return VL53L1X_I2C_Write(RegisterAddr, (uint8_t *)buffer, 2);
+   return VL53L1X_IO_I2C_Write(RegisterAddr, (uint8_t *)buffer, 2);
 }
 
 VL53L1X_OpResult VL53L1X_IO_Write_DWord(uint16_t RegisterAddr, uint32_t data)
@@ -288,12 +299,12 @@ VL53L1X_OpResult VL53L1X_IO_Write_DWord(uint16_t RegisterAddr, uint32_t data)
    buffer[2] = (data >>  8) & 0xFF;
    buffer[3] = (data >>  0) & 0xFF;
 
-   return VL53L1X_I2C_Write(RegisterAddr, (uint8_t *)buffer, 4);
+   return VL53L1X_IO_I2C_Write(RegisterAddr, (uint8_t *)buffer, 4);
 }
 
 VL53L1X_OpResult VL53L1X_IO_Read_Byte(uint16_t RegisterAddr, uint8_t *data)
 {
-   return VL53L1X_I2C_Read(RegisterAddr, data, 1);
+   return VL53L1X_IO_I2C_Read(RegisterAddr, data, 1);
 }
 
 VL53L1X_OpResult VL53L1X_IO_Read_Word(uint16_t RegisterAddr, uint16_t *data)
@@ -301,7 +312,7 @@ VL53L1X_OpResult VL53L1X_IO_Read_Word(uint16_t RegisterAddr, uint16_t *data)
    VL53L1X_OpResult status;
    uint8_t buffer[2] = {0,0};
 
-   status = VL53L1X_I2C_Read(RegisterAddr, buffer, 2);
+   status = VL53L1X_IO_I2C_Read(RegisterAddr, buffer, 2);
    if (status<VL53L1X_OK)
    {
       return status;
@@ -317,7 +328,7 @@ VL53L1X_OpResult VL53L1X_IO_Read_DWord(uint16_t RegisterAddr, uint32_t *data)
    VL53L1X_OpResult status;
    uint8_t buffer[4] = {0,0,0,0};
 
-   status = VL53L1X_I2C_Read(RegisterAddr, buffer, 4);
+   status = VL53L1X_IO_I2C_Read(RegisterAddr, buffer, 4);
    if (status<VL53L1X_OK)
    {
       return status;
@@ -334,7 +345,7 @@ VL53L1X_OpResult VL53L1X_IO_UpdateByte(uint16_t RegisterAddr, uint8_t AndData, u
    uint8_t buffer = 0;
 
    /* read data direct onto buffer */
-   status = VL53L1X_I2C_Read(RegisterAddr, &buffer, 1);
+   status = VL53L1X_IO_I2C_Read(RegisterAddr, &buffer, 1);
    if (status<VL53L1X_OK)
    {
       return status;
@@ -342,5 +353,5 @@ VL53L1X_OpResult VL53L1X_IO_UpdateByte(uint16_t RegisterAddr, uint8_t AndData, u
    
    buffer = (buffer & AndData) | OrData;
 
-   return VL53L1X_I2C_Write(RegisterAddr, &buffer, (uint16_t)1);
+   return VL53L1X_IO_I2C_Write(RegisterAddr, &buffer, (uint16_t)1);
 }

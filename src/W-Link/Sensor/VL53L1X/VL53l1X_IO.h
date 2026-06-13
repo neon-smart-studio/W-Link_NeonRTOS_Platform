@@ -25,6 +25,10 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
+/*
+ * Based on STMicroelectronics VL53L1X driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
 #ifndef VL53l1X_IO_H
 #define VL53l1X_IO_H
@@ -32,13 +36,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "VL53l1X_Def.h"
+#include "VL53L1X_Def.h"
 
 #include "Sensor_Config.h"
 
 #define VL53L1X_ACC_I2C_ADDRESS            0x52
 
 #define VL53L1X_I2C_OP_TIMEOUT             500
+
+#ifndef CONFIG_VL53L1X_NEW_I2C_ADDRESS
+#define VL53L1X_I2C_NEW_I2C_ADDRESS        VL53L1X_ACC_I2C_ADDRESS
+#else
+#define VL53L1X_I2C_NEW_I2C_ADDRESS        CONFIG_VL53L1X_NEW_I2C_ADDRESS
+#endif
 
 #ifndef CONFIG_VL53L1X_I2C_INDEX
 #define VL53L1X_I2C_INDEX                  hwI2C_Index_0
@@ -60,6 +70,7 @@ VL53L1X_OpResult VL53L1X_IO_Init();
 VL53L1X_OpResult VL53L1X_IO_DeInit();
 VL53L1X_OpResult VL53L1X_IO_Power_On();
 VL53L1X_OpResult VL53L1X_IO_Power_Off();
+VL53L1X_OpResult VL53L1X_IO_SetI2CAddress(uint8_t new_address);
 VL53L1X_OpResult VL53L1X_IO_Write_Multi(uint16_t RegisterAddr, uint8_t *pdata, uint32_t count);
 VL53L1X_OpResult VL53L1X_IO_Read_Multi(uint16_t RegisterAddr, uint8_t *pdata, uint32_t count);
 VL53L1X_OpResult VL53L1X_IO_Write_Byte(uint16_t RegisterAddr, uint8_t data);

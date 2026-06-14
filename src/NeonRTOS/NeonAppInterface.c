@@ -31,6 +31,7 @@ typedef struct APP_Topic_CallBack_Item_Inf_t
 
 APP_Topic_CallBack_Item_Inf* app_if_callback_inf_lst = NULL;
 
+#ifdef CONFIG_SUPPORT_INTERNET
 /*
 int App_Interface_Process_MQTT_Post_Message(MQTT_Address_Type address_mode, const char* callDevice_ID, const char* msg_topic, cJSON* in_msg)
 {
@@ -511,15 +512,17 @@ int Network_On_GET_Callback(App_Interface_Protocol protocol, cJSON *in_json, cJS
 
 	return 0;
 }
-
+#endif //CONFIG_SUPPORT_INTERNET
 
 void Init_Thread(void* p)
 {
+#ifdef CONFIG_SUPPORT_INTERNET
     NeonTCPIP_init(NULL, NULL, NULL);
 
     HTTPd_Init();
 
     Register_Neon_APP_Interface_Msg_CallBack("Network", Network_On_POST_Callback, Network_On_GET_Callback);
+#endif //CONFIG_SUPPORT_INTERNET
 
     Neon_APP_Device_Init();
 
@@ -576,7 +579,9 @@ void Neon_App_Init(void)
 {
         UART_Open(LOG_UART_INDEX, 115200, false);
 
+#ifdef CONFIG_SUPPORT_INTERNET
         WebsocketServer_RegisterMsgCallback(Process_Websocket_Incomming_Message);
+#endif //CONFIG_SUPPORT_INTERNET
     
 #if INIT_THREAD_DEBUG==1
         printf("[Init Thread] Creating Threaf: Init_Thread()\n");

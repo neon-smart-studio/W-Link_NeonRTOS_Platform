@@ -34,8 +34,11 @@
  *
  ******************************************************************************
 */
+/*
+ * Based on STMicroelectronics VL53L1X driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
-/* Includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -43,55 +46,9 @@
 
 #include "NeonRTOS.h"
 
-#include "VL53l1X_Def.h"
-#include "VL53l1X_IO.h"
-#include "VL53l1X.h"
-
-#define ALGO__PART_TO_PART_RANGE_OFFSET_MM	0x001E
-#define MM_CONFIG__INNER_OFFSET_MM			0x0020
-#define MM_CONFIG__OUTER_OFFSET_MM 			0x0022
-
-#define VL53L1X_I2C_SLAVE__DEVICE_ADDRESS					0x0001
-#define VL53L1X_VHV_CONFIG__TIMEOUT_MACROP_LOOP_BOUND        0x0008
-#define ALGO__CROSSTALK_COMPENSATION_PLANE_OFFSET_KCPS 		0x0016
-#define ALGO__CROSSTALK_COMPENSATION_X_PLANE_GRADIENT_KCPS 	0x0018
-#define ALGO__CROSSTALK_COMPENSATION_Y_PLANE_GRADIENT_KCPS 	0x001A
-#define ALGO__PART_TO_PART_RANGE_OFFSET_MM					0x001E
-#define MM_CONFIG__INNER_OFFSET_MM							0x0020
-#define MM_CONFIG__OUTER_OFFSET_MM 							0x0022
-#define GPIO_HV_MUX__CTRL									0x0030
-#define GPIO__TIO_HV_STATUS       							0x0031
-#define SYSTEM__INTERRUPT_CONFIG_GPIO 						0x0046
-#define PHASECAL_CONFIG__TIMEOUT_MACROP     				0x004B
-#define RANGE_CONFIG__TIMEOUT_MACROP_A_HI   				0x005E
-#define RANGE_CONFIG__VCSEL_PERIOD_A        				0x0060
-#define RANGE_CONFIG__VCSEL_PERIOD_B						0x0063
-#define RANGE_CONFIG__TIMEOUT_MACROP_B_HI  					0x0061
-#define RANGE_CONFIG__TIMEOUT_MACROP_B_LO  					0x0062
-#define RANGE_CONFIG__SIGMA_THRESH 							0x0064
-#define RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS			0x0066
-#define RANGE_CONFIG__VALID_PHASE_HIGH      				0x0069
-#define VL53L1X_SYSTEM__INTERMEASUREMENT_PERIOD				0x006C
-#define SYSTEM__THRESH_HIGH 								0x0072
-#define SYSTEM__THRESH_LOW 									0x0074
-#define SD_CONFIG__WOI_SD0                  				0x0078
-#define SD_CONFIG__INITIAL_PHASE_SD0        				0x007A
-#define ROI_CONFIG__USER_ROI_CENTRE_SPAD					0x007F
-#define ROI_CONFIG__USER_ROI_REQUESTED_GLOBAL_XY_SIZE		0x0080
-#define SYSTEM__SEQUENCE_CONFIG								0x0081
-#define VL53L1X_SYSTEM__GROUPED_PARAMETER_HOLD 				0x0082
-#define SYSTEM__INTERRUPT_CLEAR       						0x0086
-#define SYSTEM__MODE_START                 					0x0087
-#define VL53L1X_RESULT__RANGE_STATUS							0x0089
-#define VL53L1X_RESULT__DSS_ACTUAL_EFFECTIVE_SPADS_SD0		0x008C
-#define RESULT__AMBIENT_COUNT_RATE_MCPS_SD					0x0090
-#define VL53L1X_RESULT__FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0				0x0096
-#define VL53L1X_RESULT__PEAK_SIGNAL_COUNT_RATE_CROSSTALK_CORRECTED_MCPS_SD0 	0x0098
-#define VL53L1X_RESULT__OSC_CALIBRATE_VAL					0x00DE
-#define VL53L1X_FIRMWARE__SYSTEM_STATUS                      0x00E5
-#define VL53L1X_IDENTIFICATION__MODEL_ID                     0x010F
-#define VL53L1X_ROI_CONFIG__MODE_ROI_CENTRE_SPAD				0x013E
-
+#include "VL53L1X_Def.h"
+#include "VL53L1X_IO.h"
+#include "VL53L1X.h"
 
 const uint8_t VL51L1X_Default_Config[] =
 {
@@ -188,33 +145,34 @@ const uint8_t VL51L1X_Default_Config[] =
    0x00  /* 0x87 : start ranging, use StartRanging() or StopRanging(), If you want an automatic start after VL53L1X_init() call, put 0x40 in location 0x87 */
 };
 
-/*
+VL53L1X_OpResult VL53L1X_Init()
+{
+   return VL53L1X_IO_Init();
+}
+
+VL53L1X_OpResult VL53L1X_DeInit()
+{
+   return VL53L1X_IO_DeInit();
+}
+
+VL53L1X_OpResult VL53L1X_Power_Off()
+{
+   return VL53L1X_IO_Power_Off();
+}
+
+VL53L1X_OpResult VL53L1X_Power_On()
+{
+   return VL53L1X_IO_Power_On();
+}
+
 VL53L1X_OpResult VL53L1X_SetI2CAddress(uint8_t new_address)
 {
-   VL53L1X_OpResult status;
-
-   status = VL53L1X_IO_Write_Byte(VL53L1X_I2C_SLAVE__DEVICE_ADDRESS, new_address >> 1);
-   Device->I2cDevAddr = new_address;
-
-
-   return status;
+   return VL53L1X_IO_SetI2CAddress(new_address);
 }
-*/
 
 VL53L1X_OpResult VL53L1X_SensorInit()
 {
    VL53L1X_OpResult status;
-
-   status = VL53L1X_IO_Power_Off();
-   if(status < VL53L1X_OK)
-   {
-      return status;
-   }
-   status = VL53L1X_IO_Power_On();
-   if(status < VL53L1X_OK)
-   {
-      return status;
-   }
 
    uint8_t sensorState = 0;
 

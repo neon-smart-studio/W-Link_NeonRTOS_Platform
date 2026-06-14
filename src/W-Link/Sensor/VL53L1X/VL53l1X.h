@@ -25,10 +25,30 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
+/*
+ * Based on STMicroelectronics VL53L1X driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
 #ifndef VL53l1X_H
 #define VL53l1X_H
 
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "VL53L1X_Def.h"
+
+#include "Sensor_Config.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+VL53L1X_OpResult VL53L1X_Init();
+VL53L1X_OpResult VL53L1X_DeInit();
+VL53L1X_OpResult VL53L1X_Power_Off();
+VL53L1X_OpResult VL53L1X_Power_On();
+VL53L1X_OpResult VL53L1X_SetI2CAddress(uint8_t new_address);
 VL53L1X_OpResult VL53L1X_SensorInit();
 VL53L1X_OpResult VL53L1X_ClearInterrupt();
 VL53L1X_OpResult VL53L1X_SetInterruptPolarity(uint8_t IntPol);
@@ -70,5 +90,9 @@ VL53L1X_OpResult VL53L1X_GetSigmaThreshold(uint16_t *signal);
 VL53L1X_OpResult VL53L1X_StartTemperatureUpdate();
 VL53L1X_OpResult VL53L1X_CalibrateOffset(uint16_t TargetDistInMm, int16_t *offset);
 VL53L1X_OpResult VL53L1X_CalibrateXtalk(uint16_t TargetDistInMm, uint16_t *xtalk);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // VL53l1X_H

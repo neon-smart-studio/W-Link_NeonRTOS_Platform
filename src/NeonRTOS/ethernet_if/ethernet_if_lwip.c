@@ -357,4 +357,3 @@ uint32_t ethernetif_get_tick(void)
 #ifdef __cplusplus
 }
 #endif
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -69,6 +69,7 @@ env.AppendUnique(
     LINKFLAGS=[
         "--specs=nano.specs",
         "--specs=nosys.specs",
+        "-Wl,--wrap=memset",
         "-Wl,--gc-sections",
         "-Wl,-Map,firmware.map",
         "-Wl,--print-memory-usage",

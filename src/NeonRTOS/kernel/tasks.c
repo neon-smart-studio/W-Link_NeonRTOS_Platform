@@ -772,7 +772,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 #if ( configUSE_PASSIVE_IDLE_HOOK == 1 )
     extern void vApplicationPassiveIdleHook( void );
 #endif /* #if ( configUSE_PASSIVE_IDLE_HOOK == 1 ) */
+static void safe_memset_xram(void *dst, uint8_t value, size_t len)
+{
+    volatile uint8_t *p = (volatile uint8_t *)dst;
 
+    while (len--) {
+        *p++ = value;
+    }
+}
 #if ( ( configUSE_TRACE_FACILITY == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) )
 
 /*

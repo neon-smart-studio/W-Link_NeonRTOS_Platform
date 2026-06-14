@@ -112,7 +112,6 @@ void SysCtrl_Init()
     gpio_pin_init_status[hwGPIO_Pin_E9]  = true;   // nWRH
     gpio_pin_init_status[hwGPIO_Pin_E10] = true;   // nWRL
     gpio_pin_init_status[hwGPIO_Pin_E11] = true;   // nCS0
-    
 
     /* 開 EBI Bank0，16-bit SRAM，normal mode，CS active low */
     EBI_Open(

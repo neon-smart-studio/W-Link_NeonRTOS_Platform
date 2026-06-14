@@ -52,7 +52,7 @@
 #include "VL53L4CD_Def.h"
 #include "VL53L4CD_IO.h"
 
-static sw_i2c_address = VL53L4CD_I2C_NEW_I2C_ADDRESS;
+static uint8_t sw_i2c_address = VL53L4CD_I2C_NEW_I2C_ADDRESS;
 
 static VL53L4CD_OpResult VL53L4CD_IO_Map_GPIO_Error(hwGPIO_OpResult error_code)
 {

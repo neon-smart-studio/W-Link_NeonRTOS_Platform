@@ -14,4 +14,11 @@ typedef enum hwQSPI_Index_t
 }hwQSPI_Index;
 #endif // DEVICE_STM32
 
+#ifdef DEVICE_NUVOTON
+typedef enum hwQSPI_Index_t
+{
+  hwQSPI_Index_MAX,
+}hwQSPI_Index;
+#endif // DEVICE_NUVOTON
+
 #endif //QSPI_MASTER_INDEX_H

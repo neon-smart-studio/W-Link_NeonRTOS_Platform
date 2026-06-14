@@ -52,7 +52,7 @@
 #include "VL53L1X_Def.h"
 #include "VL53L1X_IO.h"
 
-static sw_i2c_address = VL53L1X_ACC_I2C_ADDRESS;
+static uint8_t sw_i2c_address = VL53L1X_ACC_I2C_ADDRESS;
 
 static VL53L1X_OpResult VL53L1X_IO_Map_GPIO_Error(hwGPIO_OpResult error_code)
 {

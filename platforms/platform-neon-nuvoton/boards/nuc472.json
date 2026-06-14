@@ -11,6 +11,7 @@
     "extra_flags": [
       "-DNUC472",
       "-D__NUC472__",
+      "-D__STARTUP_CLEAR_BSS",
       "-DARM_MATH_CM4"
     ]
   },

@@ -277,7 +277,7 @@ VL53L4CD_OpResult VL53L4CD_IO_Write_Word(uint16_t RegisterAdress, uint16_t value
   buffer[0] = value >> 8;
   buffer[1] = value & 0x00FF;
 
-  return VL53L4CD_IO_I2C_Read(RegisterAdress, (uint8_t *)buffer, 2);
+  return VL53L4CD_IO_I2C_Write(RegisterAdress, (uint8_t *)buffer, 2);
 }
 
 VL53L4CD_OpResult VL53L4CD_IO_Write_DWord(uint16_t RegisterAdress, uint32_t value)

@@ -9,6 +9,8 @@
 
 #include "NeonRtFs.h"
 
+#define NEONRTFS_HEATSHRINK
+
 #ifdef NEONRTFS_HEATSHRINK
 #include "heatshrink_config_custom.h"
 #include "heatshrink_decoder.h"

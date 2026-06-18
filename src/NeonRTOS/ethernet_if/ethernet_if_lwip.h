@@ -32,7 +32,7 @@ void ethernetif_scheduler_config(scheduler_poll_CB poll_cb);
 #endif
 
 uint32_t ethernetif_get_tick(void);
-void get_hardware_mac(uint8_t *mac);
+void ethernetif_get_hardware_mac(uint8_t mac[6]);
 
 #ifdef __cplusplus
 }

@@ -528,7 +528,7 @@ void NeonTCPIP_IF_Set_NetMask_Address(uint32_t net_mask)
 
 void NeonTCPIP_IF_Get_Mac_Address(uint8_t mac[6])
 {
-  get_hardware_mac(mac);
+  ethernetif_get_hardware_mac(mac);
 }
 
 #if LWIP_DHCP

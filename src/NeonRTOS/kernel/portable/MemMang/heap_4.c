@@ -92,7 +92,7 @@
 * heap - probably so it can be placed in a special segment or address. */
     extern uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 #else
-#ifdef NUVOTON_SRAM
+#ifdef EXT_SRAM
     PRIVILEGED_DATA static uint8_t ucHeap[configTOTAL_HEAP_SIZE] __attribute__((section(".ext_sram"), aligned(8)));
 #else
     PRIVILEGED_DATA static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];

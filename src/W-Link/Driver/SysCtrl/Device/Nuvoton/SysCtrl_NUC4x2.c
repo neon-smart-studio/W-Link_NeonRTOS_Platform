@@ -44,7 +44,7 @@ void SysCtrl_Init()
        AD0~AD15 / A0~Ax / nCS / nOE / nWE
     */
 
-#ifdef NUVOTON_SRAM
+#ifdef EXT_SRAM
     /* Configure EBI multi-function pins */
 
     /* Address lines */

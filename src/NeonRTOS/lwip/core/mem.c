@@ -63,7 +63,7 @@
 #include <string.h>
 
 #if MEM_LIBC_MALLOC
-#include <stdlib.h> /* for malloc()/free() */
+#include "NeonRTOS.h"
 #endif
 
 /* This is overridable for tests only... */
@@ -180,13 +180,13 @@ mem_trim(void *mem, mem_size_t size)
  * allow these defines to be overridden.
  */
 #ifndef mem_clib_free
-#define mem_clib_free free
+#define mem_clib_free mem_Free
 #endif
 #ifndef mem_clib_malloc
-#define mem_clib_malloc malloc
+#define mem_clib_malloc mem_Malloc
 #endif
 #ifndef mem_clib_calloc
-#define mem_clib_calloc calloc
+#define mem_clib_calloc mem_Calloc
 #endif
 
 #if LWIP_STATS && MEM_STATS
@@ -376,7 +376,7 @@ struct mem {
  * how that space is calculated). */
 #ifndef LWIP_RAM_HEAP_POINTER
 /** the heap. we need one struct mem at the end and some room for alignment */
-#ifdef NUVOTON_SRAM
+#ifdef EXT_SRAM
 LWIP_DECLARE_MEMORY_ALIGNED(ram_heap, MEM_SIZE_ALIGNED + (2U * SIZEOF_STRUCT_MEM)) __attribute__((section(".ext_sram"), aligned(8)));
 #else
 LWIP_DECLARE_MEMORY_ALIGNED(ram_heap, MEM_SIZE_ALIGNED + (2U * SIZEOF_STRUCT_MEM));

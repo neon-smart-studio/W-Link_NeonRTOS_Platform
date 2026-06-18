@@ -48,20 +48,20 @@ static const QSPI_Pin_Def QSPI_Pin_Def_Table[hwQSPI_Index_MAX][QSPI_Pinset_MAX] 
 static const QSPI_AF_Map QSPI_Pin_AF_Map[] =
 {
     /* DEFAULT */
-    { hwQSPI_Index_0, hwGPIO_Pin_F6,  GPIO_AF9_QSPI  },
-    { hwQSPI_Index_0, hwGPIO_Pin_F7,  GPIO_AF9_QSPI  },
-    { hwQSPI_Index_0, hwGPIO_Pin_F8,  GPIO_AF10_QSPI },
-    { hwQSPI_Index_0, hwGPIO_Pin_F9,  GPIO_AF10_QSPI },
-    { hwQSPI_Index_0, hwGPIO_Pin_F10, GPIO_AF9_QSPI  },
-    { hwQSPI_Index_0, hwGPIO_Pin_B6,  GPIO_AF10_QSPI },
+    { hwQSPI_Index_0, hwGPIO_Pin_F6,  GPIO_AF9_QUADSPI  },
+    { hwQSPI_Index_0, hwGPIO_Pin_F7,  GPIO_AF9_QUADSPI  },
+    { hwQSPI_Index_0, hwGPIO_Pin_F8,  GPIO_AF10_QUADSPI },
+    { hwQSPI_Index_0, hwGPIO_Pin_F9,  GPIO_AF10_QUADSPI },
+    { hwQSPI_Index_0, hwGPIO_Pin_F10, GPIO_AF9_QUADSPI  },
+    { hwQSPI_Index_0, hwGPIO_Pin_B6,  GPIO_AF10_QUADSPI },
 
     /* ALT */
-    { hwQSPI_Index_0, hwGPIO_Pin_D11, GPIO_AF9_QSPI  },
-    { hwQSPI_Index_0, hwGPIO_Pin_D12, GPIO_AF9_QSPI  },
-    { hwQSPI_Index_0, hwGPIO_Pin_E2,  GPIO_AF9_QSPI  },
-    { hwQSPI_Index_0, hwGPIO_Pin_D13, GPIO_AF9_QSPI  },
-    { hwQSPI_Index_0, hwGPIO_Pin_B2,  GPIO_AF9_QSPI  },
-    { hwQSPI_Index_0, hwGPIO_Pin_G6,  GPIO_AF10_QSPI },
+    { hwQSPI_Index_0, hwGPIO_Pin_D11, GPIO_AF9_QUADSPI  },
+    { hwQSPI_Index_0, hwGPIO_Pin_D12, GPIO_AF9_QUADSPI  },
+    { hwQSPI_Index_0, hwGPIO_Pin_E2,  GPIO_AF9_QUADSPI  },
+    { hwQSPI_Index_0, hwGPIO_Pin_D13, GPIO_AF9_QUADSPI  },
+    { hwQSPI_Index_0, hwGPIO_Pin_B2,  GPIO_AF9_QUADSPI  },
+    { hwQSPI_Index_0, hwGPIO_Pin_G6,  GPIO_AF10_QUADSPI },
 };
 
 #endif

@@ -354,6 +354,11 @@ uint32_t ethernetif_get_tick(void)
   return sys_now();
 }
 
+void ethernetif_get_hardware_mac(uint8_t mac[6])
+{
+  Ethernet_Get_Hardware_Mac(mac);
+}
+
 #ifdef __cplusplus
 }
 #endif

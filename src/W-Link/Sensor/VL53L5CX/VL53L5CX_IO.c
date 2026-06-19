@@ -302,7 +302,7 @@ VL53L5CX_OpResult VL53L5CX_IO_Power_Off()
    return VL53L5CX_OK;
 }
 
-VL53L5CX_OpResult VL53L5CX_IO_SetI2CAddress(uint8_t new_address)
+VL53L5CX_OpResult VL53L5CX_IO_Set_I2C_Address(uint8_t new_address)
 {
   VL53L5CX_OpResult status;
 

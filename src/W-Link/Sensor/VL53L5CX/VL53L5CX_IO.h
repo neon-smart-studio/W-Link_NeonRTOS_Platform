@@ -86,7 +86,7 @@ VL53L5CX_OpResult VL53L5CX_IO_DeInit();
 VL53L5CX_OpResult VL53L5CX_IO_Power_On();
 VL53L5CX_OpResult VL53L5CX_IO_Power_Off();
 VL53L5CX_OpResult VL53L5CX_IO_I2C_Reset();
-VL53L5CX_OpResult VL53L5CX_IO_SetI2CAddress(uint8_t new_address);
+VL53L5CX_OpResult VL53L5CX_IO_Set_I2C_Address(uint8_t new_address);
 VL53L5CX_OpResult VL53L5CX_IO_Write_Byte(uint16_t RegisterAdress, uint8_t value);
 VL53L5CX_OpResult VL53L5CX_IO_Write_Bytes(uint16_t RegisterAdress, uint16_t* wr_dat, uint32_t size);
 VL53L5CX_OpResult VL53L5CX_IO_Read_Byte(uint16_t RegisterAdress, uint8_t *value);

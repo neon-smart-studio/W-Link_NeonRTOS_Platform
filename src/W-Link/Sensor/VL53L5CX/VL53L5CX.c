@@ -387,6 +387,162 @@ const uint8_t VL53L5CX_GET_NVM_CMD[] = {
   0x02, 0x02, 0x00, 0x24
 };
 
+static VL53L5CX_OpResult VL53L5CX_Poll_For_Answer(uint8_t size, uint8_t pos, uint16_t address, uint8_t mask, uint8_t expected_value)
+{
+  VL53L5CX_OpResult status;
+  uint8_t timeout = 0;
+
+  do {
+    status = VL53L5CX_IO_Read_Bytes(address, temp_buffer, size);
+    if(status < VL53L5CX_OK)
+    {
+      return status;
+    }
+
+    NeonRTOS_Sleep(10);
+
+    if (timeout >= (uint8_t)200)
+    { /* 2s timeout */
+      return VL53L5CX_SlaveTimeout;
+    }
+    else if ((size >= (uint8_t)4) && (temp_buffer[2] >= (uint8_t)0x7f))
+    {
+      return VL53L5CX_MCU_Error;
+    }
+    else
+    {
+      timeout++;
+    }
+
+  } while ((temp_buffer[pos] & mask) != expected_value);
+
+  return VL53L5CX_OK;
+}
+
+static VL53L5CX_OpResult VL53L5CX_Send_Offset_Data(uint8_t resolution)
+{
+  uint8_t status;
+  uint32_t signal_grid[64];
+  int16_t range_grid[64];
+  uint8_t dss_4x4[] = {0x0F, 0x04, 0x04, 0x00, 0x08, 0x10, 0x10, 0x07};
+  uint8_t footer[] = {0x00, 0x00, 0x00, 0x0F, 0x03, 0x01, 0x01, 0xE4};
+  int8_t i, j;
+  uint16_t k;
+
+  (void)memcpy(temp_buffer, offset_data, VL53L5CX_OFFSET_BUFFER_SIZE);
+
+  /* Data extrapolation is required for 4X4 offset */
+  if (resolution == (uint8_t)VL53L5CX_RESOLUTION_4X4)
+  {
+    (void)memcpy(&(temp_buffer[0x10]), dss_4x4, sizeof(dss_4x4));
+
+    VL53L5CX_SwapBuffer(temp_buffer, VL53L5CX_OFFSET_BUFFER_SIZE);
+
+    (void)memcpy(signal_grid, &(temp_buffer[0x3C]), sizeof(signal_grid));
+    (void)memcpy(range_grid, &(temp_buffer[0x140]), sizeof(range_grid));
+
+    for (j = 0; j < (int8_t)4; j++)
+    {
+      for (i = 0; i < (int8_t)4 ; i++)
+      {
+        signal_grid[i + (4 * j)] =
+          (signal_grid[(2 * i) + (16 * j) + (int8_t)0]
+           + signal_grid[(2 * i) + (16 * j) + (int8_t)1]
+           + signal_grid[(2 * i) + (16 * j) + (int8_t)8]
+           + signal_grid[(2 * i) + (16 * j) + (int8_t)9])
+          / (uint32_t)4;
+        range_grid[i + (4 * j)] =
+          (range_grid[(2 * i) + (16 * j)]
+           + range_grid[(2 * i) + (16 * j) + 1]
+           + range_grid[(2 * i) + (16 * j) + 8]
+           + range_grid[(2 * i) + (16 * j) + 9])
+          / (int16_t)4;
+      }
+    }
+
+    (void)memset(&range_grid[0x10], 0, (uint16_t)96);
+    (void)memset(&signal_grid[0x10], 0, (uint16_t)192);
+
+    (void)memcpy(&(temp_buffer[0x3C]), signal_grid, sizeof(signal_grid));
+    (void)memcpy(&(temp_buffer[0x140]), range_grid, sizeof(range_grid));
+
+    VL53L5CX_SwapBuffer(temp_buffer, VL53L5CX_OFFSET_BUFFER_SIZE);
+  }
+
+  for (k = 0; k < (VL53L5CX_OFFSET_BUFFER_SIZE - (uint16_t)4); k++) {
+    temp_buffer[k] = temp_buffer[k + (uint16_t)8];
+  }
+
+  (void)memcpy(&(temp_buffer[0x1E0]), footer, 8);
+
+  status = VL53L5CX_IO_Write_Bytes(0x2e18, temp_buffer, VL53L5CX_OFFSET_BUFFER_SIZE);
+  if(status < VL53L5CX_OK)
+  {
+    return status;
+  }
+
+  status = VL53L5CX_Poll_For_Answer(4, 1, VL53L5CX_UI_CMD_STATUS, 0xff, 0x03);
+  if(status < VL53L5CX_OK)
+  {
+    return status;
+  }
+
+  return VL53L5CX_OK;
+}
+
+static VL53L5CX_OpResult VL53L5CX_Send_Xtalk_Data(uint8_t resolution)
+{
+  VL53L5CX_OpResult status;
+  uint8_t res4x4[] = {0x0F, 0x04, 0x04, 0x17, 0x08, 0x10, 0x10, 0x07};
+  uint8_t dss_4x4[] = {0x00, 0x78, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08};
+  uint8_t profile_4x4[] = {0xA0, 0xFC, 0x01, 0x00};
+  uint32_t signal_grid[64];
+  int8_t i, j;
+
+  (void)memcpy(temp_buffer, (uint8_t *)xtalk_data, VL53L5CX_XTALK_BUFFER_SIZE);
+
+  /* Data extrapolation is required for 4X4 Xtalk */
+  if (resolution == (uint8_t)VL53L5CX_RESOLUTION_4X4)
+  {
+    (void)memcpy(&(temp_buffer[0x8]), res4x4, sizeof(res4x4));
+    (void)memcpy(&(temp_buffer[0x020]), dss_4x4, sizeof(dss_4x4));
+
+    VL53L5CX_SwapBuffer(temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE);
+
+    (void)memcpy(signal_grid, &(temp_buffer[0x34]), sizeof(signal_grid));
+
+    for (j = 0; j < (int8_t)4; j++) {
+      for (i = 0; i < (int8_t)4 ; i++) {
+        signal_grid[i + (4 * j)] =
+          (signal_grid[(2 * i) + (16 * j) + 0]
+           + signal_grid[(2 * i) + (16 * j) + 1]
+           + signal_grid[(2 * i) + (16 * j) + 8]
+           + signal_grid[(2 * i) + (16 * j) + 9]) / (uint32_t)4;
+      }
+    }
+    (void)memset(&signal_grid[0x10], 0, (uint32_t)192);
+    (void)memcpy(&(temp_buffer[0x34]), signal_grid, sizeof(signal_grid));
+
+    VL53L5CX_SwapBuffer(temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE);
+
+    (void)memcpy(&(temp_buffer[0x134]), profile_4x4, sizeof(profile_4x4));
+    (void)memset(&(temp_buffer[0x078]), 0, (uint32_t)4 * sizeof(uint8_t));
+  }
+
+  status = VL53L5CX_IO_Write_Bytes(0x2cf8, temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE);
+  if(status < VL53L5CX_OK)
+  {
+    return status;
+  }
+  status = VL53L5CX_Poll_For_Answer(4, 1, VL53L5CX_UI_CMD_STATUS, 0xff, 0x03);
+  if(status < VL53L5CX_OK)
+  {
+    return status;
+  }
+
+  return VL53L5CX_OK;
+}
+
 VL53L5CX_OpResult VL53L5CX_Init()
 {
    return VL53L5CX_IO_Init();
@@ -407,9 +563,9 @@ VL53L5CX_OpResult VL53L5CX_Power_On()
    return VL53L5CX_IO_Power_On();
 }
 
-VL53L5CX_OpResult VL53L5CX_SetI2CAddress(uint8_t new_address)
+VL53L5CX_OpResult VL53L5CX_Set_I2C_Address(uint8_t new_address)
 {
-   return VL53L5CX_IO_SetI2CAddress(new_address);
+   return VL53L5CX_IO_Set_I2C_Address(new_address);
 }
 
 VL53L5CX_OpResult VL53L5CX_SensorInit()
@@ -605,6 +761,8 @@ VL53L5CX_OpResult VL53L5CX_SensorInit()
   if(status < VL53L5CX_OK) { return status; }
 
   /* Set default Xtalk shape. Send Xtalk to sensor */
+  (void)memcpy(xtalk_data, (uint8_t *)VL53L5CX_DEFAULT_XTALK, VL53L5CX_XTALK_BUFFER_SIZE);
+
   status = VL53L5CX_Send_Xtalk_Data(VL53L5CX_RESOLUTION_4X4);
   if(status < VL53L5CX_OK) { return status; }
 
@@ -625,162 +783,6 @@ VL53L5CX_OpResult VL53L5CX_SensorInit()
 
   status = VL53L5CX_DCI_Write_Data((uint8_t *)&single_range, VL53L5CX_DCI_SINGLE_RANGE, (uint16_t)sizeof(single_range));
   if(status < VL53L5CX_OK) { return status; }
-
-  return VL53L5CX_OK;
-}
-
-VL53L5CX_OpResult VL53L5CX_Poll_For_Answer(uint8_t size, uint8_t pos, uint16_t address, uint8_t mask, uint8_t expected_value)
-{
-  VL53L5CX_OpResult status;
-  uint8_t timeout = 0;
-
-  do {
-    status = VL53L5CX_IO_Read_Bytes(address, temp_buffer, size);
-    if(status < VL53L5CX_OK)
-    {
-      return status;
-    }
-
-    NeonRTOS_Sleep(10);
-
-    if (timeout >= (uint8_t)200)
-    { /* 2s timeout */
-      status = temp_buffer[2];
-    }
-    else if ((size >= (uint8_t)4) && (temp_buffer[2] >= (uint8_t)0x7f))
-    {
-      return VL53L5CX_MCU_Error;
-    }
-    else
-    {
-      timeout++;
-    }
-
-  } while ((temp_buffer[pos] & mask) != expected_value);
-
-  return VL53L5CX_OK;
-}
-
-VL53L5CX_OpResult VL53L5CX_Send_Offset_Data(uint8_t resolution)
-{
-  uint8_t status;
-  uint32_t signal_grid[64];
-  int16_t range_grid[64];
-  uint8_t dss_4x4[] = {0x0F, 0x04, 0x04, 0x00, 0x08, 0x10, 0x10, 0x07};
-  uint8_t footer[] = {0x00, 0x00, 0x00, 0x0F, 0x03, 0x01, 0x01, 0xE4};
-  int8_t i, j;
-  uint16_t k;
-
-  (void)memcpy(temp_buffer, offset_data, VL53L5CX_OFFSET_BUFFER_SIZE);
-
-  /* Data extrapolation is required for 4X4 offset */
-  if (resolution == (uint8_t)VL53L5CX_RESOLUTION_4X4)
-  {
-    (void)memcpy(&(temp_buffer[0x10]), dss_4x4, sizeof(dss_4x4));
-
-    VL53L5CX_SwapBuffer(temp_buffer, VL53L5CX_OFFSET_BUFFER_SIZE);
-
-    (void)memcpy(signal_grid, &(temp_buffer[0x3C]), sizeof(signal_grid));
-    (void)memcpy(range_grid, &(temp_buffer[0x140]), sizeof(range_grid));
-
-    for (j = 0; j < (int8_t)4; j++)
-    {
-      for (i = 0; i < (int8_t)4 ; i++)
-      {
-        signal_grid[i + (4 * j)] =
-          (signal_grid[(2 * i) + (16 * j) + (int8_t)0]
-           + signal_grid[(2 * i) + (16 * j) + (int8_t)1]
-           + signal_grid[(2 * i) + (16 * j) + (int8_t)8]
-           + signal_grid[(2 * i) + (16 * j) + (int8_t)9])
-          / (uint32_t)4;
-        range_grid[i + (4 * j)] =
-          (range_grid[(2 * i) + (16 * j)]
-           + range_grid[(2 * i) + (16 * j) + 1]
-           + range_grid[(2 * i) + (16 * j) + 8]
-           + range_grid[(2 * i) + (16 * j) + 9])
-          / (int16_t)4;
-      }
-    }
-
-    (void)memset(&range_grid[0x10], 0, (uint16_t)96);
-    (void)memset(&signal_grid[0x10], 0, (uint16_t)192);
-
-    (void)memcpy(&(temp_buffer[0x3C]), signal_grid, sizeof(signal_grid));
-    (void)memcpy(&(temp_buffer[0x140]), range_grid, sizeof(range_grid));
-
-    VL53L5CX_SwapBuffer(temp_buffer, VL53L5CX_OFFSET_BUFFER_SIZE);
-  }
-
-  for (k = 0; k < (VL53L5CX_OFFSET_BUFFER_SIZE - (uint16_t)4); k++) {
-    temp_buffer[k] = temp_buffer[k + (uint16_t)8];
-  }
-
-  (void)memcpy(&(temp_buffer[0x1E0]), footer, 8);
-
-  status = VL53L5CX_IO_Write_Bytes(0x2e18, temp_buffer, VL53L5CX_OFFSET_BUFFER_SIZE);
-  if(status < VL53L5CX_OK)
-  {
-    return status;
-  }
-
-  status = VL53L5CX_Poll_For_Answer(4, 1, VL53L5CX_UI_CMD_STATUS, 0xff, 0x03);
-  if(status < VL53L5CX_OK)
-  {
-    return status;
-  }
-
-  return VL53L5CX_OK;
-}
-
-VL53L5CX_OpResult VL53L5CX_Send_Xtalk_Data(uint8_t resolution)
-{
-  VL53L5CX_OpResult status;
-  uint8_t res4x4[] = {0x0F, 0x04, 0x04, 0x17, 0x08, 0x10, 0x10, 0x07};
-  uint8_t dss_4x4[] = {0x00, 0x78, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08};
-  uint8_t profile_4x4[] = {0xA0, 0xFC, 0x01, 0x00};
-  uint32_t signal_grid[64];
-  int8_t i, j;
-
-  (void)memcpy(temp_buffer, (uint8_t *)VL53L5CX_DEFAULT_XTALK, VL53L5CX_XTALK_BUFFER_SIZE);
-
-  /* Data extrapolation is required for 4X4 Xtalk */
-  if (resolution == (uint8_t)VL53L5CX_RESOLUTION_4X4)
-  {
-    (void)memcpy(&(temp_buffer[0x8]), res4x4, sizeof(res4x4));
-    (void)memcpy(&(temp_buffer[0x020]), dss_4x4, sizeof(dss_4x4));
-
-    VL53L5CX_SwapBuffer(temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE);
-
-    (void)memcpy(signal_grid, &(temp_buffer[0x34]), sizeof(signal_grid));
-
-    for (j = 0; j < (int8_t)4; j++) {
-      for (i = 0; i < (int8_t)4 ; i++) {
-        signal_grid[i + (4 * j)] =
-          (signal_grid[(2 * i) + (16 * j) + 0]
-           + signal_grid[(2 * i) + (16 * j) + 1]
-           + signal_grid[(2 * i) + (16 * j) + 8]
-           + signal_grid[(2 * i) + (16 * j) + 9]) / (uint32_t)4;
-      }
-    }
-    (void)memset(&signal_grid[0x10], 0, (uint32_t)192);
-    (void)memcpy(&(temp_buffer[0x34]), signal_grid, sizeof(signal_grid));
-
-    VL53L5CX_SwapBuffer(temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE);
-
-    (void)memcpy(&(temp_buffer[0x134]), profile_4x4, sizeof(profile_4x4));
-    (void)memset(&(temp_buffer[0x078]), 0, (uint32_t)4 * sizeof(uint8_t));
-  }
-
-  status = VL53L5CX_IO_Write_Bytes(0x2cf8, temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE);
-  if(status < VL53L5CX_OK)
-  {
-    return status;
-  }
-  status = VL53L5CX_Poll_For_Answer(4, 1, VL53L5CX_UI_CMD_STATUS, 0xff, 0x03);
-  if(status < VL53L5CX_OK)
-  {
-    return status;
-  }
 
   return VL53L5CX_OK;
 }

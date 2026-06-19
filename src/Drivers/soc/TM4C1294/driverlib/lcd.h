@@ -40,6 +40,9 @@
 #ifndef __DRIVERLIB_LCD_H__
 #define __DRIVERLIB_LCD_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+
 //*****************************************************************************
 //
 //! \addtogroup lcd_api

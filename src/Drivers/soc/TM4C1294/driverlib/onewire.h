@@ -40,6 +40,9 @@
 #ifndef __DRIVERLIB_ONEWIRE_H__
 #define __DRIVERLIB_ONEWIRE_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+
 //*****************************************************************************
 //
 //! \addtogroup onewire_api

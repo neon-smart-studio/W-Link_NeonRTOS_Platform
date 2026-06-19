@@ -94,7 +94,7 @@ extern const struct memp_desc* const memp_pools[MEMP_MAX];
  */
 #ifdef EXT_SRAM
 #define LWIP_MEMPOOL_DECLARE(name,num,size,desc) \
-  u8_t memp_memory_ ## name ## _base[LWIP_MEM_ALIGN_BUFFER((num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size)))] \
+  static u8_t memp_memory_ ## name ## _base[LWIP_MEM_ALIGN_BUFFER((num) * (MEMP_SIZE + MEMP_ALIGN_SIZE(size)))] \
     __attribute__((section(".ext_sram"), aligned(8))); \
     \
   LWIP_MEMPOOL_DECLARE_STATS_INSTANCE(memp_stats_ ## name) \

@@ -40,6 +40,9 @@
 #ifndef __DRIVERLIB_DEBUG_H__
 #define __DRIVERLIB_DEBUG_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+
 //*****************************************************************************
 //
 // Prototype for the function that is called when an invalid argument is passed

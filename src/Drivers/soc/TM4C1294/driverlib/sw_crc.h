@@ -40,6 +40,9 @@
 #ifndef __DRIVERLIB_SW_CRC_H__
 #define __DRIVERLIB_SW_CRC_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+
 //*****************************************************************************
 //
 // If building with a C++ compiler, make all of the definitions in this header

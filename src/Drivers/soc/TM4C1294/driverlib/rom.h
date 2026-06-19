@@ -40,6 +40,9 @@
 #ifndef __DRIVERLIB_ROM_H__
 #define __DRIVERLIB_ROM_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #ifndef DEPRECATED
 //*****************************************************************************
 //

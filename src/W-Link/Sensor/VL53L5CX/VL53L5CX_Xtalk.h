@@ -53,8 +53,6 @@
 extern "C" {
 #endif
 
-VL53L5CX_OpResult VL53L5CX_Poll_For_Answer_Xtalk(uint16_t address, uint8_t expected_value);
-VL53L5CX_OpResult VL53L5CX_Program_Output_Config();
 VL53L5CX_OpResult VL53L5CX_Calibrate_Xtalk(uint16_t reflectance_percent, uint8_t nb_samples, uint16_t distance_mm);
 VL53L5CX_OpResult VL53L5CX_Get_Caldata_Xtalk(uint8_t *p_xtalk_data);
 VL53L5CX_OpResult VL53L5CX_Set_Caldata_Xtalk(uint8_t *p_xtalk_data);

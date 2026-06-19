@@ -86,7 +86,7 @@ static const uint8_t VL53L5CX_GET_XTALK_CMD[] = {
 #define VL53L5CX_DCI_CAL_CFG        ((uint16_t)0x5470U)
 #define VL53L5CX_DCI_XTALK_CFG        ((uint16_t)0xAD94U)
 
-VL53L5CX_OpResult VL53L5CX_Poll_For_Answer_Xtalk(uint16_t address, uint8_t expected_value)
+static VL53L5CX_OpResult VL53L5CX_Poll_For_Answer_Xtalk(uint16_t address, uint8_t expected_value)
 {
   VL53L5CX_OpResult status;
   uint8_t timeout = 0;
@@ -116,7 +116,7 @@ VL53L5CX_OpResult VL53L5CX_Poll_For_Answer_Xtalk(uint16_t address, uint8_t expec
  * program the output using the macro defined into the 'platform.h' file.
  */
 
-VL53L5CX_OpResult VL53L5CX_Program_Output_Config()
+static VL53L5CX_OpResult VL53L5CX_Program_Output_Config()
 {
   VL53L5CX_OpResult status;
   uint8_t resolution;

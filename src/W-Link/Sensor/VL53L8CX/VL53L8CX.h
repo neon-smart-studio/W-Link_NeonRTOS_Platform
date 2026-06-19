@@ -9,6 +9,10 @@
   *
   ******************************************************************************
   */
+/*
+ * Based on STMicroelectronics VL53L5CX driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
 #ifndef VL53L8CX_API_H_
 #define VL53L8CX_API_H_

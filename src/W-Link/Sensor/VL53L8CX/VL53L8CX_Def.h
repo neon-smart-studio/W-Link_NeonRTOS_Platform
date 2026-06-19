@@ -58,7 +58,8 @@ typedef enum VL53L8CX_OpResult_t
     VL53L8CX_FW_Checksum_Error  = -9,
     VL53L8CX_Laser_Safty        = -10,
     VL53L8CX_Corrupted_Frame    = -11,
-    VL53L8CX_Unsupport          = -12,
+    VL53L8CX_Xtalk_Failed       = -12,
+    VL53L8CX_Unsupport          = -13,
 }VL53L8CX_OpResult;
 
 /*
@@ -102,6 +103,32 @@ typedef enum VL53L8CX_OpResult_t
 //  #define VL53L8CX_DISABLE_REFLECTANCE_PERCENT
 //  #define VL53L8CX_DISABLE_TARGET_STATUS
 //  #define VL53L8CX_DISABLE_MOTION_INDICATOR
+
+/**
+ * @brief Inner Macro for API. Not for user, only for development.
+ */
+
+#define VL53L8CX_DCI_ZONE_CONFIG    ((uint16_t)0x5450U)
+#define VL53L8CX_DCI_FREQ_HZ      ((uint16_t)0x5458U)
+#define VL53L8CX_DCI_INT_TIME     ((uint16_t)0x545CU)
+#define VL53L8CX_DCI_FW_NB_TARGET   ((uint16_t)0x5478)
+#define VL53L8CX_DCI_RANGING_MODE   ((uint16_t)0xAD30U)
+#define VL53L8CX_DCI_DSS_CONFIG     ((uint16_t)0xAD38U)
+#define VL53L8CX_DCI_VHV_CONFIG     ((uint16_t)0xAD60U)
+#define VL53L8CX_DCI_TARGET_ORDER   ((uint16_t)0xAE64U)
+#define VL53L8CX_DCI_SHARPENER      ((uint16_t)0xAED8U)
+#define VL53L8CX_DCI_INTERNAL_CP    ((uint16_t)0xB39CU)
+#define VL53L8CX_DCI_SYNC_PIN     ((uint16_t)0xB5F0U)
+#define VL53L8CX_DCI_MOTION_DETECTOR_CFG ((uint16_t)0xBFACU)
+#define VL53L8CX_DCI_SINGLE_RANGE   ((uint16_t)0xD964U)
+#define VL53L8CX_DCI_OUTPUT_CONFIG    ((uint16_t)0xD968U)
+#define VL53L8CX_DCI_OUTPUT_ENABLES   ((uint16_t)0xD970U)
+#define VL53L8CX_DCI_OUTPUT_LIST    ((uint16_t)0xD980U)
+#define VL53L8CX_DCI_PIPE_CONTROL   ((uint16_t)0xDB80U)
+
+#define VL53L8CX_UI_CMD_STATUS      ((uint16_t)0x2C00U)
+#define VL53L8CX_UI_CMD_START     ((uint16_t)0x2C04U)
+#define VL53L8CX_UI_CMD_END       ((uint16_t)0x2FFFU)
 
 /**
  * @brief Inner values for API. Max buffer size depends of the selected output.

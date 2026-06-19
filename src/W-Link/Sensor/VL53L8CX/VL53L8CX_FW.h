@@ -10,10 +10,14 @@
   *
   ******************************************************************************
   */
+/*
+ * Based on STMicroelectronics VL53L8CX driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
 
-#ifndef VL53L8CX_BUFFERS_H_
-#define VL53L8CX_BUFFERS_H_
+#ifndef VL53L8CX_FW_H
+#define VL53L8CX_FW_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -21533,13 +21537,11 @@ const uint8_t VL53L8CX_FIRMWARE[] = {
   0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00,
-
 };
-
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* VL53L8CX_BUFFERS_H_ */
+#endif // VL53L8CX_FW_H
 

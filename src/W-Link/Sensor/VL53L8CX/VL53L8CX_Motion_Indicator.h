@@ -9,15 +9,20 @@
   *
   ******************************************************************************
   */
+/*
+ * Based on STMicroelectronics VL53L8CX driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
-#ifndef VL53L8CX_PLUGIN_MOTION_INDICATOR_H_
-#define VL53L8CX_PLUGIN_MOTION_INDICATOR_H_
+#ifndef VL53L8CX_MOTION_INDICATOR_H
+#define VL53L8CX_MOTION_INDICATOR_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h>
+#include <stdbool.h>
 
-#include "vl53l8cx_api.h"
+#include "VL53L8CX_Def.h"
+
+#include "Sensor_Config.h"
 
 /**
  * @brief Motion indicator internal configuration structure.
@@ -45,60 +50,16 @@ typedef struct {
   uint8_t  indicator_format_2[32];
 } VL53L8CX_Motion_Configuration;
 
-/**
- * @brief This function is used to initialized the motion indicator. By default,
- * indicator is programmed to monitor movements between 400mm and 1500mm.
- * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
- * @param (VL53L8CX_Motion_Configuration) *p_motion_config : Structure
- * containing the initialized motion configuration.
- * @param (uint8_t) resolution : Wanted resolution, defined by macros
- * VL53L8CX_RESOLUTION_4X4 or VL53L8CX_RESOLUTION_8X8.
- * @return (uint8_t) status : 0 if OK, or 127 is the resolution is unknown.
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-uint8_t vl53l8cx_motion_indicator_init(
-  VL53L8CX_Configuration    *p_dev,
-  VL53L8CX_Motion_Configuration *p_motion_config,
-  uint8_t       resolution);
-
-/**
- * @brief This function can be used to change the working distance of motion
- * indicator. By default, indicator is programmed to monitor movements between
- * 400mm and 1500mm.
- * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
- * @param (VL53L8CX_Motion_Configuration) *p_motion_config : Structure
- * containing the initialized motion configuration.
- * @param (uint16_t) distance_min_mm : Minimum distance for indicator (min value
- * 400mm, max 4000mm).
- * @param (uint16_t) distance_max_mm : Maximum distance for indicator (min value
- * 400mm, max 4000mm).
- * VL53L8CX_RESOLUTION_4X4 or VL53L8CX_RESOLUTION_8X8.
- * @return (uint8_t) status : 0 if OK, or 127 if an argument is invalid.
- */
-
-uint8_t vl53l8cx_motion_indicator_set_distance_motion(
-  VL53L8CX_Configuration    *p_dev,
-  VL53L8CX_Motion_Configuration *p_motion_config,
-  uint16_t      distance_min_mm,
-  uint16_t      distance_max_mm);
-
-/**
- * @brief This function is used to update the internal motion indicator map.
- * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
- * @param (VL53L8CX_Motion_Configuration) *p_motion_config : Structure
- * containing the initialized motion configuration.
- * @param (uint8_t) resolution : Wanted SCI resolution, defined by macros
- * VL53L8CX_RESOLUTION_4X4 or VL53L8CX_RESOLUTION_8X8.
- * @return (uint8_t) status : 0 if OK, or 127 is the resolution is unknown.
- */
-
-uint8_t vl53l8cx_motion_indicator_set_resolution(
-  VL53L8CX_Configuration    *p_dev,
-  VL53L8CX_Motion_Configuration *p_motion_config,
-  uint8_t       resolution);
+VL53L8CX_OpResult VL53L8CX_Motion_Indicator_Init(VL53L8CX_Motion_Configuration *p_motion_config, uint8_t resolution);
+VL53L8CX_OpResult VL53L8CX_Motion_Indicator_Set_Distance_Motion(VL53L8CX_Motion_Configuration *p_motion_config, uint16_t distance_min_mm, uint16_t distance_max_mm);
+VL53L8CX_OpResult VL53L8CX_Motion_Indicator_Set_Resolution(VL53L8CX_Motion_Configuration *p_motion_config, uint8_t resolution);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* VL53L8CX_PLUGIN_MOTION_INDICATOR_H_ */
+#endif // VL53L8CX_MOTION_INDICATOR_H

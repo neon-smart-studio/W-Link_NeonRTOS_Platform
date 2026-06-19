@@ -9,15 +9,20 @@
   *
   ******************************************************************************
   */
+/*
+ * Based on STMicroelectronics VL53L8CX driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
-#ifndef VL53L8CX_PLUGIN_DETECTION_THRESHOLDS_H_
-#define VL53L8CX_PLUGIN_DETECTION_THRESHOLDS_H_
+#ifndef VL53L8CX_DETECTION_THRESHOLDS_H
+#define VL53L8CX_DETECTION_THRESHOLDS_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h>
+#include <stdbool.h>
 
-#include "vl53l8cx_api.h"
+#include "VL53L8CX_Def.h"
+
+#include "Sensor_Config.h"
 
 /**
  * @brief Macro VL53L8CX_NB_THRESHOLDS indicates the number of checkers. This
@@ -102,94 +107,19 @@ typedef struct {
   uint8_t   mathematic_operation;
 } VL53L8CX_DetectionThresholds;
 
-/**
- * @brief This function allows indicating if the detection thresholds are
- * enabled.
- * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
- * @param (uint8_t) *p_enabled : Set to 1 if enabled, or 0 if disable.
- * @return (uint8_t) status : 0 if OK
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-uint8_t vl53l8cx_get_detection_thresholds_enable(
-  VL53L8CX_Configuration    *p_dev,
-  uint8_t       *p_enabled);
-
-/**
- * @brief This function allows enable the detection thresholds.
- * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
- * @param (uint8_t) enabled : Set to 1 to enable, or 0 to disable thresholds.
- * @return (uint8_t) status : 0 if programming is OK
- */
-
-uint8_t vl53l8cx_set_detection_thresholds_enable(
-  VL53L8CX_Configuration    *p_dev,
-  uint8_t       enabled);
-
-/**
- * @brief This function allows getting the detection thresholds.
- * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
- * @param (VL53L8CX_DetectionThresholds) *p_thresholds : Array of 64 thresholds.
- * @return (uint8_t) status : 0 if programming is OK
- */
-
-uint8_t vl53l8cx_get_detection_thresholds(
-  VL53L8CX_Configuration    *p_dev,
-  VL53L8CX_DetectionThresholds  *p_thresholds);
-
-/**
- * @brief This function allows programming the detection thresholds.
- * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
- * @param (VL53L8CX_DetectionThresholds) *p_thresholds :  Array of 64 thresholds.
- * @return (uint8_t) status : 0 if programming is OK
- */
-
-uint8_t vl53l8cx_set_detection_thresholds(
-  VL53L8CX_Configuration    *p_dev,
-  VL53L8CX_DetectionThresholds  *p_thresholds);
-
-/**
- * @brief This function is used to enable or disable the auto-stop feature.
- * When ToF runs in autonomous mode with detection threshold, the sensor
- * only emits an interrupt (INT pin) when a threshold is reached. Interrupt
- * is raised when the measurement is completed. It is possible to abort the ranging
- * without waiting for end of measurement completed by enabling the auto-stop. The
- * sensor emits an interrupt and quickly aborts the measurements in progress. Please
- * note that vl53l8cx_stop_ranging() function needs to be used after interrupt raised
- * for a clean stop.
- * This function is used to get the auto_stop flag.
- * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
- * @param (uint8_t) *p_auto_stop :  Pointer of auto-stop feature, 0 disabled
- * (default) or 1 enabled.
- * @return (uint8_t) status : 0 if programming is OK
- */
-
-uint8_t vl53l8cx_get_detection_thresholds_auto_stop(
-  VL53L8CX_Configuration    *p_dev,
-  uint8_t       *p_auto_stop);
-
-/**
- * @brief This function is used to enable or disable the auto-stop feature.
- * When ToF runs in autonomous mode with detection threshold, the sensor
- * only emits an interrupt (INT pin) when a threshold is reached. Interrupt
- * is raised when the measurement is completed. It is possible to abort the ranging
- * without waiting for end of measurement completed by enabling the auto-stop. The
- * sensor emits an interrupt and quickly aborts the measurements in progress. Please
- * note that vl53l8cx_stop_ranging() function needs to be used after interrupt raised
- * for a clean stop.
- * This function is used to set the auto_stop flag.
- * @param (VL53L8CX_Configuration) *p_dev : VL53L8CX configuration structure.
- * @param (uint8_t) *p_auto_stop :  Pointer of auto-stop feature, 0 disabled
- * (default) or 1 enabled.
- * @return (uint8_t) status : 0 if programming is OK
- */
-
-uint8_t vl53l8cx_set_detection_thresholds_auto_stop(
-  VL53L8CX_Configuration    *p_dev,
-  uint8_t       auto_stop);
-
+VL53L8CX_OpResult VL53L8CX_Get_Detection_Thresholds_Enable(uint8_t *p_enabled);
+VL53L8CX_OpResult VL53L8CX_Set_Detection_Thresholds_Enable(uint8_t enabled);
+VL53L8CX_OpResult VL53L8CX_Get_Detection_Thresholds(VL53L8CX_DetectionThresholds *p_thresholds);
+VL53L8CX_OpResult VL53L8CX_Set_Detection_Thresholds(VL53L8CX_DetectionThresholds *p_thresholds);
+VL53L8CX_OpResult VL53L8CX_Get_Detection_Thresholds_Auto_Stop(uint8_t *p_auto_stop);
+VL53L8CX_OpResult VL53L8CX_Set_Detection_Thresholds_Auto_Stop(uint8_t auto_stop);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* VL53L8CX_PLUGIN_DETECTION_THRESHOLDS_H_ */
+#endif // VL53L8CX_DETECTION_THRESHOLDS_H

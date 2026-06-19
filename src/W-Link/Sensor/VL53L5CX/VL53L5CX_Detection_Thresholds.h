@@ -34,6 +34,10 @@
  *
  ******************************************************************************
  */
+/*
+ * Based on STMicroelectronics VL53L5CX driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
 #ifndef VL53L5CX_DETECTION_THRESHOLDS_H
 #define VL53L5CX_DETECTION_THRESHOLDS_H

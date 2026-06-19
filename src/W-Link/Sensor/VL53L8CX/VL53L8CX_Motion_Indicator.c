@@ -9,16 +9,28 @@
   *
   ******************************************************************************
   */
+/*
+ * Based on STMicroelectronics VL53L8CX driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
 #include <math.h>
-#include "vl53l8cx_plugin_motion_indicator.h"
+#include <stdint.h>
+#include <stdbool.h>
 
-uint8_t vl53l8cx_motion_indicator_init(
-  VL53L8CX_Configuration    *p_dev,
-  VL53L8CX_Motion_Configuration *p_motion_config,
-  uint8_t       resolution)
+#include "NeonRTOS.h"
+
+#include "VL53L8CX_Def.h"
+#include "VL53L8CX_Global.h"
+#include "VL53L8CX_Utils.h"
+#include "VL53L8CX_IO.h"
+#include "VL53L8CX.h"
+
+#include "VL53L8CX_Motion_Indicator.h"
+
+VL53L8CX_OpResult VL53L8CX_Motion_Indicator_Init(VL53L8CX_Motion_Configuration *p_motion_config, uint8_t resolution)
 {
-  uint8_t status = VL53L8CX_STATUS_OK;
+  VL53L8CX_OpResult status;
 
   (void)memset(p_motion_config, 0, sizeof(VL53L8CX_Motion_Configuration));
 
@@ -39,77 +51,70 @@ uint8_t vl53l8cx_motion_indicator_init(
   p_motion_config->spare_2 = 0;
   p_motion_config->spare_3 = 0;
 
-  status |= vl53l8cx_motion_indicator_set_resolution(p_dev,
-                                                     p_motion_config, resolution);
-
-  return status;
-}
-
-uint8_t vl53l8cx_motion_indicator_set_distance_motion(
-  VL53L8CX_Configuration    *p_dev,
-  VL53L8CX_Motion_Configuration *p_motion_config,
-  uint16_t      distance_min_mm,
-  uint16_t      distance_max_mm)
-{
-  uint8_t status = VL53L8CX_STATUS_OK;
-  float_t tmp;
-
-  if (((distance_max_mm - distance_min_mm) > (uint16_t)1500)
-      || (distance_min_mm < (uint16_t)400)
-      || (distance_max_mm > (uint16_t)4000)) {
-    status |= VL53L8CX_STATUS_INVALID_PARAM;
-  } else {
-    tmp = (float_t)((((float_t)distance_min_mm / (float_t)37.5348)
-                     - (float_t)4.0) * (float_t)2048.5);
-    p_motion_config->ref_bin_offset = (int32_t)tmp;
-
-    tmp = (float_t)((((((float_t)distance_max_mm -
-                        (float_t)distance_min_mm) / (float_t)10.0) + (float_t)30.02784)
-                     / ((float_t)15.01392)) + (float_t)0.5);
-    p_motion_config->feature_length = (uint8_t)tmp;
-
-    status |= vl53l8cx_dci_write_data(p_dev,
-                                      (uint8_t *)(p_motion_config),
-                                      VL53L8CX_DCI_MOTION_DETECTOR_CFG,
-                                      (uint16_t)sizeof(*p_motion_config));
+  status = VL53L8CX_Motion_Indicator_Set_Resolution(p_motion_config, resolution);
+  if(status < VL53L8CX_OK)
+  {
+    return status;
   }
 
-  return status;
+  return VL53L8CX_OK;
 }
 
-uint8_t vl53l8cx_motion_indicator_set_resolution(
-  VL53L8CX_Configuration    *p_dev,
-  VL53L8CX_Motion_Configuration *p_motion_config,
-  uint8_t       resolution)
+VL53L8CX_OpResult VL53L8CX_Motion_Indicator_Set_Distance_Motion(VL53L8CX_Motion_Configuration *p_motion_config, uint16_t distance_min_mm, uint16_t distance_max_mm)
 {
-  uint8_t i, status = VL53L8CX_STATUS_OK;
+  VL53L8CX_OpResult status;
+  float_t tmp;
+
+  if (((distance_max_mm - distance_min_mm) > (uint16_t)1500) || (distance_min_mm < (uint16_t)400) || (distance_max_mm > (uint16_t)4000))
+  {
+    return VL53L8CX_InvalidParameter;
+  }
+
+  tmp = (float_t)((((float_t)distance_min_mm / (float_t)37.5348) - (float_t)4.0) * (float_t)2048.5);
+  p_motion_config->ref_bin_offset = (int32_t)tmp;
+
+  tmp = (float_t)((((((float_t)distance_max_mm - (float_t)distance_min_mm) / (float_t)10.0) + (float_t)30.02784) / ((float_t)15.01392)) + (float_t)0.5);
+  p_motion_config->feature_length = (uint8_t)tmp;
+
+  status = VL53L8CX_DCI_Write_Data((uint8_t *)(p_motion_config), VL53L8CX_DCI_MOTION_DETECTOR_CFG, (uint16_t)sizeof(*p_motion_config));
+  if(status < VL53L8CX_OK)
+  {
+    return status;
+  }
+
+  return VL53L8CX_OK;
+}
+
+VL53L8CX_OpResult VL53L8CX_Motion_Indicator_Set_Resolution(VL53L8CX_Motion_Configuration *p_motion_config, uint8_t resolution)
+{
+  VL53L8CX_OpResult status;
+  uint8_t i;
 
   switch (resolution) {
     case VL53L8CX_RESOLUTION_4X4:
-      for (i = 0; i < (uint8_t)VL53L8CX_RESOLUTION_4X4; i++) {
+      for (i = 0; i < (uint8_t)VL53L8CX_RESOLUTION_4X4; i++)
+      {
         p_motion_config->map_id[i] = (int8_t)i;
       }
       (void)memset(p_motion_config->map_id + 16, -1, 48);
       break;
 
     case VL53L8CX_RESOLUTION_8X8:
-      for (i = 0; i < (uint8_t)VL53L8CX_RESOLUTION_8X8; i++) {
-        p_motion_config->map_id[i] = (int8_t)((((int8_t)
-                                                i % 8) / 2) + (4 * ((int8_t)i / 16)));
+      for (i = 0; i < (uint8_t)VL53L8CX_RESOLUTION_8X8; i++)
+      {
+        p_motion_config->map_id[i] = (int8_t)((((int8_t) i % 8) / 2) + (4 * ((int8_t)i / 16)));
       }
       break;
 
     default:
-      status |= VL53L8CX_STATUS_ERROR;
-      break;
+      return VL53L8CX_Status_Error;
   }
 
-  if (status == VL53L8CX_STATUS_OK) {
-    status |= vl53l8cx_dci_write_data(p_dev,
-                                      (uint8_t *)(p_motion_config),
-                                      VL53L8CX_DCI_MOTION_DETECTOR_CFG,
-                                      (uint16_t)sizeof(*p_motion_config));
+  status = VL53L8CX_DCI_Write_Data((uint8_t *)(p_motion_config), VL53L8CX_DCI_MOTION_DETECTOR_CFG, (uint16_t)sizeof(*p_motion_config));
+  if(status < VL53L8CX_OK)
+  {
+    return status;
   }
 
-  return status;
+  return VL53L8CX_OK;
 }

@@ -108,7 +108,7 @@ static VL53L8CX_OpResult VL53L8CX_Poll_For_Answer(uint8_t size, uint8_t pos, uin
   uint8_t timeout = 0;
 
   do {
-    status = VL53L8CX_IO_Read_Bytes(address, temp_buffer, size);
+    status = VL53L8CX_IO_Read_Bytes(address, VL53L8CX_Temp_Buffer, size);
     if(status < VL53L8CX_OK)
     {
         return status;
@@ -120,7 +120,7 @@ static VL53L8CX_OpResult VL53L8CX_Poll_For_Answer(uint8_t size, uint8_t pos, uin
     { /* 2s timeout */
       return VL53L8CX_SlaveTimeout;
     }
-    else if ((size >= (uint8_t)4) && (temp_buffer[2] >= (uint8_t)0x7f))
+    else if ((size >= (uint8_t)4) && (VL53L8CX_Temp_Buffer[2] >= (uint8_t)0x7f))
     {
       return VL53L8CX_MCU_Error;
     }
@@ -128,7 +128,7 @@ static VL53L8CX_OpResult VL53L8CX_Poll_For_Answer(uint8_t size, uint8_t pos, uin
     {
       timeout++;
     }
-  } while ((temp_buffer[pos] & mask) != expected_value);
+  } while ((VL53L8CX_Temp_Buffer[pos] & mask) != expected_value);
 
   return VL53L8CX_OK;
 }
@@ -188,17 +188,17 @@ static VL53L8CX_OpResult VL53L8CX_Send_Offset_Data(uint8_t resolution)
   int8_t i, j;
   uint16_t k;
 
-  (void)memcpy(temp_buffer, offset_data, VL53L8CX_OFFSET_BUFFER_SIZE);
+  (void)memcpy(VL53L8CX_Temp_Buffer, VL53L8CX_Offset_Data, VL53L8CX_OFFSET_BUFFER_SIZE);
 
   /* Data extrapolation is required for 4X4 offset */
   if (resolution == (uint8_t)VL53L8CX_RESOLUTION_4X4)
   {
-    (void)memcpy(&(temp_buffer[0x10]), dss_4x4, sizeof(dss_4x4));
+    (void)memcpy(&(VL53L8CX_Temp_Buffer[0x10]), dss_4x4, sizeof(dss_4x4));
 
-    VL53L8CX_SwapBuffer(temp_buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
+    VL53L8CX_SwapBuffer(VL53L8CX_Temp_Buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
 
-    (void)memcpy(signal_grid, &(temp_buffer[0x3C]), sizeof(signal_grid));
-    (void)memcpy(range_grid, &(temp_buffer[0x140]), sizeof(range_grid));
+    (void)memcpy(signal_grid, &(VL53L8CX_Temp_Buffer[0x3C]), sizeof(signal_grid));
+    (void)memcpy(range_grid, &(VL53L8CX_Temp_Buffer[0x140]), sizeof(range_grid));
 
     for (j = 0; j < (int8_t)4; j++)
     {
@@ -222,19 +222,19 @@ static VL53L8CX_OpResult VL53L8CX_Send_Offset_Data(uint8_t resolution)
     (void)memset(&range_grid[0x10], 0, (uint16_t)96);
     (void)memset(&signal_grid[0x10], 0, (uint16_t)192);
 
-    (void)memcpy(&(temp_buffer[0x3C]), signal_grid, sizeof(signal_grid));
-    (void)memcpy(&(temp_buffer[0x140]), range_grid, sizeof(range_grid));
+    (void)memcpy(&(VL53L8CX_Temp_Buffer[0x3C]), signal_grid, sizeof(signal_grid));
+    (void)memcpy(&(VL53L8CX_Temp_Buffer[0x140]), range_grid, sizeof(range_grid));
 
-    VL53L8CX_SwapBuffer(temp_buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
+    VL53L8CX_SwapBuffer(VL53L8CX_Temp_Buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
   }
 
   for (k = 0; k < (VL53L8CX_OFFSET_BUFFER_SIZE - (uint16_t)4); k++) {
-    temp_buffer[k] = temp_buffer[k + (uint16_t)8];
+    VL53L8CX_Temp_Buffer[k] = VL53L8CX_Temp_Buffer[k + (uint16_t)8];
   }
 
-  (void)memcpy(&(temp_buffer[0x1E0]), footer, 8);
+  (void)memcpy(&(VL53L8CX_Temp_Buffer[0x1E0]), footer, 8);
 
-  status = VL53L8CX_IO_Write_Bytes(0x2e18, temp_buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
+  status = VL53L8CX_IO_Write_Bytes(0x2e18, VL53L8CX_Temp_Buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
   if(status < VL53L8CX_OK)
   {
       return status;
@@ -258,17 +258,17 @@ static VL53L8CX_OpResult VL53L8CX_Send_Xtalk_Data(uint8_t resolution)
   uint32_t signal_grid[64];
   int8_t i, j;
 
-  (void)memcpy(temp_buffer, xtalk_data, VL53L8CX_XTALK_BUFFER_SIZE);
+  (void)memcpy(VL53L8CX_Temp_Buffer, VL53L8CX_Xtalk_Data, VL53L8CX_XTALK_BUFFER_SIZE);
 
   /* Data extrapolation is required for 4X4 Xtalk */
   if (resolution == (uint8_t)VL53L8CX_RESOLUTION_4X4)
   {
-    (void)memcpy(&(temp_buffer[0x8]), res4x4, sizeof(res4x4));
-    (void)memcpy(&(temp_buffer[0x020]), dss_4x4, sizeof(dss_4x4));
+    (void)memcpy(&(VL53L8CX_Temp_Buffer[0x8]), res4x4, sizeof(res4x4));
+    (void)memcpy(&(VL53L8CX_Temp_Buffer[0x020]), dss_4x4, sizeof(dss_4x4));
 
-    VL53L8CX_SwapBuffer(temp_buffer, VL53L8CX_XTALK_BUFFER_SIZE);
+    VL53L8CX_SwapBuffer(VL53L8CX_Temp_Buffer, VL53L8CX_XTALK_BUFFER_SIZE);
 
-    (void)memcpy(signal_grid, &(temp_buffer[0x34]), sizeof(signal_grid));
+    (void)memcpy(signal_grid, &(VL53L8CX_Temp_Buffer[0x34]), sizeof(signal_grid));
 
     for (j = 0; j < (int8_t)4; j++)
     {
@@ -283,15 +283,15 @@ static VL53L8CX_OpResult VL53L8CX_Send_Xtalk_Data(uint8_t resolution)
     }
 
     (void)memset(&signal_grid[0x10], 0, (uint32_t)192);
-    (void)memcpy(&(temp_buffer[0x34]), signal_grid, sizeof(signal_grid));
+    (void)memcpy(&(VL53L8CX_Temp_Buffer[0x34]), signal_grid, sizeof(signal_grid));
 
-    VL53L8CX_SwapBuffer(temp_buffer, VL53L8CX_XTALK_BUFFER_SIZE);
+    VL53L8CX_SwapBuffer(VL53L8CX_Temp_Buffer, VL53L8CX_XTALK_BUFFER_SIZE);
 
-    (void)memcpy(&(temp_buffer[0x134]), profile_4x4, sizeof(profile_4x4));
-    (void)memset(&(temp_buffer[0x078]), 0, (uint32_t)4 * sizeof(uint8_t));
+    (void)memcpy(&(VL53L8CX_Temp_Buffer[0x134]), profile_4x4, sizeof(profile_4x4));
+    (void)memset(&(VL53L8CX_Temp_Buffer[0x078]), 0, (uint32_t)4 * sizeof(uint8_t));
   }
 
-  status = VL53L8CX_IO_Write_Bytes(0x2cf8, temp_buffer, VL53L8CX_XTALK_BUFFER_SIZE);
+  status = VL53L8CX_IO_Write_Bytes(0x2cf8, VL53L8CX_Temp_Buffer, VL53L8CX_XTALK_BUFFER_SIZE);
   if(status < VL53L8CX_OK)
   {
       return status;
@@ -510,12 +510,12 @@ VL53L8CX_OpResult VL53L8CX_SensorInit()
   if(status < VL53L8CX_OK) { return status; }
 
   /* Firmware checksum */
-  status = VL53L8CX_IO_Read_Bytes((uint16_t)(0x812FFC & 0xFFFF), temp_buffer, 4);
+  status = VL53L8CX_IO_Read_Bytes((uint16_t)(0x812FFC & 0xFFFF), VL53L8CX_Temp_Buffer, 4);
   if(status < VL53L8CX_OK) { return status; }
 
-  VL53L8CX_SwapBuffer(temp_buffer, 4);
+  VL53L8CX_SwapBuffer(VL53L8CX_Temp_Buffer, 4);
 
-  memcpy((uint8_t *)&crc_checksum, &(temp_buffer[0]), 4);
+  memcpy((uint8_t *)&crc_checksum, &(VL53L8CX_Temp_Buffer[0]), 4);
 
   if (crc_checksum != (uint32_t)0xc0b6c9e)
   {
@@ -527,16 +527,16 @@ VL53L8CX_OpResult VL53L8CX_SensorInit()
   if(status < VL53L8CX_OK) { return status; }
   status = VL53L8CX_Poll_For_Answer(4, 0, VL53L8CX_UI_CMD_STATUS, 0xff, 2);
   if(status < VL53L8CX_OK) { return status; }
-  status = VL53L8CX_IO_Read_Bytes(VL53L8CX_UI_CMD_START, temp_buffer, VL53L8CX_NVM_DATA_SIZE);
+  status = VL53L8CX_IO_Read_Bytes(VL53L8CX_UI_CMD_START, VL53L8CX_Temp_Buffer, VL53L8CX_NVM_DATA_SIZE);
   if(status < VL53L8CX_OK) { return status; }
 
-  (void)memcpy(offset_data, temp_buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
+  (void)memcpy(VL53L8CX_Offset_Data, VL53L8CX_Temp_Buffer, VL53L8CX_OFFSET_BUFFER_SIZE);
 
   status = VL53L8CX_Send_Offset_Data(VL53L8CX_RESOLUTION_4X4);
   if(status < VL53L8CX_OK) { return status; }
 
   /* Set default Xtalk shape. Send Xtalk to sensor */
-  (void)memcpy(xtalk_data, (uint8_t *)VL53L8CX_DEFAULT_XTALK, VL53L8CX_XTALK_BUFFER_SIZE);
+  (void)memcpy(VL53L8CX_Xtalk_Data, (uint8_t *)VL53L8CX_DEFAULT_XTALK, VL53L8CX_XTALK_BUFFER_SIZE);
 
   status = VL53L8CX_Send_Xtalk_Data(VL53L8CX_RESOLUTION_4X4);
   if(status < VL53L8CX_OK) { return status; }
@@ -552,7 +552,7 @@ VL53L8CX_OpResult VL53L8CX_SensorInit()
 
 #if VL53L8CX_NB_TARGET_PER_ZONE != 1
   tmp = VL53L8CX_NB_TARGET_PER_ZONE;
-  status = VL53L8CX_DCI_Replace_Data(temp_buffer, VL53L8CX_DCI_FW_NB_TARGET, 16, (uint8_t *)&tmp, 1, 0x0C);
+  status = VL53L8CX_DCI_Replace_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_FW_NB_TARGET, 16, (uint8_t *)&tmp, 1, 0x0C);
   if(status < VL53L8CX_OK) { return status; }
 #endif
 
@@ -769,8 +769,8 @@ VL53L8CX_OpResult VL53L8CX_Start_Ranging()
     return status;
   }
 
-  data_read_size = 0;
-  streamcount = 255;
+  VL53L8CX_Data_Read_Size = 0;
+  VL53L8CX_Streamcount = 255;
 
   /* Enable mandatory output (meta and common data) */
   uint32_t output_bh_enable[] = {
@@ -843,15 +843,15 @@ VL53L8CX_OpResult VL53L8CX_Start_Ranging()
       {
         bh_ptr->size = (uint16_t)((uint16_t)resolution * (uint16_t)VL53L8CX_NB_TARGET_PER_ZONE);
       }
-      data_read_size += bh_ptr->type * bh_ptr->size;
+      VL53L8CX_Data_Read_Size += bh_ptr->type * bh_ptr->size;
     }
     else
     {
-      data_read_size += bh_ptr->size;
+      VL53L8CX_Data_Read_Size += bh_ptr->size;
     }
-    data_read_size += (uint32_t)4;
+    VL53L8CX_Data_Read_Size += (uint32_t)4;
   }
-  data_read_size += (uint32_t)24;
+  VL53L8CX_Data_Read_Size += (uint32_t)24;
 
   status = VL53L8CX_DCI_Write_Data((uint8_t *) & (output), VL53L8CX_DCI_OUTPUT_LIST, (uint16_t)sizeof(output));
   if(status < VL53L8CX_OK)
@@ -859,7 +859,7 @@ VL53L8CX_OpResult VL53L8CX_Start_Ranging()
     return status;
   }
 
-  header_config[0] = data_read_size;
+  header_config[0] = VL53L8CX_Data_Read_Size;
   header_config[1] = i + (uint32_t)1;
 
   status = VL53L8CX_DCI_Write_Data((uint8_t *) & (header_config), VL53L8CX_DCI_OUTPUT_CONFIG, (uint16_t)sizeof(header_config));
@@ -905,26 +905,26 @@ VL53L8CX_OpResult VL53L8CX_Start_Ranging()
   }
 
   /* Read ui range data content and compare if data size is the correct one */
-  status = VL53L8CX_DCI_Read_Data((uint8_t *)temp_buffer, 0x5440, 12);
+  status = VL53L8CX_DCI_Read_Data((uint8_t *)VL53L8CX_Temp_Buffer, 0x5440, 12);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  (void)memcpy(&tmp, &(temp_buffer[0x8]), sizeof(tmp));
-  if (tmp != data_read_size)
+  (void)memcpy(&tmp, &(VL53L8CX_Temp_Buffer[0x8]), sizeof(tmp));
+  if (tmp != VL53L8CX_Data_Read_Size)
   {
     return VL53L8CX_Status_Error;
   }
 
   /* Ensure that there is no laser safety fault */
-  status = VL53L8CX_DCI_Read_Data((uint8_t *)temp_buffer, 0xE0C4, 8);
+  status = VL53L8CX_DCI_Read_Data((uint8_t *)VL53L8CX_Temp_Buffer, 0xE0C4, 8);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  if ((uint8_t)temp_buffer[0x6] != (uint8_t)0)
+  if ((uint8_t)VL53L8CX_Temp_Buffer[0x6] != (uint8_t)0)
   {
     return VL53L8CX_Laser_Safty;
   }
@@ -945,7 +945,7 @@ VL53L8CX_OpResult VL53L8CX_Stop_Ranging()
     return status;
   }
 
-  if ((auto_stop_flag != (uint32_t)0x4FF) && (is_auto_stop_enabled == (uint8_t)0))
+  if ((auto_stop_flag != (uint32_t)0x4FF) && (VL53L8CX_Is_Auto_Stop_Enabled == (uint8_t)0))
   {
     status = VL53L8CX_IO_Write_Byte(0x7fff, 0x00);
     if(status < VL53L8CX_OK)
@@ -1041,28 +1041,28 @@ VL53L8CX_OpResult VL53L8CX_Check_Data_Ready(uint8_t *p_isReady)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_IO_Read_Bytes(0x0, temp_buffer, 4);
+  status = VL53L8CX_IO_Read_Bytes(0x0, VL53L8CX_Temp_Buffer, 4);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  if ((temp_buffer[0] != streamcount)
-      && (temp_buffer[0] != (uint8_t)255)
-      && (temp_buffer[1] == (uint8_t)0x5)
-      && ((temp_buffer[2] & (uint8_t)0x5) == (uint8_t)0x5)
-      && ((temp_buffer[3] & (uint8_t)0x10) == (uint8_t)0x10)
+  if ((VL53L8CX_Temp_Buffer[0] != VL53L8CX_Streamcount)
+      && (VL53L8CX_Temp_Buffer[0] != (uint8_t)255)
+      && (VL53L8CX_Temp_Buffer[1] == (uint8_t)0x5)
+      && ((VL53L8CX_Temp_Buffer[2] & (uint8_t)0x5) == (uint8_t)0x5)
+      && ((VL53L8CX_Temp_Buffer[3] & (uint8_t)0x10) == (uint8_t)0x10)
      )
   {
     *p_isReady = (uint8_t)1;
-    streamcount = temp_buffer[0];
+    VL53L8CX_Streamcount = VL53L8CX_Temp_Buffer[0];
   }
   else
   {
     /*
-    if ((temp_buffer[3] & (uint8_t)0x80) != (uint8_t)0)
+    if ((VL53L8CX_Temp_Buffer[3] & (uint8_t)0x80) != (uint8_t)0)
     {
-      status = temp_buffer[2];  // Return GO2 error status
+      status = VL53L8CX_Temp_Buffer[2];  // Return GO2 error status
     }
     */
     *p_isReady = 0;
@@ -1078,20 +1078,20 @@ VL53L8CX_OpResult VL53L8CX_Get_Ranging_Data(VL53L8CX_ResultsData *p_results)
   union Block_header *bh_ptr;
   uint32_t i, j, msize;
 
-  status = VL53L8CX_IO_Read_Bytes(0x0, temp_buffer, data_read_size);
+  status = VL53L8CX_IO_Read_Bytes(0x0, VL53L8CX_Temp_Buffer, VL53L8CX_Data_Read_Size);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  streamcount = temp_buffer[0];
+  VL53L8CX_Streamcount = VL53L8CX_Temp_Buffer[0];
 
-  VL53L8CX_SwapBuffer(temp_buffer, (uint16_t)data_read_size);
+  VL53L8CX_SwapBuffer(VL53L8CX_Temp_Buffer, (uint16_t)VL53L8CX_Data_Read_Size);
 
   /* Start conversion at position 16 to avoid headers */
-  for (i = (uint32_t)16; i < (uint32_t)data_read_size; i += (uint32_t)4)
+  for (i = (uint32_t)16; i < (uint32_t)VL53L8CX_Data_Read_Size; i += (uint32_t)4)
   {
-    bh_ptr = (union Block_header *) & (temp_buffer[i]);
+    bh_ptr = (union Block_header *) & (VL53L8CX_Temp_Buffer[i]);
     if ((bh_ptr->type > (uint32_t)0x1) && (bh_ptr->type < (uint32_t)0xd))
     {
       msize = bh_ptr->type * bh_ptr->size;
@@ -1104,52 +1104,52 @@ VL53L8CX_OpResult VL53L8CX_Get_Ranging_Data(VL53L8CX_ResultsData *p_results)
     switch (bh_ptr->idx)
     {
       case VL53L8CX_METADATA_IDX:
-        p_results->silicon_temp_degc = (int8_t)temp_buffer[i + (uint32_t)12];
+        p_results->silicon_temp_degc = (int8_t)VL53L8CX_Temp_Buffer[i + (uint32_t)12];
         break;
 
 #ifndef VL53L8CX_DISABLE_AMBIENT_PER_SPAD
       case VL53L8CX_AMBIENT_RATE_IDX:
-        (void)memcpy(p_results->ambient_per_spad, &(temp_buffer[i + (uint32_t)4]), msize);
+        (void)memcpy(p_results->ambient_per_spad, &(VL53L8CX_Temp_Buffer[i + (uint32_t)4]), msize);
         break;
 #endif
 #ifndef VL53L8CX_DISABLE_NB_SPADS_ENABLED
       case VL53L8CX_SPAD_COUNT_IDX:
-        (void)memcpy(p_results->nb_spads_enabled, &(temp_buffer[i + (uint32_t)4]), msize);
+        (void)memcpy(p_results->nb_spads_enabled, &(VL53L8CX_Temp_Buffer[i + (uint32_t)4]), msize);
         break;
 #endif
 #ifndef VL53L8CX_DISABLE_NB_TARGET_DETECTED
       case VL53L8CX_NB_TARGET_DETECTED_IDX:
-        (void)memcpy(p_results->nb_target_detected, &(temp_buffer[i + (uint32_t)4]), msize);
+        (void)memcpy(p_results->nb_target_detected, &(VL53L8CX_Temp_Buffer[i + (uint32_t)4]), msize);
         break;
 #endif
 #ifndef VL53L8CX_DISABLE_SIGNAL_PER_SPAD
       case VL53L8CX_SIGNAL_RATE_IDX:
-        (void)memcpy(p_results->signal_per_spad, &(temp_buffer[i + (uint32_t)4]), msize);
+        (void)memcpy(p_results->signal_per_spad, &(VL53L8CX_Temp_Buffer[i + (uint32_t)4]), msize);
         break;
 #endif
 #ifndef VL53L8CX_DISABLE_RANGE_SIGMA_MM
       case VL53L8CX_RANGE_SIGMA_MM_IDX:
-        (void)memcpy(p_results->range_sigma_mm, &(temp_buffer[i + (uint32_t)4]), msize);
+        (void)memcpy(p_results->range_sigma_mm, &(VL53L8CX_Temp_Buffer[i + (uint32_t)4]), msize);
         break;
 #endif
 #ifndef VL53L8CX_DISABLE_DISTANCE_MM
       case VL53L8CX_DISTANCE_IDX:
-        (void)memcpy(p_results->distance_mm, &(temp_buffer[i + (uint32_t)4]), msize);
+        (void)memcpy(p_results->distance_mm, &(VL53L8CX_Temp_Buffer[i + (uint32_t)4]), msize);
         break;
 #endif
 #ifndef VL53L8CX_DISABLE_REFLECTANCE_PERCENT
       case VL53L8CX_REFLECTANCE_EST_PC_IDX:
-        (void)memcpy(p_results->reflectance, &(temp_buffer[i + (uint32_t)4]), msize);
+        (void)memcpy(p_results->reflectance, &(VL53L8CX_Temp_Buffer[i + (uint32_t)4]), msize);
         break;
 #endif
 #ifndef VL53L8CX_DISABLE_TARGET_STATUS
       case VL53L8CX_TARGET_STATUS_IDX:
-        (void)memcpy(p_results->target_status, &(temp_buffer[i + (uint32_t)4]), msize);
+        (void)memcpy(p_results->target_status, &(VL53L8CX_Temp_Buffer[i + (uint32_t)4]), msize);
         break;
 #endif
 #ifndef VL53L8CX_DISABLE_MOTION_INDICATOR
       case VL53L8CX_MOTION_DETEC_IDX:
-        (void)memcpy(&p_results->motion_indicator, &(temp_buffer[i + (uint32_t)4]), msize);
+        (void)memcpy(&p_results->motion_indicator, &(VL53L8CX_Temp_Buffer[i + (uint32_t)4]), msize);
         break;
 #endif
       default:
@@ -1211,11 +1211,11 @@ VL53L8CX_OpResult VL53L8CX_Get_Ranging_Data(VL53L8CX_ResultsData *p_results)
 
   /* Check if footer id and header id are matching. This allows to detect
    * corrupted frames */
-  header_id = ((uint16_t)(temp_buffer[0x8]) << 8) & 0xFF00U;
-  header_id |= ((uint16_t)(temp_buffer[0x9])) & 0x00FFU;
+  header_id = ((uint16_t)(VL53L8CX_Temp_Buffer[0x8]) << 8) & 0xFF00U;
+  header_id |= ((uint16_t)(VL53L8CX_Temp_Buffer[0x9])) & 0x00FFU;
 
-  footer_id = ((uint16_t)(temp_buffer[data_read_size - (uint32_t)4]) << 8) & 0xFF00U;
-  footer_id |= ((uint16_t)(temp_buffer[data_read_size - (uint32_t)3])) & 0xFFU;
+  footer_id = ((uint16_t)(VL53L8CX_Temp_Buffer[VL53L8CX_Data_Read_Size - (uint32_t)4]) << 8) & 0xFF00U;
+  footer_id |= ((uint16_t)(VL53L8CX_Temp_Buffer[VL53L8CX_Data_Read_Size - (uint32_t)3])) & 0xFFU;
 
   if (header_id != footer_id)
   {
@@ -1229,8 +1229,8 @@ VL53L8CX_OpResult VL53L8CX_Get_Resolution(uint8_t *p_resolution)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
-  *p_resolution = temp_buffer[0x00] * temp_buffer[0x01];
+  status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
+  *p_resolution = VL53L8CX_Temp_Buffer[0x00] * VL53L8CX_Temp_Buffer[0x01];
 
   return status;
 }
@@ -1241,34 +1241,34 @@ VL53L8CX_OpResult VL53L8CX_Set_Resolution(uint8_t resolution)
 
   switch (resolution) {
     case VL53L8CX_RESOLUTION_4X4:
-      status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_DSS_CONFIG, 16);
+      status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_DSS_CONFIG, 16);
       if(status < VL53L8CX_OK)
       {
         return status;
       }
 
-      temp_buffer[0x04] = 64;
-      temp_buffer[0x06] = 64;
-      temp_buffer[0x09] = 4;
+      VL53L8CX_Temp_Buffer[0x04] = 64;
+      VL53L8CX_Temp_Buffer[0x06] = 64;
+      VL53L8CX_Temp_Buffer[0x09] = 4;
 
-      status = VL53L8CX_DCI_Write_Data(temp_buffer, VL53L8CX_DCI_DSS_CONFIG, 16);
+      status = VL53L8CX_DCI_Write_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_DSS_CONFIG, 16);
       if(status < VL53L8CX_OK)
       {
         return status;
       }
 
-      status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
+      status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
       if(status < VL53L8CX_OK)
       {
         return status;
       }
 
-      temp_buffer[0x00] = 4;
-      temp_buffer[0x01] = 4;
-      temp_buffer[0x04] = 8;
-      temp_buffer[0x05] = 8;
+      VL53L8CX_Temp_Buffer[0x00] = 4;
+      VL53L8CX_Temp_Buffer[0x01] = 4;
+      VL53L8CX_Temp_Buffer[0x04] = 8;
+      VL53L8CX_Temp_Buffer[0x05] = 8;
 
-      status = VL53L8CX_DCI_Write_Data(temp_buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
+      status = VL53L8CX_DCI_Write_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
       if(status < VL53L8CX_OK)
       {
         return status;
@@ -1277,34 +1277,34 @@ VL53L8CX_OpResult VL53L8CX_Set_Resolution(uint8_t resolution)
       break;
 
     case VL53L8CX_RESOLUTION_8X8:
-      status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_DSS_CONFIG, 16);
+      status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_DSS_CONFIG, 16);
       if(status < VL53L8CX_OK)
       {
         return status;
       }
 
-      temp_buffer[0x04] = 16;
-      temp_buffer[0x06] = 16;
-      temp_buffer[0x09] = 1;
+      VL53L8CX_Temp_Buffer[0x04] = 16;
+      VL53L8CX_Temp_Buffer[0x06] = 16;
+      VL53L8CX_Temp_Buffer[0x09] = 1;
 
-      status = VL53L8CX_DCI_Write_Data(temp_buffer, VL53L8CX_DCI_DSS_CONFIG, 16);
+      status = VL53L8CX_DCI_Write_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_DSS_CONFIG, 16);
       if(status < VL53L8CX_OK)
       {
         return status;
       }
 
-      status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
+      status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
       if(status < VL53L8CX_OK)
       {
         return status;
       }
 
-      temp_buffer[0x00] = 8;
-      temp_buffer[0x01] = 8;
-      temp_buffer[0x04] = 4;
-      temp_buffer[0x05] = 4;
+      VL53L8CX_Temp_Buffer[0x00] = 8;
+      VL53L8CX_Temp_Buffer[0x01] = 8;
+      VL53L8CX_Temp_Buffer[0x04] = 4;
+      VL53L8CX_Temp_Buffer[0x05] = 4;
 
-      status = VL53L8CX_DCI_Write_Data(temp_buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
+      status = VL53L8CX_DCI_Write_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_ZONE_CONFIG, 8);
       if(status < VL53L8CX_OK)
       {
         return status;
@@ -1335,13 +1335,13 @@ VL53L8CX_OpResult VL53L8CX_Get_Ranging_Frequency_Hz(uint8_t *p_frequency_hz)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data((uint8_t *)temp_buffer, VL53L8CX_DCI_FREQ_HZ, 4);
+  status = VL53L8CX_DCI_Read_Data((uint8_t *)VL53L8CX_Temp_Buffer, VL53L8CX_DCI_FREQ_HZ, 4);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  *p_frequency_hz = temp_buffer[0x01];
+  *p_frequency_hz = VL53L8CX_Temp_Buffer[0x01];
 
   return VL53L8CX_OK;
 }
@@ -1350,7 +1350,7 @@ VL53L8CX_OpResult VL53L8CX_Set_Ranging_Frequency_Hz(uint8_t frequency_hz)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Replace_Data(temp_buffer, VL53L8CX_DCI_FREQ_HZ, 4, (uint8_t *)&frequency_hz, 1, 0x01);
+  status = VL53L8CX_DCI_Replace_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_FREQ_HZ, 4, (uint8_t *)&frequency_hz, 1, 0x01);
   if(status < VL53L8CX_OK)
   {
     return status;
@@ -1363,13 +1363,13 @@ VL53L8CX_OpResult VL53L8CX_Get_Integration_Time_mS(uint32_t *p_time_ms)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data((uint8_t *)temp_buffer, VL53L8CX_DCI_INT_TIME, 20);
+  status = VL53L8CX_DCI_Read_Data((uint8_t *)VL53L8CX_Temp_Buffer, VL53L8CX_DCI_INT_TIME, 20);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  (void)memcpy(p_time_ms, &(temp_buffer[0x0]), 4);
+  (void)memcpy(p_time_ms, &(VL53L8CX_Temp_Buffer[0x0]), 4);
   *p_time_ms /= (uint32_t)1000;
 
   return VL53L8CX_OK;
@@ -1388,7 +1388,7 @@ VL53L8CX_OpResult VL53L8CX_Set_Integration_Time_mS(uint32_t integration_time_ms)
 
   integration *= (uint32_t)1000;
 
-  status = VL53L8CX_DCI_Replace_Data(temp_buffer, VL53L8CX_DCI_INT_TIME, 20, (uint8_t *)&integration, 4, 0x00);
+  status = VL53L8CX_DCI_Replace_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_INT_TIME, 20, (uint8_t *)&integration, 4, 0x00);
   if(status < VL53L8CX_OK)
   {
     return status;
@@ -1401,13 +1401,13 @@ VL53L8CX_OpResult VL53L8CX_Get_Sharpener_Percent(uint8_t *p_sharpener_percent)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_SHARPENER, 16);
+  status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_SHARPENER, 16);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  *p_sharpener_percent = (temp_buffer[0xD] * (uint8_t)100) / (uint8_t)255;
+  *p_sharpener_percent = (VL53L8CX_Temp_Buffer[0xD] * (uint8_t)100) / (uint8_t)255;
 
   return VL53L8CX_OK;
 }
@@ -1424,7 +1424,7 @@ VL53L8CX_OpResult VL53L8CX_Set_Sharpener_Percent(uint8_t sharpener_percent)
 
   sharpener = (sharpener_percent * (uint8_t)255) / (uint8_t)100;
 
-  status = VL53L8CX_DCI_Replace_Data(temp_buffer, VL53L8CX_DCI_SHARPENER, 16, (uint8_t *)&sharpener, 1, 0xD);
+  status = VL53L8CX_DCI_Replace_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_SHARPENER, 16, (uint8_t *)&sharpener, 1, 0xD);
   if(status < VL53L8CX_OK)
   {
     return status;
@@ -1437,13 +1437,13 @@ VL53L8CX_OpResult VL53L8CX_Get_Target_Order(uint8_t *p_target_order)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data((uint8_t *)temp_buffer, VL53L8CX_DCI_TARGET_ORDER, 4);
+  status = VL53L8CX_DCI_Read_Data((uint8_t *)VL53L8CX_Temp_Buffer, VL53L8CX_DCI_TARGET_ORDER, 4);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  *p_target_order = (uint8_t)temp_buffer[0x0];
+  *p_target_order = (uint8_t)VL53L8CX_Temp_Buffer[0x0];
 
   return VL53L8CX_OK;
 }
@@ -1457,7 +1457,7 @@ VL53L8CX_OpResult VL53L8CX_Set_Target_Order(uint8_t target_order)
     return VL53L8CX_InvalidParameter;
   }
 
-  status = VL53L8CX_DCI_Replace_Data(temp_buffer, VL53L8CX_DCI_TARGET_ORDER, 4, (uint8_t *)&target_order, 1, 0x0);
+  status = VL53L8CX_DCI_Replace_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_TARGET_ORDER, 4, (uint8_t *)&target_order, 1, 0x0);
   if(status < VL53L8CX_OK)
   {
     return status;
@@ -1470,13 +1470,13 @@ VL53L8CX_OpResult VL53L8CX_Get_Ranging_Mode(uint8_t *p_ranging_mode)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_RANGING_MODE, 8);
+  status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_RANGING_MODE, 8);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  if (temp_buffer[0x01] == (uint8_t)0x1) {
+  if (VL53L8CX_Temp_Buffer[0x01] == (uint8_t)0x1) {
     *p_ranging_mode = VL53L8CX_RANGING_MODE_CONTINUOUS;
   } else {
     *p_ranging_mode = VL53L8CX_RANGING_MODE_AUTONOMOUS;
@@ -1490,7 +1490,7 @@ VL53L8CX_OpResult VL53L8CX_Set_Ranging_Mode(uint8_t ranging_mode)
   VL53L8CX_OpResult status;
   uint32_t single_range = 0x00;
 
-  status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_RANGING_MODE, 8);
+  status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_RANGING_MODE, 8);
   if(status < VL53L8CX_OK)
   {
     return status;
@@ -1498,14 +1498,14 @@ VL53L8CX_OpResult VL53L8CX_Set_Ranging_Mode(uint8_t ranging_mode)
 
   switch (ranging_mode) {
     case VL53L8CX_RANGING_MODE_CONTINUOUS:
-      temp_buffer[0x01] = 0x1;
-      temp_buffer[0x03] = 0x3;
+      VL53L8CX_Temp_Buffer[0x01] = 0x1;
+      VL53L8CX_Temp_Buffer[0x03] = 0x3;
       single_range = 0x00;
       break;
 
     case VL53L8CX_RANGING_MODE_AUTONOMOUS:
-      temp_buffer[0x01] = 0x3;
-      temp_buffer[0x03] = 0x2;
+      VL53L8CX_Temp_Buffer[0x01] = 0x3;
+      VL53L8CX_Temp_Buffer[0x03] = 0x2;
       single_range = 0x01;
       break;
 
@@ -1513,7 +1513,7 @@ VL53L8CX_OpResult VL53L8CX_Set_Ranging_Mode(uint8_t ranging_mode)
       return VL53L8CX_InvalidParameter;
   }
 
-  status = VL53L8CX_DCI_Write_Data(temp_buffer, VL53L8CX_DCI_RANGING_MODE, (uint16_t)8);
+  status = VL53L8CX_DCI_Write_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_RANGING_MODE, (uint16_t)8);
   if(status < VL53L8CX_OK)
   {
     return status;
@@ -1532,14 +1532,14 @@ VL53L8CX_OpResult VL53L8CX_Get_External_Sync_Pin_Enable(uint8_t *p_is_sync_pin_e
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_SYNC_PIN, 4);
+  status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_SYNC_PIN, 4);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
   /* Check bit 1 value (get sync pause bit) */
-  if ((temp_buffer[3] & (uint8_t)0x2) != (uint8_t)0) {
+  if ((VL53L8CX_Temp_Buffer[3] & (uint8_t)0x2) != (uint8_t)0) {
     *p_is_sync_pin_enabled = (uint8_t)1;
   } else {
     *p_is_sync_pin_enabled = (uint8_t)0;
@@ -1553,13 +1553,13 @@ VL53L8CX_OpResult VL53L8CX_Set_External_Sync_Pin_Enable(uint8_t enable_sync_pin)
   VL53L8CX_OpResult status;
   uint32_t tmp;
 
-  status = VL53L8CX_DCI_Read_Data(temp_buffer, VL53L8CX_DCI_SYNC_PIN, 4);
+  status = VL53L8CX_DCI_Read_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_SYNC_PIN, 4);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  tmp = (uint32_t)temp_buffer[3];
+  tmp = (uint32_t)VL53L8CX_Temp_Buffer[3];
 
   /* Update bit 1 with mask (set sync pause bit) */
   if (enable_sync_pin == (uint8_t)0) {
@@ -1569,9 +1569,9 @@ VL53L8CX_OpResult VL53L8CX_Set_External_Sync_Pin_Enable(uint8_t enable_sync_pin)
     tmp |= 1UL << 1;
   }
 
-  temp_buffer[3] = (uint8_t)tmp;
+  VL53L8CX_Temp_Buffer[3] = (uint8_t)tmp;
 
-  status = VL53L8CX_DCI_Write_Data(temp_buffer, VL53L8CX_DCI_SYNC_PIN, 4);
+  status = VL53L8CX_DCI_Write_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_SYNC_PIN, 4);
   if(status < VL53L8CX_OK)
   {
     return status;
@@ -1584,16 +1584,16 @@ VL53L8CX_OpResult VL53L8CX_Get_VHV_Repeat_Count(uint32_t *p_repeat_count)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data((uint8_t *)temp_buffer, VL53L8CX_DCI_VHV_CONFIG, 16);
+  status = VL53L8CX_DCI_Read_Data((uint8_t *)VL53L8CX_Temp_Buffer, VL53L8CX_DCI_VHV_CONFIG, 16);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  *p_repeat_count = ((uint32_t)temp_buffer[7] << 24)
-                    | ((uint32_t)temp_buffer[6]  << 16)
-                    | ((uint32_t)temp_buffer[5]  << 8)
-                    | (uint32_t)temp_buffer[4];
+  *p_repeat_count = ((uint32_t)VL53L8CX_Temp_Buffer[7] << 24)
+                    | ((uint32_t)VL53L8CX_Temp_Buffer[6]  << 16)
+                    | ((uint32_t)VL53L8CX_Temp_Buffer[5]  << 8)
+                    | (uint32_t)VL53L8CX_Temp_Buffer[4];
 
   return VL53L8CX_OK;
 }
@@ -1602,7 +1602,7 @@ VL53L8CX_OpResult VL53L8CX_Set_VHV_Repeat_Count(uint32_t repeat_count)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Replace_Data(temp_buffer, VL53L8CX_DCI_VHV_CONFIG, 16, (uint8_t *)&repeat_count, 4, 0x4);
+  status = VL53L8CX_DCI_Replace_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_VHV_CONFIG, 16, (uint8_t *)&repeat_count, 4, 0x4);
   if(status < VL53L8CX_OK)
   {
     return status;
@@ -1645,17 +1645,17 @@ VL53L8CX_OpResult VL53L8CX_DCI_Read_Data(uint8_t *data, uint32_t index, uint16_t
   }
 
   /* Read new data sent (4 bytes header + data_size + 8 bytes footer) */
-  status = VL53L8CX_IO_Read_Bytes(VL53L8CX_UI_CMD_START, temp_buffer, rd_size);
+  status = VL53L8CX_IO_Read_Bytes(VL53L8CX_UI_CMD_START, VL53L8CX_Temp_Buffer, rd_size);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  VL53L8CX_SwapBuffer(temp_buffer, data_size + (uint16_t)12);
+  VL53L8CX_SwapBuffer(VL53L8CX_Temp_Buffer, data_size + (uint16_t)12);
 
   /* Copy data from FW into input structure (-4 bytes to remove header) */
   for (i = 0 ; i < (int16_t)data_size; i++) {
-    data[i] = temp_buffer[i + 4];
+    data[i] = VL53L8CX_Temp_Buffer[i + 4];
   }
 
   return VL53L8CX_OK;
@@ -1688,15 +1688,15 @@ VL53L8CX_OpResult VL53L8CX_DCI_Write_Data(uint8_t *data, uint32_t index, uint16_
   /* Copy data from structure to FW format (+4 bytes to add header) */
   VL53L8CX_SwapBuffer(data, data_size);
   for (i = (int16_t)data_size - (int16_t)1 ; i >= 0; i--) {
-    temp_buffer[i + 4] = data[i];
+    VL53L8CX_Temp_Buffer[i + 4] = data[i];
   }
 
   /* Add headers and footer */
-  (void)memcpy(&temp_buffer[0], headers, sizeof(headers));
-  (void)memcpy(&temp_buffer[data_size + (uint16_t)4], footer, sizeof(footer));
+  (void)memcpy(&VL53L8CX_Temp_Buffer[0], headers, sizeof(headers));
+  (void)memcpy(&VL53L8CX_Temp_Buffer[data_size + (uint16_t)4], footer, sizeof(footer));
 
   /* Send data to FW */
-  status = VL53L8CX_IO_Write_Bytes(address, temp_buffer, (uint32_t)((uint32_t)data_size + (uint32_t)12));
+  status = VL53L8CX_IO_Write_Bytes(address, VL53L8CX_Temp_Buffer, (uint32_t)((uint32_t)data_size + (uint32_t)12));
   if(status < VL53L8CX_OK)
   {
     return status;

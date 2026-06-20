@@ -26,18 +26,18 @@
 #define VL53L8CX_FW_NBTAR_XTALK VL53L8CX_NB_TARGET_PER_ZONE
 #endif
 
-bool is_auto_stop_enabled = false;
+bool VL53L8CX_Is_Auto_Stop_Enabled = false;
 
-/* Results streamcount, value auto-incremented at each range */
-uint8_t streamcount = 0;
 /* Size of data read though I2C */
-uint32_t data_read_size = 0;
+uint32_t VL53L8CX_Data_Read_Size = 0;
+/* Results streamcount, value auto-incremented at each range */
+uint8_t VL53L8CX_Streamcount = 0;
 
-uint8_t xtalk_data[VL53L8CX_XTALK_BUFFER_SIZE];
+uint8_t VL53L8CX_Xtalk_Data[VL53L8CX_XTALK_BUFFER_SIZE];
 
-uint8_t offset_data[VL53L8CX_OFFSET_BUFFER_SIZE];
+uint8_t VL53L8CX_Offset_Data[VL53L8CX_OFFSET_BUFFER_SIZE];
 
-uint8_t temp_buffer[VL53L8CX_TEMPORARY_BUFFER_SIZE];
+uint8_t VL53L8CX_Temp_Buffer[VL53L8CX_TEMPORARY_BUFFER_SIZE];
 
 /**
  * @brief This buffer contains the VL53L8CX default configuration.

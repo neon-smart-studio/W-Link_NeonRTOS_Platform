@@ -37,12 +37,12 @@
 #define VL53L8CX_OFFSET_BUFFER_SIZE   ((uint16_t)488U)
 #define VL53L8CX_XTALK_BUFFER_SIZE    ((uint16_t)776U)
 
-extern bool is_auto_stop_enabled;
-extern uint32_t data_read_size;
-extern uint8_t streamcount;
-extern uint8_t xtalk_data[VL53L8CX_XTALK_BUFFER_SIZE];
-extern uint8_t offset_data[VL53L8CX_OFFSET_BUFFER_SIZE];
-extern uint8_t temp_buffer[VL53L8CX_TEMPORARY_BUFFER_SIZE];
+extern bool VL53L8CX_Is_Auto_Stop_Enabled;
+extern uint32_t VL53L8CX_Data_Read_Size;
+extern uint8_t VL53L8CX_Streamcount;
+extern uint8_t VL53L8CX_Xtalk_Data[VL53L8CX_XTALK_BUFFER_SIZE];
+extern uint8_t VL53L8CX_Offset_Data[VL53L8CX_OFFSET_BUFFER_SIZE];
+extern uint8_t VL53L8CX_Temp_Buffer[VL53L8CX_TEMPORARY_BUFFER_SIZE];
 extern const uint8_t VL53L8CX_DEFAULT_CONFIGURATION[];
 extern const uint8_t VL53L8CX_DEFAULT_XTALK[];
 extern const uint8_t VL53L8CX_CALIBRATE_XTALK[];

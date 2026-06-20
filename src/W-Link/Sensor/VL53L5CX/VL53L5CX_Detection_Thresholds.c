@@ -57,13 +57,13 @@ VL53L5CX_OpResult VL53L5CX_Get_Detection_Thresholds_Enable(uint8_t *p_enabled)
 {
   VL53L5CX_OpResult status;
 
-  status = VL53L5CX_DCI_Read_Data((uint8_t *)temp_buffer, VL53L5CX_DCI_DET_THRESH_GLOBAL_CONFIG, 8);
+  status = VL53L5CX_DCI_Read_Data((uint8_t *)VL53L5CX_Temp_Buffer, VL53L5CX_DCI_DET_THRESH_GLOBAL_CONFIG, 8);
   if(status < VL53L5CX_OK)
   {
     return status;
   }
 
-  *p_enabled = temp_buffer[0x1];
+  *p_enabled = VL53L5CX_Temp_Buffer[0x1];
 
   return VL53L5CX_OK;
 }
@@ -83,14 +83,14 @@ VL53L5CX_OpResult VL53L5CX_Set_Detection_Thresholds_Enable(uint8_t enabled)
   }
 
   /* Set global interrupt config */
-  status = VL53L5CX_DCI_Replace_Data(temp_buffer, VL53L5CX_DCI_DET_THRESH_GLOBAL_CONFIG, 8, (uint8_t *)&grp_global_config, 4, 0x00);
+  status = VL53L5CX_DCI_Replace_Data(VL53L5CX_Temp_Buffer, VL53L5CX_DCI_DET_THRESH_GLOBAL_CONFIG, 8, (uint8_t *)&grp_global_config, 4, 0x00);
   if(status < VL53L5CX_OK)
   {
     return status;
   }
 
   /* Update interrupt config */
-  status = VL53L5CX_DCI_Replace_Data(temp_buffer, VL53L5CX_DCI_DET_THRESH_CONFIG, 20, (uint8_t *)&tmp, 1, 0x11);
+  status = VL53L5CX_DCI_Replace_Data(VL53L5CX_Temp_Buffer, VL53L5CX_DCI_DET_THRESH_CONFIG, 20, (uint8_t *)&tmp, 1, 0x11);
   if(status < VL53L5CX_OK)
   {
     return status;

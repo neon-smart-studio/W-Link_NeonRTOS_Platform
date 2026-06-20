@@ -92,7 +92,7 @@ static VL53L5CX_OpResult VL53L5CX_Poll_For_Answer_Xtalk(uint16_t address, uint8_
   uint8_t timeout = 0;
 
   do {
-    status = VL53L5CX_IO_Read_Bytes(address, temp_buffer, 4);
+    status = VL53L5CX_IO_Read_Bytes(address, VL53L5CX_Temp_Buffer, 4);
     if(status < VL53L5CX_OK)
     {
       return status;
@@ -101,12 +101,12 @@ static VL53L5CX_OpResult VL53L5CX_Poll_For_Answer_Xtalk(uint16_t address, uint8_
     NeonRTOS_Sleep(10);
 
     /* 2s timeout or FW error*/
-    if ((timeout >= (uint8_t)200) || (temp_buffer[2] >= (uint8_t) 0x7f)) {
+    if ((timeout >= (uint8_t)200) || (VL53L5CX_Temp_Buffer[2] >= (uint8_t) 0x7f)) {
       return VL53L5CX_MCU_Error;
     } else {
       timeout++;
     }
-  } while ((temp_buffer[0x1]) != expected_value);
+  } while ((VL53L5CX_Temp_Buffer[0x1]) != expected_value);
 
   return VL53L5CX_OK;
 }
@@ -130,7 +130,7 @@ static VL53L5CX_OpResult VL53L5CX_Program_Output_Config()
     return status;
   }
 
-  data_read_size = 0;
+  VL53L5CX_Data_Read_Size = 0;
 
   /* Enable mandatory output (meta and common data) */
   uint32_t output_bh_enable[] = {
@@ -176,14 +176,14 @@ static VL53L5CX_OpResult VL53L5CX_Program_Output_Config()
                                  * (uint8_t)VL53L5CX_NB_TARGET_PER_ZONE);
       }
 
-      data_read_size += bh_ptr->type * bh_ptr->size;
+      VL53L5CX_Data_Read_Size += bh_ptr->type * bh_ptr->size;
     } else {
-      data_read_size += bh_ptr->size;
+      VL53L5CX_Data_Read_Size += bh_ptr->size;
     }
 
-    data_read_size += (uint32_t)4;
+    VL53L5CX_Data_Read_Size += (uint32_t)4;
   }
-  data_read_size += (uint32_t)20;
+  VL53L5CX_Data_Read_Size += (uint32_t)20;
 
   status = VL53L5CX_DCI_Write_Data((uint8_t *) & (output), VL53L5CX_DCI_OUTPUT_LIST, (uint16_t)sizeof(output));
   if(status < VL53L5CX_OK)
@@ -193,7 +193,7 @@ static VL53L5CX_OpResult VL53L5CX_Program_Output_Config()
 
   header_config = (uint64_t)i + (uint64_t)1;
   header_config = header_config << 32;
-  header_config += (uint64_t)data_read_size;
+  header_config += (uint64_t)VL53L5CX_Data_Read_Size;
 
   status = VL53L5CX_DCI_Write_Data((uint8_t *) & (header_config), VL53L5CX_DCI_OUTPUT_CONFIG, (uint16_t)sizeof(header_config));
   if(status < VL53L5CX_OK)
@@ -290,19 +290,19 @@ VL53L5CX_OpResult VL53L5CX_Calibrate_Xtalk(uint16_t reflectance_percent, uint8_t
   distance = distance * (uint16_t)4;
 
   /* Update required fields */
-  status = VL53L5CX_DCI_Replace_Data(temp_buffer, VL53L5CX_DCI_CAL_CFG, 8, (uint8_t *)&distance, 2, 0x00);
+  status = VL53L5CX_DCI_Replace_Data(VL53L5CX_Temp_Buffer, VL53L5CX_DCI_CAL_CFG, 8, (uint8_t *)&distance, 2, 0x00);
   if(status < VL53L5CX_OK)
   {
     return status;
   }
 
-  status = VL53L5CX_DCI_Replace_Data(temp_buffer, VL53L5CX_DCI_CAL_CFG, 8, (uint8_t *)&reflectance, 2, 0x02);
+  status = VL53L5CX_DCI_Replace_Data(VL53L5CX_Temp_Buffer, VL53L5CX_DCI_CAL_CFG, 8, (uint8_t *)&reflectance, 2, 0x02);
   if(status < VL53L5CX_OK)
   {
     return status;
   }
 
-  status = VL53L5CX_DCI_Replace_Data(temp_buffer, VL53L5CX_DCI_CAL_CFG, 8, (uint8_t *)&samples, 1, 0x04);
+  status = VL53L5CX_DCI_Replace_Data(VL53L5CX_Temp_Buffer, VL53L5CX_DCI_CAL_CFG, 8, (uint8_t *)&samples, 1, 0x04);
   if(status < VL53L5CX_OK)
   {
     return status;
@@ -329,17 +329,17 @@ VL53L5CX_OpResult VL53L5CX_Calibrate_Xtalk(uint16_t reflectance_percent, uint8_t
 
   /* Wait for end of calibration */
   do {
-    status = VL53L5CX_IO_Read_Bytes(0x0, temp_buffer, 4);
+    status = VL53L5CX_IO_Read_Bytes(0x0, VL53L5CX_Temp_Buffer, 4);
     if(status < VL53L5CX_OK)
     {
       return status;
     }
 
-    if (temp_buffer[0] != VL53L5CX_STATUS_ERROR)
+    if (VL53L5CX_Temp_Buffer[0] != VL53L5CX_STATUS_ERROR)
     {
       /* Coverglass too good for Xtalk calibration */
-      if ((temp_buffer[2] >= (uint8_t)0x7f) && (((uint16_t)(temp_buffer[3] & (uint16_t)0x80) >> 7) == (uint16_t)1)) {
-        (void)memcpy(xtalk_data, VL53L5CX_DEFAULT_XTALK, VL53L5CX_XTALK_BUFFER_SIZE);
+      if ((VL53L5CX_Temp_Buffer[2] >= (uint8_t)0x7f) && (((uint16_t)(VL53L5CX_Temp_Buffer[3] & (uint16_t)0x80) >> 7) == (uint16_t)1)) {
+        (void)memcpy(VL53L5CX_Xtalk_Data, VL53L5CX_DEFAULT_XTALK, VL53L5CX_XTALK_BUFFER_SIZE);
       }
       break;
     }
@@ -368,14 +368,14 @@ VL53L5CX_OpResult VL53L5CX_Calibrate_Xtalk(uint16_t reflectance_percent, uint8_t
     return status;
   }
 
-  status = VL53L5CX_IO_Read_Bytes(VL53L5CX_UI_CMD_START, temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE + (uint16_t)4);
+  status = VL53L5CX_IO_Read_Bytes(VL53L5CX_UI_CMD_START, VL53L5CX_Temp_Buffer, VL53L5CX_XTALK_BUFFER_SIZE + (uint16_t)4);
   if(status < VL53L5CX_OK)
   {
     return status;
   }
 
-  (void)memcpy(&(xtalk_data[0]), &(temp_buffer[8]), VL53L5CX_XTALK_BUFFER_SIZE - (uint16_t)8);
-  (void)memcpy(&(xtalk_data[VL53L5CX_XTALK_BUFFER_SIZE - (uint16_t)8]), footer, sizeof(footer));
+  (void)memcpy(&(VL53L5CX_Xtalk_Data[0]), &(VL53L5CX_Temp_Buffer[8]), VL53L5CX_XTALK_BUFFER_SIZE - (uint16_t)8);
+  (void)memcpy(&(VL53L5CX_Xtalk_Data[VL53L5CX_XTALK_BUFFER_SIZE - (uint16_t)8]), footer, sizeof(footer));
 
   /* Reset default buffer */
   status = VL53L5CX_IO_Write_Bytes(0x2c34, VL53L5CX_DEFAULT_CONFIGURATION, VL53L5CX_CONFIGURATION_SIZE);
@@ -429,7 +429,7 @@ VL53L5CX_OpResult VL53L5CX_Calibrate_Xtalk(uint16_t reflectance_percent, uint8_t
   return status;
 }
 
-VL53L5CX_OpResult VL53L5CX_Get_Caldata_Xtalk(uint8_t *p_xtalk_data)
+VL53L5CX_OpResult VL53L5CX_Get_Caldata_Xtalk(uint8_t *p_VL53L5CX_Xtalk_Data)
 {
   VL53L5CX_OpResult status;
   uint8_t resolution;
@@ -456,14 +456,14 @@ VL53L5CX_OpResult VL53L5CX_Get_Caldata_Xtalk(uint8_t *p_xtalk_data)
   {
     return status;
   }
-  status = VL53L5CX_IO_Read_Bytes(VL53L5CX_UI_CMD_START, temp_buffer, VL53L5CX_XTALK_BUFFER_SIZE + (uint16_t)4);
+  status = VL53L5CX_IO_Read_Bytes(VL53L5CX_UI_CMD_START, VL53L5CX_Temp_Buffer, VL53L5CX_XTALK_BUFFER_SIZE + (uint16_t)4);
   if(status < VL53L5CX_OK)
   {
     return status;
   }
 
-  (void)memcpy(&(p_xtalk_data[0]), &(temp_buffer[8]), VL53L5CX_XTALK_BUFFER_SIZE - (uint16_t)8);
-  (void)memcpy(&(p_xtalk_data[VL53L5CX_XTALK_BUFFER_SIZE - (uint16_t)8]), footer, sizeof(footer));
+  (void)memcpy(&(p_VL53L5CX_Xtalk_Data[0]), &(VL53L5CX_Temp_Buffer[8]), VL53L5CX_XTALK_BUFFER_SIZE - (uint16_t)8);
+  (void)memcpy(&(p_VL53L5CX_Xtalk_Data[VL53L5CX_XTALK_BUFFER_SIZE - (uint16_t)8]), footer, sizeof(footer));
 
   status = VL53L5CX_Set_Resolution(resolution);
   if(status < VL53L5CX_OK)
@@ -474,7 +474,7 @@ VL53L5CX_OpResult VL53L5CX_Get_Caldata_Xtalk(uint8_t *p_xtalk_data)
   return status;
 }
 
-VL53L5CX_OpResult VL53L5CX_Set_Caldata_Xtalk(uint8_t *p_xtalk_data)
+VL53L5CX_OpResult VL53L5CX_Set_Caldata_Xtalk(uint8_t *p_VL53L5CX_Xtalk_Data)
 {
   VL53L5CX_OpResult status;
   uint8_t resolution;
@@ -485,7 +485,7 @@ VL53L5CX_OpResult VL53L5CX_Set_Caldata_Xtalk(uint8_t *p_xtalk_data)
     return status;
   }
 
-  (void)memcpy(xtalk_data, p_xtalk_data, VL53L5CX_XTALK_BUFFER_SIZE);
+  (void)memcpy(VL53L5CX_Xtalk_Data, p_VL53L5CX_Xtalk_Data, VL53L5CX_XTALK_BUFFER_SIZE);
 
   status = VL53L5CX_Set_Resolution(resolution);
   if(status < VL53L5CX_OK)
@@ -500,13 +500,13 @@ VL53L5CX_OpResult VL53L5CX_Get_Xtalk_Margin(uint32_t *p_xtalk_margin)
 {
   VL53L5CX_OpResult status;
 
-  status = VL53L5CX_DCI_Read_Data((uint8_t *)temp_buffer, VL53L5CX_DCI_XTALK_CFG, 16);
+  status = VL53L5CX_DCI_Read_Data((uint8_t *)VL53L5CX_Temp_Buffer, VL53L5CX_DCI_XTALK_CFG, 16);
   if(status < VL53L5CX_OK)
   {
     return status;
   }
 
-  (void)memcpy(p_xtalk_margin, temp_buffer, 4);
+  (void)memcpy(p_xtalk_margin, VL53L5CX_Temp_Buffer, 4);
   *p_xtalk_margin = *p_xtalk_margin / (uint32_t)2048;
 
   return VL53L5CX_OK;
@@ -524,7 +524,7 @@ VL53L5CX_OpResult VL53L5CX_set_xtalk_margin(uint32_t xtalk_margin)
 
   margin_kcps = margin_kcps * (uint32_t)2048;
 
-  status = VL53L5CX_DCI_Replace_Data(temp_buffer, VL53L5CX_DCI_XTALK_CFG, 16, (uint8_t *)&margin_kcps, 4, 0x00);
+  status = VL53L5CX_DCI_Replace_Data(VL53L5CX_Temp_Buffer, VL53L5CX_DCI_XTALK_CFG, 16, (uint8_t *)&margin_kcps, 4, 0x00);
   if(status < VL53L5CX_OK)
   {
     return status;

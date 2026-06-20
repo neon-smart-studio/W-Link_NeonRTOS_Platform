@@ -32,13 +32,13 @@ VL53L8CX_OpResult VL53L8CX_Get_Detection_Thresholds_Enable(uint8_t *p_enabled)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data((uint8_t *)temp_buffer, VL53L8CX_DCI_DET_THRESH_GLOBAL_CONFIG, 8);
+  status = VL53L8CX_DCI_Read_Data((uint8_t *)VL53L8CX_Temp_Buffer, VL53L8CX_DCI_DET_THRESH_GLOBAL_CONFIG, 8);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  *p_enabled = temp_buffer[0x1];
+  *p_enabled = VL53L8CX_Temp_Buffer[0x1];
 
   return VL53L8CX_OK;
 }
@@ -58,14 +58,14 @@ VL53L8CX_OpResult VL53L8CX_Set_Detection_Thresholds_Enable(uint8_t enabled)
   }
 
   /* Set global interrupt config */
-  status = VL53L8CX_DCI_Replace_Data(temp_buffer, VL53L8CX_DCI_DET_THRESH_GLOBAL_CONFIG, 8, (uint8_t *)&grp_global_config, 4, 0x00);
+  status = VL53L8CX_DCI_Replace_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_DET_THRESH_GLOBAL_CONFIG, 8, (uint8_t *)&grp_global_config, 4, 0x00);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
   /* Update interrupt config */
-  status = VL53L8CX_DCI_Replace_Data(temp_buffer, VL53L8CX_DCI_DET_THRESH_CONFIG, 20, (uint8_t *)&tmp, 1, 0x11);
+  status = VL53L8CX_DCI_Replace_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_DET_THRESH_CONFIG, 20, (uint8_t *)&tmp, 1, 0x11);
   if(status < VL53L8CX_OK)
   {
     return status;
@@ -180,13 +180,13 @@ VL53L8CX_OpResult VL53L8CX_Get_Detection_Thresholds_Auto_Stop(uint8_t *p_auto_st
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Read_Data((uint8_t *)temp_buffer, VL53L8CX_DCI_PIPE_CONTROL, 4);
+  status = VL53L8CX_DCI_Read_Data((uint8_t *)VL53L8CX_Temp_Buffer, VL53L8CX_DCI_PIPE_CONTROL, 4);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  *p_auto_stop = temp_buffer[0x3];
+  *p_auto_stop = VL53L8CX_Temp_Buffer[0x3];
 
   return VL53L8CX_OK;
 }
@@ -195,13 +195,13 @@ VL53L8CX_OpResult VL53L8CX_Set_Detection_Thresholds_Auto_Stop(uint8_t auto_stop)
 {
   VL53L8CX_OpResult status;
 
-  status = VL53L8CX_DCI_Replace_Data(temp_buffer, VL53L8CX_DCI_PIPE_CONTROL, 4, (uint8_t *)&auto_stop, 1, 0x03);
+  status = VL53L8CX_DCI_Replace_Data(VL53L8CX_Temp_Buffer, VL53L8CX_DCI_PIPE_CONTROL, 4, (uint8_t *)&auto_stop, 1, 0x03);
   if(status < VL53L8CX_OK)
   {
     return status;
   }
 
-  is_auto_stop_enabled = (uint8_t)auto_stop;
+  VL53L8CX_Is_Auto_Stop_Enabled = (uint8_t)auto_stop;
 
   return VL53L8CX_OK;
 }

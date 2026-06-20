@@ -594,7 +594,7 @@ void UART_NVIC_Init(hwUART_Index index)
             HAL_NVIC_SetPriority(UART10_IRQn, UART_IRQ_NVIC_PRIORITY, UART_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(UART10_IRQn);
             break;
-#elif defined(USART4_BASE)
+#elif defined(USART10_BASE)
         case hwUART_Index_9:
             HAL_NVIC_SetPriority(USART10_IRQn, UART_IRQ_NVIC_PRIORITY, UART_IRQ_NVIC_SUB_PRIORITY);
             HAL_NVIC_EnableIRQ(USART10_IRQn);

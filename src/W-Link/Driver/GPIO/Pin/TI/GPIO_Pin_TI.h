@@ -1,6 +1,6 @@
 
-#ifndef GPIO_PIN_TM4C1294_H
-#define GPIO_PIN_TM4C1294_H
+#ifndef GPIO_PIN_TI_H
+#define GPIO_PIN_TI_H
 
 #include <stdint.h>
 
@@ -206,4 +206,4 @@ uint32_t GPIO_Map_Pin_Int_Mask(uint32_t pinMask);
 hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(uint32_t portBase, uint32_t intMask);
 uint32_t GPIO_Enable_Port_Clock(uint32_t portBase);
 
-#endif //GPIO_PIN_TM4C1294_H
+#endif //GPIO_PIN_TI_H

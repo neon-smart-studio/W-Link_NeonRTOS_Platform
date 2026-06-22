@@ -2,11 +2,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "GPIO_Pin_TM4C1294.h"
+#include "GPIO_Pin_TI.h"
 
 #include "soc.h"
 
-#ifdef DEVICE_TM4C1294
+#ifdef DEVICE_TI
 
 uint32_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin)
 {
@@ -925,4 +925,4 @@ uint32_t GPIO_Enable_Port_Clock(uint32_t portBase)
     }
 }
 
-#endif //DEVICE_TM4C1294
+#endif //DEVICE_TI

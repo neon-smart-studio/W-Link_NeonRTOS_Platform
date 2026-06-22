@@ -14,8 +14,8 @@
 #include "STM32/GPIO_Pin_STM32.h"
 #endif
 
-#ifdef DEVICE_TM4C1294
-#include "TI/GPIO_Pin_TM4C1294.h"
+#ifdef DEVICE_TI
+#include "TI/GPIO_Pin_TI.h"
 #endif
 
 #ifdef DEVICE_RP2

@@ -1,5 +1,5 @@
-#ifndef GPIO_NUVOTON_H
-#define GPIO_NUVOTON_H
+#ifndef GPIO_TI_H
+#define GPIO_TI_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -14,8 +14,4 @@ void GPIO_Int_Handler(hwGPIO_Int_Pin irq_pin);
 void GPIO_NVIC_Init(hwGPIO_Int_Pin irq_pin);
 void GPIO_NVIC_DeInit(hwGPIO_Int_Pin irq_pin);
 
-hwGPIO_OpResult GPIO_Bit_Read(hwGPIO_Pin pin, bool *level);
-hwGPIO_OpResult GPIO_Bit_Write(hwGPIO_Pin pin, bool level);
-hwGPIO_OpResult GPIO_Bit_Toggle(hwGPIO_Pin pin);
-
-#endif //GPIO_NUVOTON_H
+#endif //GPIO_TI_H

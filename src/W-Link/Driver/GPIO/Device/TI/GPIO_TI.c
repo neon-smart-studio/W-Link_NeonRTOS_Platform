@@ -648,4 +648,4 @@ hwGPIO_OpResult GPIO_Interrupt_Pin_Read(hwGPIO_Int_Pin irq_pin, bool* level)
     return hwGPIO_OK;
 }
 
-#endif //TM4C1294
+#endif //DEVICE_TM4C1294

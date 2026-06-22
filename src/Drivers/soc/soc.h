@@ -411,7 +411,7 @@
 #define DEVICE_STM32
 #endif
 
-#ifdef DEVICE_TM4C1294
+#if defined (TM4C1294)
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_emac.h"
@@ -428,6 +428,7 @@
 #include "driverlib/pwm.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/flash.h"
-#endif //DEVICE_TM4C1294
+#define DEVICE_TI
+#endif
 
 #endif //SOC_H

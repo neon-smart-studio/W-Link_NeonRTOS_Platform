@@ -19,14 +19,6 @@
   },
   "version": "3.1.0",
   "frameworks": {
-    "arduino": {
-      "package": "framework-energiativa",
-      "script": "builder/frameworks/energia.py"
-    },
-    "energia": {
-      "package": "framework-energiativa",
-      "script": "builder/frameworks/energia.py"
-    },
     "libopencm3": {
       "package": "framework-libopencm3",
       "script": "builder/frameworks/libopencm3/libopencm3.py"

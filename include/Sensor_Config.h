@@ -4,4 +4,6 @@
 
 #define CONFIG_HTS221_I2C_INDEX hwI2C_Index_1
 
+#define CONFIG_VL53L1X_I2C_INDEX hwI2C_Index_1
+
 #endif //SENSOR_CONFIG_H

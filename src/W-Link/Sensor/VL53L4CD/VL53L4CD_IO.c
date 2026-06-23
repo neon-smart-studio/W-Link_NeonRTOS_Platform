@@ -137,7 +137,7 @@ static VL53L4CD_OpResult VL53L4CD_IO_I2C_Write(uint16_t RegisterAddr, uint8_t* p
     }
 
     status = VL53L4CD_IO_Map_I2C_Error(
-        I2C_Master_Read(
+        I2C_Master_Write(
             VL53L4CD_I2C_INDEX,
             sw_i2c_address >> 1,
             pBuffer,

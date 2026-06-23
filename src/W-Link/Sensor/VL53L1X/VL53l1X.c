@@ -212,7 +212,7 @@ VL53L1X_OpResult VL53L1X_SensorInit()
       }
    }
 
-   tmp  = 0;
+   tmp = 0;
 
    status = VL53L1X_ClearInterrupt();
    if(status < VL53L1X_OK)

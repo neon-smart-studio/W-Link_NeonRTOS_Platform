@@ -116,32 +116,17 @@ static VL53L8CX_OpResult VL53L8CX_IO_I2C_Write(uint16_t RegisterAddr, uint8_t* p
         return VL53L8CX_InvalidParameter;
     }
 
-   uint8_t buffer[2];
+   uint8_t buffer[NumByteToWrite+2];
    buffer[0]=(uint8_t) (RegisterAddr>>8);
    buffer[1]=(uint8_t) (RegisterAddr&0xFF);
+   memcpy(&buffer[2], pBuffer, NumByteToWrite);
 
    status = VL53L8CX_IO_Map_I2C_Error(
         I2C_Master_Write(
             VL53L8CX_I2C_INDEX,
             sw_i2c_address >> 1,
             buffer,
-            2,
-            false,
-            VL53L8CX_I2C_OP_TIMEOUT
-        )
-    );
-
-    if(status < VL53L8CX_OK)
-    {
-        return status;
-    }
-
-    status = VL53L8CX_IO_Map_I2C_Error(
-        I2C_Master_Write(
-            VL53L8CX_I2C_INDEX,
-            sw_i2c_address >> 1,
-            pBuffer,
-            NumByteToWrite,
+            NumByteToWrite+2,
             true,
             VL53L8CX_I2C_OP_TIMEOUT
         )

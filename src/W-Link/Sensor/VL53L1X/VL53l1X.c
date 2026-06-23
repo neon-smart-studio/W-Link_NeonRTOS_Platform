@@ -173,18 +173,32 @@ VL53L1X_OpResult VL53L1X_SetI2CAddress(uint8_t new_address)
 VL53L1X_OpResult VL53L1X_SensorInit()
 {
    VL53L1X_OpResult status;
-
+   uint16_t i;
    uint8_t sensorState = 0;
 
-   do
-   {
+   i = 0;
+   do {
       status = VL53L1X_BootState(&sensorState);
       if(status < VL53L1X_OK)
       {
          return status;
       }
-      NeonRTOS_Sleep(2);
-   }while (!sensorState);
+
+      if (sensorState == (uint8_t)0x3)
+      { /* Sensor booted */
+         break;
+      }
+      else if (i < (uint16_t)1000)
+      {  /* Wait for boot */
+         i++;
+      }
+      else
+      { /* Timeout 1000ms reached */
+         return VL53L1X_SlaveTimeout;
+      }
+
+      NeonRTOS_Sleep(1);
+   } while (1);
 
    uint8_t Addr = 0x00, tmp=0;
 
@@ -202,6 +216,29 @@ VL53L1X_OpResult VL53L1X_SensorInit()
    {
       return status;
    }
+
+  i = 0;
+  do {
+    status = VL53L1X_CheckForDataReady(&tmp);
+    if(status < VL53L1X_OK)
+    {
+        return status;
+    }
+
+    if (tmp == (uint8_t)1)
+    { /* Data ready */
+      break;
+    }
+    else if (i < (uint16_t)1000)
+    {  /* Wait for answer */
+      i++;
+    }
+    else
+    { /* Timeout 1000ms reached */
+      return VL53L1X_SlaveTimeout;
+    }
+    NeonRTOS_Sleep(1);
+  } while (1);
 
    while(tmp==0)
    {

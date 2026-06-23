@@ -50,40 +50,6 @@
 #include "VL53L4CD_IO.h"
 #include "VL53L4CD.h"
 
-#define VL53L4CD_SOFT_RESET     ((uint16_t)0x0000))
-#define VL53L4CD_I2C_SLAVE_DEVICE_ADDRESS      ((uint16_t)0x0001)
-#define VL53L4CD_VHV_CONFIG_TIMEOUT_MACROP_LOOP_BOUND  ((uint16_t)0x0008)
-#define VL53L4CD_XTALK_PLANE_OFFSET_KCPS ((uint16_t)0x0016)
-#define VL53L4CD_XTALK_X_PLANE_GRADIENT_KCPS     ((uint16_t)0x0018)
-#define VL53L4CD_XTALK_Y_PLANE_GRADIENT_KCPS     ((uint16_t)0x001A)
-#define VL53L4CD_RANGE_OFFSET_MM     ((uint16_t)0x001E)
-#define VL53L4CD_INNER_OFFSET_MM     ((uint16_t)0x0020)
-#define VL53L4CD_OUTER_OFFSET_MM     ((uint16_t)0x0022)
-#define VL53L4CD_I2C_FAST_MODE_PLUS     ((uint16_t)0x002D)
-#define VL53L4CD_GPIO_HV_MUX_CTRL      ((uint16_t)0x0030)
-#define VL53L4CD_GPIO_TIO_HV_STATUS    ((uint16_t)0x0031)
-#define VL53L4CD_SYSTEM_INTERRUPT  ((uint16_t)0x0046)
-#define VL53L4CD_RANGE_CONFIG_A     ((uint16_t)0x005E)
-#define VL53L4CD_RANGE_CONFIG_B      ((uint16_t)0x0061)
-#define VL53L4CD_RANGE_CONFIG_SIGMA_THRESH     ((uint16_t)0x0064)
-#define VL53L4CD_MIN_COUNT_RATE_RTN_LIMIT_MCPS    ((uint16_t)0x0066)
-#define VL53L4CD_INTERMEASUREMENT_MS ((uint16_t)0x006C)
-#define VL53L4CD_THRESH_HIGH    ((uint16_t)0x0072)
-#define VL53L4CD_THRESH_LOW     ((uint16_t)0x0074)
-#define VL53L4CD_SYSTEM_INTERRUPT_CLEAR        ((uint16_t)0x0086)
-#define VL53L4CD_SYSTEM_START     ((uint16_t)0x0087)
-#define VL53L4CD_RESULT_RANGE_STATUS   ((uint16_t)0x0089)
-#define VL53L4CD_RESULT_SPAD_NB   ((uint16_t)0x008C)
-#define VL53L4CD_RESULT_SIGNAL_RATE   ((uint16_t)0x008E)
-#define VL53L4CD_RESULT_AMBIENT_RATE   ((uint16_t)0x0090)
-#define VL53L4CD_RESULT_SIGMA   ((uint16_t)0x0092)
-#define VL53L4CD_RESULT_DISTANCE   ((uint16_t)0x0096)
-
-
-#define VL53L4CD_RESULT_OSC_CALIBRATE_VAL      ((uint16_t)0x00DE)
-#define VL53L4CD_FIRMWARE_SYSTEM_STATUS        ((uint16_t)0x00E5)
-#define VL53L4CD_IDENTIFICATION_MODEL_ID       ((uint16_t)0x010F)
-
 static const uint8_t VL53L4CD_DEFAULT_CONFIGURATION[] = {
   0x12, /* 0x2d : set bit 2 and 5 to 1 for fast plus mode (1MHz I2C),
    else don't touch */
@@ -341,7 +307,7 @@ VL53L4CD_OpResult VL53L4CD_StartRanging()
   uint16_t i = 0;
   uint32_t tmp;
 
-  status = VL53L4CD_RdDWord(VL53L4CD_INTERMEASUREMENT_MS, &tmp);
+  status = VL53L4CD_IO_Read_DWord(VL53L4CD_INTERMEASUREMENT_MS, &tmp);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -436,8 +402,7 @@ VL53L4CD_OpResult VL53L4CD_CheckForDataReady(uint8_t *p_is_data_ready)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms,
-  uint32_t inter_measurement_ms)
+VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms, uint32_t inter_measurement_ms)
 {
   VL53L4CD_OpResult status;
   uint16_t clock_pll, osc_frequency, ms_byte;
@@ -538,8 +503,7 @@ VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms,
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint32_t *p_timing_budget_ms,
-  uint32_t *p_inter_measurement_ms)
+VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint32_t *p_timing_budget_ms, uint32_t *p_inter_measurement_ms)
 {
   VL53L4CD_OpResult status;
   uint16_t osc_frequency = 1, range_config_macrop_high, clock_pll = 1;
@@ -547,7 +511,7 @@ VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint32_t *p_timing_budget_ms,
   float clock_pll_factor = (float)1.065;
 
   /* Get InterMeasurement */
-  status = VL53L4CD_RdDWord(VL53L4CD_INTERMEASUREMENT_MS, &tmp);
+  status = VL53L4CD_IO_Read_DWord(VL53L4CD_INTERMEASUREMENT_MS, &tmp);
   if(status < VL53L4CD_OK)
   {
       return status;

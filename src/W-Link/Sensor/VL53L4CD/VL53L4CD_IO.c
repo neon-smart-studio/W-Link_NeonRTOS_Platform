@@ -116,32 +116,17 @@ static VL53L4CD_OpResult VL53L4CD_IO_I2C_Write(uint16_t RegisterAddr, uint8_t* p
         return VL53L4CD_InvalidParameter;
     }
 
-   uint8_t buffer[2];
+   uint8_t buffer[NumByteToWrite+2];
    buffer[0]=(uint8_t) (RegisterAddr>>8);
    buffer[1]=(uint8_t) (RegisterAddr&0xFF);
+   memcpy(&buffer[2], pBuffer, NumByteToWrite);
 
    status = VL53L4CD_IO_Map_I2C_Error(
         I2C_Master_Write(
             VL53L4CD_I2C_INDEX,
             sw_i2c_address >> 1,
             buffer,
-            2,
-            false,
-            VL53L4CD_I2C_OP_TIMEOUT
-        )
-    );
-
-    if(status < VL53L4CD_OK)
-    {
-        return status;
-    }
-
-    status = VL53L4CD_IO_Map_I2C_Error(
-        I2C_Master_Write(
-            VL53L4CD_I2C_INDEX,
-            sw_i2c_address >> 1,
-            pBuffer,
-            NumByteToWrite,
+            NumByteToWrite+2,
             true,
             VL53L4CD_I2C_OP_TIMEOUT
         )
@@ -262,7 +247,7 @@ VL53L4CD_OpResult VL53L4CD_IO_Power_Off()
 VL53L4CD_OpResult VL53L4CD_IO_SetI2CAddress(uint8_t new_address)
 {
   sw_i2c_address = new_address;
-  return VL53L4CD_IO_SetI2CAddress(new_address);
+  return VL53L4CD_IO_Write_Byte(VL53L4CD_I2C_SLAVE_DEVICE_ADDRESS, (uint8_t)(new_address >> (uint8_t)1));
 }
 
 VL53L4CD_OpResult VL53L4CD_IO_Write_Byte(uint16_t RegisterAdress, uint8_t value)

@@ -14,6 +14,7 @@
 
 #include "Sensor/HTS221/HTS221.h"
 #include "Sensor/VL53L1X/VL53L1X.h"
+#include "Sensor/VL53L4CD/VL53L4CD.h"
 
 //#include "NFC/Device/M24SR/M24SR.h"
 //#include "NFC/Devce/ST25R95//RFal_ST25R95.h"
@@ -62,9 +63,14 @@ void vApplicationTickHook(void) {
 #endif
 }
 
-void vSensor_Task(void* p)
+void VL53L1X_Sensor_Task(void* p)
 {
+    uint16_t sensorID;
+
     I2C_Master_Init(hwI2C_Index_1, hwI2C_Standard_Mode);
+
+    VL53L1X_GetSensorId(&sensorID);
+    UART_Printf("sensorID = 0x%4x\n", sensorID);
 
     if(VL53L1X_SensorInit() < VL53L1X_OK)
     {
@@ -75,7 +81,6 @@ void vSensor_Task(void* p)
     VL53L1X_SetDistanceMode(2);
     VL53L1X_SetTimingBudgetInMs(50);
     VL53L1X_SetInterMeasurementInMs(100);
-
     VL53L1X_StartRanging();
 
     while(1)
@@ -95,6 +100,49 @@ void vSensor_Task(void* p)
     }
 }
 
+void VL53L4CD_Sensor_Task(void* p)
+{
+    uint16_t sensorID;
+    
+    I2C_Master_Init(hwI2C_Index_1, hwI2C_Fast_Mode);
+
+    VL53L4CD_Init();
+
+    VL53L4CD_Power_Off();
+
+    NeonRTOS_Sleep(100);
+
+    VL53L4CD_Power_On();
+
+    VL53L4CD_GetSensorId(&sensorID);
+    UART_Printf("sensorID = 0x%4x\n", sensorID);
+
+    if(VL53L4CD_SensorInit() < VL53L4CD_OK)
+    {
+        UART_Printf("VL53L1X init failed\n");
+        return;
+    }
+
+    VL53L4CD_SetRangeTiming(200, 0);
+    VL53L4CD_StartRanging();
+
+    while(1)
+    {
+        uint8_t ready = 0;
+        VL53L4CD_Result_t result;
+
+        if(VL53L4CD_CheckForDataReady(&ready) == VL53L4CD_OK && ready)
+        {
+            VL53L4CD_ClearInterrupt();
+            VL53L4CD_GetResult(&result);
+
+            UART_Printf("distance = %d\n", result.distance_mm);
+        }
+
+        NeonRTOS_Sleep(10);
+    }
+}
+
 int main(void) {
     SysCtrl_Init();
 
@@ -104,14 +152,23 @@ int main(void) {
     //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗
 
     NeonRTOS_TaskCreate(
-        vSensor_Task,
+        VL53L1X_Sensor_Task,
         (const signed char *)"Sensor",
         1024,
         NULL,
         2,
         NULL
     );
-
+/*
+    NeonRTOS_TaskCreate(
+        VL53L4CD_Sensor_Task,
+        (const signed char *)"Sensor",
+        1024,
+        NULL,
+        2,
+        NULL
+    );
+*/
     //NFC_Demo_Init();
 
     Neon_App_Init();

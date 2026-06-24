@@ -49,9 +49,11 @@ typedef enum VL53L0X_OpResult_t
     VL53L0X_IO_Error           = -6,
     VL53L0X_Unsupport          = -7,
 
-    VL53L0X_Range_Error        = -8,
-	VL53L0X_Interrupt_Not_Cleard = -9,
-	VL53L0X_Ref_Spad_Init = -10
+    VL53L0X_Range_Error               = -8,
+	VL53L0X_Interrupt_Not_Cleard      = -9,
+	VL53L0X_Ref_Spad_Init             = -10,
+	VL53L0X_GPIO_Not_Exist            = -11,
+	VL53L0X_GPIO_Function_Not_Support = -12
 } VL53L0X_OpResult;
 
 #define VL53L0X_MAX_STRING_LENGTH 32

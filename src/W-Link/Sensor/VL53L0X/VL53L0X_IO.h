@@ -71,15 +71,15 @@ VL53L0X_OpResult VL53L0X_IO_DeInit();
 VL53L0X_OpResult VL53L0X_IO_Power_On();
 VL53L0X_OpResult VL53L0X_IO_Power_Off();
 VL53L0X_OpResult VL53L0X_IO_SetI2CAddress(uint8_t new_address);
-VL53L0X_OpResult VL53L0X_IO_Write_Multi(uint16_t RegisterAddr, uint8_t *pdata, uint32_t count);
-VL53L0X_OpResult VL53L0X_IO_Read_Multi(uint16_t RegisterAddr, uint8_t *pdata, uint32_t count);
-VL53L0X_OpResult VL53L0X_IO_Write_Byte(uint16_t RegisterAddr, uint8_t data);
-VL53L0X_OpResult VL53L0X_IO_Write_Word(uint16_t RegisterAddr, uint16_t data);
-VL53L0X_OpResult VL53L0X_IO_Write_DWord(uint16_t RegisterAddr, uint32_t data);
-VL53L0X_OpResult VL53L0X_IO_Read_Byte(uint16_t RegisterAddr, uint8_t *data);
-VL53L0X_OpResult VL53L0X_IO_Read_Word(uint16_t RegisterAddr, uint16_t *data);
-VL53L0X_OpResult VL53L0X_IO_Read_DWord(uint16_t RegisterAddr, uint32_t *data);
-VL53L0X_OpResult VL53L0X_IO_UpdateByte(uint16_t RegisterAddr, uint8_t AndData, uint8_t OrData);
+VL53L0X_OpResult VL53L0X_IO_Write_Multi(uint8_t RegisterAddr, uint8_t *pdata, uint32_t count);
+VL53L0X_OpResult VL53L0X_IO_Read_Multi(uint8_t RegisterAddr, uint8_t *pdata, uint32_t count);
+VL53L0X_OpResult VL53L0X_IO_Write_Byte(uint8_t RegisterAddr, uint8_t data);
+VL53L0X_OpResult VL53L0X_IO_Write_Word(uint8_t RegisterAddr, uint16_t data);
+VL53L0X_OpResult VL53L0X_IO_Write_DWord(uint8_t RegisterAddr, uint32_t data);
+VL53L0X_OpResult VL53L0X_IO_Read_Byte(uint8_t RegisterAddr, uint8_t *data);
+VL53L0X_OpResult VL53L0X_IO_Read_Word(uint8_t RegisterAddr, uint16_t *data);
+VL53L0X_OpResult VL53L0X_IO_Read_DWord(uint8_t RegisterAddr, uint32_t *data);
+VL53L0X_OpResult VL53L0X_IO_UpdateByte(uint8_t RegisterAddr, uint8_t AndData, uint8_t OrData);
 
 #ifdef __cplusplus
 }

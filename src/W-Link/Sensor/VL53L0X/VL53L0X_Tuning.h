@@ -25,12 +25,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
-
+/*
+ * Based on STMicroelectronics VL53L0X driver
+ * Modified by Neon Smart Studio for W-Link
+ */
 
 #ifndef _VL53L0X_TUNING_H_
 #define _VL53L0X_TUNING_H_
 
-#include "vl53l0x_def.h"
+#include "VL53L0X_Def.h"
 
 
 #ifdef __cplusplus

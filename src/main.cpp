@@ -13,6 +13,8 @@
 #include "DMA/DMA.h"
 
 #include "Sensor/HTS221/HTS221.h"
+
+#include "Sensor/VL53L0X/VL53L0X.h"
 #include "Sensor/VL53L1X/VL53L1X.h"
 #include "Sensor/VL53L4CD/VL53L4CD.h"
 
@@ -61,6 +63,33 @@ void vApplicationTickHook(void) {
 #ifdef DEVICE_STM32
     HAL_IncTick(); // 增加 HAL 的滴答計數
 #endif
+}
+
+void VL53L0X_Sensor_Task(void* p)
+{
+    uint16_t sensorID;
+
+    I2C_Master_Init(hwI2C_Index_1, hwI2C_Standard_Mode);
+
+    VL53L0X_GetSensorId(&sensorID);
+    UART_Printf("sensorID = 0x%4x\n", sensorID);
+
+    if(VL53L0X_SensorInit() < VL53L1X_OK)
+    {
+        UART_Printf("VL53L1X init failed\n");
+        return;
+    }
+
+    while(1)
+    {
+        uint32_t dist = 0;
+
+        VL53L0X_GetDistance(&dist);
+
+        UART_Printf("distance = %d\n", dist);
+
+        NeonRTOS_Sleep(20);
+    }
 }
 
 void VL53L1X_Sensor_Task(void* p)
@@ -151,6 +180,14 @@ int main(void) {
     //__HAL_RCC_WWDG_CLK_DISABLE();  // 禁用窗口看門狗
     //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗
 
+    NeonRTOS_TaskCreate(
+        VL53L0X_Sensor_Task,
+        (const signed char *)"Sensor",
+        1024,
+        NULL,
+        2,
+        NULL
+    );
     NeonRTOS_TaskCreate(
         VL53L1X_Sensor_Task,
         (const signed char *)"Sensor",

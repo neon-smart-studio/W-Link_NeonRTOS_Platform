@@ -48,30 +48,55 @@ typedef enum VL53L0X_OpResult_t
     VL53L0X_SlaveTimeout       = -5,
     VL53L0X_IO_Error           = -6,
     VL53L0X_Unsupport          = -7,
+
+    VL53L0X_Range_Error        = -8,
+	VL53L0X_Interrupt_Not_Cleard = -9,
+	VL53L0X_Ref_Spad_Init = -10
 } VL53L0X_OpResult;
+
+#define VL53L0X_MAX_STRING_LENGTH 32
+#define VL53L0X_DEFAULT_MAX_LOOP 2000
+
+typedef struct {
+	char Name[VL53L0X_MAX_STRING_LENGTH];
+		/*!< Name of the Device e.g. Left_Distance */
+	char Type[VL53L0X_MAX_STRING_LENGTH];
+		/*!< Type of the Device e.g VL53L0X */
+	char ProductId[VL53L0X_MAX_STRING_LENGTH];
+		/*!< Product Identifier String	*/
+	uint8_t ProductType;
+		/*!< Product Type, VL53L0X = 1, VL53L1 = 2 */
+	uint8_t ProductRevisionMajor;
+		/*!< Product revision major */
+	uint8_t ProductRevisionMinor;
+		/*!< Product revision minor */
+} VL53L0X_DeviceInfo_t;
+
+/* sensor operating modes */
+typedef enum
+{
+   range_single_shot_polling=1,
+   range_continuous_polling,
+   range_continuous_interrupt,
+   range_continuous_polling_low_threshold,
+   range_continuous_polling_high_threshold,
+   range_continuous_polling_out_of_window,
+   range_continuous_interrupt_low_threshold,
+   range_continuous_interrupt_high_threshold,
+   range_continuous_interrupt_out_of_window,
+}OperatingMode;
 
 /** use where fractional values are expected
  *
  * Given a floating point value f it's .16 bit point is (int)(f*(1<<16))*/
 typedef uint32_t FixPoint1616_t;
 
-
-/** @defgroup VL53L0X_DeviceError_group Device Error
- *  @brief Device Error code
- *
- *  This enum is Device specific it should be updated in the implementation
- *  Use @a VL53L0X_GetStatusErrorString() to get the string.
- *  It is related to Status Register of the Device.
- *  @{
- */
-typedef uint8_t VL53L0X_DeviceError;
-
-/** @defgroup VL53L0X_define_Error_group Error and Warning code returned by API
- *	The following DEFINE are used to identify the PAL ERROR
- *	@{
- */
-
-typedef int8_t VL53L0X_Error;
+#define  VL53L0X_STRING_DEVICE_INFO_NAME          "VL53L0X cut1.0"
+#define  VL53L0X_STRING_DEVICE_INFO_NAME_TS0      "VL53L0X TS0"
+#define  VL53L0X_STRING_DEVICE_INFO_NAME_TS1      "VL53L0X TS1"
+#define  VL53L0X_STRING_DEVICE_INFO_NAME_TS2      "VL53L0X TS2"
+#define  VL53L0X_STRING_DEVICE_INFO_NAME_ES1      "VL53L0X ES1 or later"
+#define  VL53L0X_STRING_DEVICE_INFO_TYPE          "VL53L0X"
 
 #define VL53L0X_ERROR_NONE		((VL53L0X_Error)	0)
 #define VL53L0X_ERROR_CALIBRATION_WARNING	((VL53L0X_Error) -1)
@@ -301,46 +326,6 @@ typedef uint8_t VL53L0X_GpioFunctionality;
 #define VL53L0X_GPIOFUNCTIONALITY_NEW_MEASURE_READY        \
 	((VL53L0X_GpioFunctionality)  4) /*!< New Sample Ready  */
 
-/** @} end of VL53L0X_GpioFunctionality_group */
-
-/** PAL SPECIFICATION major version */
-#define VL53L0X10_SPECIFICATION_VER_MAJOR   1
-/** PAL SPECIFICATION minor version */
-#define VL53L0X10_SPECIFICATION_VER_MINOR   2
-/** PAL SPECIFICATION sub version */
-#define VL53L0X10_SPECIFICATION_VER_SUB	   7
-/** PAL SPECIFICATION sub version */
-#define VL53L0X10_SPECIFICATION_VER_REVISION 1440
-
-/** VL53L0X PAL IMPLEMENTATION major version */
-#define VL53L0X10_IMPLEMENTATION_VER_MAJOR	1
-/** VL53L0X PAL IMPLEMENTATION minor version */
-#define VL53L0X10_IMPLEMENTATION_VER_MINOR	0
-/** VL53L0X PAL IMPLEMENTATION sub version */
-#define VL53L0X10_IMPLEMENTATION_VER_SUB		9
-/** VL53L0X PAL IMPLEMENTATION sub version */
-#define VL53L0X10_IMPLEMENTATION_VER_REVISION	3673
-
-/** PAL SPECIFICATION major version */
-#define VL53L0X_SPECIFICATION_VER_MAJOR	 1
-/** PAL SPECIFICATION minor version */
-#define VL53L0X_SPECIFICATION_VER_MINOR	 2
-/** PAL SPECIFICATION sub version */
-#define VL53L0X_SPECIFICATION_VER_SUB	 7
-/** PAL SPECIFICATION sub version */
-#define VL53L0X_SPECIFICATION_VER_REVISION 1440
-
-/** VL53L0X PAL IMPLEMENTATION major version */
-#define VL53L0X_IMPLEMENTATION_VER_MAJOR	  1
-/** VL53L0X PAL IMPLEMENTATION minor version */
-#define VL53L0X_IMPLEMENTATION_VER_MINOR	  1
-/** VL53L0X PAL IMPLEMENTATION sub version */
-#define VL53L0X_IMPLEMENTATION_VER_SUB	  21
-/** VL53L0X PAL IMPLEMENTATION sub version */
-#define VL53L0X_IMPLEMENTATION_VER_REVISION	  4823
-#define VL53L0X_DEFAULT_MAX_LOOP 2000
-#define VL53L0X_MAX_STRING_LENGTH 32
-
 
 /** @defgroup VL53L0X_define_DeviceModes_group Defines Device modes
  *	Defines all possible modes for the device
@@ -527,8 +512,6 @@ typedef struct {
 	uint8_t BufferSize; /*!< Buffer Size - Set by the user.*/
 	uint8_t NumberOfBins;
 	/*!< Number of bins filled by the histogram measurement */
-
-	VL53L0X_DeviceError ErrorStatus;
 	/*!< Error status of the current measurement. \n
 	see @a ::VL53L0X_DeviceError @a VL53L0X_GetStatusErrorString() */
 } VL53L0X_HistogramMeasurementData_t;
@@ -726,28 +709,6 @@ typedef uint8_t VL53L0X_SequenceStepId;
  *	General Macro Defines
  *	@{
  */
-
-/* Defines */
-#define VL53L0X_SETPARAMETERFIELD(Dev, field, value) \
-	PALDevDataSet(Dev, CurrentParameters.field, value)
-
-#define VL53L0X_GETPARAMETERFIELD(Dev, field, variable) \
-	variable = PALDevDataGet(Dev, CurrentParameters).field
-
-
-#define VL53L0X_SETARRAYPARAMETERFIELD(Dev, field, index, value) \
-	PALDevDataSet(Dev, CurrentParameters.field[index], value)
-
-#define VL53L0X_GETARRAYPARAMETERFIELD(Dev, field, index, variable) \
-	variable = PALDevDataGet(Dev, CurrentParameters).field[index]
-
-
-#define VL53L0X_SETDEVICESPECIFICPARAMETER(Dev, field, value) \
-		PALDevDataSet(Dev, DeviceSpecificParameters.field, value)
-
-#define VL53L0X_GETDEVICESPECIFICPARAMETER(Dev, field) \
-		PALDevDataGet(Dev, DeviceSpecificParameters).field
-
 
 #define VL53L0X_FIXPOINT1616TOFIXPOINT97(Value) \
 	(uint16_t)((Value>>9)&0xFFFF)

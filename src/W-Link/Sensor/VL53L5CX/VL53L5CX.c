@@ -154,6 +154,13 @@ static VL53L5CX_OpResult VL53L5CX_Poll_For_Answer(uint8_t size, uint8_t pos, uin
       timeout++;
     }
 
+      UART_Printf("poll %u: %02X %02X %02X %02X\r\n",
+                  timeout,
+                  VL53L5CX_Temp_Buffer[0],
+                  VL53L5CX_Temp_Buffer[1],
+                  VL53L5CX_Temp_Buffer[2],
+                  VL53L5CX_Temp_Buffer[3]);
+
   } while ((VL53L5CX_Temp_Buffer[pos] & mask) != expected_value);
 
   return VL53L5CX_OK;
@@ -486,7 +493,7 @@ VL53L5CX_OpResult VL53L5CX_SensorInit()
   if(status < VL53L5CX_OK) { return status; }
 
   /* Get offset NVM data and store them into the offset buffer */
-  status = VL53L5CX_IO_Write_Bytes(0x2fd8, (uint8_t *)VL53L5CX_GET_NVM_CMD, sizeof(VL53L5CX_GET_NVM_CMD));
+  status = VL53L5CX_IO_Write_Bytes(0x2fd8, (uint8_t *)VL53L5CX_GET_NVM_CMD, sizeof(VL53L5CX_GET_NVM_CMD)/sizeof(VL53L5CX_GET_NVM_CMD[0]));
   if(status < VL53L5CX_OK) { return status; }
 
   status = VL53L5CX_Poll_For_Answer(4, 0, VL53L5CX_UI_CMD_STATUS, 0xff, 2);
@@ -649,7 +656,7 @@ VL53L5CX_OpResult VL53L5CX_Start_Ranging()
   union Block_header *bh_ptr;
   uint8_t cmd[] = {0x00, 0x03, 0x00, 0x00};
 
-  status = vl53l5cx_get_resolution(&resolution);
+  status = VL53L5CX_Get_Resolution(&resolution);
   if(status < VL53L5CX_OK)
   {
     return status;

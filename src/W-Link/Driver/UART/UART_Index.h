@@ -4,6 +4,12 @@
 
 #include "Driver_Config.h"
 
+#ifndef CONFIG_LOG_UART_INDEX
+#define LOG_UART_INDEX hwUART_Index_0
+#else
+#define LOG_UART_INDEX CONFIG_LOG_UART_INDEX
+#endif
+
 #ifdef DEVICE_NUVOTON
 typedef enum hwUART_Index_t
 {
@@ -28,7 +34,6 @@ typedef enum hwUART_Index_t
   hwUART_Index_MAX,
 }hwUART_Index;
 // 定義標準輸出的 UART 索引
-#define LOG_UART_INDEX hwUART_Index_MAX
 #endif //DEVICE_NUVOTON
 
 #ifdef DEVICE_STM32
@@ -81,10 +86,6 @@ typedef enum hwUART_Index_t
 #endif
   hwUART_Index_MAX,
 }hwUART_Index;
-// 定義標準輸出的 UART 索引
-//#define LOG_UART_INDEX hwUART_Index_0
-//#define LOG_UART_INDEX hwUART_Index_1
-#define LOG_UART_INDEX hwUART_Index_2
 #endif //DEVICE_STM32
 
 #ifdef DEVICE_RP2
@@ -94,7 +95,6 @@ typedef enum hwUART_Index_t
   hwUART_Index_1,
   hwUART_Index_MAX,
 }hwUART_Index;
-#define LOG_UART_INDEX hwUART_Index_0
 #endif // DEVICE_RP2
 
 #ifdef DEVICE_TM4C1294
@@ -111,7 +111,6 @@ typedef enum hwUART_Index_t
   hwUART_Index_MAX,
 }hwUART_Index;
 // 定義標準輸出的 UART 索引
-#define LOG_UART_INDEX hwUART_Index_0
 #endif //DEVICE_TM4C1294
 
 #endif //UART_INDEX_H

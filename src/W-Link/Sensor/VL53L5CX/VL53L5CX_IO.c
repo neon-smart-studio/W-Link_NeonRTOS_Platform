@@ -116,21 +116,28 @@ static VL53L5CX_OpResult VL53L5CX_IO_I2C_Write(uint16_t RegisterAddr, uint8_t* p
         return VL53L5CX_InvalidParameter;
     }
 
-   uint8_t buffer[NumByteToWrite+2];
-   buffer[0]=(uint8_t) (RegisterAddr>>8);
-   buffer[1]=(uint8_t) (RegisterAddr&0xFF);
-   memcpy(&buffer[2], pBuffer, NumByteToWrite);
+   uint8_t* pBuf = mem_Malloc(NumByteToWrite+2);
+   if(pBuf==NULL)
+   {
+        return VL53L5CX_MemoryError;
+   }
+
+   pBuf[0]=(uint8_t) (RegisterAddr>>8);
+   pBuf[1]=(uint8_t) (RegisterAddr&0xFF);
+   memcpy(&pBuf[2], pBuffer, NumByteToWrite);
 
    status = VL53L5CX_IO_Map_I2C_Error(
         I2C_Master_Write(
             VL53L5CX_I2C_INDEX,
             sw_i2c_address >> 1,
-            buffer,
+            pBuf,
             NumByteToWrite+2,
             true,
             VL53L5CX_I2C_OP_TIMEOUT
         )
     );
+
+    mem_Free(pBuf);
 
     if(status < VL53L5CX_OK)
     {

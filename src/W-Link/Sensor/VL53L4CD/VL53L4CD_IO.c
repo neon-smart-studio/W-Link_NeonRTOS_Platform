@@ -246,8 +246,17 @@ VL53L4CD_OpResult VL53L4CD_IO_Power_Off()
 
 VL53L4CD_OpResult VL53L4CD_IO_SetI2CAddress(uint8_t new_address)
 {
-  sw_i2c_address = new_address;
-  return VL53L4CD_IO_Write_Byte(VL53L4CD_I2C_SLAVE_DEVICE_ADDRESS, (uint8_t)(new_address >> (uint8_t)1));
+   VL53L4CD_OpResult status;
+
+   status = VL53L4CD_IO_Write_Byte(VL53L4CD_I2C_SLAVE_DEVICE_ADDRESS, new_address >> 1);
+   if(status < VL53L4CD_OK)
+   {
+      return status;
+   }
+
+   sw_i2c_address = new_address;
+
+   return VL53L4CD_OK;
 }
 
 VL53L4CD_OpResult VL53L4CD_IO_Write_Byte(uint16_t RegisterAdress, uint8_t value)

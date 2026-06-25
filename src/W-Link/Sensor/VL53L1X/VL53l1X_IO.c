@@ -246,8 +246,17 @@ VL53L1X_OpResult VL53L1X_IO_Power_Off()
 
 VL53L1X_OpResult VL53L1X_IO_SetI2CAddress(uint8_t new_address)
 {
+   VL53L1X_OpResult status;
+   
+   status = VL53L1X_IO_Write_Byte(VL53L1X_I2C_SLAVE__DEVICE_ADDRESS, new_address >> 1);
+   if(status < VL53L1X_OK)
+   {
+      return status;
+   }
+
    sw_i2c_address = new_address;
-   return VL53L1X_IO_Write_Byte(VL53L1X_I2C_SLAVE__DEVICE_ADDRESS, new_address >> 1);
+
+   return VL53L1X_OK;
 }
 
 VL53L1X_OpResult VL53L1X_IO_Write_Multi(uint16_t RegisterAddr, uint8_t *pdata, uint32_t count)

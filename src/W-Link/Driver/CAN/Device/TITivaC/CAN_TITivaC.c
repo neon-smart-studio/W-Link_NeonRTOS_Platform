@@ -154,18 +154,18 @@ static void CAN_IRQ_Process(uint32_t base)
     if (index >= hwCAN_Index_MAX)
         return;
 
-    uint32_t cause = CANIntStatus(base, CAN_INT_STS_CAUSE);
+    uint32_t cause = MAP_CANIntStatus(base, CAN_INT_STS_CAUSE);
 
     if (cause == CAN_INT_INTID_STATUS)
     {
-        (void)CANStatusGet(base, CAN_STS_CONTROL);
-        CANIntClear(base, cause);
+        (void)MAP_CANStatusGet(base, CAN_STS_CONTROL);
+        MAP_CANIntClear(base, cause);
         return;
     }
 
     if (cause == CAN_TX_MSG_OBJ)
     {
-        CANIntClear(base, CAN_TX_MSG_OBJ);
+        MAP_CANIntClear(base, CAN_TX_MSG_OBJ);
         NeonRTOS_SyncObjSignalFromISR(&CAN_TxDone_Sync[index]);
         return;
     }
@@ -178,7 +178,7 @@ static void CAN_IRQ_Process(uint32_t base)
         memset(&msg, 0, sizeof(msg));
         msg.pui8MsgData = data;
 
-        CANMessageGet(base, CAN_RX_MSG_OBJ, &msg, true);
+        MAP_CANMessageGet(base, CAN_RX_MSG_OBJ, &msg, true);
 
         NeonRTOS_MsgQWrite(&CAN_RxQueue[index], data, NEONRT_NO_WAIT);
         return;
@@ -186,7 +186,7 @@ static void CAN_IRQ_Process(uint32_t base)
 
     if (cause != 0)
     {
-        CANIntClear(base, cause);
+        MAP_CANIntClear(base, cause);
     }
 }
 
@@ -219,7 +219,7 @@ static hwCAN_OpResult CAN_ConfigRxObject(hwCAN_Index index)
     rx_msg.ui32Flags = MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER;
     rx_msg.ui32MsgLen = 8;
 
-    CANMessageSet(base, CAN_RX_MSG_OBJ, &rx_msg, MSG_OBJ_TYPE_RX);
+    MAP_CANMessageSet(base, CAN_RX_MSG_OBJ, &rx_msg, MSG_OBJ_TYPE_RX);
 
     return hwCAN_OK;
 }
@@ -273,22 +273,22 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
 
     while (!SysCtlPeripheralReady(can_periph));
 
-    GPIOPinConfigure(tx_cfg);
-    GPIOPinConfigure(rx_cfg);
+    MAP_GPIOPinConfigure(tx_cfg);
+    MAP_GPIOPinConfigure(rx_cfg);
 
-    GPIOPinTypeCAN(tx_port, tx_mask);
-    GPIOPinTypeCAN(rx_port, rx_mask);
+    MAP_GPIOPinTypeCAN(tx_port, tx_mask);
+    MAP_GPIOPinTypeCAN(rx_port, rx_mask);
 
-    CANInit(can_base);
+    MAP_CANInit(can_base);
 
-    if (CANBitRateSet(can_base, SysCtlClockGet(), 500000) == 0)
+    if (MAP_CANBitRateSet(can_base, MAP_SysCtlClockGet(), 500000) == 0)
     {
         NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
         NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
         return hwCAN_HwError;
     }
 
-    CANIntEnable(can_base, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
+    MAP_CANIntEnable(can_base, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
 
     switch (index)
     {
@@ -308,14 +308,14 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
             break;
     }
 
-    IntEnable(irq);
+    MAP_IntEnable(irq);
 
-    CANEnable(can_base);
+    MAP_CANEnable(can_base);
 
-    if (CAN_ConfigRxObject(index) != hwCAN_OK)
+    if (MAP_CAN_ConfigRxObject(index) != hwCAN_OK)
     {
-        CANDisable(can_base);
-        IntDisable(irq);
+        MAP_CANDisable(can_base);
+        MAP_IntDisable(irq);
         NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
         NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
         return hwCAN_HwError;
@@ -360,18 +360,18 @@ hwCAN_OpResult CAN_DeInit(hwCAN_Index index)
 
     CAN_Init_Status[index] = false;
 
-    CANIntDisable(can_base, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
-    IntDisable(irq);
-    CANDisable(can_base);
+    MAP_CANIntDisable(can_base, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
+    MAP_IntDisable(irq);
+    MAP_CANDisable(can_base);
 
     if (tx_port && tx_mask)
     {
-        GPIOPinTypeGPIOInput(tx_port, tx_mask);
+        MAP_GPIOPinTypeGPIOInput(tx_port, tx_mask);
     }
 
     if (rx_port && rx_mask)
     {
-        GPIOPinTypeGPIOInput(rx_port, rx_mask);
+        MAP_GPIOPinTypeGPIOInput(rx_port, rx_mask);
     }
 
     NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
@@ -419,7 +419,7 @@ hwCAN_OpResult CAN_Write(hwCAN_Index index, uint32_t id, uint8_t *data, uint8_t 
     tx_msg.ui32MsgLen = len;
     tx_msg.pui8MsgData = data;
 
-    CANMessageSet(base, CAN_TX_MSG_OBJ, &tx_msg, MSG_OBJ_TYPE_TX);
+    MAP_CANMessageSet(base, CAN_TX_MSG_OBJ, &tx_msg, MSG_OBJ_TYPE_TX);
 
     if (NeonRTOS_SyncObjWait(&CAN_TxDone_Sync[index], timeout) != NeonRTOS_OK)
         return hwCAN_Timeout;

@@ -23,60 +23,60 @@ void GPIO_Enable_Port_Clock(uint32_t base)
   switch(base)
   {
     case GPIO_PORTA_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA));
       break;
     case GPIO_PORTB_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB));
       break;
     case GPIO_PORTC_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOC));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOC));
       break;
     case GPIO_PORTD_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD));
       break;
     case GPIO_PORTE_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE));
       break;
     case GPIO_PORTF_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF));
       break;
     case GPIO_PORTG_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOG);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOG));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOG);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOG));
       break;
     case GPIO_PORTH_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOH);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOH));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOH);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOH));
       break;
     case GPIO_PORTK_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOK);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOK));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOK);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOK));
       break;
     case GPIO_PORTL_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
       break;
     case GPIO_PORTM_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));
       break;
     case GPIO_PORTN_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));
       break;
     case GPIO_PORTP_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOP));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOP));
       break;
     case GPIO_PORTQ_BASE:
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOQ));
+      MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);
+      while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOQ));
       break;
   }
 }
@@ -86,46 +86,46 @@ void GPIO_Disable_Port_Clock(uint32_t base)
   switch(base)
   {
     case GPIO_PORTA_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOA);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOA);
       break;
     case GPIO_PORTB_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOB);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOB);
       break;
     case GPIO_PORTC_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOC);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOC);
       break;
     case GPIO_PORTD_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOD);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOD);
       break;
     case GPIO_PORTE_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOE);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOE);
       break;
     case GPIO_PORTF_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOF);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOF);
       break;
     case GPIO_PORTG_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOG);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOG);
       break;
     case GPIO_PORTH_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOH);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOH);
       break;
     case GPIO_PORTK_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOK);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOK);
       break;
     case GPIO_PORTL_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOL);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOL);
       break;
     case GPIO_PORTM_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOM);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOM);
       break;
     case GPIO_PORTN_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPION);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPION);
       break;
     case GPIO_PORTP_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOP);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOP);
       break;
     case GPIO_PORTQ_BASE:
-      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOQ);
+      MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOQ);
       break;
   }
 }

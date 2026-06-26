@@ -288,10 +288,10 @@ static void TIVA_I2C_StartNext(hwI2C_Index index)
         return;
     }
 
-    if (I2CMasterErr(base) != I2C_MASTER_ERR_NONE) {
-        t->error = I2CMasterErr(base);
+    if (MAP_I2CMasterErr(base) != I2C_MASTER_ERR_NONE) {
+        t->error = MAP_I2CMasterErr(base);
         t->state = TIVA_I2C_ERROR;
-        I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
+        MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
         NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
         return;
     }
@@ -299,29 +299,29 @@ static void TIVA_I2C_StartNext(hwI2C_Index index)
     if (t->state == TIVA_I2C_TX) {
         if (t->tx_pos >= t->tx_len) {
             t->state = TIVA_I2C_DONE;
-            I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
+            MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
             NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
             return;
         }
 
-        I2CMasterDataPut(base, t->tx_buf[t->tx_pos]);
+        MAP_I2CMasterDataPut(base, t->tx_buf[t->tx_pos]);
 
         if (t->tx_len == 1) {
             if (t->stop) {
-                I2CMasterControl(base, I2C_MASTER_CMD_SINGLE_SEND);
+                MAP_I2CMasterControl(base, I2C_MASTER_CMD_SINGLE_SEND);
             } else {
-                I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_START);
+                MAP_I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_START);
             }
         } else if (t->tx_pos == 0) {
-            I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_START);
+            MAP_I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_START);
         } else if (t->tx_pos == (uint8_t)(t->tx_len - 1)) {
             if (t->stop) {
-                I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_FINISH);
+                MAP_I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_FINISH);
             } else {
-                I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_CONT);
+                MAP_I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_CONT);
             }
         } else {
-            I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_CONT);
+            MAP_I2CMasterControl(base, I2C_MASTER_CMD_BURST_SEND_CONT);
         }
 
         t->tx_pos++;
@@ -330,24 +330,24 @@ static void TIVA_I2C_StartNext(hwI2C_Index index)
 
     if (t->state == TIVA_I2C_RX) {
         if (t->rx_pos > 0 && t->rx_pos <= t->rx_len) {
-            t->rx_buf[t->rx_pos - 1] = (uint8_t)I2CMasterDataGet(base);
+            t->rx_buf[t->rx_pos - 1] = (uint8_t)MAP_I2CMasterDataGet(base);
         }
 
         if (t->rx_pos >= t->rx_len) {
             t->state = TIVA_I2C_DONE;
-            I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
+            MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
             NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
             return;
         }
 
         if (t->rx_len == 1) {
-            I2CMasterControl(base, I2C_MASTER_CMD_SINGLE_RECEIVE);
+            MAP_I2CMasterControl(base, I2C_MASTER_CMD_SINGLE_RECEIVE);
         } else if (t->rx_pos == 0) {
-            I2CMasterControl(base, I2C_MASTER_CMD_BURST_RECEIVE_START);
+            MAP_I2CMasterControl(base, I2C_MASTER_CMD_BURST_RECEIVE_START);
         } else if (t->rx_pos == (uint8_t)(t->rx_len - 1)) {
-            I2CMasterControl(base, I2C_MASTER_CMD_BURST_RECEIVE_FINISH);
+            MAP_I2CMasterControl(base, I2C_MASTER_CMD_BURST_RECEIVE_FINISH);
         } else {
-            I2CMasterControl(base, I2C_MASTER_CMD_BURST_RECEIVE_CONT);
+            MAP_I2CMasterControl(base, I2C_MASTER_CMD_BURST_RECEIVE_CONT);
         }
 
         t->rx_pos++;
@@ -363,10 +363,10 @@ static void TIVA_I2C_IRQ_Process(hwI2C_Index index)
         return;
     }
 
-    uint32_t status = I2CMasterIntStatus(base, true);
+    uint32_t status = MAP_I2CMasterIntStatus(base, true);
 
     if (status) {
-        I2CMasterIntClear(base);
+        MAP_I2CMasterIntClear(base);
     }
 
     TIVA_I2C_StartNext(index);
@@ -448,31 +448,31 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
     GPIO_Enable_Port_Clock(sda_port);
     GPIO_Enable_Port_Clock(scl_port);
 
-    SysCtlPeripheralEnable(i2c_periph);
-    while (!SysCtlPeripheralReady(i2c_periph));
+    MAP_SysCtlPeripheralEnable(i2c_periph);
+    while (!MAP_SysCtlPeripheralReady(i2c_periph));
 
-    GPIOPinConfigure(scl_cfg);
-    GPIOPinConfigure(sda_cfg);
+    MAP_GPIOPinConfigure(scl_cfg);
+    MAP_GPIOPinConfigure(sda_cfg);
 
-    GPIOPinTypeI2CSCL(scl_port, scl_mask);
-    GPIOPinTypeI2C(sda_port, sda_mask);
+    MAP_GPIOPinTypeI2CSCL(scl_port, scl_mask);
+    MAP_GPIOPinTypeI2C(sda_port, sda_mask);
 
-    I2CMasterDisable(i2c_base);
+    MAP_I2CMasterDisable(i2c_base);
     
     switch(speed_mode)
     {
         case hwI2C_Standard_Mode:
-            I2CMasterInitExpClk(i2c_base, SysCtlClockGet(), false);
+            MAP_I2CMasterInitExpClk(i2c_base, MAP_SysCtlClockGet(), false);
             break;
         case hwI2C_Fast_Mode:
-            I2CMasterInitExpClk(i2c_base, SysCtlClockGet(), true);
+            MAP_I2CMasterInitExpClk(i2c_base, MAP_SysCtlClockGet(), true);
             break;
     }
     
-    I2CMasterEnable(i2c_base);
+    MAP_I2CMasterEnable(i2c_base);
 
-    I2CMasterIntDisableEx(i2c_base, I2C_MASTER_INT_DATA);
-    I2CMasterIntClear(i2c_base);
+    MAP_I2CMasterIntDisableEx(i2c_base, I2C_MASTER_INT_DATA);
+    MAP_I2CMasterIntClear(i2c_base);
 
     if (NeonRTOS_SyncObjCreate(&I2C_Master_Done_SyncHandle[index]) != NeonRTOS_OK) {
         return hwI2C_MemoryError;
@@ -515,7 +515,7 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
         default: break;
     }
 
-    IntEnable(irq);
+    MAP_IntEnable(irq);
 
     gpio_pin_init_status[sda_pin] = true;
     gpio_pin_init_status[scl_pin] = true;
@@ -553,19 +553,19 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index)
 
     I2C_Master_Init_Status[index] = false;
 
-    I2CMasterIntDisableEx(i2c_base, I2C_MASTER_INT_DATA);
-    I2CMasterIntClear(i2c_base);
-    IntDisable(irq);
-    I2CMasterDisable(i2c_base);
+    MAP_I2CMasterIntDisableEx(i2c_base, I2C_MASTER_INT_DATA);
+    MAP_I2CMasterIntClear(i2c_base);
+    MAP_IntDisable(irq);
+    MAP_I2CMasterDisable(i2c_base);
 
     NeonRTOS_SyncObjDelete(&I2C_Master_Done_SyncHandle[index]);
 
     if (sda_port && sda_mask) {
-        GPIOPinTypeGPIOInput(sda_port, sda_mask);
+        MAP_GPIOPinTypeGPIOInput(sda_port, sda_mask);
     }
 
     if (scl_port && scl_mask) {
-        GPIOPinTypeGPIOInput(scl_port, scl_mask);
+        MAP_GPIOPinTypeGPIOInput(scl_port, scl_mask);
     }
 
     gpio_pin_init_status[sda_pin] = false;
@@ -637,14 +637,14 @@ hwI2C_OpResult I2C_Master_Read(
     t->rx_pos = 0;
     t->stop = stop;
 
-    I2CMasterSlaveAddrSet(base, address, true);
-    I2CMasterIntClear(base);
-    I2CMasterIntEnableEx(base, I2C_MASTER_INT_DATA);
+    MAP_I2CMasterSlaveAddrSet(base, address, true);
+    MAP_I2CMasterIntClear(base);
+    MAP_I2CMasterIntEnableEx(base, I2C_MASTER_INT_DATA);
 
     TIVA_I2C_StartNext(index);
 
     if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeoutMs) != NeonRTOS_OK) {
-        I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
+        MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
         t->state = TIVA_I2C_ERROR;
         return hwI2C_SlaveTimeout;
     }
@@ -693,14 +693,14 @@ hwI2C_OpResult I2C_Master_Write(
     t->tx_pos = 0;
     t->stop = stop;
 
-    I2CMasterSlaveAddrSet(base, address, false);
-    I2CMasterIntClear(base);
-    I2CMasterIntEnableEx(base, I2C_MASTER_INT_DATA);
+    MAP_I2CMasterSlaveAddrSet(base, address, false);
+    MAP_I2CMasterIntClear(base);
+    MAP_I2CMasterIntEnableEx(base, I2C_MASTER_INT_DATA);
 
     TIVA_I2C_StartNext(index);
 
     if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeoutMs) != NeonRTOS_OK) {
-        I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
+        MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
         t->state = TIVA_I2C_ERROR;
         return hwI2C_SlaveTimeout;
     }

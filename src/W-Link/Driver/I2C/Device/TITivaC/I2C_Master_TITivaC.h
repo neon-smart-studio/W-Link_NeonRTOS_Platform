@@ -1,6 +1,6 @@
 
-#ifndef I2C_MASTER_RP2_H
-#define I2C_MASTER_RP2_H
+#ifndef I2C_MASTER_TITIVAC_H
+#define I2C_MASTER_TITIVAC_H
 
 #include "soc.h"
 
@@ -21,4 +21,4 @@ extern bool I2C_Master_Init_Status[];
 }
 #endif // __cplusplus
 
-#endif //I2C_MASTER_RP2_H
+#endif //I2C_MASTER_TITIVAC_H

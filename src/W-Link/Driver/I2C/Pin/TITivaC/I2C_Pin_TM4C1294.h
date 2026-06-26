@@ -18,7 +18,7 @@ static const I2C_Pin_Def I2C_Pin_Def_Table[hwI2C_Index_MAX] =
 #endif
 
 #if defined(I2C3_BASE)
-    { hwGPIO_Pin_G4, hwGPIO_Pin_G5 },   // I2C3
+    { hwGPIO_Pin_K4, hwGPIO_Pin_K5 },   // I2C3
 #endif
 
 #if defined(I2C4_BASE)
@@ -30,7 +30,7 @@ static const I2C_Pin_Def I2C_Pin_Def_Table[hwI2C_Index_MAX] =
 #endif
 
 #if defined(I2C6_BASE)
-    { hwGPIO_Pin_B6, hwGPIO_Pin_B7 },   // I2C6
+    { hwGPIO_Pin_A6, hwGPIO_Pin_A7 },   // I2C6
 #endif
 
 #if defined(I2C7_BASE)
@@ -42,7 +42,7 @@ static const I2C_Pin_Def I2C_Pin_Def_Table[hwI2C_Index_MAX] =
 #endif
 
 #if defined(I2C9_BASE)
-    { hwGPIO_Pin_A6, hwGPIO_Pin_A7 },   // I2C9
+    { hwGPIO_Pin_A0, hwGPIO_Pin_A1 },   // I2C9
 #endif
 };
 

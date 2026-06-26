@@ -4,200 +4,185 @@
 * Version            : V1.0.0
 * Date               : 19-July-2012
 * Description        : Circular Linked List Implementation.
-********************************************************************************
-* THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-* WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE TIME.
-* AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY DIRECT,
-* INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING FROM THE
-* CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE CODING
-* INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
 *******************************************************************************/
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 
-#include "cmsis_gcc.h"
+#include "NeonRTOS.h"
 
 #include "ble_list.h"
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
-void list_init_head (tListNode * listHead)
+void list_init_head(tListNode *listHead)
 {
-  listHead->next = listHead;
-  listHead->prev = listHead;
+    listHead->next = listHead;
+    listHead->prev = listHead;
 }
 
-bool list_is_empty(tListNode * listHead)
+bool list_is_empty(tListNode *listHead)
 {
-  uint32_t uwPRIMASK_Bit;
-  uint8_t return_value;
+    bool return_value;
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
-  if(listHead->next == listHead)
-  {
-    return_value = true;
-  }
-  else
-  {
-    return_value = false;
-  }
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
+    NeonRTOS_EnterCritical();
 
-  return return_value;
+    return_value = (listHead->next == listHead);
+
+    NeonRTOS_ExitCritical(0);
+
+    return return_value;
 }
 
-void list_insert_head (tListNode * listHead, tListNode * node)
+void list_insert_head(tListNode *listHead, tListNode *node)
 {
-  uint32_t uwPRIMASK_Bit;
+    NeonRTOS_EnterCritical();
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    node->next = listHead->next;
+    node->prev = listHead;
 
-  node->next = listHead->next;
-  node->prev = listHead;
-  listHead->next = node;
-  (node->next)->prev = node;
+    listHead->next->prev = node;
+    listHead->next = node;
 
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
+    NeonRTOS_ExitCritical(0);
 }
 
-void list_insert_tail (tListNode * listHead, tListNode * node)
+void list_insert_tail(tListNode *listHead, tListNode *node)
 {
-  uint32_t uwPRIMASK_Bit;
+    NeonRTOS_EnterCritical();
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    node->next = listHead;
+    node->prev = listHead->prev;
 
-  node->next = listHead;
-  node->prev = listHead->prev;
-  listHead->prev = node;
-  (node->prev)->next = node;
+    listHead->prev->next = node;
+    listHead->prev = node;
 
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
+    NeonRTOS_ExitCritical(0);
 }
 
-void list_remove_node (tListNode * node)
+void list_remove_node(tListNode *node)
 {
-  uint32_t uwPRIMASK_Bit;
+    NeonRTOS_EnterCritical();
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    node->prev->next = node->next;
+    node->next->prev = node->prev;
 
-  (node->prev)->next = node->next;
-  (node->next)->prev = node->prev;
+    node->next = NULL;
+    node->prev = NULL;
 
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
+    NeonRTOS_ExitCritical(0);
 }
 
-void list_remove_head (tListNode * listHead, tListNode ** node )
+void list_remove_head(tListNode *listHead, tListNode **node)
 {
-  uint32_t uwPRIMASK_Bit;
+    NeonRTOS_EnterCritical();
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    if (listHead->next == listHead)
+    {
+        *node = NULL;
+    }
+    else
+    {
+        *node = listHead->next;
 
-  *node = listHead->next;
-  list_remove_node (listHead->next);
-  (*node)->next = NULL;
-  (*node)->prev = NULL;
+        listHead->next = (*node)->next;
+        (*node)->next->prev = listHead;
 
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
+        (*node)->next = NULL;
+        (*node)->prev = NULL;
+    }
+
+    NeonRTOS_ExitCritical(0);
 }
 
-void list_remove_tail (tListNode * listHead, tListNode ** node )
+void list_remove_tail(tListNode *listHead, tListNode **node)
 {
-  uint32_t uwPRIMASK_Bit;
+    NeonRTOS_EnterCritical();
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    if (listHead->prev == listHead)
+    {
+        *node = NULL;
+    }
+    else
+    {
+        *node = listHead->prev;
 
-  *node = listHead->prev;
-  list_remove_node (listHead->prev);
-  (*node)->next = NULL;
-  (*node)->prev = NULL;
+        listHead->prev = (*node)->prev;
+        (*node)->prev->next = listHead;
 
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
+        (*node)->next = NULL;
+        (*node)->prev = NULL;
+    }
+
+    NeonRTOS_ExitCritical(0);
 }
 
-void list_insert_node_after (tListNode * node, tListNode * ref_node)
+void list_insert_node_after(tListNode *node, tListNode *ref_node)
 {
-  uint32_t uwPRIMASK_Bit;
+    NeonRTOS_EnterCritical();
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    node->next = ref_node->next;
+    node->prev = ref_node;
 
-  node->next = ref_node->next;
-  node->prev = ref_node;
-  ref_node->next = node;
-  (node->next)->prev = node;
+    ref_node->next->prev = node;
+    ref_node->next = node;
 
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
+    NeonRTOS_ExitCritical(0);
 }
 
-void list_insert_node_before (tListNode * node, tListNode * ref_node)
+void list_insert_node_before(tListNode *node, tListNode *ref_node)
 {
-  uint32_t uwPRIMASK_Bit;
+    NeonRTOS_EnterCritical();
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    node->next = ref_node;
+    node->prev = ref_node->prev;
 
-  node->next = ref_node;
-  node->prev = ref_node->prev;
-  ref_node->prev = node;
-  (node->prev)->next = node;
+    ref_node->prev->next = node;
+    ref_node->prev = node;
 
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
+    NeonRTOS_ExitCritical(0);
 }
 
-int list_get_size (tListNode * listHead)
+int list_get_size(tListNode *listHead)
 {
-  int size = 0;
-  tListNode * temp;
-  uint32_t uwPRIMASK_Bit;
+    int size = 0;
+    tListNode *temp;
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    NeonRTOS_EnterCritical();
 
-  temp = listHead->next;
-  while (temp != listHead)
-  {
-    size++;
-    temp = temp->next;
-  }
+    temp = listHead->next;
 
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
-  return (size);
+    while (temp != listHead)
+    {
+        size++;
+        temp = temp->next;
+    }
+
+    NeonRTOS_ExitCritical(0);
+
+    return size;
 }
 
-void list_get_next_node (tListNode * ref_node, tListNode ** node)
+void list_get_next_node(tListNode *ref_node, tListNode **node)
 {
-  uint32_t uwPRIMASK_Bit;
+    NeonRTOS_EnterCritical();
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    *node = ref_node->next;
 
-  *node = ref_node->next;
-
-  __set_PRIMASK(uwPRIMASK_Bit);     /**< Restore PRIMASK bit*/
+    NeonRTOS_ExitCritical(0);
 }
 
-void list_get_prev_node (tListNode * ref_node, tListNode ** node)
+void list_get_prev_node(tListNode *ref_node, tListNode **node)
 {
-  uint32_t uwPRIMASK_Bit;
+    NeonRTOS_EnterCritical();
 
-  uwPRIMASK_Bit = __get_PRIMASK();  /**< backup PRIMASK bit */
-  __disable_irq();                  /**< Disable all interrupts by setting PRIMASK bit on Cortex*/
+    *node = ref_node->prev;
 
-  *node = ref_node->prev;
-
-  __set_PRIMASK(uwPRIMASK_Bit);      /**< Restore PRIMASK bit*/
+    NeonRTOS_ExitCritical(0);
 }
-
 
 #ifdef __cplusplus
 }

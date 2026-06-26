@@ -410,11 +410,13 @@
 
 #if defined (TM4C1294) || defined (TM4C123)
 #include "inc/hw_ints.h"
-#include "inc/hw_memmap.h"
+#include "inc/hw_can.h"
 #include "inc/hw_emac.h"
+#include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "driverlib/rom.h"
 #include "driverlib/rom_map.h"
+#include "driverlib/can.h"
 #include "driverlib/debug.h"
 #include "driverlib/emac.h"
 #include "driverlib/pin_map.h"

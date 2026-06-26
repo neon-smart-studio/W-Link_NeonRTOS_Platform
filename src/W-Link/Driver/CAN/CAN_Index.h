@@ -2,6 +2,8 @@
 #ifndef CAN_INDEX_H
 #define CAN_INDEX_H
 
+#include "soc.h"
+
 #ifdef DEVICE_NUVOTON
 typedef enum {
 #if defined (CAN0_BASE)
@@ -28,5 +30,17 @@ typedef enum {
     hwCAN_Index_MAX
 } hwCAN_Index;
 #endif // DEVICE_STM32
+
+#ifdef DEVICE_TITIVAC
+typedef enum {
+#if defined (CAN0_BASE)
+    hwCAN_Index_0 = 0,
+#endif
+#if defined (CAN1_BASE)
+    hwCAN_Index_1,
+#endif
+    hwCAN_Index_MAX
+} hwCAN_Index;
+#endif // DEVICE_TITIVAC
 
 #endif //CAN_INDEX_H

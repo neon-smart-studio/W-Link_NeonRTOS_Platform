@@ -10,7 +10,7 @@
 
 #include "PWM/PWM.h"
 
-#ifdef DEVICE_TM4C1294
+#ifdef DEVICE_TITIVAC
 
 #include "PWM/PWM_Pin.h"
 

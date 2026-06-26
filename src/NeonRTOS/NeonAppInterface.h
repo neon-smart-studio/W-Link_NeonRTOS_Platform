@@ -10,10 +10,6 @@
 extern "C" {
 #endif
 
-#define LED_G hwGPIO_Pin_B0
-#define LED_B hwGPIO_Pin_B7
-#define LED_R hwGPIO_Pin_B14
-
 typedef enum App_Interface_Protocol_t
 {
     None = 0,

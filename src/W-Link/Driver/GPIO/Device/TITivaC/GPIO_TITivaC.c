@@ -10,13 +10,125 @@
 
 #include "GPIO/GPIO.h"
 
-#ifdef TM4C1294
+#ifdef DEVICE_TITIVAC
 
 static bool gpio_pin_init_status[hwGPIO_Pin_MAX] = {false};
 static hwGPIO_Direction gpio_current_dir[hwGPIO_Int_Pin_MAX] = {hwGPIO_Direction_Input};
 static hwGPIO_Pull_Mode gpio_current_mode[hwGPIO_Int_Pin_MAX] = {hwGPIO_Pull_Mode_None};
 static hwGPIO_Interrupt_Mode gpio_current_irq_mode[hwGPIO_Int_Pin_MAX] = {hwGPIO_Interrupt_Mode_MAX};
 static GPIO_Interrupt_Event_Handler gpio_irq_handlers[hwGPIO_Int_Pin_MAX];
+
+void GPIO_Enable_Port_Clock(uint32_t base)
+{
+  switch(base)
+  {
+    case GPIO_PORTA_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA));
+      break;
+    case GPIO_PORTB_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB));
+      break;
+    case GPIO_PORTC_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOC));
+      break;
+    case GPIO_PORTD_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOD));
+      break;
+    case GPIO_PORTE_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE));
+      break;
+    case GPIO_PORTF_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF));
+      break;
+    case GPIO_PORTG_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOG);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOG));
+      break;
+    case GPIO_PORTH_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOH);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOH));
+      break;
+    case GPIO_PORTK_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOK);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOK));
+      break;
+    case GPIO_PORTL_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
+      break;
+    case GPIO_PORTM_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));
+      break;
+    case GPIO_PORTN_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));
+      break;
+    case GPIO_PORTP_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOP));
+      break;
+    case GPIO_PORTQ_BASE:
+      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);
+      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOQ));
+      break;
+  }
+}
+
+void GPIO_Disable_Port_Clock(uint32_t base)
+{
+  switch(base)
+  {
+    case GPIO_PORTA_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOA);
+      break;
+    case GPIO_PORTB_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOB);
+      break;
+    case GPIO_PORTC_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOC);
+      break;
+    case GPIO_PORTD_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOD);
+      break;
+    case GPIO_PORTE_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOE);
+      break;
+    case GPIO_PORTF_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOF);
+      break;
+    case GPIO_PORTG_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOG);
+      break;
+    case GPIO_PORTH_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOH);
+      break;
+    case GPIO_PORTK_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOK);
+      break;
+    case GPIO_PORTL_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOL);
+      break;
+    case GPIO_PORTM_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOM);
+      break;
+    case GPIO_PORTN_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPION);
+      break;
+    case GPIO_PORTP_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOP);
+      break;
+    case GPIO_PORTQ_BASE:
+      SysCtlPeripheralDisable(SYSCTL_PERIPH_GPIOQ);
+      break;
+  }
+}
 
 hwGPIO_OpResult GPIO_Pin_Init(hwGPIO_Pin pin, hwGPIO_Direction dir, hwGPIO_Pull_Mode pull_mode)
 {
@@ -648,4 +760,4 @@ hwGPIO_OpResult GPIO_Interrupt_Pin_Read(hwGPIO_Int_Pin irq_pin, bool* level)
     return hwGPIO_OK;
 }
 
-#endif //TM4C1294
+#endif //DEVICE_TM4C1294

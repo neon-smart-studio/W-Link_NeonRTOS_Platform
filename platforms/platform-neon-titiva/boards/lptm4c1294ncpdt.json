@@ -27,7 +27,6 @@
     }
   },
   "frameworks": [
-    "arduino",
     "libopencm3"
   ],
   "name": "TI LaunchPad (Tiva C) w/ tm4c129 (120MHz)",

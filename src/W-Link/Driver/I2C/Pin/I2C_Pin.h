@@ -16,8 +16,8 @@
 #include "RP2/I2C_Pin_RP2.h"
 #endif
 
-#ifdef DEVICE_TM4C1294
-#include "TI/I2C_Pin_TM4C1294.h"
+#ifdef DEVICE_TITIVAC
+#include "TI/I2C_Pin_TITivaC.h"
 #endif
 
 #endif //I2C_PIN_H

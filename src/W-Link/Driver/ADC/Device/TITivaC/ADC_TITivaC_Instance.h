@@ -1,6 +1,6 @@
 
-#ifndef ADC_TM4C1294_INSTANCE_H
-#define ADC_TM4C1294_INSTANCE_H
+#ifndef ADC_TITIVAC_INSTANCE_H
+#define ADC_TITIVAC_INSTANCE_H
 
 #include "GPIO/GPIO.h"
 
@@ -12,4 +12,4 @@ typedef enum {
     hwADC_Instance_MAX,
 } hwADC_Instance;
 
-#endif //ADC_TM4C1294_INSTANCE_H
+#endif //ADC_TITIVAC_INSTANCE_H

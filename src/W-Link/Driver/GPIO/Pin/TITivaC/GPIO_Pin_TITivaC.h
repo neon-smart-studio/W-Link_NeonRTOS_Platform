@@ -1,6 +1,6 @@
 
-#ifndef GPIO_PIN_TI_H
-#define GPIO_PIN_TI_H
+#ifndef GPIO_PIN_TITIVAC_H
+#define GPIO_PIN_TITIVAC_H
 
 #include <stdint.h>
 
@@ -21,6 +21,8 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_B3,
   hwGPIO_Pin_B4,
   hwGPIO_Pin_B5,
+  hwGPIO_Pin_B6,
+  hwGPIO_Pin_B7,
   hwGPIO_Pin_C0,
   hwGPIO_Pin_C1,
   hwGPIO_Pin_C2,
@@ -50,6 +52,12 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_F4,
   hwGPIO_Pin_G0,
   hwGPIO_Pin_G1,
+  hwGPIO_Pin_G2,
+  hwGPIO_Pin_G3,
+  hwGPIO_Pin_G4,
+  hwGPIO_Pin_G5,
+  hwGPIO_Pin_G6,
+  hwGPIO_Pin_G7,
   hwGPIO_Pin_H0,
   hwGPIO_Pin_H1,
   hwGPIO_Pin_H2,
@@ -117,6 +125,8 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_B3,
   hwGPIO_Int_Pin_B4,
   hwGPIO_Int_Pin_B5,
+  hwGPIO_Int_Pin_B6,
+  hwGPIO_Int_Pin_B7,
   hwGPIO_Int_Pin_C0,
   hwGPIO_Int_Pin_C1,
   hwGPIO_Int_Pin_C2,
@@ -146,6 +156,12 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_F4,
   hwGPIO_Int_Pin_G0,
   hwGPIO_Int_Pin_G1,
+  hwGPIO_Int_Pin_G2,
+  hwGPIO_Int_Pin_G3,
+  hwGPIO_Int_Pin_G4,
+  hwGPIO_Int_Pin_G5,
+  hwGPIO_Int_Pin_G6,
+  hwGPIO_Int_Pin_G7,
   hwGPIO_Int_Pin_H0,
   hwGPIO_Int_Pin_H1,
   hwGPIO_Int_Pin_H2,
@@ -206,4 +222,4 @@ uint32_t GPIO_Map_Pin_Int_Mask(uint32_t pinMask);
 hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(uint32_t portBase, uint32_t intMask);
 uint32_t GPIO_Enable_Port_Clock(uint32_t portBase);
 
-#endif //GPIO_PIN_TI_H
+#endif //GPIO_PIN_TITIVAC_H

@@ -10,7 +10,7 @@
 
 #include "ADC/ADC.h"
 
-#include "ADC_TM4C1294_Instance.h"
+#include "ADC_TITivaC_Instance.h"
 
 #define ADC_VREF_MV                3300.0f
 #define ADC_MAX_COUNT              4095.0f

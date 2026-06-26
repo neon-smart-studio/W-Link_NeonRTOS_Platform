@@ -4,9 +4,9 @@
 
 #include "soc.h"
 
-#include "GPIO/Device/TI/GPIO_TM4C1294.h"
+#include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
 
-#include "ADC/Device/TI/ADC_TM4C1294_Instance.h"
+#include "ADC/Device/TITivaC/ADC_TITivaC_Instance.h"
 
 typedef struct {
     hwGPIO_Pin adc_pin;

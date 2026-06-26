@@ -2,11 +2,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "GPIO_Pin_TI.h"
+#include "GPIO_Pin_TITivaC.h"
 
 #include "soc.h"
 
-#ifdef DEVICE_TI
+#ifdef DEVICE_TITIVAC
 
 uint32_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin)
 {
@@ -27,6 +27,8 @@ uint32_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin)
         case hwGPIO_Pin_B3:
         case hwGPIO_Pin_B4:
         case hwGPIO_Pin_B5:
+        case hwGPIO_Pin_B6:
+        case hwGPIO_Pin_B7:
           return GPIO_PORTB_BASE;
         case hwGPIO_Pin_C0:
         case hwGPIO_Pin_C1:
@@ -61,6 +63,12 @@ uint32_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin)
           return GPIO_PORTF_BASE;
         case hwGPIO_Pin_G0:
         case hwGPIO_Pin_G1:
+        case hwGPIO_Pin_G2:
+        case hwGPIO_Pin_G3:
+        case hwGPIO_Pin_G4:
+        case hwGPIO_Pin_G5:
+        case hwGPIO_Pin_G6:
+        case hwGPIO_Pin_G7:
           return GPIO_PORTG_BASE;
         case hwGPIO_Pin_H0:
         case hwGPIO_Pin_H1:
@@ -141,6 +149,8 @@ uint32_t GPIO_Map_Soc_Port_HighSpeed_Base(hwGPIO_Pin pin)
         case hwGPIO_Pin_B3:
         case hwGPIO_Pin_B4:
         case hwGPIO_Pin_B5:
+        case hwGPIO_Pin_B6:
+        case hwGPIO_Pin_B7:
           return GPIO_PORTB_AHB_BASE;
         case hwGPIO_Pin_C0:
         case hwGPIO_Pin_C1:
@@ -175,6 +185,12 @@ uint32_t GPIO_Map_Soc_Port_HighSpeed_Base(hwGPIO_Pin pin)
           return GPIO_PORTF_AHB_BASE;
         case hwGPIO_Pin_G0:
         case hwGPIO_Pin_G1:
+        case hwGPIO_Pin_G2:
+        case hwGPIO_Pin_G3:
+        case hwGPIO_Pin_G4:
+        case hwGPIO_Pin_G5:
+        case hwGPIO_Pin_G6:
+        case hwGPIO_Pin_G7:
           return GPIO_PORTG_AHB_BASE;
         case hwGPIO_Pin_H0:
         case hwGPIO_Pin_H1:
@@ -208,6 +224,8 @@ uint32_t GPIO_Map_Soc_Int_Port_Base(hwGPIO_Int_Pin pin)
         case hwGPIO_Int_Pin_B3:
         case hwGPIO_Int_Pin_B4:
         case hwGPIO_Int_Pin_B5:
+        case hwGPIO_Int_Pin_B6:
+        case hwGPIO_Int_Pin_B7:
           return GPIO_PORTB_BASE;
         case hwGPIO_Int_Pin_C0:
         case hwGPIO_Int_Pin_C1:
@@ -242,6 +260,12 @@ uint32_t GPIO_Map_Soc_Int_Port_Base(hwGPIO_Int_Pin pin)
           return GPIO_PORTF_BASE;
         case hwGPIO_Int_Pin_G0:
         case hwGPIO_Int_Pin_G1:
+        case hwGPIO_Int_Pin_G2:
+        case hwGPIO_Int_Pin_G3:
+        case hwGPIO_Int_Pin_G4:
+        case hwGPIO_Int_Pin_G5:
+        case hwGPIO_Int_Pin_G6:
+        case hwGPIO_Int_Pin_G7:
           return GPIO_PORTG_BASE;
         case hwGPIO_Int_Pin_H0:
         case hwGPIO_Int_Pin_H1:
@@ -322,6 +346,8 @@ uint32_t GPIO_Map_Soc_Int_Port_HighSpeed_Base(hwGPIO_Int_Pin pin)
         case hwGPIO_Int_Pin_B3:
         case hwGPIO_Int_Pin_B4:
         case hwGPIO_Int_Pin_B5:
+        case hwGPIO_Int_Pin_B6:
+        case hwGPIO_Int_Pin_B7:
           return GPIO_PORTB_AHB_BASE;
         case hwGPIO_Int_Pin_C0:
         case hwGPIO_Int_Pin_C1:
@@ -356,6 +382,12 @@ uint32_t GPIO_Map_Soc_Int_Port_HighSpeed_Base(hwGPIO_Int_Pin pin)
           return GPIO_PORTF_AHB_BASE;
         case hwGPIO_Int_Pin_G0:
         case hwGPIO_Int_Pin_G1:
+        case hwGPIO_Int_Pin_G2:
+        case hwGPIO_Int_Pin_G3:
+        case hwGPIO_Int_Pin_G4:
+        case hwGPIO_Int_Pin_G5:
+        case hwGPIO_Int_Pin_G6:
+        case hwGPIO_Int_Pin_G7:
           return GPIO_PORTG_AHB_BASE;
         case hwGPIO_Int_Pin_H0:
         case hwGPIO_Int_Pin_H1:
@@ -412,6 +444,7 @@ uint32_t GPIO_Map_Soc_Pin_Mask(hwGPIO_Pin pin)
         case hwGPIO_Pin_D2:
         case hwGPIO_Pin_E2:
         case hwGPIO_Pin_F2:
+        case hwGPIO_Pin_G2:
         case hwGPIO_Pin_H2:
         case hwGPIO_Pin_K2:
         case hwGPIO_Pin_L2:
@@ -426,6 +459,7 @@ uint32_t GPIO_Map_Soc_Pin_Mask(hwGPIO_Pin pin)
         case hwGPIO_Pin_D3:
         case hwGPIO_Pin_E3:
         case hwGPIO_Pin_F3:
+        case hwGPIO_Pin_G3:
         case hwGPIO_Pin_H3:
         case hwGPIO_Pin_K3:
         case hwGPIO_Pin_L3:
@@ -440,6 +474,7 @@ uint32_t GPIO_Map_Soc_Pin_Mask(hwGPIO_Pin pin)
         case hwGPIO_Pin_D4:
         case hwGPIO_Pin_E4:
         case hwGPIO_Pin_F4:
+        case hwGPIO_Pin_G4:
         case hwGPIO_Pin_K4:
         case hwGPIO_Pin_L4:
         case hwGPIO_Pin_M4:
@@ -452,6 +487,7 @@ uint32_t GPIO_Map_Soc_Pin_Mask(hwGPIO_Pin pin)
         case hwGPIO_Pin_C5:
         case hwGPIO_Pin_D5:
         case hwGPIO_Pin_E5:
+        case hwGPIO_Pin_G5:
         case hwGPIO_Pin_K5:
         case hwGPIO_Pin_L5:
         case hwGPIO_Pin_M5:
@@ -459,15 +495,19 @@ uint32_t GPIO_Map_Soc_Pin_Mask(hwGPIO_Pin pin)
         case hwGPIO_Pin_P5:
           return GPIO_PIN_5;
         case hwGPIO_Pin_A6:
+        case hwGPIO_Pin_B6:
         case hwGPIO_Pin_C6:
         case hwGPIO_Pin_D6:
+        case hwGPIO_Pin_G6:
         case hwGPIO_Pin_K6:
         case hwGPIO_Pin_L6:
         case hwGPIO_Pin_M6:
           return GPIO_PIN_6;
         case hwGPIO_Pin_A7:
+        case hwGPIO_Pin_B7:
         case hwGPIO_Pin_C7:
         case hwGPIO_Pin_D7:
+        case hwGPIO_Pin_G7:
         case hwGPIO_Pin_K7:
         case hwGPIO_Pin_L7:
         case hwGPIO_Pin_M7:
@@ -519,6 +559,7 @@ uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin)
         case hwGPIO_Int_Pin_D2:
         case hwGPIO_Int_Pin_E2:
         case hwGPIO_Int_Pin_F2:
+        case hwGPIO_Int_Pin_G2:
         case hwGPIO_Int_Pin_H2:
         case hwGPIO_Int_Pin_K2:
         case hwGPIO_Int_Pin_L2:
@@ -533,6 +574,7 @@ uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin)
         case hwGPIO_Int_Pin_D3:
         case hwGPIO_Int_Pin_E3:
         case hwGPIO_Int_Pin_F3:
+        case hwGPIO_Int_Pin_G3:
         case hwGPIO_Int_Pin_H3:
         case hwGPIO_Int_Pin_K3:
         case hwGPIO_Int_Pin_L3:
@@ -547,6 +589,7 @@ uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin)
         case hwGPIO_Int_Pin_D4:
         case hwGPIO_Int_Pin_E4:
         case hwGPIO_Int_Pin_F4:
+        case hwGPIO_Int_Pin_G4:
         case hwGPIO_Int_Pin_K4:
         case hwGPIO_Int_Pin_L4:
         case hwGPIO_Int_Pin_M4:
@@ -559,6 +602,7 @@ uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin)
         case hwGPIO_Int_Pin_C5:
         case hwGPIO_Int_Pin_D5:
         case hwGPIO_Int_Pin_E5:
+        case hwGPIO_Int_Pin_G5:
         case hwGPIO_Int_Pin_K5:
         case hwGPIO_Int_Pin_L5:
         case hwGPIO_Int_Pin_M5:
@@ -566,15 +610,19 @@ uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin)
         case hwGPIO_Int_Pin_P5:
           return GPIO_PIN_5;
         case hwGPIO_Int_Pin_A6:
+        case hwGPIO_Int_Pin_B6:
         case hwGPIO_Int_Pin_C6:
         case hwGPIO_Int_Pin_D6:
+        case hwGPIO_Int_Pin_G6:
         case hwGPIO_Int_Pin_K6:
         case hwGPIO_Int_Pin_L6:
         case hwGPIO_Int_Pin_M6:
           return GPIO_PIN_6;
         case hwGPIO_Int_Pin_A7:
+        case hwGPIO_Int_Pin_B7:
         case hwGPIO_Int_Pin_C7:
         case hwGPIO_Int_Pin_D7:
+        case hwGPIO_Int_Pin_G7:
         case hwGPIO_Int_Pin_K7:
         case hwGPIO_Int_Pin_L7:
         case hwGPIO_Int_Pin_M7:
@@ -649,6 +697,10 @@ hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(uint32_t portBase, uint32_t intMask)
                 return hwGPIO_Int_Pin_B4;
               case GPIO_INT_PIN_5:
                 return hwGPIO_Int_Pin_B5;
+              case GPIO_INT_PIN_6:
+                return hwGPIO_Int_Pin_B6;
+              case GPIO_INT_PIN_7:
+                return hwGPIO_Int_Pin_B7;
           }
           break;
         case GPIO_PORTC_BASE:
@@ -732,6 +784,18 @@ hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(uint32_t portBase, uint32_t intMask)
                 return hwGPIO_Int_Pin_G0;
               case GPIO_INT_PIN_1:
                 return hwGPIO_Int_Pin_G1;
+              case GPIO_INT_PIN_2:
+                return hwGPIO_Int_Pin_G2;
+              case GPIO_INT_PIN_3:
+                return hwGPIO_Int_Pin_G3;
+              case GPIO_INT_PIN_4:
+                return hwGPIO_Int_Pin_G4;
+              case GPIO_INT_PIN_5:
+                return hwGPIO_Int_Pin_G5;
+              case GPIO_INT_PIN_6:
+                return hwGPIO_Int_Pin_G6;
+              case GPIO_INT_PIN_7:
+                return hwGPIO_Int_Pin_G7;
           }
           break;
         case GPIO_PORTH_BASE:
@@ -873,56 +937,4 @@ hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(uint32_t portBase, uint32_t intMask)
     return hwGPIO_Int_Pin_NC;
 }
 
-uint32_t GPIO_Enable_Port_Clock(uint32_t portBase)
-{
-    switch(portBase)
-    {
-      case GPIO_PORTA_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-        break;
-      case GPIO_PORTB_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-        break;
-      case GPIO_PORTC_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
-        break;
-      case GPIO_PORTD_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
-        break;
-      case GPIO_PORTE_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
-        break;
-      case GPIO_PORTF_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-        break;
-      case GPIO_PORTG_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOG);
-        break;
-      case GPIO_PORTH_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOH);
-        break;
-      case GPIO_PORTJ_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOJ);
-        break;
-      case GPIO_PORTK_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOK);
-        break;
-      case GPIO_PORTL_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);
-        break;
-      case GPIO_PORTM_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);
-        break;
-      case GPIO_PORTN_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
-        break;
-      case GPIO_PORTP_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
-        break;
-      case GPIO_PORTQ_BASE:
-        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOQ);
-        break;
-    }
-}
-
-#endif //DEVICE_TI
+#endif //TM4C1294

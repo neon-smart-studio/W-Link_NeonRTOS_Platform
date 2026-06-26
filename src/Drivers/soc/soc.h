@@ -19,6 +19,22 @@
 #endif //NUC442 || NUC472
 
 #if defined (RP2040) || defined (RP2350)
+#include "pico/types.h"
+#include "pico/time.h"
+#include "hardware/sync.h"
+#include "hardware/irq.h"
+#include "hardware/resets.h"
+#include "hardware/clocks.h"
+#include "hardware/adc.h"
+#include "hardware/gpio.h"
+#include "hardware/i2c.h"
+#include "hardware/pwm.h"
+#include "hardware/rtc.h"
+#include "hardware/spi.h"
+#include "hardware/uart.h"
+#include "hardware/structs/adc.h"
+#include "hardware/structs/resets.h"
+#include "hardware/structs/clocks.h"
 #define DEVICE_RP2
 #endif
 
@@ -382,25 +398,6 @@
 #include "stm32wlxx_hal_dac.h"
 #endif //STM32WL
 
-#if defined (RP2040) || defined (RP2350)
-#include "pico/types.h"
-#include "pico/time.h"
-#include "hardware/sync.h"
-#include "hardware/irq.h"
-#include "hardware/resets.h"
-#include "hardware/clocks.h"
-#include "hardware/adc.h"
-#include "hardware/gpio.h"
-#include "hardware/i2c.h"
-#include "hardware/pwm.h"
-#include "hardware/rtc.h"
-#include "hardware/spi.h"
-#include "hardware/uart.h"
-#include "hardware/structs/adc.h"
-#include "hardware/structs/resets.h"
-#include "hardware/structs/clocks.h"
-#endif
-
 #if defined (STM32F0) || defined (STM32F1) || defined (STM32F2) || defined (STM32F3) || defined (STM32F4) || defined (STM32F7) || \
     defined (STM32L0) || defined (STM32L1) || defined (STM32L4) || defined (STM32L5) || \
     defined (STM32C0) || \
@@ -411,7 +408,7 @@
 #define DEVICE_STM32
 #endif
 
-#if defined (TM4C1294)
+#if defined (TM4C1294) || defined (TM4C123)
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_emac.h"
@@ -428,7 +425,7 @@
 #include "driverlib/pwm.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/flash.h"
-#define DEVICE_TI
+#define DEVICE_TITIVAC
 #endif
 
 #endif //SOC_H

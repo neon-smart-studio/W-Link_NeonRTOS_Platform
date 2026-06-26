@@ -14,8 +14,8 @@
 #include "STM32/GPIO_Pin_STM32.h"
 #endif
 
-#ifdef DEVICE_TI
-#include "TI/GPIO_Pin_TI.h"
+#ifdef DEVICE_TITIVAC
+#include "TITivaC/GPIO_Pin_TITivaC.h"
 #endif
 
 #ifdef DEVICE_RP2

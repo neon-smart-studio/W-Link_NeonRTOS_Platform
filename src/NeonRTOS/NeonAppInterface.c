@@ -528,10 +528,6 @@ void Init_Thread(void* p)
 
     //NeonRTOS_TaskCreate(Display_Task, (const signed char*)"Display Task", 2048, NULL, 1, NULL);
 
-    GPIO_Pin_Init(LED_R, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
-    GPIO_Pin_Init(LED_B, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
-    GPIO_Pin_Init(LED_G, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
-
     while (1)
     {
         if(NeonTCPIP_IF_isLinkUp())
@@ -539,35 +535,15 @@ void Init_Thread(void* p)
 #if LWIP_DHCP
             if(NeonTCPIP_Get_DHCP_State()==DHCP_ADDRESS_ASSIGNED)
             {
-                GPIO_Pin_Write(LED_B, 1);
-                NeonRTOS_Sleep(500);
-
-                GPIO_Pin_Write(LED_B, 0);
-                NeonRTOS_Sleep(500);
             }
             else
             {
-                GPIO_Pin_Write(LED_G, 1);
-                NeonRTOS_Sleep(500);
-
-                GPIO_Pin_Write(LED_G, 0);
-                NeonRTOS_Sleep(500);
             }
 #else
-                GPIO_Pin_Write(LED_B, 1);
-                NeonRTOS_Sleep(500);
-
-                GPIO_Pin_Write(LED_B, 0);
-                NeonRTOS_Sleep(500);
 #endif
         }
         else
         {
-            GPIO_Pin_Write(LED_R, 1);
-            NeonRTOS_Sleep(200);
-
-            GPIO_Pin_Write(LED_R, 0);
-            NeonRTOS_Sleep(200);  
         }
 
         size_t freeHeapSize = NeonRTOS_GetFreeHeapSize();

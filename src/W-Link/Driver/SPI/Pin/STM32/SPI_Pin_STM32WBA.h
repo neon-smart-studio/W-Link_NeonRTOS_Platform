@@ -1,7 +1,7 @@
 #ifndef SPI_PIN_STM32WBA_H
 #define SPI_PIN_STM32WBA_H
 
-#include "SPI_Pin_STM32.h"
+#include "SPI_Pin_STM32_Def.h"
 
 typedef enum {
     SPI_Pinset_DEFAULT = 0,

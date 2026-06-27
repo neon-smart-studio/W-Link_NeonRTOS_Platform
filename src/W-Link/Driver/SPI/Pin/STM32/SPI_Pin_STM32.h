@@ -2,7 +2,7 @@
 #ifndef SPI_PIN_STM32_H
 #define SPI_PIN_STM32_H
 
-#include "SPI_Pin_STM32_Def.h"
+#include "soc.h"
 
 #ifdef STM32C0
 #include "SPI_Pin_STM32C0.h"

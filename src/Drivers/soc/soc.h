@@ -419,15 +419,17 @@
 #include "driverlib/can.h"
 #include "driverlib/debug.h"
 #include "driverlib/emac.h"
-#include "driverlib/pin_map.h"
+#include "driverlib/flash.h"
 #include "driverlib/gpio.h"
 #include "driverlib/hibernate.h"
-#include "driverlib/interrupt.h"
-#include "driverlib/uart.h"
 #include "driverlib/i2c.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/pin_map.h"
 #include "driverlib/pwm.h"
+#include "driverlib/ssi.h"
 #include "driverlib/sysctl.h"
-#include "driverlib/flash.h"
+#include "driverlib/timer.h"
+#include "driverlib/uart.h"
 #define DEVICE_TITIVAC
 #endif
 

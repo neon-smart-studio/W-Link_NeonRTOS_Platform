@@ -272,13 +272,8 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index)
 
     NeonRTOS_SyncObjDelete(&I2C_Master_Done_SyncHandle[index]);
 
-    if (sda_port && sda_mask) {
-        MAP_GPIOPinTypeGPIOInput(sda_port, sda_mask);
-    }
-
-    if (scl_port && scl_mask) {
-        MAP_GPIOPinTypeGPIOInput(scl_port, scl_mask);
-    }
+    MAP_GPIOPinTypeGPIOInput(sda_port, sda_mask);
+    MAP_GPIOPinTypeGPIOInput(scl_port, scl_mask);
 
     gpio_pin_init_status[sda_pin] = false;
     gpio_pin_init_status[scl_pin] = false;

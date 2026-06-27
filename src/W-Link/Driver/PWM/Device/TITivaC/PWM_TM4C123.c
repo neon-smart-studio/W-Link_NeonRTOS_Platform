@@ -1,3 +1,15 @@
+
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <math.h>
+
+#include "soc.h"
+
+#include "NeonRTOS.h"
+
+#include "PWM/PWM.h"
+
 #if defined(TM4C123)
 
 #include "PWM/Pin/PWM_Pin.h"

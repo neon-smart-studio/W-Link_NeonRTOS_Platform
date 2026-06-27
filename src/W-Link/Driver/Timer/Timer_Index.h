@@ -119,4 +119,19 @@ typedef enum hwTimer_Index_t
 }hwTimer_Index;
 #endif // DEVICE_RP2
 
+#ifdef DEVICE_TITIVAC
+typedef enum hwTimer_Index_t
+{
+    hwTimer_Index_0 = 0,
+    hwTimer_Index_1,
+    hwTimer_Index_2,
+    hwTimer_Index_3,
+    hwTimer_Index_4,
+    hwTimer_Index_5,
+    hwTimer_Index_6,
+    hwTimer_Index_7,
+  hwTimer_Index_MAX,
+}hwTimer_Index;
+#endif // DEVICE_TITIVAC
+
 #endif //TIMER_INDEX_H

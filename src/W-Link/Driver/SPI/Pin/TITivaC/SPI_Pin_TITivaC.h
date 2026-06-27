@@ -1,7 +1,15 @@
 
-#ifndef SPI_MASTER_PIN_H
-#define SPI_MASTER_PIN_H
+#ifndef SPI_PIN_DEF_H
+#define SPI_PIN_DEF_H
 
-#include "GPIO/GPIO.h"
+#include "soc.h"
 
-#endif //SPI_MASTER_PIN_H
+#if defined(TM4C123)
+#include "SPI_Pin_TM4C123.h"
+#endif
+
+#if defined(TM4C1294)
+#include "SPI_Pin_TM4C1294.h"
+#endif
+
+#endif //SPI_PIN_DEF_H

@@ -2,6 +2,8 @@
 #ifndef DAC_CHANNEL_H
 #define DAC_CHANNEL_H
 
+#include "soc.h"
+
 #ifdef DEVICE_NUVOTON
 typedef enum hwDAC_Channel_Index_t
 {
@@ -34,6 +36,13 @@ typedef enum hwDAC_Channel_Index_t
 #endif
 
 #ifdef DEVICE_RP2
+typedef enum hwDAC_Channel_Index_t
+{
+  hwDAC_Channel_Index_MAX = 0,
+}hwDAC_Channel_Index;
+#endif
+
+#ifdef DEVICE_TITIVAC
 typedef enum hwDAC_Channel_Index_t
 {
   hwDAC_Channel_Index_MAX = 0,

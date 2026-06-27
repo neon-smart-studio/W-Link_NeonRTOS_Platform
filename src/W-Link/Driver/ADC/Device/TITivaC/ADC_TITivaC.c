@@ -65,7 +65,7 @@ static uint32_t ADC_Channel_Index_To_Ctl(hwADC_Channel_Index ch)
     }
 }
 
-static void ADC_GPIO_ConfigAF(hwADC_Channel_Index ch)
+void ADC_GPIO_ConfigAF(hwADC_Channel_Index ch)
 {
     hwGPIO_Pin pin = ADC_Channel_Def_Table[ch].adc_pin;
     uint32_t portBase =  GPIO_Map_Soc_Port_Base(pin);
@@ -78,10 +78,10 @@ static void ADC_GPIO_ConfigAF(hwADC_Channel_Index ch)
 
     GPIO_Enable_Port_Clock(portBase);
 
-    GPIOPinTypeADC(portBase, pinMask);
+    MAP_GPIOPinTypeADC(portBase, pinMask);
 }
 
-static void ADC_GPIO_DeConfigAF(hwADC_Channel_Index ch)
+void ADC_GPIO_DeConfigAF(hwADC_Channel_Index ch)
 {
     hwGPIO_Pin pin = ADC_Channel_Def_Table[ch].adc_pin;
     uint32_t portBase =  GPIO_Map_Soc_Port_Base(pin);
@@ -92,10 +92,10 @@ static void ADC_GPIO_DeConfigAF(hwADC_Channel_Index ch)
       return hwGPIO_InvalidParameter;
     }
 
-    GPIOPinTypeGPIOInput(portBase, pinMask);
+    MAP_GPIOPinTypeGPIOInput(portBase, pinMask);
 }
 
-static hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
+hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
 {
     uint32_t periph = ADC_Instance_To_Periph(inst);
     uint32_t base   = ADC_Instance_To_Base(inst);
@@ -103,22 +103,22 @@ static hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
     if(base == 0 || periph == 0)
         return hwADC_InvalidParameter;
 
-    SysCtlPeripheralEnable(periph);
-    while(!SysCtlPeripheralReady(periph));
+    MAP_SysCtlPeripheralEnable(periph);
+    while(!MAP_SysCtlPeripheralReady(periph));
 
-    ADCSequenceDisable(base, 3);
+    MAP_ADCSequenceDisable(base, 3);
 
-    ADCSequenceConfigure(base, 3, ADC_TRIGGER_PROCESSOR, 0);
+    MAP_ADCSequenceConfigure(base, 3, ADC_TRIGGER_PROCESSOR, 0);
 
-    ADCIntClear(base, 3);
-    ADCIntEnable(base, 3);
+    MAP_ADCIntClear(base, 3);
+    MAP_ADCIntEnable(base, 3);
 
-    ADCSequenceEnable(base, 3);
+    MAP_ADCSequenceEnable(base, 3);
 
     return hwADC_OK;
 }
 
-static hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
+hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
 {
     uint32_t periph = ADC_Instance_To_Periph(inst);
     uint32_t base   = ADC_Instance_To_Base(inst);
@@ -126,15 +126,15 @@ static hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
     if(base == 0 || periph == 0)
         return hwADC_InvalidParameter;
 
-    ADCIntDisable(base, 3);
-    ADCSequenceDisable(base, 3);
+    MAP_ADCIntDisable(base, 3);
+    MAP_ADCSequenceDisable(base, 3);
 
-    SysCtlPeripheralDisable(periph);
+    MAP_SysCtlPeripheralDisable(periph);
 
     return hwADC_OK;
 }
 
-static hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
+hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
 {
     uint32_t base = ADC_Instance_To_Base(inst);
     uint32_t ctl_ch = ADC_Channel_Index_To_Ctl(ch);
@@ -142,26 +142,26 @@ static hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index
     if(base == 0 || ctl_ch == 0)
         return hwADC_InvalidParameter;
 
-    ADCSequenceDisable(base, 3);
+    MAP_ADCSequenceDisable(base, 3);
 
-    ADCSequenceStepConfigure(base, 3, 0, ctl_ch | ADC_CTL_IE | ADC_CTL_END);
+    MAP_ADCSequenceStepConfigure(base, 3, 0, ctl_ch | ADC_CTL_IE | ADC_CTL_END);
 
-    ADCIntClear(base, 3);
-    ADCSequenceEnable(base, 3);
+    MAP_ADCIntClear(base, 3);
+    MAP_ADCSequenceEnable(base, 3);
 
     return hwADC_OK;
 }
 
-static void ADC_NVIC_Init(void)
+void ADC_NVIC_Init(void)
 {
-    IntEnable(INT_ADC0SS3);
-    IntEnable(INT_ADC1SS3);
+    MAP_IntEnable(INT_ADC0SS3);
+    MAP_IntEnable(INT_ADC1SS3);
 }
 
-static void ADC_NVIC_DeInit(void)
+void ADC_NVIC_DeInit(void)
 {
-    IntDisable(INT_ADC0SS3);
-    IntDisable(INT_ADC1SS3);
+    MAP_IntDisable(INT_ADC0SS3);
+    MAP_IntDisable(INT_ADC1SS3);
 }
 
 bool ADC_IsInstanceChannelUsed(hwADC_Instance inst)
@@ -204,8 +204,8 @@ void ADC0SS3_Handler(void)
 {
     uint32_t raw;
 
-    ADCIntClear(ADC0_BASE, 3);
-    ADCSequenceDataGet(ADC0_BASE, 3, &raw);
+    MAP_ADCIntClear(ADC0_BASE, 3);
+    MAP_ADCSequenceDataGet(ADC0_BASE, 3, &raw);
 
     ADC_ConvCpltCallback((uint16_t)raw);
 }
@@ -214,8 +214,8 @@ void ADC1SS3_Handler(void)
 {
     uint32_t raw;
 
-    ADCIntClear(ADC1_BASE, 3);
-    ADCSequenceDataGet(ADC1_BASE, 3, &raw);
+    MAP_ADCIntClear(ADC1_BASE, 3);
+    MAP_ADCSequenceDataGet(ADC1_BASE, 3, &raw);
 
     ADC_ConvCpltCallback((uint16_t)raw);
 }
@@ -343,7 +343,7 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
     if (ADC_ConfigChannel(inst, ch) < hwADC_OK)
         return hwADC_HwError;
 
-    ADCProcessorTrigger(base, 3);
+    MAP_ADCProcessorTrigger(base, 3);
 
     ADC_QueueItem item;
 
@@ -352,8 +352,8 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
                          ADC_CONV_TIMEOUT_MS) != NeonRTOS_OK)
     {
         uint32_t base = ADC_Instance_To_Base(inst);
-        ADCSequenceDisable(base, 3);
-        ADCSequenceEnable(base, 3);
+        MAP_ADCSequenceDisable(base, 3);
+        MAP_ADCSequenceEnable(base, 3);
         return hwADC_HwError;
     }
 

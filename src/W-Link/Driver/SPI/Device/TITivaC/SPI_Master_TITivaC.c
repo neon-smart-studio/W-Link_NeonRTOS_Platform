@@ -181,10 +181,8 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
 
     uint32_t ssi_base = SPI_Map_Soc_Base(index);
     uint32_t ssi_periph = SPI_Map_Soc_Periph(index);
-    uint32_t gpio_base = SPI_Map_GPIO_Port(index);
-    uint32_t gpio_periph = SPI_Map_GPIO_Periph(index);
 
-    if (ssi_base == 0 || ssi_periph == 0 || gpio_base == 0 || gpio_periph == 0)
+    if (ssi_base == 0 || ssi_periph == 0)
     {
         return hwSPI_InvalidParameter;
     }
@@ -199,21 +197,38 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     uint32_t sclk_pin_cfg = SPI_Map_PinConfig(index, sclk_pin);
     uint32_t cs_pin_cfg = SPI_Map_PinConfig(index, cs_pin);
 
-    if (miso_pin_cfg == 0 || mosi_pin_cfg == 0 || sclk_pin_cfg == 0)
+    uint32_t miso_port = GPIO_Map_Soc_Port_Base(miso_pin);
+    uint32_t mosi_port = GPIO_Map_Soc_Port_Base(mosi_pin);
+    uint32_t sclk_port = GPIO_Map_Soc_Port_Base(sclk_pin);
+    uint32_t cs_port = GPIO_Map_Soc_Port_Base(cs_pin);
+
+    uint32_t miso_pin_mask = GPIO_Map_Soc_Pin_Mask(miso_pin);
+    uint32_t mosi_pin_mask = GPIO_Map_Soc_Pin_Mask(mosi_pin);
+    uint32_t sclk_pin_mask = GPIO_Map_Soc_Pin_Mask(sclk_pin);
+    uint32_t cs_pin_mask = GPIO_Map_Soc_Pin_Mask(cs_pin);
+
+    if (miso_pin_cfg == 0 || mosi_pin_cfg == 0 || sclk_pin_cfg == 0 || \
+        miso_port == 0 || mosi_port == 0 || sclk_port == 0 || \
+        miso_pin_mask == 0 || mosi_pin_mask == 0 || sclk_pin_mask == 0)
     {
         return hwSPI_InvalidParameter;
     }
 
     if(cs)
     {
-        if (cs_pin_cfg == 0)
+        if (cs_pin_cfg == 0 || cs_port == 0 || cs_pin_mask == 0)
         {
             return hwSPI_InvalidParameter;
         }
     }
 
-    MAP_SysCtlPeripheralEnable(gpio_periph);
-    while (!MAP_SysCtlPeripheralReady(gpio_periph));
+    GPIO_Enable_Port_Clock(miso_port);
+    GPIO_Enable_Port_Clock(mosi_port);
+    GPIO_Enable_Port_Clock(sclk_port);
+    if(cs)
+    {
+        GPIO_Enable_Port_Clock(cs_port);
+    }
 
     MAP_SysCtlPeripheralEnable(ssi_periph);
     while (!MAP_SysCtlPeripheralReady(ssi_periph));
@@ -221,9 +236,18 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     MAP_GPIOPinConfigure(miso_pin_cfg);
     MAP_GPIOPinConfigure(mosi_pin_cfg);
     MAP_GPIOPinConfigure(sclk_pin_cfg);
-    if (cs) MAP_GPIOPinConfigure(cs_pin_cfg);
+    if(cs)
+    {
+        MAP_GPIOPinConfigure(cs_pin_cfg);
+    }
 
-    MAP_GPIOPinTypeSSI(gpio_base, SPI_Map_GPIO_PinMask(index, (cs && cs_pin != hwGPIO_Pin_NC)));
+    MAP_GPIOPinTypeSSI(miso_port, miso_pin_mask);
+    MAP_GPIOPinTypeSSI(mosi_port, mosi_pin_mask);
+    MAP_GPIOPinTypeSSI(sclk_port, sclk_pin_mask);
+    if(cs)
+    {
+        MAP_GPIOPinTypeSSI(cs_port, cs_pin_mask);
+    }
 
     MAP_SSIDisable(ssi_base);
 
@@ -271,7 +295,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
     gpio_pin_init_status[mosi_pin] = true;
     gpio_pin_init_status[sclk_pin] = true;
 
-    if (cs_pin != hwGPIO_Pin_NC && cs)
+    if (cs)
     {
         gpio_pin_init_status[cs_pin] = true;
         Spi_Master_Use_CS[index] = true;
@@ -320,30 +344,32 @@ hwSPI_OpResult SPI_Master_DeInit(hwSPI_Index index)
     uint32_t mosi_port = GPIO_Map_Soc_Port_Base(mosi_pin);
     uint32_t sclk_port = GPIO_Map_Soc_Port_Base(sclk_pin);
     uint32_t cs_port   = GPIO_Map_Soc_Port_Base(cs_pin);
-    uint32_t miso_mask = GPIO_Map_Soc_Pin_Mask(miso_pin);
-    uint32_t mosi_mask = GPIO_Map_Soc_Pin_Mask(mosi_pin);
-    uint32_t sclk_mask = GPIO_Map_Soc_Pin_Mask(sclk_pin);
-    uint32_t cs_mask   = GPIO_Map_Soc_Pin_Mask(cs_pin);
+    
+    uint32_t miso_pin_mask = GPIO_Map_Soc_Pin_Mask(miso_pin);
+    uint32_t mosi_pin_mask = GPIO_Map_Soc_Pin_Mask(mosi_pin);
+    uint32_t sclk_pin_mask = GPIO_Map_Soc_Pin_Mask(sclk_pin);
+    uint32_t cs_pin_mask   = GPIO_Map_Soc_Pin_Mask(cs_pin);
 
-    if (miso_port == 0 || mosi_port == 0 || sclk_port == 0 || miso_mask == 0 || mosi_mask == 0 || sclk_mask == 0)
+    if (miso_port == 0 || mosi_port == 0 || sclk_port == 0 || \
+        miso_pin_mask == 0 || mosi_pin_mask == 0 || sclk_pin_mask == 0)
     {
         return hwSPI_InvalidParameter;
     }
 
     if(Spi_Master_Use_CS[index])
     {
-        if(cs_port == 0  || cs_mask == 0)
+        if(cs_port == 0  || cs_pin_mask == 0)
         {
             return hwSPI_InvalidParameter;
         }
     }
 
-    MAP_GPIOPinTypeGPIOInput(miso_port, miso_mask);
-    MAP_GPIOPinTypeGPIOInput(mosi_port, mosi_mask);
-    MAP_GPIOPinTypeGPIOInput(sclk_port, sclk_mask);
+    MAP_GPIOPinTypeGPIOInput(miso_port, miso_pin_mask);
+    MAP_GPIOPinTypeGPIOInput(mosi_port, mosi_pin_mask);
+    MAP_GPIOPinTypeGPIOInput(sclk_port, sclk_pin_mask);
     if(Spi_Master_Use_CS[index])
     {
-        MAP_GPIOPinTypeGPIOInput(cs_port, cs_mask);
+        MAP_GPIOPinTypeGPIOInput(cs_port, cs_pin_mask);
     }
 
     gpio_pin_init_status[miso_pin] = false;
@@ -668,7 +694,7 @@ hwSPI_OpResult SPI_Master_DummyBytes(hwSPI_Index index, uint32_t len)
     return hwSPI_OK;
 }
 
-hwSPI_OpResult SPI_Master_Stream_Write(hwSPI_Index index, const uint8_t *buf, uint32_t len)
+hwSPI_OpResult SPI_Master_Stream_Write(hwSPI_Index index, const uint8_t *buf, uint16_t len)
 {
     if (index >= hwSPI_Index_MAX || buf == NULL || len == 0)
     {
@@ -730,7 +756,7 @@ hwSPI_OpResult SPI_Master_Stream_Write(hwSPI_Index index, const uint8_t *buf, ui
     return hwSPI_OK;
 }
 
-hwSPI_OpResult SPI_Master_Stream_Read(hwSPI_Index index, uint8_t *buf, uint32_t len)
+hwSPI_OpResult SPI_Master_Stream_Read(hwSPI_Index index, uint8_t *buf, uint16_t len)
 {
     if (index >= hwSPI_Index_MAX || buf == NULL || len == 0)
     {
@@ -792,7 +818,7 @@ hwSPI_OpResult SPI_Master_Stream_Read(hwSPI_Index index, uint8_t *buf, uint32_t 
     return hwSPI_OK;
 }
 
-hwSPI_OpResult SPI_Master_Stream_Transfer(hwSPI_Index index, const uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len)
+hwSPI_OpResult SPI_Master_Stream_Transfer(hwSPI_Index index, const uint8_t *tx_buf, uint8_t *rx_buf, uint16_t len)
 {
     if (index >= hwSPI_Index_MAX || tx_buf == NULL || rx_buf == NULL || len == 0)
     {

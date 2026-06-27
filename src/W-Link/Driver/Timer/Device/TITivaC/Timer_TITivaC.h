@@ -12,8 +12,6 @@
 extern "C" {
 #endif
 
-extern bool Timer_Init_Status[hwTimer_Index_MAX];
-
 #ifdef  __cplusplus
 }
 #endif // __cplusplus

@@ -46,51 +46,6 @@ uint32_t SPI_Map_IRQ(hwSPI_Index index)
     }
 }
 
-uint32_t SPI_Map_GPIO_Port(hwSPI_Index index)
-{
-    switch (index)
-    {
-        case hwSPI_Index_0: return GPIO_PORTA_BASE;
-        case hwSPI_Index_1: return GPIO_PORTF_BASE;
-        case hwSPI_Index_2: return GPIO_PORTB_BASE;
-        case hwSPI_Index_3: return GPIO_PORTD_BASE;
-        default: return 0;
-    }
-}
-
-uint32_t SPI_Map_GPIO_Periph(hwSPI_Index index)
-{
-    switch (index)
-    {
-        case hwSPI_Index_0: return SYSCTL_PERIPH_GPIOA;
-        case hwSPI_Index_1: return SYSCTL_PERIPH_GPIOF;
-        case hwSPI_Index_2: return SYSCTL_PERIPH_GPIOB;
-        case hwSPI_Index_3: return SYSCTL_PERIPH_GPIOD;
-        default: return 0;
-    }
-}
-
-uint32_t SPI_Map_GPIO_PinMask(hwSPI_Index index, bool cs)
-{
-    switch (index)
-    {
-        case hwSPI_Index_0:
-            return GPIO_PIN_2 | GPIO_PIN_4 | GPIO_PIN_5 | (cs ? GPIO_PIN_3 : 0);
-
-        case hwSPI_Index_1:
-            return GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | (cs ? GPIO_PIN_3 : 0);
-
-        case hwSPI_Index_2:
-            return GPIO_PIN_4 | GPIO_PIN_6 | GPIO_PIN_7 | (cs ? GPIO_PIN_5 : 0);
-
-        case hwSPI_Index_3:
-            return GPIO_PIN_0 | GPIO_PIN_2 | GPIO_PIN_3 | (cs ? GPIO_PIN_1 : 0);
-
-        default:
-            return 0;
-    }
-}
-
 uint32_t SPI_Map_PinConfig(hwSPI_Index index, hwGPIO_Pin pin)
 {
     switch (index) {

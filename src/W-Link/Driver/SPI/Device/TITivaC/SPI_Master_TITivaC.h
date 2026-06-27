@@ -17,9 +17,6 @@ extern bool Spi_Master_Init_Status[];
 uint32_t SPI_Map_Soc_Base(hwSPI_Index index);
 uint32_t SPI_Map_Soc_Periph(hwSPI_Index index);
 uint32_t SPI_Map_IRQ(hwSPI_Index index);
-uint32_t SPI_Map_GPIO_Port(hwSPI_Index index);
-uint32_t SPI_Map_GPIO_Periph(hwSPI_Index index);
-uint32_t SPI_Map_GPIO_PinMask(hwSPI_Index index, bool cs);
 uint32_t SPI_Map_PinConfig(hwSPI_Index index, hwGPIO_Pin pin);
 
 void TITivaC_SPI_IRQ_Process(hwSPI_Index index);

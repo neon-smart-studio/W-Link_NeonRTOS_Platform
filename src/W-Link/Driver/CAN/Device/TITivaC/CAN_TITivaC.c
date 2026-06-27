@@ -168,7 +168,7 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
 
     MAP_CANEnable(can_base);
 
-    if (MAP_CAN_ConfigRxObject(index) != hwCAN_OK)
+    if (CAN_ConfigRxObject(index) != hwCAN_OK)
     {
         MAP_CANDisable(can_base);
         MAP_IntDisable(irq);

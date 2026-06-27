@@ -78,12 +78,12 @@ uint32_t CAN_Map_PinConfig(hwCAN_Index can, hwGPIO_Pin pin)
 
 void CAN0_IRQHandler(void)
 {
-    CAN_IRQ_Process(CAN0_BASE);
+    CAN_IRQ_Process(hwCAN_Index_0);
 }
 
 void CAN1_IRQHandler(void)
 {
-    CAN_IRQ_Process(CAN1_BASE);
+    CAN_IRQ_Process(hwCAN_Index_1);
 }
 
 void CAN_NVIC_Init(hwCAN_Index index)

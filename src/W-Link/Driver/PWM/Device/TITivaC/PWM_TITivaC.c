@@ -12,7 +12,13 @@
 
 #ifdef DEVICE_TITIVAC
 
-#include "PWM/Pin/PWM_Pin.h"
+#include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
+
+#include "PWM/Pin/TITivaC/PWM_Pin_TITivaC.h"
+
+#include "PWM_TITivaC_Base.h"
+
+#include "PWM_TITivaC.h"
 
 #define PWM_HZ           1000
 

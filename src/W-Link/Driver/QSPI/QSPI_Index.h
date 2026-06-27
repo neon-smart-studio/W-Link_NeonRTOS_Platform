@@ -21,4 +21,15 @@ typedef enum hwQSPI_Index_t
 }hwQSPI_Index;
 #endif // DEVICE_NUVOTON
 
+#ifdef DEVICE_TITIVAC
+typedef enum hwQSPI_Index_t
+{
+  hwQSPI_Index_0 = 0,
+  hwQSPI_Index_1,
+  hwQSPI_Index_2,
+  hwQSPI_Index_3,
+  hwQSPI_Index_MAX,
+}hwQSPI_Index;
+#endif // DEVICE_TITIVAC
+
 #endif //QSPI_MASTER_INDEX_H

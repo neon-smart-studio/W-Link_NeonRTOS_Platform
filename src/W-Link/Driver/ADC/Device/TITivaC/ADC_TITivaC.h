@@ -20,9 +20,6 @@ typedef struct {
     uint32_t raw;
 } ADC_QueueItem;
 
-void ADC_GPIO_ConfigAF(hwADC_Channel_Index ch);
-void ADC_GPIO_DeConfigAF(hwADC_Channel_Index ch);
-
 void ADC_ConvCpltCallback(uint16_t raw);
 
 hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst);

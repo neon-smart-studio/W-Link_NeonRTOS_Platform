@@ -65,36 +65,6 @@ static uint32_t ADC_Channel_Index_To_Ctl(hwADC_Channel_Index ch)
     }
 }
 
-void ADC_GPIO_ConfigAF(hwADC_Channel_Index ch)
-{
-    hwGPIO_Pin pin = ADC_Channel_Def_Table[ch].adc_pin;
-    uint32_t portBase =  GPIO_Map_Soc_Port_Base(pin);
-    uint32_t pinMask = GPIO_Map_Soc_Pin_Mask(pin);
-
-    if(portBase==0 || pinMask==0)
-    {
-      return hwGPIO_InvalidParameter;
-    }
-
-    GPIO_Enable_Port_Clock(portBase);
-
-    MAP_GPIOPinTypeADC(portBase, pinMask);
-}
-
-void ADC_GPIO_DeConfigAF(hwADC_Channel_Index ch)
-{
-    hwGPIO_Pin pin = ADC_Channel_Def_Table[ch].adc_pin;
-    uint32_t portBase =  GPIO_Map_Soc_Port_Base(pin);
-    uint32_t pinMask = GPIO_Map_Soc_Pin_Mask(pin);
-
-    if(portBase==0 || pinMask==0)
-    {
-      return hwGPIO_InvalidParameter;
-    }
-
-    MAP_GPIOPinTypeGPIOInput(portBase, pinMask);
-}
-
 hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
 {
     uint32_t periph = ADC_Instance_To_Periph(inst);
@@ -234,7 +204,18 @@ hwADC_OpResult ADC_Channel_Init(hwADC_Channel_Index ch)
         return hwADC_InvalidParameter;
     }
 
-    ADC_GPIO_ConfigAF(ch);
+    hwGPIO_Pin pin = ADC_Channel_Def_Table[ch].adc_pin;
+    uint32_t portBase =  GPIO_Map_Soc_Port_Base(pin);
+    uint32_t pinMask = GPIO_Map_Soc_Pin_Mask(pin);
+
+    if(portBase==0 || pinMask==0)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+
+    GPIO_Enable_Port_Clock(portBase);
+
+    MAP_GPIOPinTypeADC(portBase, pinMask);
 
     if(!ADC_Instance_Init_Status[inst])
     {
@@ -282,9 +263,18 @@ hwADC_OpResult ADC_Channel_DeInit(hwADC_Channel_Index ch)
         return hwADC_OK;
     }
         
-    ADC_Channel_Init_Status[ch] = false;
+    hwGPIO_Pin pin = ADC_Channel_Def_Table[ch].adc_pin;
+    uint32_t portBase =  GPIO_Map_Soc_Port_Base(pin);
+    uint32_t pinMask = GPIO_Map_Soc_Pin_Mask(pin);
 
-    ADC_GPIO_DeConfigAF(ch);
+    if(portBase==0 || pinMask==0)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+
+    MAP_GPIOPinTypeGPIOInput(portBase, pinMask);
+
+    ADC_Channel_Init_Status[ch] = false;
 
     gpio_pin_init_status[ADC_Channel_Def_Table[ch].adc_pin] = false;
 

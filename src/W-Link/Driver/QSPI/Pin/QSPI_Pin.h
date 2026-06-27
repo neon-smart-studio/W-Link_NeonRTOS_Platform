@@ -14,8 +14,8 @@
 #include "STM32/QSPI_Pin_STM32.h"
 #endif
 
-#ifdef DEVICE_TM4C1294
-#include "TI/QSPI_Pin_TM4C1294.h"
+#ifdef DEVICE_TITIVAC
+#include "TI/QSPI_Pin_TITivaC.h"
 #endif
 
 #endif //QSPI_MASTER_PIN_H

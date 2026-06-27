@@ -11,16 +11,22 @@
 extern "C" {
 #endif
 
+#if defined(TM4C123)
 typedef enum
 {
-#if defined(SYSCTL_PERIPH_PWM0)
     hwPWM_Base_0 = 0,
-#endif
-#if defined(SYSCTL_PERIPH_PWM1)
     hwPWM_Base_1,
-#endif
 	hwPWM_Base_MAX
 }hwPWM_Base_Index;
+#endif
+
+#if defined(TM4C1294)
+typedef enum
+{
+    hwPWM_Base_0 = 0,
+	hwPWM_Base_MAX
+}hwPWM_Base_Index;
+#endif
 
 #ifdef  __cplusplus
 }

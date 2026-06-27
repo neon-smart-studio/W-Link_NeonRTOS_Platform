@@ -12,7 +12,7 @@
 
 #ifdef DEVICE_TITIVAC
 
-#include "PWM/PWM_Pin.h"
+#include "PWM/Pin/PWM_Pin.h"
 
 #define PWM_HZ           1000
 

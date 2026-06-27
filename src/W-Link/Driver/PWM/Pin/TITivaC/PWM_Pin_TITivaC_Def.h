@@ -4,12 +4,13 @@
 
 #include "GPIO/GPIO.h"
 
-#include "Timer/Timer.h"
-
 #include "PWM/PWM.h"
+
+#include "PWM/Device/TITivaC/PWM_TITivaC_Base.h"
 
 typedef struct {
     hwPWM_Channel channel;
+    hwPWM_Base_Index base;
     hwGPIO_Pin    pin;
 } PWM_Pin_Def;
 

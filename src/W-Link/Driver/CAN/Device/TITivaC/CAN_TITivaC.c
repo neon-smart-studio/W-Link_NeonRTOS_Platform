@@ -29,130 +29,18 @@ static bool CAN_Init_Status[hwCAN_Index_MAX] = {false};
 static NeonRTOS_SyncObj_t CAN_TxDone_Sync[hwCAN_Index_MAX];
 static NeonRTOS_MsgQ_t CAN_RxQueue[hwCAN_Index_MAX];
 
-static uint32_t CAN_Map_Soc_Base(hwCAN_Index index)
+void CAN_IRQ_Process(hwCAN_Index index)
 {
-    switch (index)
-    {
-#if defined(CAN0_BASE)
-        case hwCAN_Index_0: return CAN0_BASE;
-#endif
-#if defined(CAN1_BASE)
-        case hwCAN_Index_1: return CAN1_BASE;
-#endif
-        default: break;
-    }
-
-    return 0;
-}
-
-static uint32_t CAN_Map_Soc_Periph(hwCAN_Index index)
-{
-    switch (index)
-    {
-#if defined(SYSCTL_PERIPH_CAN0)
-        case hwCAN_Index_0: return SYSCTL_PERIPH_CAN0;
-#endif
-#if defined(SYSCTL_PERIPH_CAN1)
-        case hwCAN_Index_1: return SYSCTL_PERIPH_CAN1;
-#endif
-        default: break;
-    }
-
-    return 0;
-}
-
-static uint32_t CAN_Map_Soc_Int(hwCAN_Index index)
-{
-    switch (index)
-    {
-#if defined(INT_CAN0)
-        case hwCAN_Index_0: return INT_CAN0;
-#endif
-#if defined(INT_CAN1)
-        case hwCAN_Index_1: return INT_CAN1;
-#endif
-        default: break;
-    }
-
-    return 0;
-}
-
-#if defined(TM4C123)
-static uint32_t CAN_Map_PinConfig(hwCAN_Index can, hwGPIO_Pin pin)
-{
-    switch (can)
-    {
-#if defined(CAN0_BASE)
-        case hwCAN_Index_0:
-            if (pin == hwGPIO_Pin_E5) return GPIO_PE5_CAN0TX;
-            if (pin == hwGPIO_Pin_E4) return GPIO_PE4_CAN0RX;
-            break;
-#endif
-
-#if defined(CAN1_BASE)
-        case hwCAN_Index_1:
-            if (pin == hwGPIO_Pin_B1) return GPIO_PB1_CAN1TX;
-            if (pin == hwGPIO_Pin_B0) return GPIO_PB0_CAN1RX;
-            break;
-#endif
-
-        default:
-            break;
-    }
-
-    return 0;
-}
-#endif
-
-#if defined(TM4C1294)
-static uint32_t CAN_Map_PinConfig(hwCAN_Index can, hwGPIO_Pin pin)
-{
-    switch (can)
-    {
-#if defined(CAN0_BASE)
-        case hwCAN_Index_0:
-            if (pin == hwGPIO_Pin_A1) return GPIO_PA1_CAN0TX;
-            if (pin == hwGPIO_Pin_A0) return GPIO_PA0_CAN0RX;
-            break;
-#endif
-
-#if defined(CAN1_BASE)
-        case hwCAN_Index_1:
-            if (pin == hwGPIO_Pin_B1) return GPIO_PB1_CAN1TX;
-            if (pin == hwGPIO_Pin_B0) return GPIO_PB0_CAN1RX;
-            break;
-#endif
-
-        default:
-            break;
-    }
-
-    return 0;
-}
-#endif
-
-static hwCAN_Index CAN_IndexFromBase(uint32_t base)
-{
-    switch (base)
-    {
-#if defined(CAN0_BASE)
-        case CAN0_BASE: return hwCAN_Index_0;
-#endif
-#if defined(CAN1_BASE)
-        case CAN1_BASE: return hwCAN_Index_1;
-#endif
-        default: break;
-    }
-
-    return hwCAN_Index_MAX;
-}
-
-static void CAN_IRQ_Process(uint32_t base)
-{
-    hwCAN_Index index = CAN_IndexFromBase(base);
-
     if (index >= hwCAN_Index_MAX)
+    {
         return;
+    }
+
+    uint32_t base = CAN_Map_Soc_Base(index);
+    if(base==0)
+    {
+        return;
+    }
 
     uint32_t cause = MAP_CANIntStatus(base, CAN_INT_STS_CAUSE);
 
@@ -189,20 +77,6 @@ static void CAN_IRQ_Process(uint32_t base)
         MAP_CANIntClear(base, cause);
     }
 }
-
-#if defined(CAN0_BASE)
-void CAN0_IRQHandler(void)
-{
-    CAN_IRQ_Process(CAN0_BASE);
-}
-#endif
-
-#if defined(CAN1_BASE)
-void CAN1_IRQHandler(void)
-{
-    CAN_IRQ_Process(CAN1_BASE);
-}
-#endif
 
 static hwCAN_OpResult CAN_ConfigRxObject(hwCAN_Index index)
 {
@@ -290,25 +164,7 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
 
     MAP_CANIntEnable(can_base, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
 
-    switch (index)
-    {
-#if defined(CAN0_BASE)
-        case hwCAN_Index_0:
-            IntRegister(irq, CAN0_IRQHandler);
-            break;
-#endif
-
-#if defined(CAN1_BASE)
-        case hwCAN_Index_1:
-            IntRegister(irq, CAN1_IRQHandler);
-            break;
-#endif
-
-        default:
-            break;
-    }
-
-    MAP_IntEnable(irq);
+    CAN_NVIC_Init(index);
 
     MAP_CANEnable(can_base);
 
@@ -361,7 +217,9 @@ hwCAN_OpResult CAN_DeInit(hwCAN_Index index)
     CAN_Init_Status[index] = false;
 
     MAP_CANIntDisable(can_base, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
-    MAP_IntDisable(irq);
+
+    CAN_NVIC_DeInit(index);
+
     MAP_CANDisable(can_base);
 
     if (tx_port && tx_mask)

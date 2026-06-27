@@ -174,6 +174,29 @@ typedef enum hwPWM_Channel_t
 #endif // DEVICE_RP2
 
 #ifdef DEVICE_TITIVAC
+#if defined(TM4C123)
+typedef enum
+{
+	hwPWM_Channel_1 = 0,
+	hwPWM_Channel_2,
+	hwPWM_Channel_3,
+	hwPWM_Channel_4,
+	hwPWM_Channel_5,
+	hwPWM_Channel_6,
+	hwPWM_Channel_7,
+	hwPWM_Channel_8,
+	hwPWM_Channel_9,
+	hwPWM_Channel_10,
+	hwPWM_Channel_11,
+	hwPWM_Channel_12,
+	hwPWM_Channel_13,
+	hwPWM_Channel_14,
+	hwPWM_Channel_15,
+	hwPWM_Channel_16,
+  	hwPWM_Channel_MAX,
+}hwPWM_Channel;
+#endif
+#if defined(TM4C1294)
 typedef enum
 {
 	hwPWM_Channel_1 = 0,
@@ -186,6 +209,7 @@ typedef enum
 	hwPWM_Channel_8,
   	hwPWM_Channel_MAX,
 }hwPWM_Channel;
+#endif
 #endif //DEVICE_TITIVAC
 
 #endif //PWM_INDEX_H

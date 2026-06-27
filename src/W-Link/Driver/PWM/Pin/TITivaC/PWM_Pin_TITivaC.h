@@ -2,7 +2,7 @@
 #ifndef PWM_PIN_TITIVAC_H
 #define PWM_PIN_TITIVAC_H
 
-#include "GPIO/GPIO.h"
+#include "soc.h"
 
 #if defined(TM4C123)
 #include "PWM_Pin_TM4C123.h"

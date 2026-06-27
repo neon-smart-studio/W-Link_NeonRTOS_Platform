@@ -130,9 +130,14 @@ static void TIVA_I2C_StartNext(hwI2C_Index index)
 
 void TIVA_I2C_IRQ_Process(hwI2C_Index index)
 {
-    uint32_t base = I2C_Map_Soc_Base(index);
+    if (index >= hwI2C_Index_MAX)
+    {
+        return;
+    }
 
-    if (base == 0) {
+    uint32_t base = I2C_Map_Soc_Base(index);
+    if (base == 0)
+    {
         return;
     }
 

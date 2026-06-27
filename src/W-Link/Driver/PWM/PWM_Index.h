@@ -173,8 +173,7 @@ typedef enum hwPWM_Channel_t
 }hwPWM_Channel;
 #endif // DEVICE_RP2
 
-#ifdef DEVICE_TM4C1294
-#undef DEFAULT_PWM_INDEX
+#ifdef DEVICE_TITIVAC
 typedef enum
 {
 	hwPWM_Channel_1 = 0,
@@ -187,6 +186,6 @@ typedef enum
 	hwPWM_Channel_8,
   	hwPWM_Channel_MAX,
 }hwPWM_Channel;
-#endif //DEVICE_TM4C1294
+#endif //DEVICE_TITIVAC
 
 #endif //PWM_INDEX_H

@@ -1,6 +1,6 @@
 
-#ifndef PWM_PIN_STM32H723xx_H
-#define PWM_PIN_STM32H723xx_H
+#ifndef PWM_PIN_TM4C123_H
+#define PWM_PIN_TM4C123_H
 
 #include "GPIO/GPIO.h"
 
@@ -16,4 +16,4 @@
 const hwGPIO_Pin PWM_Pins[] = { PWM_CH1_PIN, PWM_CH2_PIN, PWM_CH3_PIN, PWM_CH4_PIN, \
                                 PWM_CH5_PIN, PWM_CH6_PIN, PWM_CH7_PIN, PWM_CH8_PIN};
 
-#endif //PWM_PIN_STM32H723xx_H
+#endif //PWM_PIN_TM4C123_H

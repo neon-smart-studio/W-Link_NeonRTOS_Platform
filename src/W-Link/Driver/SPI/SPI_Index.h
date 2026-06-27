@@ -57,4 +57,15 @@ typedef enum hwSPI_Index_t
 }hwSPI_Index;
 #endif // DEVICE_RP2
 
+#ifdef DEVICE_TITIVAC
+typedef enum hwSPI_Index_t
+{
+  hwSPI_Index_0 = 0,
+  hwSPI_Index_1,
+  hwSPI_Index_2,
+  hwSPI_Index_3,
+  hwSPI_Index_MAX,
+}hwSPI_Index;
+#endif // DEVICE_TITIVAC
+
 #endif //SPI_MASTER_INDEX_H

@@ -21,72 +21,6 @@ static bool PWM_Channel_OnOff_Status[hwPWM_Channel_MAX] = {false};
 static bool PWM_Channel_Inverse_Status[hwPWM_Channel_MAX] = {false};
 static uint16_t PWM_Channel_Current_Duty[hwPWM_Channel_MAX] = {0};
 
-typedef enum
-{
-	hwPWM_Base_0 = 0,
-	hwPWM_Base_MAX
-}hwPWM_Base;
-
-const uint32_t Map_Soc_PWM_Pin_Cfg[hwPWM_Channel_MAX] = 
-{
-    GPIO_PF0_M0PWM0,
-    GPIO_PF1_M0PWM1,
-    GPIO_PF2_M0PWM2,
-    GPIO_PF3_M0PWM3,
-    GPIO_PG0_M0PWM4,
-    GPIO_PG1_M0PWM5,
-    GPIO_PK4_M0PWM6,
-    GPIO_PK5_M0PWM7
-};
-
-const uint32_t Map_Soc_PWM_Gen[hwPWM_Channel_MAX] = 
-{
-    PWM_GEN_0,
-    PWM_GEN_0,
-    PWM_GEN_1,
-    PWM_GEN_1,
-    PWM_GEN_2,
-    PWM_GEN_2,
-    PWM_GEN_3,
-    PWM_GEN_3
-};
-
-const uint32_t Map_Soc_PWM_Gen_Mask[hwPWM_Channel_MAX] = 
-{
-    PWM_GEN_0_BIT,
-    PWM_GEN_0_BIT,
-    PWM_GEN_1_BIT,
-    PWM_GEN_1_BIT,
-    PWM_GEN_2_BIT,
-    PWM_GEN_2_BIT,
-    PWM_GEN_3_BIT,
-    PWM_GEN_3_BIT
-};
-
-const uint32_t Map_Soc_PWM_Out[hwPWM_Channel_MAX] = 
-{
-    PWM_OUT_0,
-    PWM_OUT_1,
-    PWM_OUT_2,
-    PWM_OUT_3,
-    PWM_OUT_4,
-    PWM_OUT_5,
-    PWM_OUT_6,
-    PWM_OUT_7
-};
-
-const uint32_t Map_Soc_PWM_Out_Mask[hwPWM_Channel_MAX] = 
-{
-    PWM_OUT_0_BIT,
-    PWM_OUT_1_BIT,
-    PWM_OUT_2_BIT,
-    PWM_OUT_3_BIT,
-    PWM_OUT_4_BIT,
-    PWM_OUT_5_BIT,
-    PWM_OUT_6_BIT,
-    PWM_OUT_7_BIT
-};
-
 static bool PWM_Base_Init_Status[hwPWM_Base_MAX] = {false};
 
 hwPWM_OpResult PWM_Channel_Init(hwPWM_Channel channel_index, bool inverse_PWM)
@@ -95,21 +29,23 @@ hwPWM_OpResult PWM_Channel_Init(hwPWM_Channel channel_index, bool inverse_PWM)
         
         if(PWM_Channel_Init_Status[channel_index]==true){return hwPWM_OK;}
         
-        uint32_t pwmPortBase = GPIO_Map_Soc_Port_Base(PWM_Pins[channel_index]);
-        uint32_t pwmPinMask = GPIO_Map_Soc_Pin_Mask(PWM_Pins[channel_index]);
+        hwGPIO_Pin pwm_pin = PWM_Pin_Def_Table[channel_index].pin;
 
-        if(pwmPortBase==0 || pwmPinMask==0)
+        uint32_t pwmPortBase = GPIO_Map_Soc_Port_Base(pwm_pin);
+        uint32_t pwmPinMask = GPIO_Map_Soc_Pin_Mask(pwm_pin);
+
+        uint32_t pwmPinCfg = PWM_Map_Pin_Cfg(channel_index, pwm_pin);
+        uint32_t pwmGen = PWM_Map_Gen(channel_index);
+        uint32_t pwmOut = PWM_Map_Out(channel_index);
+        uint32_t pwmOutMask = PWM_Map_Out_Mask(channel_index);
+        
+        if(pwmPortBase==0 || pwmPinMask==0 || pwmPinCfg==0 || pwmGen==0 || pwmOut==0 || pwmOutMask==0)
         {
                 return hwGPIO_InvalidParameter;
         }
 
         GPIO_Enable_Port_Clock(pwmPortBase);
 
-        uint32_t pwmPinCfg = Map_Soc_PWM_Pin_Cfg[channel_index];
-        uint32_t pwmGen = Map_Soc_PWM_Gen[channel_index];
-        uint32_t pwmOut = Map_Soc_PWM_Out[channel_index];
-        uint32_t pwmOutMask = Map_Soc_PWM_Out_Mask[channel_index];
-        
         MAP_GPIOPinConfigure(pwmPinCfg);
         MAP_GPIOPinTypePWM(pwmPortBase, pwmPinMask);
 
@@ -167,16 +103,18 @@ hwPWM_OpResult PWM_Channel_DeInit(hwPWM_Channel channel_index)
         
         if(PWM_Channel_Init_Status[channel_index]==false){return hwPWM_OK;}
         
-        uint32_t pwmPortBase = GPIO_Map_Soc_Port_Base(PWM_Pins[channel_index]);
-        uint32_t pwmPinMask = GPIO_Map_Soc_Pin_Mask(PWM_Pins[channel_index]);
+        hwGPIO_Pin pwm_pin = PWM_Pin_Def_Table[channel_index].pin;
 
-        if(pwmPortBase==0 || pwmPinMask==0)
+        uint32_t pwmPortBase = GPIO_Map_Soc_Port_Base(pwm_pin);
+        uint32_t pwmPinMask = GPIO_Map_Soc_Pin_Mask(pwm_pin);
+
+        uint32_t pwmGen = PWM_Map_Gen(channel_index);
+        
+        if(pwmPortBase==0 || pwmPinMask==0 || pwmGen==0)
         {
                 return hwGPIO_InvalidParameter;
         }
 
-        uint32_t pwmGen = Map_Soc_PWM_Gen[channel_index];
-        
         MAP_PWMGenDisable(PWM0_BASE, pwmGen);
 
         bool turnOffSysCtrl = true;
@@ -212,10 +150,15 @@ hwPWM_OpResult PWM_Turn_On(hwPWM_Channel channel_index)
         
         if(PWM_Channel_Init_Status[channel_index]==false){return hwPWM_NotInit;}
         
-        uint32_t pwmGen = Map_Soc_PWM_Gen[channel_index];
-        uint32_t pwmOut = Map_Soc_PWM_Out[channel_index];
-        uint32_t pwmOutMask = Map_Soc_PWM_Out_Mask[channel_index];
+        uint32_t pwmGen = PWM_Map_Gen(channel_index);
+        uint32_t pwmOut = PWM_Map_Out(channel_index);
+        uint32_t pwmOutMask = PWM_Map_Out_Mask(channel_index);
         
+        if(pwmGen==0 || pwmOut==0 || pwmOutMask==0)
+        {
+                return hwGPIO_InvalidParameter;
+        }
+
         if(PWM_Channel_Current_Duty[channel_index]>PWM_MAX_DUTY)
         {
                 PWM_Channel_Current_Duty[channel_index] = PWM_MAX_DUTY;
@@ -260,10 +203,15 @@ hwPWM_OpResult PWM_Turn_On_And_Set_Duty(hwPWM_Channel channel_index, uint16_t du
         
         if(PWM_Channel_Init_Status[channel_index]==false){return hwPWM_NotInit;}
         
-        uint32_t pwmGen = Map_Soc_PWM_Gen[channel_index];
-        uint32_t pwmOut = Map_Soc_PWM_Out[channel_index];
-        uint32_t pwmOutMask = Map_Soc_PWM_Out_Mask[channel_index];
+        uint32_t pwmGen = PWM_Map_Gen(channel_index);
+        uint32_t pwmOut = PWM_Map_Out(channel_index);
+        uint32_t pwmOutMask = PWM_Map_Out_Mask(channel_index);
         
+        if(pwmGen==0 || pwmOut==0 || pwmOutMask==0)
+        {
+                return hwGPIO_InvalidParameter;
+        }
+
         float pwm_duty_float = ((float)duty/PWM_MAX_DUTY);
 				
         MAP_PWMPulseWidthSet(PWM0_BASE, pwmOut, MAP_PWMGenPeriodGet(PWM0_BASE, pwmGen)*pwm_duty_float);
@@ -308,9 +256,14 @@ hwPWM_OpResult PWM_Turn_Off(hwPWM_Channel channel_index)
         
         if(PWM_Channel_Init_Status[channel_index]==false){return hwPWM_NotInit;}
         
-        uint32_t pwmOut = Map_Soc_PWM_Out[channel_index];
-        uint32_t pwmOutMask = Map_Soc_PWM_Out_Mask[channel_index];
+        uint32_t pwmOut = PWM_Map_Out(channel_index);
+        uint32_t pwmOutMask = PWM_Map_Out_Mask(channel_index);
         
+        if(pwmOut==0 || pwmOutMask==0)
+        {
+                return hwGPIO_InvalidParameter;
+        }
+
         MAP_PWMPulseWidthSet(PWM0_BASE, pwmOut, 0);
 
         if(PWM_Channel_Current_Duty[channel_index]==PWM_MAX_DUTY)
@@ -339,10 +292,15 @@ hwPWM_OpResult PWM_Set_Duty(hwPWM_Channel channel_index, uint16_t duty)
         
         if(PWM_Channel_OnOff_Status[channel_index]==false){return hwPWM_NotTurnOn;}
         
-        uint32_t pwmGen = Map_Soc_PWM_Gen[channel_index];
-        uint32_t pwmOut = Map_Soc_PWM_Out[channel_index];
-        uint32_t pwmOutMask = Map_Soc_PWM_Out_Mask[channel_index];
+        uint32_t pwmGen = PWM_Map_Gen(channel_index);
+        uint32_t pwmOut = PWM_Map_Out(channel_index);
+        uint32_t pwmOutMask = PWM_Map_Out_Mask(channel_index);
         
+        if(pwmGen==0 || pwmOut==0 || pwmOutMask==0)
+        {
+                return hwGPIO_InvalidParameter;
+        }
+
         float pwm_duty_float = ((float)duty/PWM_MAX_DUTY);
 
         MAP_PWMPulseWidthSet(PWM0_BASE, pwmOut, MAP_PWMGenPeriodGet(PWM0_BASE, pwmGen)*pwm_duty_float);
@@ -384,10 +342,15 @@ hwPWM_OpResult PWM_Step_Duty(hwPWM_Channel channel_index, uint16_t step_duty, hw
         
         if(PWM_Channel_OnOff_Status[channel_index]==false){return hwPWM_NotTurnOn;}
         
-        uint32_t pwmGen = Map_Soc_PWM_Gen[channel_index];
-        uint32_t pwmOut = Map_Soc_PWM_Out[channel_index];
-        uint32_t pwmOutMask = Map_Soc_PWM_Out_Mask[channel_index];
+        uint32_t pwmGen = PWM_Map_Gen(channel_index);
+        uint32_t pwmOut = PWM_Map_Out(channel_index);
+        uint32_t pwmOutMask = PWM_Map_Out_Mask(channel_index);
         
+        if(pwmGen==0 || pwmOut==0 || pwmOutMask==0)
+        {
+                return hwGPIO_InvalidParameter;
+        }
+
         uint16_t current_duty = PWM_Channel_Current_Duty[channel_index];
         
         switch(direction)

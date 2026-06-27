@@ -421,6 +421,7 @@
 #include "driverlib/emac.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/gpio.h"
+#include "driverlib/hibernate.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/uart.h"
 #include "driverlib/i2c.h"

@@ -30,4 +30,11 @@ typedef enum {
 } hwRTC_Alarm_Channel_Index;
 #endif // DEVICE_RP2
 
+#ifdef DEVICE_TITIVAC
+typedef enum {
+    hwRTC_Alarm_Channel_Index_0 = 0,
+    hwRTC_Alarm_Channel_Index_MAX
+} hwRTC_Alarm_Channel_Index;
+#endif // DEVICE_TITIVAC
+
 #endif //RTC_ALARM_CHANNEL_H

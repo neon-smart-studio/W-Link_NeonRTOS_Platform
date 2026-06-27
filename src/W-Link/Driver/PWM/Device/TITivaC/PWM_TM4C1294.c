@@ -14,100 +14,105 @@
 
 #include "PWM/Pin/PWM_Pin.h"
 
-#define PWM_HZ           1000
-
-static bool PWM_Channel_Init_Status[hwPWM_Channel_MAX] = {false};
-static bool PWM_Channel_OnOff_Status[hwPWM_Channel_MAX] = {false};
-static bool PWM_Channel_Inverse_Status[hwPWM_Channel_MAX] = {false};
-static uint16_t PWM_Channel_Current_Duty[hwPWM_Channel_MAX] = {0};
-
-typedef enum
+uint32_t PWM_Map_Gen(hwPWM_Channel ch)
 {
-	hwPWM_Base_0 = 0,
-	hwPWM_Base_MAX
-}hwPWM_Base;
+        switch(ch)
+        {
+                case hwPWM_Channel_1: return PWM_GEN_0;
+                case hwPWM_Channel_2: return PWM_GEN_0;
+                case hwPWM_Channel_3: return PWM_GEN_1;
+                case hwPWM_Channel_4: return PWM_GEN_1;
+                case hwPWM_Channel_5: return PWM_GEN_2;
+                case hwPWM_Channel_6: return PWM_GEN_2;
+                case hwPWM_Channel_7: return PWM_GEN_3;
+                case hwPWM_Channel_8: return PWM_GEN_3;
+        }
 
-const uint32_t Map_Soc_PWM_Pin_Cfg[hwPWM_Channel_MAX] = 
+        return 0;
+}
+
+uint32_t PWM_Map_Gen_Mask(hwPWM_Channel ch)
 {
-    GPIO_PF0_M0PWM0,
-    GPIO_PF1_M0PWM1,
-    GPIO_PF2_M0PWM2,
-    GPIO_PF3_M0PWM3,
-    GPIO_PG0_M0PWM4,
-    GPIO_PG1_M0PWM5,
-    GPIO_PK4_M0PWM6,
-    GPIO_PK5_M0PWM7
-};
+        switch(ch)
+        {
+                case hwPWM_Channel_1: return PWM_GEN_0_BIT;
+                case hwPWM_Channel_2: return PWM_GEN_0_BIT;
+                case hwPWM_Channel_3: return PWM_GEN_1_BIT;
+                case hwPWM_Channel_4: return PWM_GEN_1_BIT;
+                case hwPWM_Channel_5: return PWM_GEN_2_BIT;
+                case hwPWM_Channel_6: return PWM_GEN_2_BIT;
+                case hwPWM_Channel_7: return PWM_GEN_3_BIT;
+                case hwPWM_Channel_8: return PWM_GEN_3_BIT;
+        }
 
-const uint32_t Map_Soc_PWM_Gen[hwPWM_Channel_MAX] = 
+        return 0;
+}
+
+uint32_t PWM_Map_Out(hwPWM_Channel ch)
 {
-    PWM_GEN_0,
-    PWM_GEN_0,
-    PWM_GEN_1,
-    PWM_GEN_1,
-    PWM_GEN_2,
-    PWM_GEN_2,
-    PWM_GEN_3,
-    PWM_GEN_3
-};
+        switch(ch)
+        {
+                case hwPWM_Channel_1: return PWM_OUT_0;
+                case hwPWM_Channel_2: return PWM_OUT_1;
+                case hwPWM_Channel_3: return PWM_OUT_2;
+                case hwPWM_Channel_4: return PWM_OUT_3;
+                case hwPWM_Channel_5: return PWM_OUT_4;
+                case hwPWM_Channel_6: return PWM_OUT_5;
+                case hwPWM_Channel_7: return PWM_OUT_6;
+                case hwPWM_Channel_8: return PWM_OUT_7;
+        }
 
-const uint32_t Map_Soc_PWM_Gen_Mask[hwPWM_Channel_MAX] = 
+        return 0;
+}
+
+uint32_t PWM_Map_Out_Mask(hwPWM_Channel ch)
 {
-    PWM_GEN_0_BIT,
-    PWM_GEN_0_BIT,
-    PWM_GEN_1_BIT,
-    PWM_GEN_1_BIT,
-    PWM_GEN_2_BIT,
-    PWM_GEN_2_BIT,
-    PWM_GEN_3_BIT,
-    PWM_GEN_3_BIT
-};
+        switch(ch)
+        {
+                case hwPWM_Channel_1: return PWM_OUT_0_BIT;
+                case hwPWM_Channel_2: return PWM_OUT_1_BIT;
+                case hwPWM_Channel_3: return PWM_OUT_2_BIT;
+                case hwPWM_Channel_4: return PWM_OUT_3_BIT;
+                case hwPWM_Channel_5: return PWM_OUT_4_BIT;
+                case hwPWM_Channel_6: return PWM_OUT_5_BIT;
+                case hwPWM_Channel_7: return PWM_OUT_6_BIT;
+                case hwPWM_Channel_8: return PWM_OUT_7_BIT;
+        }
 
-const uint32_t Map_Soc_PWM_Out[hwPWM_Channel_MAX] = 
-{
-    PWM_OUT_0,
-    PWM_OUT_1,
-    PWM_OUT_2,
-    PWM_OUT_3,
-    PWM_OUT_4,
-    PWM_OUT_5,
-    PWM_OUT_6,
-    PWM_OUT_7
-};
+        return 0;
+}
 
-const uint32_t Map_Soc_PWM_Out_Mask[hwPWM_Channel_MAX] = 
-{
-    PWM_OUT_0_BIT,
-    PWM_OUT_1_BIT,
-    PWM_OUT_2_BIT,
-    PWM_OUT_3_BIT,
-    PWM_OUT_4_BIT,
-    PWM_OUT_5_BIT,
-    PWM_OUT_6_BIT,
-    PWM_OUT_7_BIT
-};
-
-void PWM_Map_Pin_Cfg(hwPWM_Channel ch, hwGPIO_Pin pin)
+uint32_t PWM_Map_Pin_Cfg(hwPWM_Channel ch, hwGPIO_Pin pin)
 {
         switch(ch)
         {
                 case hwPWM_Channel_1:
+                        if (pin == hwGPIO_Pin_F0) return GPIO_PF0_M0PWM0;
                         break;
                 case hwPWM_Channel_2:
+                        if (pin == hwGPIO_Pin_F1) return GPIO_PF1_M0PWM1;
                         break;
                 case hwPWM_Channel_3:
+                        if (pin == hwGPIO_Pin_F2) return GPIO_PF2_M0PWM2;
                         break;
                 case hwPWM_Channel_4:
+                        if (pin == hwGPIO_Pin_F3) return GPIO_PF3_M0PWM3;
                         break;
                 case hwPWM_Channel_5:
+                        if (pin == hwGPIO_Pin_G0) return GPIO_PG0_M0PWM4;
                         break;
                 case hwPWM_Channel_6:
+                        if (pin == hwGPIO_Pin_G1) return GPIO_PG1_M0PWM5;
                         break;
                 case hwPWM_Channel_7:
+                        if (pin == hwGPIO_Pin_K4) return GPIO_PK4_M0PWM6;
                         break;
                 case hwPWM_Channel_8:
+                        if (pin == hwGPIO_Pin_K5) return GPIO_PK5_M0PWM7;
                         break;
         }
+
+        return 0;
 }
 
 #endif //TM4C1294

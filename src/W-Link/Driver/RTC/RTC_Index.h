@@ -26,4 +26,12 @@ typedef enum hwRTC_Index_t
 }hwRTC_Index;
 #endif // DEVICE_RP2
 
+#ifdef DEVICE_TITIVAC
+typedef enum hwRTC_Index_t
+{
+  hwRTC_Index_0 = 0,
+  hwRTC_Index_MAX,
+}hwRTC_Index;
+#endif // DEVICE_TITIVAC
+
 #endif //RTC_INDEX_H

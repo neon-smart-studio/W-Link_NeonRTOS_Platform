@@ -1,0 +1,46 @@
+{
+  "name": "neon-atmelsam",
+  "title": "Atmel SAM",
+  "description": "PlatformIO platform for SAM3X/SAM4 baremetal",
+  "homepage": "https://github.com/neon-smart-studio",
+  "license": "Apache-2.0",
+  "version": "1.0.0",
+
+  "frameworks": {
+    "cmsis": {
+      "package": "framework-cmsis-sam3x",
+      "script": "builder/frameworks/cmsis.py"
+    },
+
+    "wlink": {
+      "package": "framework-wlink",
+      "script": "builder/frameworks/wlink.py"
+    }
+  },
+
+  "packages": {
+
+    "toolchain-gccarmnoneeabi": {
+      "type": "toolchain",
+      "owner": "platformio",
+      "version": "~1.120301.0"
+    },
+
+    "tool-openocd": {
+      "type": "uploader",
+      "owner": "platformio",
+      "version": "~3.1200.0"
+    },
+
+    "framework-cmsis-sam3x": {
+      "type": "framework",
+      "optional": true
+    }
+  },
+
+  "boards": {
+    "due_sam3x8e": {
+      "mcu": "sam3x8e"
+    }
+  }
+}

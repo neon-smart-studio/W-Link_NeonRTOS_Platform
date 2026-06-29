@@ -10,7 +10,7 @@
   ******************************************************************************
   */
 /*
- * Based on STMicroelectronics VL53L5CX driver
+ * Based on STMicroelectronics VL53L8CX driver
  * Modified by Neon Smart Studio for W-Link
  */
 
@@ -104,33 +104,34 @@ const VL53L8CX_OpResult VL53L8CX_GET_NVM_CMD[] = {
 
 static VL53L8CX_OpResult VL53L8CX_Poll_For_Answer(uint8_t size, uint8_t pos, uint16_t address, uint8_t mask, uint8_t expected_value)
 {
-  VL53L8CX_OpResult status;
-  uint8_t timeout = 0;
+    VL53L8CX_OpResult status;
+    uint8_t timeout = 0;
 
-  do {
-    status = VL53L8CX_IO_Read_Bytes(address, VL53L8CX_Temp_Buffer, size);
-    if(status < VL53L8CX_OK)
-    {
-        return status;
-    }
+    do {
+        if (size == 1)
+        {
+            status = VL53L8CX_IO_Read_Byte(address, &VL53L8CX_Temp_Buffer[0]);
+        }
+        else
+        {
+            status = VL53L8CX_IO_Read_Bytes(address, VL53L8CX_Temp_Buffer, size);
+        }
 
-    NeonRTOS_Sleep(10);
+        if(status < VL53L8CX_OK)
+            return status;
 
-    if (timeout >= (uint8_t)200)
-    { /* 2s timeout */
-      return VL53L8CX_SlaveTimeout;
-    }
-    else if ((size >= (uint8_t)4) && (VL53L8CX_Temp_Buffer[2] >= (uint8_t)0x7f))
-    {
-      return VL53L8CX_MCU_Error;
-    }
-    else
-    {
-      timeout++;
-    }
-  } while ((VL53L8CX_Temp_Buffer[pos] & mask) != expected_value);
+        if ((VL53L8CX_Temp_Buffer[pos] & mask) == expected_value)
+            return VL53L8CX_OK;
 
-  return VL53L8CX_OK;
+        if ((size >= 4) && (VL53L8CX_Temp_Buffer[2] >= 0x7f))
+            return VL53L8CX_MCU_Error;
+
+        if (timeout++ >= 200)
+            return VL53L8CX_SlaveTimeout;
+
+        NeonRTOS_Sleep(10);
+
+    } while (1);
 }
 
 static VL53L8CX_OpResult VL53L8CX_Poll_For_MCU_Boot()
@@ -453,17 +454,11 @@ VL53L8CX_OpResult VL53L8CX_SensorInit()
   if(status < VL53L8CX_OK) { return status; }
 
   /* Download FW into VL53L8CX */
-  status = VL53L8CX_IO_Write_Byte(0x7fff, 0x09);
+  status = VL53L8CX_IO_Write_Fw_Block(0x09, (uint8_t *)&VL53L8CX_FIRMWARE[0], 0x8000);
   if(status < VL53L8CX_OK) { return status; }
-  status = VL53L8CX_IO_Write_Bytes(0, (uint8_t *)&VL53L8CX_FIRMWARE[0], 0x8000);
+  status = VL53L8CX_IO_Write_Fw_Block(0x0a, (uint8_t *)&VL53L8CX_FIRMWARE[0x8000], 0x8000);
   if(status < VL53L8CX_OK) { return status; }
-  status = VL53L8CX_IO_Write_Byte(0x7fff, 0x0a);
-  if(status < VL53L8CX_OK) { return status; }
-  status = VL53L8CX_IO_Write_Bytes(0, (uint8_t *)&VL53L8CX_FIRMWARE[0x8000], 0x8000);
-  if(status < VL53L8CX_OK) { return status; }
-  status = VL53L8CX_IO_Write_Byte(0x7fff, 0x0b);
-  if(status < VL53L8CX_OK) { return status; }
-  status = VL53L8CX_IO_Write_Bytes(0, (uint8_t *)&VL53L8CX_FIRMWARE[0x10000], 0x5000);
+  status = VL53L8CX_IO_Write_Fw_Block(0x0b, (uint8_t *)&VL53L8CX_FIRMWARE[0x10000], 0x5000);
   if(status < VL53L8CX_OK) { return status; }
   status = VL53L8CX_IO_Write_Byte(0x7fff, 0x01);
   if(status < VL53L8CX_OK) { return status; }

@@ -52,6 +52,8 @@
 #include "VL53L8CX_Def.h"
 #include "VL53L8CX_IO.h"
 
+#define VL53L8CX_I2C_CHUNK_SIZE 128
+
 static uint8_t sw_i2c_address = VL53L8CX_I2C_NEW_I2C_ADDRESS;
 
 static VL53L8CX_OpResult VL53L8CX_IO_Map_GPIO_Error(hwGPIO_OpResult error_code)
@@ -116,21 +118,28 @@ static VL53L8CX_OpResult VL53L8CX_IO_I2C_Write(uint16_t RegisterAddr, uint8_t* p
         return VL53L8CX_InvalidParameter;
     }
 
-   uint8_t buffer[NumByteToWrite+2];
-   buffer[0]=(uint8_t) (RegisterAddr>>8);
-   buffer[1]=(uint8_t) (RegisterAddr&0xFF);
-   memcpy(&buffer[2], pBuffer, NumByteToWrite);
+   uint8_t* pBuf = mem_Malloc(NumByteToWrite+2);
+   if(pBuf==NULL)
+   {
+        return VL53L8CX_MemoryError;
+   }
+
+   pBuf[0]=(uint8_t) (RegisterAddr>>8);
+   pBuf[1]=(uint8_t) (RegisterAddr&0xFF);
+   memcpy(&pBuf[2], pBuffer, NumByteToWrite);
 
    status = VL53L8CX_IO_Map_I2C_Error(
         I2C_Master_Write(
             VL53L8CX_I2C_INDEX,
             sw_i2c_address >> 1,
-            buffer,
+            pBuf,
             NumByteToWrite+2,
             true,
             VL53L8CX_I2C_OP_TIMEOUT
         )
     );
+
+    mem_Free(pBuf);
 
     if(status < VL53L8CX_OK)
     {
@@ -243,33 +252,19 @@ VL53L8CX_OpResult VL53L8CX_IO_Power_On()
 
 VL53L8CX_OpResult VL53L8CX_IO_I2C_Reset()
 {
-   hwGPIO_OpResult gpio_status;
+    hwGPIO_OpResult gpio_status;
 
-   gpio_status = GPIO_Pin_Write(VL53L8CX_LPN_PIN, false);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
-   }
+    gpio_status = GPIO_Pin_Write(VL53L8CX_LPN_PIN, false);
+    if(gpio_status < hwGPIO_OK) return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
 
-   NeonRTOS_Sleep(10);
+    NeonRTOS_Sleep(10);
 
-   gpio_status = GPIO_Pin_Write(VL53L8CX_LPN_PIN, true);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
-   }
+    gpio_status = GPIO_Pin_Write(VL53L8CX_LPN_PIN, true);
+    if(gpio_status < hwGPIO_OK) return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
 
-   NeonRTOS_Sleep(10);
+    NeonRTOS_Sleep(100);
 
-   gpio_status = GPIO_Pin_Write(VL53L8CX_LPN_PIN, false);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
-   }
-
-   NeonRTOS_Sleep(10);
-
-   return VL53L8CX_OK;
+    return VL53L8CX_OK;
 }
 
 VL53L8CX_OpResult VL53L8CX_IO_Power_Off()
@@ -319,9 +314,30 @@ VL53L8CX_OpResult VL53L8CX_IO_Write_Byte(uint16_t RegisterAdress, uint8_t value)
   return VL53L8CX_IO_I2C_Write(RegisterAdress, &value, 1);
 }
 
-VL53L8CX_OpResult VL53L8CX_IO_Write_Bytes(uint16_t RegisterAdress, uint16_t* wr_dat, uint32_t size)
+VL53L8CX_OpResult VL53L8CX_IO_Write_Bytes(uint16_t RegisterAdress, uint8_t* wr_dat, uint32_t size)
 {
-  return VL53L8CX_IO_I2C_Write(RegisterAdress, (uint8_t *)wr_dat, size);
+    VL53L8CX_OpResult status;
+    uint32_t offset = 0;
+
+    while (offset < size)
+    {
+        uint16_t chunk = (size - offset > VL53L8CX_I2C_CHUNK_SIZE)
+                       ? VL53L8CX_I2C_CHUNK_SIZE
+                       : (uint16_t)(size - offset);
+
+        status = VL53L8CX_IO_I2C_Write(
+            RegisterAdress + offset,
+            &wr_dat[offset],
+            chunk
+        );
+
+        if (status < VL53L8CX_OK)
+            return status;
+
+        offset += chunk;
+    }
+
+    return VL53L8CX_OK;
 }
 
 VL53L8CX_OpResult VL53L8CX_IO_Read_Byte(uint16_t RegisterAdress, uint8_t *value)
@@ -329,7 +345,70 @@ VL53L8CX_OpResult VL53L8CX_IO_Read_Byte(uint16_t RegisterAdress, uint8_t *value)
   return VL53L8CX_IO_I2C_Read(RegisterAdress, value, 1);
 }
 
-VL53L8CX_OpResult VL53L8CX_IO_Read_Bytes(uint16_t RegisterAdress, uint16_t* rd_dat, uint32_t size)
+VL53L8CX_OpResult VL53L8CX_IO_Read_Bytes(uint16_t RegisterAdress, uint8_t* rd_dat, uint32_t size)
 {
-  return VL53L8CX_IO_I2C_Read(RegisterAdress, (uint8_t *)rd_dat, size);
+    VL53L8CX_OpResult status;
+    uint32_t offset = 0;
+
+    if (rd_dat == NULL || size == 0)
+        return VL53L8CX_InvalidParameter;
+
+    while (offset < size)
+    {
+        uint16_t chunk = (size - offset > VL53L8CX_I2C_CHUNK_SIZE)
+                       ? VL53L8CX_I2C_CHUNK_SIZE
+                       : (uint16_t)(size - offset);
+
+        status = VL53L8CX_IO_I2C_Read(
+            RegisterAdress + offset,
+            &rd_dat[offset],
+            chunk
+        );
+
+        if (status < VL53L8CX_OK)
+            return status;
+
+        offset += chunk;
+    }
+
+    return VL53L8CX_OK;
+}
+
+VL53L8CX_OpResult VL53L8CX_IO_Write_Fw_Block(uint8_t page, const uint8_t *fw, uint32_t size)
+{
+    VL53L8CX_OpResult status;
+    uint32_t i = 0;
+
+    status = VL53L8CX_IO_Write_Byte(0x7fff, page);
+    if (status < VL53L8CX_OK)
+        return status;
+
+    while (i < size)
+    {
+        uint16_t current_write_size =
+            (size - i > VL53L8CX_I2C_CHUNK_SIZE)
+            ? VL53L8CX_I2C_CHUNK_SIZE
+            : (uint16_t)(size - i);
+
+        if ((i & 0x03FF) == 0)
+        {
+            //UART_Printf("FW page=%02X offset=0x%04lX len=%u\r\n", page, i, current_write_size);
+        }
+
+        status = VL53L8CX_IO_I2C_Write(
+            (uint16_t)i,
+            (uint8_t *)&fw[i],
+            current_write_size
+        );
+
+        if (status < VL53L8CX_OK)
+        {
+            //UART_Printf("FW write fail page=%02X offset=0x%04lX status=%d\r\n", page, i, status);
+            return status;
+        }
+
+        i += current_write_size;
+    }
+
+    return VL53L8CX_OK;
 }

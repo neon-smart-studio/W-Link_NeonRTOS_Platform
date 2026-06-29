@@ -530,6 +530,7 @@ void Init_Thread(void* p)
 
     while (1)
     {
+#ifdef CONFIG_SUPPORT_INTERNET
         if(NeonTCPIP_IF_isLinkUp())
         {
 #if LWIP_DHCP
@@ -539,12 +540,15 @@ void Init_Thread(void* p)
             else
             {
             }
-#else
-#endif
+#else //LWIP_DHCP
+#endif //LWIP_DHCP
         }
         else
         {
         }
+#else //CONFIG_SUPPORT_INTERNET
+        NeonRTOS_Sleep(1000);
+#endif //CONFIG_SUPPORT_INTERNET
 
         size_t freeHeapSize = NeonRTOS_GetFreeHeapSize();
         UART_Printf("Remain Heap Size %d bytes\n", freeHeapSize);

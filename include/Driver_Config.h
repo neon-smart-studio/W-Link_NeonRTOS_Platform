@@ -10,6 +10,7 @@
 //#define CONFIG_ETHERNET_DM9051
 
 #define CONFIG_LOG_UART_INDEX hwUART_Index_0
+//#define CONFIG_LOG_UART_INDEX hwUART_Index_1
 //#define CONFIG_LOG_UART_INDEX hwUART_Index_2
 
 #endif //DRIVER_CONFIG_H

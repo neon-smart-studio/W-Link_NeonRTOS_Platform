@@ -88,9 +88,10 @@ VL53L8CX_OpResult VL53L8CX_IO_Power_Off();
 VL53L8CX_OpResult VL53L8CX_IO_I2C_Reset();
 VL53L8CX_OpResult VL53L8CX_IO_SetI2CAddress(uint8_t new_address);
 VL53L8CX_OpResult VL53L8CX_IO_Write_Byte(uint16_t RegisterAdress, uint8_t value);
-VL53L8CX_OpResult VL53L8CX_IO_Write_Bytes(uint16_t RegisterAdress, uint16_t* wr_dat, uint32_t size);
+VL53L8CX_OpResult VL53L8CX_IO_Write_Bytes(uint16_t RegisterAdress, uint8_t* wr_dat, uint32_t size);
 VL53L8CX_OpResult VL53L8CX_IO_Read_Byte(uint16_t RegisterAdress, uint8_t *value);
-VL53L8CX_OpResult VL53L8CX_IO_Read_Bytes(uint16_t RegisterAdress, uint16_t* rd_dat, uint32_t size);
+VL53L8CX_OpResult VL53L8CX_IO_Read_Bytes(uint16_t RegisterAdress, uint8_t* rd_dat, uint32_t size);
+VL53L8CX_OpResult VL53L8CX_IO_Write_Fw_Block(uint8_t page, const uint8_t *fw, uint32_t size);
 
 #ifdef __cplusplus
 }

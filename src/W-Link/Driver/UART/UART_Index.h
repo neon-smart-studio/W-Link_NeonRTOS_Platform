@@ -97,7 +97,7 @@ typedef enum hwUART_Index_t
 }hwUART_Index;
 #endif // DEVICE_RP2
 
-#ifdef DEVICE_TM4C1294
+#ifdef DEVICE_TITIVAC
 typedef enum hwUART_Index_t
 {
   hwUART_Index_0 = 0,
@@ -110,7 +110,6 @@ typedef enum hwUART_Index_t
   hwUART_Index_7,
   hwUART_Index_MAX,
 }hwUART_Index;
-// 定義標準輸出的 UART 索引
 #endif //DEVICE_TM4C1294
 
 #endif //UART_INDEX_H

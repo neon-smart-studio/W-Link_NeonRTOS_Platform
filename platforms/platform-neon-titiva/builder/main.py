@@ -86,8 +86,10 @@ env.Append(
 
     LINKFLAGS=machine_flags + [
         "-Os",
-        "-nostartfiles",
-        "-nostdlib"
+        "-Wl,--gc-sections,--relax",
+        "--specs=nano.specs",
+        "--specs=nosys.specs",
+        "-mthumb"
     ],
 
     LIBS=["c", "gcc", "m"],
@@ -119,23 +121,46 @@ env.Append(
 )
 
 if "BOARD" in env:
-    env.Append(
-        ASFLAGS=[
-            "-mcpu=%s" % board.get("build.cpu")
-        ],
-        CCFLAGS=[
-            "-mcpu=%s" % board.get("build.cpu")
-        ],
-        LINKFLAGS=[
-            "-mcpu=%s" % board.get("build.cpu")
-        ]
-    )
 
-if "energia" in env.get("PIOFRAMEWORK", []):
-    sys.stderr.write(
-        "WARNING!!! Using of `framework = energia` in `platformio.ini` is "
-        "deprecated. Please replace with `framework = arduino`.\n")
-    env.Replace(PIOFRAMEWORK=["arduino"])
+    board_cfg = env.BoardConfig()
+
+    cpu = board_cfg.get("build.cpu", "cortex-m3")
+    fpu = board_cfg.get("build.fpu", None)
+    float_abi = board_cfg.get("build.float-abi", None)
+
+    asflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    ccflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    linkflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    if fpu and float_abi:
+        asflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        ccflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        linkflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+    env.Append(
+        ASFLAGS=asflags,
+        CCFLAGS=ccflags,
+        LINKFLAGS=linkflags
+    )
 
 #
 # Target: Build executable and linkable firmware

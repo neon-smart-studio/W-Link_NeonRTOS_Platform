@@ -55,9 +55,17 @@ SECTIONS
 
     .bss (NOLOAD) :
     {
+        . = ALIGN(4);
         _bss = .;
         *(.bss .bss.* .gnu.linkonce.b.*)
         *(COMMON)
+        . = ALIGN(4);
         _ebss = .;
+
+        end = .;
+        _end = .;
+        __end__ = .;
     } > SRAM
+
+    _estack = ORIGIN(SRAM) + LENGTH(SRAM);
 }

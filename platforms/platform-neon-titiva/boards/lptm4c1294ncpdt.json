@@ -4,6 +4,8 @@
     "cpu": "cortex-m4",
     "ldscript": "lptm4c1294.ld",
     "extra_flags": [
+      "-DPART_TM4C1294NCPDT",
+      "-DTARGET_IS_TM4C129_RA2",
       "-DTM4C1294"
     ],
     "f_cpu": "120000000L",

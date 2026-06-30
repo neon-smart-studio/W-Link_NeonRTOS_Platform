@@ -14,12 +14,12 @@
 #include "STM32/GPIO_Pin_STM32.h"
 #endif
 
-#ifdef DEVICE_TITIVAC
-#include "TITivaC/GPIO_Pin_TITivaC.h"
-#endif
-
 #ifdef DEVICE_RP2
 #include "RP2/GPIO_Pin_RP2.h"
+#endif
+
+#ifdef DEVICE_TITIVAC
+#include "TITivaC/GPIO_Pin_TITivaC.h"
 #endif
 
 #endif //GPIO_PIN_H

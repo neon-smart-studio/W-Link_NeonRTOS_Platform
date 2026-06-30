@@ -10,7 +10,7 @@
 
 #include "UART/UART.h"
 
-#ifdef DEVICE_TM4C123
+#if defined(TM4C123)
 
 #include "UART_TITivaC.h"
 

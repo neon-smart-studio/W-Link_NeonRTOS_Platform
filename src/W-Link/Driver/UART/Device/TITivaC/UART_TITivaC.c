@@ -43,7 +43,7 @@ static TM4C_UART_IT_State UART_IT_State[hwUART_Index_MAX];
 
 void UART_IRQ_Process(hwUART_Index index)
 {
-    uint32_t base = Map_Soc_UART_Base(index);
+    uint32_t base = UART_Map_Soc_Base(index);
     TM4C_UART_IT_State *s = &UART_IT_State[index];
 
     uint32_t status = MAP_UARTIntStatus(base, true);
@@ -206,7 +206,7 @@ hwUART_OpResult UART_Open_Specific_Format(hwUART_Index index, uint32_t baudrate,
         GPIO_Enable_Port_Clock(ctsPortBase);
     }
 
-    uint32_t base = Map_Soc_UART_Base(index);
+    uint32_t base = UART_Map_Soc_Base(index);
     uint32_t sysCtrlPeriph = UART_Map_Soc_Periph(index);
 
     MAP_SysCtlPeripheralEnable(sysCtrlPeriph);
@@ -335,7 +335,7 @@ hwUART_OpResult UART_Close(hwUART_Index index)
         }
     }
 
-    uint32_t base = Map_Soc_UART_Base(index);
+    uint32_t base = UART_Map_Soc_Base(index);
     uint32_t sysCtrlPeriph = UART_Map_Soc_Periph(index);
 
     if(UART_FlowControl[index])
@@ -397,7 +397,7 @@ hwUART_OpResult UART_Read(hwUART_Index index, uint8_t *data_rd, size_t size, uin
         return hwUART_NotInit;
     }
 
-    uint32_t base = Map_Soc_UART_Base(index);
+    uint32_t base = UART_Map_Soc_Base(index);
     TM4C_UART_IT_State *s = &UART_IT_State[index];
 
     if (s->rx_busy)
@@ -458,7 +458,7 @@ hwUART_OpResult UART_Write(hwUART_Index index, uint8_t *data_wr, size_t size, ui
         return hwUART_NotInit;
     }
 
-    uint32_t base = Map_Soc_UART_Base(index);
+    uint32_t base = UART_Map_Soc_Base(index);
     TM4C_UART_IT_State *s = &UART_IT_State[index];
 
     if (s->tx_busy)
@@ -513,7 +513,7 @@ void UART_Printf(const char *format, ...) {
     int len = vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    uint32_t base = Map_Soc_UART_Base(LOG_UART_INDEX);
+    uint32_t base = UART_Map_Soc_Base(LOG_UART_INDEX);
 
     NeonRTOS_EnterCritical();
 

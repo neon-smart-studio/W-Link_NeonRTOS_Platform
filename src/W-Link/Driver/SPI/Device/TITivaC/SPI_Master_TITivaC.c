@@ -85,7 +85,7 @@ static void SPI_Flush_RX(uint32_t base)
     while (MAP_SSIDataGetNonBlocking(base, &dummy));
 }
 
-void TITivaC_SPI_IRQ_Process(hwSPI_Index index)
+void SPI_IRQ_Process(hwSPI_Index index)
 {
     uint32_t base = SPI_Map_Soc_Base(index);
 
@@ -516,7 +516,7 @@ hwSPI_OpResult SPI_Master_WriteByte(hwSPI_Index index, uint8_t dat)
     MAP_SSIIntClear(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
     MAP_SSIIntEnable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
 
-    TITivaC_SPI_IRQ_Process(index);
+    SPI_IRQ_Process(index);
 
     if (NeonRTOS_SyncObjWait(&Spi_Master_Send_SyncHandle[index],
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
@@ -583,7 +583,7 @@ hwSPI_OpResult SPI_Master_ReadByte(hwSPI_Index index, uint8_t *dat)
      * SPI read still needs dummy TX clock.
      * ISR will transmit 0xFF because state == TITIVAC_SPI_RX.
      */
-    TITivaC_SPI_IRQ_Process(index);
+    SPI_IRQ_Process(index);
 
     if (NeonRTOS_SyncObjWait(&Spi_Master_Recv_SyncHandle[index],
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
@@ -645,7 +645,7 @@ hwSPI_OpResult SPI_Master_TransferByte(hwSPI_Index index, uint8_t wr_dat, uint8_
     MAP_SSIIntClear(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
     MAP_SSIIntEnable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
 
-    TITivaC_SPI_IRQ_Process(index);
+    SPI_IRQ_Process(index);
 
     if (NeonRTOS_SyncObjWait(&Spi_Master_Recv_SyncHandle[index],
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
@@ -734,7 +734,7 @@ hwSPI_OpResult SPI_Master_Stream_Write(hwSPI_Index index, const uint8_t *buf, ui
     MAP_SSIIntClear(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
     MAP_SSIIntEnable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
 
-    TITivaC_SPI_IRQ_Process(index);
+    SPI_IRQ_Process(index);
 
     if (NeonRTOS_SyncObjWait(&Spi_Master_Send_SyncHandle[index],
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
@@ -796,7 +796,7 @@ hwSPI_OpResult SPI_Master_Stream_Read(hwSPI_Index index, uint8_t *buf, uint16_t 
     MAP_SSIIntClear(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
     MAP_SSIIntEnable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
 
-    TITivaC_SPI_IRQ_Process(index);
+    SPI_IRQ_Process(index);
 
     if (NeonRTOS_SyncObjWait(&Spi_Master_Recv_SyncHandle[index],
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
@@ -858,7 +858,7 @@ hwSPI_OpResult SPI_Master_Stream_Transfer(hwSPI_Index index, const uint8_t *tx_b
     MAP_SSIIntClear(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
     MAP_SSIIntEnable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
 
-    TITivaC_SPI_IRQ_Process(index);
+    SPI_IRQ_Process(index);
 
     if (NeonRTOS_SyncObjWait(&Spi_Master_Recv_SyncHandle[index],
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)

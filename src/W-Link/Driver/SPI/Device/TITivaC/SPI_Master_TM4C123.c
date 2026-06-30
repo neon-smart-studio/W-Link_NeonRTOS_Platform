@@ -83,22 +83,22 @@ uint32_t SPI_Map_PinConfig(hwSPI_Index index, hwGPIO_Pin pin)
 
 static void SPI0_IRQ_Handler(void)
 {
-    TITivaC_SPI_IRQ_Process(hwSPI_Index_0);
+    SPI_IRQ_Process(hwSPI_Index_0);
 }
 
 static void SPI1_IRQ_Handler(void)
 {
-    TITivaC_SPI_IRQ_Process(hwSPI_Index_1);
+    SPI_IRQ_Process(hwSPI_Index_1);
 }
 
 static void SPI2_IRQ_Handler(void)
 {
-    TITivaC_SPI_IRQ_Process(hwSPI_Index_2);
+    SPI_IRQ_Process(hwSPI_Index_2);
 }
 
 static void SPI3_IRQ_Handler(void)
 {
-    TITivaC_SPI_IRQ_Process(hwSPI_Index_3);
+    SPI_IRQ_Process(hwSPI_Index_3);
 }
 
 void SPI_NVIC_Init(hwSPI_Index index)

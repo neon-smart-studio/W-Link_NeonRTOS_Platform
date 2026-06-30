@@ -22,7 +22,7 @@ uint32_t QSPI_Map_Soc_Periph(hwQSPI_Index index);
 uint32_t QSPI_Map_IRQ(hwQSPI_Index index);
 uint32_t QSPI_Map_PinConfig(hwQSPI_Index index, hwGPIO_Pin pin);
 
-void TITivaC_QSPI_IRQ_Process(hwQSPI_Index index);
+void QSPI_IRQ_Process(hwQSPI_Index index);
 
 void QSPI_NVIC_Init(hwQSPI_Index index);
 void QSPI_NVIC_DeInit(hwQSPI_Index index);

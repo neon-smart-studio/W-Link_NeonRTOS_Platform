@@ -126,16 +126,16 @@ uint32_t I2C_Map_PinConfig(hwI2C_Index index, hwGPIO_Pin pin)
     return 0;
 }
 
-static void I2C0_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_0); }
-static void I2C1_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_1); }
-static void I2C2_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_2); }
-static void I2C3_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_3); }
-static void I2C4_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_4); }
-static void I2C5_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_5); }
-static void I2C6_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_6); }
-static void I2C7_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_7); }
-static void I2C8_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_8); }
-static void I2C9_IRQ_Handler(void) { TIVA_I2C_IRQ_Process(hwI2C_Index_9); }
+static void I2C0_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_0); }
+static void I2C1_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_1); }
+static void I2C2_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_2); }
+static void I2C3_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_3); }
+static void I2C4_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_4); }
+static void I2C5_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_5); }
+static void I2C6_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_6); }
+static void I2C7_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_7); }
+static void I2C8_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_8); }
+static void I2C9_IRQ_Handler(void) { I2C_IRQ_Process(hwI2C_Index_9); }
 
 void I2C_NVIC_Init(hwI2C_Index index)
 {

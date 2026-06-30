@@ -22,7 +22,7 @@ uint32_t I2C_Map_Soc_Periph(hwI2C_Index index);
 uint32_t I2C_Map_Soc_Int(hwI2C_Index index);
 uint32_t I2C_Map_PinConfig(hwI2C_Index index, hwGPIO_Pin pin);
 
-void TIVA_I2C_IRQ_Process(hwI2C_Index index);
+void I2C_IRQ_Process(hwI2C_Index index);
 
 void I2C_NVIC_Init(hwI2C_Index index);
 void I2C_NVIC_DeInit(hwI2C_Index index);

@@ -10,7 +10,7 @@
 
 #include "UART/UART.h"
 
-#ifdef DEVICE_TM4C1294
+#ifdef DEVICE_TM4C123
 
 #include "UART_TITivaC.h"
 
@@ -69,51 +69,41 @@ uint32_t UART_Map_PinConfig(hwUART_Index index, hwGPIO_Pin pin)
         case hwUART_Index_0:
             if (pin == hwGPIO_Pin_A1) return GPIO_PA1_U0TX;
             if (pin == hwGPIO_Pin_A0) return GPIO_PA0_U0RX;
-            if (pin == hwGPIO_Pin_H0) return GPIO_PH0_U0RTS;
-            if (pin == hwGPIO_Pin_H1) return GPIO_PH1_U0CTS;
             break;
 
         case hwUART_Index_1:
             if (pin == hwGPIO_Pin_B1) return GPIO_PB1_U1TX;
             if (pin == hwGPIO_Pin_B0) return GPIO_PB0_U1RX;
-            if (pin == hwGPIO_Pin_N0) return GPIO_PN0_U1RTS;
-            if (pin == hwGPIO_Pin_N1) return GPIO_PN1_U1CTS;
             break;
 
         case hwUART_Index_2:
-            if (pin == hwGPIO_Pin_D5) return GPIO_PD5_U2TX;
-            if (pin == hwGPIO_Pin_D4) return GPIO_PD4_U2RX;
-            if (pin == hwGPIO_Pin_N2) return GPIO_PN2_U2RTS;
-            if (pin == hwGPIO_Pin_N3) return GPIO_PN3_U2CTS;
+            if (pin == hwGPIO_Pin_D7) return GPIO_PD7_U2TX;
+            if (pin == hwGPIO_Pin_D6) return GPIO_PD6_U2RX;
             break;
 
         case hwUART_Index_3:
-            if (pin == hwGPIO_Pin_J1) return GPIO_PJ1_U3TX;
-            if (pin == hwGPIO_Pin_J0) return GPIO_PJ0_U3RX;
-            if (pin == hwGPIO_Pin_N4) return GPIO_PN4_U3RTS;
-            if (pin == hwGPIO_Pin_N5) return GPIO_PN5_U3CTS;
+            if (pin == hwGPIO_Pin_C7) return GPIO_PC7_U3TX;
+            if (pin == hwGPIO_Pin_C6) return GPIO_PC6_U3RX;
             break;
 
         case hwUART_Index_4:
-            if (pin == hwGPIO_Pin_K1) return GPIO_PK1_U4TX;
-            if (pin == hwGPIO_Pin_K0) return GPIO_PK0_U4RX;
-            if (pin == hwGPIO_Pin_K2) return GPIO_PK2_U4RTS;
-            if (pin == hwGPIO_Pin_K3) return GPIO_PK3_U4CTS;
+            if (pin == hwGPIO_Pin_C5) return GPIO_PC5_U4TX;
+            if (pin == hwGPIO_Pin_C4) return GPIO_PC4_U4RX;
             break;
 
         case hwUART_Index_5:
-            if (pin == hwGPIO_Pin_C7) return GPIO_PC7_U5TX;
-            if (pin == hwGPIO_Pin_C6) return GPIO_PC6_U5RX;
+            if (pin == hwGPIO_Pin_E5) return GPIO_PE5_U5TX;
+            if (pin == hwGPIO_Pin_E4) return GPIO_PE4_U5RX;
             break;
 
         case hwUART_Index_6:
-            if (pin == hwGPIO_Pin_P1) return GPIO_PP1_U6TX;
-            if (pin == hwGPIO_Pin_P0) return GPIO_PP0_U6RX;
+            if (pin == hwGPIO_Pin_D5) return GPIO_PD5_U6TX;
+            if (pin == hwGPIO_Pin_D4) return GPIO_PD4_U6RX;
             break;
 
         case hwUART_Index_7:
-            if (pin == hwGPIO_Pin_C5) return GPIO_PC5_U7TX;
-            if (pin == hwGPIO_Pin_C4) return GPIO_PC4_U7RX;
+            if (pin == hwGPIO_Pin_E1) return GPIO_PE1_U7TX;
+            if (pin == hwGPIO_Pin_E0) return GPIO_PE0_U7RX;
             break;
 
         default:
@@ -208,4 +198,4 @@ void UART_NVIC_Disable(hwUART_Index index)
     }
 }
 
-#endif //DEVICE_TM4C1294
+#endif //DEVICE_TM4C123

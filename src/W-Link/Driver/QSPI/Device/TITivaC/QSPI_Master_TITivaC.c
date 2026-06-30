@@ -181,8 +181,8 @@ hwQSPI_OpResult QSPI_Master_Init(hwQSPI_Index index, uint32_t clock_rate_hz, hwQ
         return hwQSPI_OK;
     }
 
-    uint32_t ssi_base = SPI_Map_Soc_Base(index);
-    uint32_t ssi_periph = SPI_Map_Soc_Periph(index);
+    uint32_t ssi_base = QSPI_Map_Soc_Base(index);
+    uint32_t ssi_periph = QSPI_Map_Soc_Periph(index);
 
     if (ssi_base == 0 || ssi_periph == 0)
     {

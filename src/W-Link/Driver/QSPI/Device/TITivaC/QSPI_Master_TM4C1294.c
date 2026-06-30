@@ -91,22 +91,22 @@ uint32_t QSPI_Map_PinConfig(hwQSPI_Index index, hwGPIO_Pin pin)
 
 static void QSPI0_IRQ_Handler(void)
 {
-    TITivaC_QSPI_IRQ_Process(hwQSPI_Index_0);
+    QSPI_IRQ_Process(hwQSPI_Index_0);
 }
 
 static void QSPI1_IRQ_Handler(void)
 {
-    TITivaC_QSPI_IRQ_Process(hwQSPI_Index_1);
+    QSPI_IRQ_Process(hwQSPI_Index_1);
 }
 
 static void QSPI2_IRQ_Handler(void)
 {
-    TITivaC_QSPI_IRQ_Process(hwQSPI_Index_2);
+    QSPI_IRQ_Process(hwQSPI_Index_2);
 }
 
 static void QSPI3_IRQ_Handler(void)
 {
-    TITivaC_QSPI_IRQ_Process(hwQSPI_Index_3);
+    QSPI_IRQ_Process(hwQSPI_Index_3);
 }
 
 void QSPI_NVIC_Init(hwQSPI_Index index)

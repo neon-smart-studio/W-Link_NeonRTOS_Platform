@@ -20,7 +20,7 @@
 
 bool UART_Init_Status[hwUART_Index_MAX] = {false};
 
-static int  UART_BaudRate[hwUART_Index_MAX] = {0};
+static int UART_BaudRate[hwUART_Index_MAX] = {0};
 static bool UART_FlowControl[hwUART_Index_MAX] = {false};
 
 static NeonRTOS_SyncObj_t UART_Send_SyncHandle[hwUART_Index_MAX];

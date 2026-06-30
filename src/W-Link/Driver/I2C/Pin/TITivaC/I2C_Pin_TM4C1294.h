@@ -38,7 +38,7 @@ static const I2C_Pin_Def I2C_Pin_Def_Table[hwI2C_Index_MAX] =
 #endif
 
 #if defined(I2C8_BASE)
-    { hwGPIO_Pin_A2, hwGPIO_Pin_A3 },   // I2C8
+    { hwGPIO_Pin_D2, hwGPIO_Pin_D3 },   // I2C8
 #endif
 
 #if defined(I2C9_BASE)

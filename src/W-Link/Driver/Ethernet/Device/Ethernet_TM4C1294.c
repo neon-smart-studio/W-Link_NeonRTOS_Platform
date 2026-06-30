@@ -17,266 +17,228 @@
 
 #include "SPI/SPI_Master.h"
 
-#if 0//defined (TM4C1294)
+#if defined (TM4C1294)
 
 #ifdef CONFIG_ETHERNET_ONBOARD
 
 #include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
+
+#define EMAC_PHY_CONFIG  (EMAC_PHY_TYPE_INTERNAL | EMAC_PHY_INT_MDIX_EN | \
+                          EMAC_PHY_AN_100B_T_FULL_DUPLEX)
+#define EMAC_PHY_ADDR    0U
+
+#define ETH_RX_DESC_NUM  20U
+#define ETH_TX_DESC_NUM  20U
+
+#ifndef ETH_MAX_PACKET_SIZE
+#define ETH_MAX_PACKET_SIZE 1522U
+#endif
+
+#define ETH_DMA_BUF_SIZE ((ETH_MAX_PACKET_SIZE + 3U) & ~3U)
+
+#define ETH_DMA_ALIGN __attribute__((aligned(4)))
+
+typedef struct {
+    tEMACDMADescriptor desc;
+    uint8_t *buf;
+    uint32_t len;
+    bool used;
+} Ethernet_DMA_Desc_t;
+
+typedef struct {
+    Ethernet_DMA_Desc_t *items;
+    uint32_t count;
+    uint32_t read;
+    uint32_t write;
+} Ethernet_DMA_Ring_t;
+
+static Ethernet_DMA_Desc_t g_tx_desc[ETH_TX_DESC_NUM] ETH_DMA_ALIGN;
+static Ethernet_DMA_Desc_t g_rx_desc[ETH_RX_DESC_NUM] ETH_DMA_ALIGN;
+
+static uint8_t g_tx_buf[ETH_TX_DESC_NUM][ETH_DMA_BUF_SIZE] ETH_DMA_ALIGN;
+static uint8_t g_rx_buf[ETH_RX_DESC_NUM][ETH_DMA_BUF_SIZE] ETH_DMA_ALIGN;
+
+static Ethernet_DMA_Ring_t g_tx_ring = { g_tx_desc, ETH_TX_DESC_NUM, 0U, 0U };
+static Ethernet_DMA_Ring_t g_rx_ring = { g_rx_desc, ETH_RX_DESC_NUM, 0U, 0U };
 
 static bool ETH_Init = false;
 
 static onLinkUpCallback onLinkUpCB = NULL;
 static onLinkDownCallback onLinkDownCB = NULL;
 
-void DM9051_Hardware_Reset()
+static uint32_t g_eth_hash_high = 0U;
+static uint32_t g_eth_hash_low  = 0U;
+
+static void Ethernet_Release_Rx(Ethernet_DMA_Desc_t *d)
 {
-    GPIO_Pin_Write(DM9051_RST_Pin, 0);
-    NeonRTOS_Sleep(2);
-    GPIO_Pin_Write(DM9051_RST_Pin, 1);
-    NeonRTOS_Sleep(2);
+    d->len = 0U;
+    d->used = false;
+    d->desc.ui32Count = DES1_RX_CTRL_CHAINED |
+                        (ETH_DMA_BUF_SIZE << DES1_RX_CTRL_BUFF1_SIZE_S);
+    d->desc.pvBuffer1 = d->buf;
+    d->desc.ui32CtrlStatus = DES0_RX_CTRL_OWN;
 }
 
-static uint8_t DM9051_Read_Reg(uint8_t reg)
+void Ethernet_IRQHandler(void)
 {
-    uint8_t rx = 0;
-    uint8_t dummy = 0xFF;
+    if(!ETH_Init) return;
 
-    DM9051_CS_LOW();
-    SPI_Master_TransferByte(DM9051_SPI_INDEX, reg, &rx);
-    SPI_Master_TransferByte(DM9051_SPI_INDEX, dummy, &rx);
-    DM9051_CS_HIGH();
+    uint32_t status = MAP_EMACIntStatus(EMAC0_BASE, true);
+    MAP_EMACIntClear(EMAC0_BASE, status);
 
-    return rx;
-}
-
-static void DM9051_Write_Reg(uint8_t reg, uint8_t val)
-{
-    DM9051_CS_LOW();
-    reg |= DM_SPI_WR;
-    SPI_Master_WriteByte(DM9051_SPI_INDEX, reg);
-    SPI_Master_WriteByte(DM9051_SPI_INDEX, val);
-    DM9051_CS_HIGH();
-}
-
-/*------------------------- Read FIFO -------------------------*/
-static void DM9051_Read_Mem(uint8_t *buf, uint16_t len)
-{
-    const uint8_t cmd = DM_SPI_MRCMD;            /* 0x72 */
-
-    DM9051_CS_LOW();
-
-    SPI_Master_WriteByte(DM9051_SPI_INDEX, cmd);
-
-    if (len <= 4) {
-        /* ─────≤ FIFO 深度：改走 blocking───── */
-        static uint8_t dummy = 0xFF;
-        for (uint16_t i = 0; i < len; i++)          /* clock out len 個 0xFF */
-        {
-            SPI_Master_TransferByte(DM9051_SPI_INDEX, dummy, &buf[i]);
-        }
-    } else {
-        SPI_Master_Burst_Read(DM9051_SPI_INDEX, buf, len);
+    if(status & EMAC_INT_PHY) {
+        Ethernet_Set_Link();
     }
 
-    DM9051_CS_HIGH();
-}
+    if(status & (EMAC_INT_TRANSMIT | EMAC_INT_TX_STOPPED)) {
+        Ethernet_DMA_Desc_t *d;
 
-static void DM9051_Write_Mem(const uint8_t *buf, uint16_t len)
-{
-    const uint8_t cmd = DM_SPI_MWCMD | DM_SPI_WR;/* 0x7A */
+        for(uint32_t i = 0U; i < g_tx_ring.count; i++) {
+            d = &g_tx_ring.items[g_tx_ring.read];
 
-    DM9051_CS_LOW();
-    
-    SPI_Master_WriteByte(DM9051_SPI_INDEX, cmd);
+            if(!d->used) {
+                break;
+            }
 
-    if (len <= 4) {
-        /* ─────≤ FIFO 深度：改走 blocking───── */
-        for (uint16_t i = 0; i < len; i++)          /* clock out len 個 0xFF */
-        {
-            SPI_Master_WriteByte(DM9051_SPI_INDEX, buf[i]);
-        }
-    } else {
-        SPI_Master_Burst_Write(DM9051_SPI_INDEX, buf, len);
-    }
+            if(d->desc.ui32CtrlStatus & DES0_TX_CTRL_OWN) {
+                break;
+            }
 
-    DM9051_CS_HIGH();
-}
+            d->used = false;
+            d->len = 0U;
+            d->desc.ui32Count = 0U;
+            d->desc.pvBuffer1 = d->buf;
+            d->desc.ui32CtrlStatus = DES0_TX_CTRL_CHAINED;
 
-static void DM9051_Soft_Reset(uint8_t mac[6])
-{
-    NeonRTOS_Sleep(2); // delay 2 ms any need before NCR_RST (20170510)
-    DM9051_Write_Reg(DM9051_NCR, DM9051_NCR_REG_RESET);
-    NeonRTOS_Sleep(2);
-    DM9051_Write_Reg(DM9051_NCR, 0);
-
-    /* Setup DM9051 Registers */
-    DM9051_Write_Reg(DM9051_NCR, NCR_DEFAULT);
-    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_OFF);
-    DM9051_Write_Reg(DM9051_TCR, TCR_DEFAULT);
-    DM9051_Write_Reg(DM9051_BPTR, BPTR_DEFAULT);
-    DM9051_Write_Reg(DM9051_FCTR, FCTR_DEAFULT);
-    DM9051_Write_Reg(DM9051_FCR, FCR_DEFAULT);
-
-    //DM9051_Write_Reg(DM9051_INTCR, (0<<1) | (1<<0)); /* [1] 0:push-pull. [0] 0:active high, 1:active low. */
-    DM9051_Write_Reg(DM9051_INTCR, 0x00);
-    DM9051_Write_Reg(DM9051_INTCKCR, 0x81);
-
-    /* Clear status */
-    DM9051_Write_Reg(DM9051_NSR, NSR_CLR_STATUS);
-    DM9051_Write_Reg(DM9051_ISR, ISR_CLR_STATUS);
-
-    /* edit */
-#ifdef DM9051_FLOWCONTROL_EN
-    DM9051_Write_Reg(DM9051_FCR, FCR_FLOW_ENABLE); /* Flow Control */
-#else
-    DM9051_Write_Reg(DM9051_FCR, 0x00); /* Flow Control */
-#endif
-    DM9051_Write_Reg(DM9051_PPCR, PPCR_SETTING); /* Fully Pause Packet Count */
-    DM9051_Write_Reg(DM9051_NLEDCR, 0x81);       //set led model
-    DM9051_Write_Reg(DM9051_ATCR, 0x80);         //set TX auto_send
-    DM9051_Write_Reg(DM9051_BCASTCR, 0xC0);      //set rec broadcast packet
-
-    for (int i = 0; i < 6; i++) {
-        DM9051_Write_Reg(DM9051_PAR + i, mac[i]);
-    }
-    
-    DM9051_Write_Reg(DM9051_RCR, RCR_DEFAULT);
-}
-
-static void DM9051_PHY_Write(uint16_t reg, uint16_t value)
-{
-    /* Fill the phyxcer register into REG_0C */
-    DM9051_Write_Reg(DM9051_EPAR, DM9051_PHY | reg);
-
-    /* Fill the written data into REG_0D & REG_0E */
-    DM9051_Write_Reg(DM9051_EPDRL, (value & 0xff));
-    DM9051_Write_Reg(DM9051_EPDRH, ((value >> 8) & 0xff));
-    DM9051_Write_Reg(DM9051_EPCR, 0xa); /* Issue phyxcer write command */
-
-    while (DM9051_Read_Reg(DM9051_EPCR) & 0x1)
-    {
-        NeonRTOS_Sleep(1);
-    }; //Wait complete
-
-    DM9051_Write_Reg(DM9051_EPCR, 0x0); /* Clear phyxcer write command */
-}
-
-static uint16_t DM9051_PHY_Read(uint32_t reg)
-{
-    uint16_t value;
-
-    /* Fill the phyxcer register into REG_0C */
-    DM9051_Write_Reg(DM9051_EPAR, DM9051_PHY | reg);
-    DM9051_Write_Reg(DM9051_EPCR, 0xc); /* Issue phyxcer read command */
-
-    while (DM9051_Read_Reg(DM9051_EPCR) & 0x1)
-    {
-        NeonRTOS_Sleep(1);
-    }; //Wait complete
-
-    DM9051_Write_Reg(DM9051_EPCR, 0x0); /* Clear phyxcer read command */
-    value = (DM9051_Read_Reg(DM9051_EPDRH) << 8) | DM9051_Read_Reg(DM9051_EPDRL);
-
-    return value;
-}
-
-static void DM9051_PHY_Mode_Set()
-{
-    uint16_t phy_reg4 = 0x01e1, phy_reg0 = 0x1200;
-
-    DM9051_PHY_Write(20, 0x0200); /* Disable NWAY powersaver */
-
-#ifdef DM9051_FLOWCONTROL_EN
-    DM9051_PHY_Write(4, phy_reg4 | 0x0400); /* Set PHY media mode */
-#else
-    DM9051_PHY_Write(4, phy_reg4); /* Set PHY media mode */
-#endif /* DM9051_FLOWCONTROL_EN */
-    DM9051_PHY_Write(0, phy_reg0); /* RE_START NWAY */
-}
-
-/* polynomial: 0xEDB88320L */
-static uint32_t DM9051_CRC32_LE(const uint8_t *data, size_t length)
-{
-    uint32_t crc = 0xffffffff;
-
-    int i;
-    while (length--)
-    {
-        crc ^= *data++;
-        for (i = 0; i < 8; i++)
-        {
-            crc = (crc >> 1) ^ ((crc & 1) ? 0xEDB88320L : 0);
+            g_tx_ring.read++;
+            if(g_tx_ring.read >= g_tx_ring.count) {
+                g_tx_ring.read = 0U;
+            }
         }
     }
-    return crc;
-}
 
-static void DM9051_Chip_Reset(uint8_t mac[6])
-{
-    DM9051_Soft_Reset(mac);
+    if(status & EMAC_INT_RX_STOPPED) {
+        MAP_EMACRxDMAPollDemand(EMAC0_BASE);
+    }
 
-    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET);
+    if(status & EMAC_INT_TX_STOPPED) {
+        MAP_EMACTxDMAPollDemand(EMAC0_BASE);
+    }
 }
 
 hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb)
 {
-    int i, oft;
-    uint32_t device_id;
+    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    MAP_GPIOPinConfigure(GPIO_PF0_EN0LED0);
+    MAP_GPIOPinConfigure(GPIO_PF4_EN0LED1);
+    MAP_GPIOPinTypeEthernetLED(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4);
 
-    GPIO_Pin_Init(DM9051_RST_Pin, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
-    GPIO_Pin_Init(DM9051_CS_Pin, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
+    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_EMAC0);
+    MAP_SysCtlPeripheralReset(SYSCTL_PERIPH_EMAC0);
 
-    SPI_Master_Init(DM9051_SPI_INDEX, 20000000, hwSPI_OpMode_Polarity0_Phase0, false);
+    if((EMAC_PHY_CONFIG & EMAC_PHY_TYPE_MASK) == EMAC_PHY_TYPE_INTERNAL) {
+        if(!MAP_SysCtlPeripheralPresent(SYSCTL_PERIPH_EPHY0)) {
+            return hwEthernet_HwError;
+        }
 
-    DM9051_Hardware_Reset();
-
-    NeonRTOS_Sleep(100);
-
-    /* RESET device */
-    DM9051_Write_Reg(DM9051_NCR, DM9051_NCR_REG_RESET);
-    NeonRTOS_Sleep(2);
-    DM9051_Write_Reg(DM9051_NCR, 0);
-
-    DM9051_Write_Reg(DM9051_GPCR, GPCR_GEP_CNTL);
-    DM9051_Write_Reg(DM9051_GPR, 0x00); //Power on PHY
-
-    NeonRTOS_Sleep(100);
-
-    device_id  = DM9051_Read_Reg(DM9051_VIDL);
-    device_id |= DM9051_Read_Reg(DM9051_VIDH) << 8;
-    device_id |= DM9051_Read_Reg(DM9051_PIDL) << 16;
-    device_id |= DM9051_Read_Reg(DM9051_PIDH) << 24;
-    UART_Printf("[%s L%d] device_id: %08X\n", __FUNCTION__, __LINE__, device_id);
-
-    if(device_id != DM9051_ID)
-    {
-        return hwEthernet_HwError;
+        MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_EPHY0);
+        MAP_SysCtlPeripheralReset(SYSCTL_PERIPH_EPHY0);
     }
 
-    device_id  = DM9051_Read_Reg(DM9051_CHIPR);
-    UART_Printf("[%s L%d] CHIP Revision: %02X\n", __FUNCTION__, __LINE__, device_id);
-
-    /* Set PHY */
-    DM9051_PHY_Mode_Set();
-
-    /* set mac address */
-    for (i = 0, oft = DM9051_PAR; i < 6; i++, oft++)
-    {
-        DM9051_Write_Reg(oft, mac[i]);
+    while(!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_EMAC0)) {
     }
 
-    for (i = 0, oft = DM9051_MAR; i < 8; i++, oft++)
-    {
-        DM9051_Write_Reg(oft, 0x00);
-    }
-    UART_Printf("Clean Multicast Address Hash Table\n");
+    MAP_EMACPHYConfigSet(EMAC0_BASE, EMAC_PHY_CONFIG);
 
-    /* Activate DM9051 */
-    DM9051_Soft_Reset(mac);
+    MAP_EMACInit(EMAC0_BASE,
+                 MAP_SysCtlClockGet(),
+                 EMAC_BCONFIG_MIXED_BURST | EMAC_BCONFIG_PRIORITY_FIXED,
+                 4,
+                 4,
+                 0);
 
-    //DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
-    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_OFF); // Disable all interrupts
+    MAP_EMACConfigSet(EMAC0_BASE,
+                      (EMAC_CONFIG_FULL_DUPLEX |
+                       EMAC_CONFIG_7BYTE_PREAMBLE |
+                       EMAC_CONFIG_IF_GAP_96BITS |
+                       EMAC_CONFIG_USE_MACADDR0 |
+                       EMAC_CONFIG_SA_FROM_DESCRIPTOR |
+                       EMAC_CONFIG_BO_LIMIT_1024),
+                      (EMAC_MODE_RX_STORE_FORWARD |
+                       EMAC_MODE_TX_STORE_FORWARD |
+                       EMAC_MODE_TX_THRESHOLD_64_BYTES |
+                       EMAC_MODE_RX_THRESHOLD_64_BYTES),
+                      ETH_MAX_PACKET_SIZE);
+
+    MAP_EMACAddrSet(EMAC0_BASE, 0U, mac);
     
+    for(uint32_t i = 0U; i < ETH_TX_DESC_NUM; i++) {
+        g_tx_desc[i].buf = g_tx_buf[i];
+        g_tx_desc[i].len = 0U;
+        g_tx_desc[i].used = false;
+        g_tx_desc[i].desc.ui32Count = 0U;
+        g_tx_desc[i].desc.pvBuffer1 = g_tx_desc[i].buf;
+        g_tx_desc[i].desc.DES3.pLink = (i == (ETH_TX_DESC_NUM - 1U)) ?
+                                      &g_tx_desc[0].desc : &g_tx_desc[i + 1U].desc;
+        g_tx_desc[i].desc.ui32CtrlStatus = DES0_TX_CTRL_CHAINED;
+    }
+
+    g_tx_ring.read = 0U;
+    g_tx_ring.write = 0U;
+
+    for(uint32_t i = 0U; i < ETH_RX_DESC_NUM; i++) {
+        g_rx_desc[i].buf = g_rx_buf[i];
+        g_rx_desc[i].desc.DES3.pLink = (i == (ETH_RX_DESC_NUM - 1U)) ?
+                                      &g_rx_desc[0].desc : &g_rx_desc[i + 1U].desc;
+        Ethernet_Release_Rx(&g_rx_desc[i]);
+    }
+
+    g_rx_ring.read = 0U;
+    g_rx_ring.write = 0U;
+
+    MAP_EMACRxDMADescriptorListSet(EMAC0_BASE, &g_rx_desc[0].desc);
+    MAP_EMACTxDMADescriptorListSet(EMAC0_BASE, &g_tx_desc[0].desc);
+
+    (void)MAP_EMACPHYRead(EMAC0_BASE, EMAC_PHY_ADDR, EPHY_MISR1);
+    (void)MAP_EMACPHYRead(EMAC0_BASE, EMAC_PHY_ADDR, EPHY_MISR2);
+
+    uint16_t scr = MAP_EMACPHYRead(EMAC0_BASE, EMAC_PHY_ADDR, EPHY_SCR);
+    scr |= (EPHY_SCR_INTEN_EXT | EPHY_SCR_INTOE_EXT);
+    MAP_EMACPHYWrite(EMAC0_BASE, EMAC_PHY_ADDR, EPHY_SCR, scr);
+
+    MAP_EMACPHYWrite(EMAC0_BASE,
+                     EMAC_PHY_ADDR,
+                     EPHY_MISR1,
+                     EPHY_MISR1_LINKSTATEN |
+                     EPHY_MISR1_SPEEDEN |
+                     EPHY_MISR1_DUPLEXMEN |
+                     EPHY_MISR1_ANCEN);
+
+    MAP_EMACFrameFilterSet(EMAC0_BASE,
+                           EMAC_FRMFILTER_HASH_AND_PERFECT |
+                           EMAC_FRMFILTER_PASS_MULTICAST |
+                           EMAC_FRMFILTER_PASS_NO_CTRL);
+
+    MAP_EMACHashFilterSet(EMAC0_BASE, g_eth_hash_high, g_eth_hash_low);
+
+    MAP_EMACIntClear(EMAC0_BASE, MAP_EMACIntStatus(EMAC0_BASE, false));
+
+    MAP_EMACTxEnable(EMAC0_BASE);
+    MAP_EMACRxEnable(EMAC0_BASE);
+
+    MAP_EMACIntEnable(EMAC0_BASE,
+                      EMAC_INT_RECEIVE |
+                      EMAC_INT_TRANSMIT |
+                      EMAC_INT_TX_STOPPED |
+                      EMAC_INT_RX_NO_BUFFER |
+                      EMAC_INT_RX_STOPPED |
+                      EMAC_INT_PHY);
+
+    MAP_EMACPHYWrite(EMAC0_BASE,
+                     EMAC_PHY_ADDR,
+                     EPHY_BMCR,
+                     EPHY_BMCR_ANEN | EPHY_BMCR_RESTARTAN);
+
     onLinkUpCB = link_up_cb;
     onLinkDownCB = link_down_cb;
     
@@ -291,122 +253,119 @@ hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
         return hwEthernet_InvalidParameter;
     }
 
-    if ((out_len > ETH_MAX_PACKET_SIZE) || (out_len > ETH_TX_BUF_SIZE)) {
+    if (out_len > ETH_MAX_PACKET_SIZE) {
         return hwEthernet_BufferError;
     }
 
-    uint32_t retry = 0;
-    uint8_t nsr_reg = 0;
+    Ethernet_DMA_Desc_t *d;
 
-    // wait for sending complete
-    while (1)
-    {
-        nsr_reg = DM9051_Read_Reg(DM9051_NSR) & (NSR_TX1END | NSR_TX2END);
-        if(nsr_reg != 0)
-        {
+    for(uint32_t i = 0U; i < g_tx_ring.count; i++) {
+        d = &g_tx_ring.items[g_tx_ring.read];
+
+        if(!d->used) {
             break;
         }
 
-        retry++;
-        if (retry > 10)
-        {
-            //UART_Printf("wait for send complete timeout, retry=%d, abort!\n", retry);
-            return hwEthernet_Busy;
+        if(d->desc.ui32CtrlStatus & DES0_TX_CTRL_OWN) {
+            break;
         }
 
-        NeonRTOS_Sleep(1);
+        d->used = false;
+        d->len = 0U;
+        d->desc.ui32Count = 0U;
+        d->desc.pvBuffer1 = d->buf;
+        d->desc.ui32CtrlStatus = DES0_TX_CTRL_CHAINED;
+
+        g_tx_ring.read++;
+        if(g_tx_ring.read >= g_tx_ring.count) {
+            g_tx_ring.read = 0U;
+        }
     }
 
-    if (retry > 2)
-    {
-        //UART_Printf("TX wait %d.", retry);
+    d = &g_tx_ring.items[g_tx_ring.write];
+    if(d->used || (d->desc.ui32CtrlStatus & DES0_TX_CTRL_OWN)) {
+        return hwEthernet_Busy;
     }
 
-    if ((NSR_TX1END | NSR_TX2END) == nsr_reg)
-    {
-        DM9051_Write_Reg(DM9051_MPCR, 0x02); //reset tx point
+    memcpy(d->buf, out_data, out_len);
+    d->len = out_len;
+    d->used = true;
+
+    d->desc.ui32Count = out_len;
+    d->desc.pvBuffer1 = d->buf;
+    d->desc.ui32CtrlStatus = DES0_TX_CTRL_FIRST_SEG |
+                             DES0_TX_CTRL_LAST_SEG |
+                             DES0_TX_CTRL_INTERRUPT |
+                             DES0_TX_CTRL_CHAINED |
+                             DES0_TX_CTRL_OWN;
+
+    g_tx_ring.write++;
+    if(g_tx_ring.write >= g_tx_ring.count) {
+        g_tx_ring.write = 0U;
     }
 
-    //Write data to FIFO
-    DM9051_Write_Reg(DM9051_TXPLL, out_len & 0xff);
-    DM9051_Write_Reg(DM9051_TXPLH, (out_len >> 8) & 0xff);
-
-    DM9051_Write_Mem(out_data, out_len);
-
-    // start send cmd
-    DM9051_Write_Reg(DM9051_TCR, TCR_TXREQ);
+    MAP_EMACTxDMAPollDemand(EMAC0_BASE);
 
     return hwEthernet_OK;
 }
 
 hwEthernet_OpResult Ethernet_Get_Input_Frame_Length(uint32_t *frame_len)
 {
-    uint8_t isr_reg;
-    uint8_t nsr_reg;
-
-    isr_reg = DM9051_Read_Reg(DM9051_ISR);
-    DM9051_Write_Reg(DM9051_ISR, (isr_reg & ISR_CLR_STATUS));  // Clear ISR status
-    //UART_Printf("isr_reg=0x%x", isr_reg);
-
-    // Receive Overflow Counter Overflow
-    if (isr_reg & ISR_ROOS)
-    {
-        UART_Printf("dm9051_chip_reset Receive Overflow Counter Overflow\n");
-        return hwEthernet_BufferError;
+    if(frame_len == NULL) {
+        return hwEthernet_InvalidParameter;
     }
 
-    // Receive Overflow
-    if (isr_reg & ISR_ROS)
-    {
-        UART_Printf("Receive_FIFO Overflow\n");
-        DM9051_Write_Reg(DM9051_MPCR, MPCR_RSTRX);
-        DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
-        return hwEthernet_BufferError;
+    *frame_len = 0U;
+
+    if(!ETH_Init) {
+        return hwEthernet_NotInit;
     }
 
-    // transmit
-    if (isr_reg & ISR_PTS)
-    {
-        //UART_Printf("ISR_PTS\n");
+    Ethernet_DMA_Desc_t *d = &g_rx_ring.items[g_rx_ring.read];
+
+    /* DMA 還沒交給 CPU */
+    if(d->desc.ui32CtrlStatus & DES0_RX_CTRL_OWN) {
+        return hwEthernet_OK;
     }
 
-    uint16_t rx_status, rx_len;
-    uint8_t ReceiveData[4];
-    uint8_t rx_bytes[2];
+    /* Frame Error */
+    if(d->desc.ui32CtrlStatus & DES0_RX_STAT_ERR) {
+        Ethernet_Release_Rx(d);
 
-    /* Check packet ready or not                                                                              */
-    nsr_reg = DM9051_Read_Reg(DM9051_NSR) & NSR_RXRDY;
-    if (nsr_reg)
-    {
-        rx_bytes[0] = DM9051_Read_Reg(DM9051_MRCMDX);
-        rx_bytes[1] = DM9051_Read_Reg(DM9051_MRCMDX1);
-
-        if (rx_bytes[1] != DM9051_PKT_RDY)
-        {
-            UART_Printf("NSR %02X, RCMDX %02X: rx not ready\n", nsr_reg, rx_bytes[1]);
-            DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
-            return hwEthernet_BufferError;
+        g_rx_ring.read++;
+        if(g_rx_ring.read >= g_rx_ring.count) {
+            g_rx_ring.read = 0U;
         }
-    }
-    else
-    {
-        DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
+
+        MAP_EMACRxDMAPollDemand(EMAC0_BASE);
+
         return hwEthernet_BufferError;
     }
 
-    DM9051_Read_Mem(ReceiveData, 4);
-
-    rx_status = ReceiveData[0] + (ReceiveData[1] << 8);
-    rx_len = ReceiveData[2] + (ReceiveData[3] << 8);
-
-    if ((rx_len < 14) || (rx_len > DM9051_PKT_MAX)) {
-        UART_Printf("bad rx len=%u status=%04X, reset rx fifo\n", rx_len, rx_status);
-        DM9051_Write_Reg(DM9051_MPCR, MPCR_RSTRX);
-        DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
+    /* 目前只支援一個 Descriptor 一個 Frame */
+    if((d->desc.ui32CtrlStatus & DES0_RX_STAT_LAST_DESC) == 0U) {
         return hwEthernet_BufferError;
     }
 
-    //UART_Printf("RX header status=%04X len=%u\n", rx_status, rx_len);
+    uint32_t rx_len =
+        (d->desc.ui32CtrlStatus & DES0_RX_STAT_FRAME_LENGTH_M) >>
+        DES0_RX_STAT_FRAME_LENGTH_S;
+
+    if(rx_len > ETH_MAX_PACKET_SIZE) {
+        Ethernet_Release_Rx(d);
+
+        g_rx_ring.read++;
+        if(g_rx_ring.read >= g_rx_ring.count) {
+            g_rx_ring.read = 0U;
+        }
+
+        MAP_EMACRxDMAPollDemand(EMAC0_BASE);
+
+        return hwEthernet_BufferError;
+    }
+
+    d->len = rx_len;
+    d->used = true;
 
     *frame_len = rx_len;
 
@@ -419,16 +378,40 @@ hwEthernet_OpResult Ethernet_Input(uint8_t *in_data, uint32_t in_len)
         return hwEthernet_InvalidParameter;
     }
 
-    DM9051_Read_Mem(in_data, in_len);
+    if((in_data == NULL) || (in_len == 0U)) {
+        return hwEthernet_InvalidParameter;
+    }
 
-    //DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
-    /*
-    UART_Printf("RX frame len=%lu %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
-            in_len,
-            in_data[0], in_data[1], in_data[2], in_data[3],
-            in_data[4], in_data[5], in_data[6], in_data[7],
-            in_data[8], in_data[9], in_data[10], in_data[11],
-            in_data[12], in_data[13]);*/
+    if(!ETH_Init) {
+        return hwEthernet_NotInit;
+    }
+
+    Ethernet_DMA_Desc_t *d = &g_rx_ring.items[g_rx_ring.read];
+
+    if(d->desc.ui32CtrlStatus & DES0_RX_CTRL_OWN)
+    {
+        return hwEthernet_Busy;
+    }
+
+    if(!d->used || (d->len == 0U))
+    {
+        return hwEthernet_Busy;
+    }
+
+    if(in_len < d->len) {
+        return hwEthernet_BufferError;
+    }
+
+    memcpy(in_data, d->buf, d->len);
+
+    Ethernet_Release_Rx(d);
+
+    g_rx_ring.read++;
+    if(g_rx_ring.read >= g_rx_ring.count) {
+        g_rx_ring.read = 0U;
+    }
+
+    MAP_EMACRxDMAPollDemand(EMAC0_BASE);
 
     return hwEthernet_OK;
 }
@@ -440,22 +423,27 @@ bool Ethernet_isInit(void)
 
 void Ethernet_Set_Link(void)
 {
-    uint8_t nsr_reg;
-    nsr_reg = DM9051_Read_Reg(DM9051_NSR);
-    if (nsr_reg & NSR_LINKST)
+    if(!ETH_Init) {
+        return;
+    }
+
+    (void)MAP_EMACPHYRead(EMAC0_BASE, EMAC_PHY_ADDR, EPHY_MISR1);
+
+    (void)MAP_EMACPHYRead(EMAC0_BASE, EMAC_PHY_ADDR, EPHY_BMSR);
+    uint16_t bmsr = MAP_EMACPHYRead(EMAC0_BASE, EMAC_PHY_ADDR, EPHY_BMSR);
+    bool link_now = ((bmsr & EPHY_BMSR_LINKSTAT) != 0U);
+
+    if(link_now)
     {
-        uint8_t ncr_reg;
-
-        ncr_reg = DM9051_Read_Reg(DM9051_NCR) & NCR_FDX;
-        nsr_reg = DM9051_Read_Reg(DM9051_NSR) & (NSR_SPEED | NSR_LINKST);
-
-        if (onLinkUpCB != NULL) {
+        if(onLinkUpCB != NULL)
+        {
             onLinkUpCB();
         }
     }
     else
     {
-        if (onLinkDownCB != NULL) {
+        if(onLinkDownCB != NULL)
+        {
             onLinkDownCB();
         }
     }
@@ -463,51 +451,111 @@ void Ethernet_Set_Link(void)
 
 void Ethernet_Update_Config(bool isLinkUp)
 {
-  if (isLinkUp) {
-  } else {
-  }
+    if(!ETH_Init) {
+        return;
+    }
 
+    if(!isLinkUp) {
+        MAP_EMACTxDisable(EMAC0_BASE);
+        MAP_EMACRxDisable(EMAC0_BASE);
+        return;
+    }
+
+    uint16_t sts = MAP_EMACPHYRead(EMAC0_BASE, EMAC_PHY_ADDR, EPHY_STS);
+    uint32_t cfg, mode, rx_max_frame_size;
+
+    MAP_EMACConfigGet(EMAC0_BASE, &cfg, &mode, &rx_max_frame_size);
+
+    if(sts & EPHY_STS_SPEED) {
+        cfg &= ~EMAC_CONFIG_100MBPS;      /* 10 Mbps */
+    } else {
+        cfg |= EMAC_CONFIG_100MBPS;       /* 100 Mbps */
+    }
+
+    if(sts & EPHY_STS_DUPLEX) {
+        cfg |= EMAC_CONFIG_FULL_DUPLEX;
+    } else {
+        cfg &= ~EMAC_CONFIG_FULL_DUPLEX;
+    }
+
+    MAP_EMACConfigSet(EMAC0_BASE, cfg, mode, rx_max_frame_size);
+
+    MAP_EMACTxEnable(EMAC0_BASE);
+    MAP_EMACRxEnable(EMAC0_BASE);
 }
 
 uint32_t Ethernet_Get_Tick(void)
 {
-  return HAL_GetTick();
+    return NeonRTOS_Millis();
 }
 
 void Ethernet_Get_Hardware_Mac(uint8_t mac[6])
 {
-    // 使用 STM32 的唯一 ID 生成 MAC 地址
-    uint32_t baseUID = *(uint32_t *)UID_BASE;
-    mac[0] = 0x00;
-    mac[1] = 0x60;
-    mac[2] = 0x6e;
-    mac[3] = (baseUID & 0x00FF0000) >> 16;
-    mac[4] = (baseUID & 0x0000FF00) >> 8;
-    mac[5] = (baseUID & 0x000000FF);
+    if(mac == NULL) {
+        return;
+    }
+
+    uint32_t user0, user1;
+    MAP_FlashUserGet(&user0, &user1);
+
+    if((user0 == 0xFFFFFFFFU) || (user1 == 0xFFFFFFFFU)) {
+        memset(mac, 0, 6U);
+        return;
+    }
+
+    mac[0] = (uint8_t)( user0        & 0xFFU);
+    mac[1] = (uint8_t)((user0 >>  8) & 0xFFU);
+    mac[2] = (uint8_t)((user0 >> 16) & 0xFFU);
+    mac[3] = (uint8_t)( user1        & 0xFFU);
+    mac[4] = (uint8_t)((user1 >>  8) & 0xFFU);
+    mac[5] = (uint8_t)((user1 >> 16) & 0xFFU);
 }
 
-hwEthernet_OpResult Ethernet_Register_Multicast_Address(const uint8_t *mac, uint32_t *eth_HashTableHigh, uint32_t *eth_HashTableLow)
+static uint32_t Ethernet_Crc32Le(const uint8_t *data, uint32_t len)
 {
-    uint32_t crc;
-    uint8_t hash;
-    uint8_t hash_group;
+    uint32_t crc = 0xFFFFFFFFU;
 
-    /* calculate crc32 value of mac address */
-    crc = DM9051_CRC32_LE(mac, 6);
-
-    hash = crc & 0x3F;
-
-    hash_group = hash / 8;
-
-    if (hash > 31)
-    {
-        *eth_HashTableHigh |= 1 << (hash - 32);
-        DM9051_Write_Reg(DM9051_MAR + hash_group, (*eth_HashTableHigh >> (hash_group - 4) * 8) & 0xff);
+    for(uint32_t i = 0U; i < len; i++) {
+        uint8_t v = data[i];
+        for(uint32_t b = 0U; b < 8U; b++) {
+            uint32_t mix = (crc ^ v) & 1U;
+            crc >>= 1U;
+            if(mix != 0U) {
+                crc ^= 0xEDB88320U;
+            }
+            v >>= 1U;
+        }
     }
-    else
-    {
-        *eth_HashTableLow |= 1 << hash;
-        DM9051_Write_Reg(DM9051_MAR + hash_group, (*eth_HashTableLow >> (hash_group * 8)) & 0xff);
+
+    return crc;
+}
+
+hwEthernet_OpResult Ethernet_Register_Multicast_Address(const uint8_t *mac,
+                                                        uint32_t *eth_HashTableHigh,
+                                                        uint32_t *eth_HashTableLow)
+{
+    if((mac == NULL) || (eth_HashTableHigh == NULL) || (eth_HashTableLow == NULL)) {
+        return hwEthernet_InvalidParameter;
+    }
+
+    if((mac[0] & 0x01U) == 0U) {
+        return hwEthernet_InvalidParameter;
+    }
+
+    uint32_t crc = Ethernet_Crc32Le(mac, 6U);
+    uint32_t hash_index = (crc >> 26) & 0x3FU;
+
+    if(hash_index < 32U) {
+        *eth_HashTableLow |= (1UL << hash_index);
+    } else {
+        *eth_HashTableHigh |= (1UL << (hash_index - 32U));
+    }
+
+    g_eth_hash_low = *eth_HashTableLow;
+    g_eth_hash_high = *eth_HashTableHigh;
+
+    if(ETH_Init) {
+        MAP_EMACHashFilterSet(EMAC0_BASE, g_eth_hash_high, g_eth_hash_low);
     }
 
     return hwEthernet_OK;

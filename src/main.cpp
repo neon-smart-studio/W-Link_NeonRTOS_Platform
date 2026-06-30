@@ -73,61 +73,61 @@ void vSensor_Task(void* p)
     I2C_Master_Init(hwI2C_Index_1, hwI2C_Standard_Mode);
 
     VL53L1X_Init();
-    //VL53L4CD_Init();
-    VL53L5CX_Init();
+    VL53L4CD_Init();
+    //VL53L5CX_Init();
 
     VL53L1X_Power_Off();
-    //VL53L4CD_Power_Off();
-    VL53L5CX_Power_Off();
+    VL53L4CD_Power_Off();
+    //VL53L5CX_Power_Off();
     NeonRTOS_Sleep(10);
 
     VL53L1X_Power_On();
     NeonRTOS_Sleep(10);
     VL53L1X_SetI2CAddress(0x54);
 
-    //VL53L4CD_Power_On();
-    //NeonRTOS_Sleep(10);
-    //VL53L4CD_SetI2CAddress(0x56);
-
-    VL53L5CX_Power_On();
+    VL53L4CD_Power_On();
     NeonRTOS_Sleep(10);
+    VL53L4CD_SetI2CAddress(0x56);
+
+    //VL53L5CX_Power_On();
+    //NeonRTOS_Sleep(10);
     //VL53L5CX_Set_I2C_Address(0x58);
 
     VL53L1X_GetSensorId(&sensorID);
-    UART_Printf("sensorID = 0x%4x\n", sensorID);
+    UART_Printf("VL53L1X sensorID = 0x%4x\n", sensorID);
 
-    //VL53L4CD_GetSensorId(&sensorID);
-    //UART_Printf("sensorID = 0x%4x\n", sensorID);
+    VL53L4CD_GetSensorId(&sensorID);
+    UART_Printf("VL53L4CD sensorID = 0x%4x\n", sensorID);
 
     if(VL53L1X_SensorInit() < VL53L1X_OK)
     {
         UART_Printf("VL53L1X init failed\n");
         while(1);
     }
-/*
+
     if(VL53L4CD_SensorInit() < VL53L4CD_OK)
     {
         UART_Printf("VL53L4CD init failed\n");
         while(1);
     }
-*/
+/*
     if(VL53L5CX_SensorInit() < VL53L5CX_OK)
     {
         UART_Printf("VL53L5CX init failed\n");
         while(1);
     }
-
+*/
     VL53L1X_SetDistanceMode(2);
     VL53L1X_SetTimingBudgetInMs(50);
     VL53L1X_SetInterMeasurementInMs(100);
     VL53L1X_StartRanging();
 
-    //VL53L4CD_SetRangeTiming(200, 0);
-    //VL53L4CD_StartRanging();
+    VL53L4CD_SetRangeTiming(200, 0);
+    VL53L4CD_StartRanging();
 
-    VL53L5CX_Set_Resolution(VL53L5CX_RESOLUTION_8X8);
+    //VL53L5CX_Set_Resolution(VL53L5CX_RESOLUTION_8X8);
     
-    VL53L5CX_Start_Ranging();
+    //VL53L5CX_Start_Ranging();
 
     while(1)
     {
@@ -143,15 +143,15 @@ void vSensor_Task(void* p)
 
             UART_Printf("VL53L1X distance = %d\n", dist);
         }
-/*
+
         if(VL53L4CD_CheckForDataReady(&ready) == VL53L4CD_OK && ready)
         {
             VL53L4CD_ClearInterrupt();
             VL53L4CD_GetResult(&result);
 
-            UART_Printf("distance = %d\n", result.distance_mm);
+            UART_Printf("VL53L4CD distance = %d\n", result.distance_mm);
         }
-*/
+/*
         if(VL53L5CX_Check_Data_Ready(&ready) == VL53L5CX_OK && ready)
         {
             VL53L5CX_Get_Ranging_Data(&resultData);
@@ -159,13 +159,14 @@ void vSensor_Task(void* p)
             for(int i = 0; i < 64; i++)
             {
                 UART_Printf("%d ", resultData.distance_mm[i]);
-                if(i%8==0)
+                if(i%8==7)
                 {
                     UART_Printf("\r\n");
                 }
             }
             UART_Printf("\r\n");
         }
+        */
 
         NeonRTOS_Sleep(10);
     }

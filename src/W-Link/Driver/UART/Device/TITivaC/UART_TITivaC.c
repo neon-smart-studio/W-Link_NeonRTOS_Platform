@@ -479,7 +479,7 @@ hwUART_OpResult UART_Write(hwUART_Index index, uint8_t *data_wr, size_t size, ui
     MAP_UARTIntEnable(base, UART_INT_TX);
 
     /* 手動先塞一次 FIFO，避免 TX interrupt 沒立刻觸發 */
-    UART_IRQHandler_Common(index);
+    UART_IRQ_Process(index);
 
     if (NeonRTOS_SyncObjWait(&UART_Send_SyncHandle[index], wait_ms) != NeonRTOS_OK)
     {
@@ -505,27 +505,37 @@ hwUART_OpResult UART_PutChar(hwUART_Index index, uint8_t char_wr, uint32_t timeo
     return UART_Write(index, &char_wr, 1, timeoutMs);
 }
 
-void UART_Printf(const char *format, ...) {
-    char buffer[256];
+void UART_Printf(const char *format, ...)
+{
+    if (UART_Init_Status[LOG_UART_INDEX] == false) {
+        return;
+    }
+
+    char buffer[128];
     va_list args;
 
     va_start(args, format);
     int len = vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    uint32_t base = UART_Map_Soc_Base(LOG_UART_INDEX);
-
-    NeonRTOS_EnterCritical();
-
-    for(int i = 0; i<len; i++)
-    {
-        while(MAP_UARTCharPutNonBlocking(base, buffer[i])==false)
-        {
-            NeonRTOS_Sleep(1);
-        }
+    if (len <= 0) {
+        return;
     }
 
-    NeonRTOS_ExitCritical(0);
+    if (len >= (int)sizeof(buffer)) {
+        len = sizeof(buffer) - 1;
+    }
+
+    UART_Write(LOG_UART_INDEX, (uint8_t *)buffer, len, 1000);
+}
+
+bool UART_is_Init(hwUART_Index index)
+{
+    if (index >= hwUART_Index_MAX) {
+        return false;
+    }
+
+    return UART_Init_Status[index];
 }
 
 #endif //DEVICE_TM4C1294

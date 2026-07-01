@@ -123,7 +123,7 @@ routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
 INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
 PRIORITY THAN THIS! (higher priorities are lower numeric values. */
 
-#if defined(RP2350)
+#if defined(RP2350) || defined(TM4C123) || defined(TM4C1294)
 #define configPRIO_BITS          3
 #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY 7
 #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5

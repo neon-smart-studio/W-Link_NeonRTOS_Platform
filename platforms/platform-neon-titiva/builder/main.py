@@ -87,8 +87,6 @@ env.Append(
     LINKFLAGS=machine_flags + [
         "-Os",
         "-Wl,--gc-sections,--relax",
-        "--specs=nano.specs",
-        "--specs=nosys.specs",
         "-mthumb"
     ],
 

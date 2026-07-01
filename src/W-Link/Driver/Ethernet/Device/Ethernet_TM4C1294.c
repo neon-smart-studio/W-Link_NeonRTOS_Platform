@@ -159,6 +159,7 @@ hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up
 
     MAP_EMACConfigSet(EMAC0_BASE,
                       (EMAC_CONFIG_FULL_DUPLEX |
+                       EMAC_CONFIG_CHECKSUM_OFFLOAD |
                        EMAC_CONFIG_7BYTE_PREAMBLE |
                        EMAC_CONFIG_IF_GAP_96BITS |
                        EMAC_CONFIG_USE_MACADDR0 |
@@ -297,6 +298,7 @@ hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
                              DES0_TX_CTRL_LAST_SEG |
                              DES0_TX_CTRL_INTERRUPT |
                              DES0_TX_CTRL_CHAINED |
+                             DES0_TX_CTRL_IP_ALL_CKHSUMS |
                              DES0_TX_CTRL_OWN;
 
     g_tx_ring.write++;
@@ -395,7 +397,41 @@ hwEthernet_OpResult Ethernet_Input(uint8_t *in_data, uint32_t in_len)
 
     if(!d->used || (d->len == 0U))
     {
-        return hwEthernet_Busy;
+        uint32_t status = d->desc.ui32CtrlStatus;
+
+        if(status & DES0_RX_STAT_ERR)
+        {
+            Ethernet_Release_Rx(d);
+            g_rx_ring.read++;
+            if(g_rx_ring.read >= g_rx_ring.count) {
+                g_rx_ring.read = 0U;
+            }
+            MAP_EMACRxDMAPollDemand(EMAC0_BASE);
+            return hwEthernet_BufferError;
+        }
+
+        if((status & DES0_RX_STAT_LAST_DESC) == 0U)
+        {
+            return hwEthernet_BufferError;
+        }
+
+        uint32_t rx_len =
+            (status & DES0_RX_STAT_FRAME_LENGTH_M) >>
+            DES0_RX_STAT_FRAME_LENGTH_S;
+
+        if(rx_len == 0U || rx_len > ETH_MAX_PACKET_SIZE)
+        {
+            Ethernet_Release_Rx(d);
+            g_rx_ring.read++;
+            if(g_rx_ring.read >= g_rx_ring.count) {
+                g_rx_ring.read = 0U;
+            }
+            MAP_EMACRxDMAPollDemand(EMAC0_BASE);
+            return hwEthernet_BufferError;
+        }
+
+        d->len = rx_len;
+        d->used = true;
     }
 
     if(in_len < d->len) {

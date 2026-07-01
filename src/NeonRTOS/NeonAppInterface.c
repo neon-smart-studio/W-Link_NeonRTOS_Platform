@@ -546,6 +546,7 @@ void Init_Thread(void* p)
         else
         {
         }
+        NeonRTOS_Sleep(1000);
 #else //CONFIG_SUPPORT_INTERNET
         NeonRTOS_Sleep(1000);
 #endif //CONFIG_SUPPORT_INTERNET

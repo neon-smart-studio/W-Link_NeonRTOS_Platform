@@ -15,7 +15,7 @@
 
 #include "GPIO/GPIO.h"
 
-#include "SPI/SPI_Master.h"
+#include "SysCtrl/SysCtrl.h"
 
 #if defined (TM4C1294)
 
@@ -151,7 +151,7 @@ hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up
     MAP_EMACPHYConfigSet(EMAC0_BASE, EMAC_PHY_CONFIG);
 
     MAP_EMACInit(EMAC0_BASE,
-                 MAP_SysCtlClockGet(),
+                 g_sys_clock_hz,
                  EMAC_BCONFIG_MIXED_BURST | EMAC_BCONFIG_PRIORITY_FIXED,
                  4,
                  4,

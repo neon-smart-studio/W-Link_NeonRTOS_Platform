@@ -10,6 +10,8 @@
 
 #include "QSPI/QSPI_Master.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef DEVICE_TITIVAC
 
 #include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
@@ -269,7 +271,7 @@ hwQSPI_OpResult QSPI_Master_Init(hwQSPI_Index index, uint32_t clock_rate_hz, hwQ
 
     MAP_SSIConfigSetExpClk(
         ssi_base,
-        MAP_SysCtlClockGet(),
+        g_sys_clock_hz,
         QSPI_Map_Mode(opMode),
         SSI_MODE_MASTER,
         clock_rate_hz,
@@ -437,7 +439,7 @@ hwQSPI_OpResult QSPI_Change_Frequency(hwQSPI_Index index, uint32_t clock_rate_hz
 
     MAP_SSIConfigSetExpClk(
         base,
-        MAP_SysCtlClockGet(),
+        g_sys_clock_hz,
         QSPI_Map_Mode(Qspi_Master_Mode[index]),
         SSI_MODE_MASTER,
         clock_rate_hz,
@@ -474,7 +476,7 @@ hwQSPI_OpResult QSPI_Change_Mode(hwQSPI_Index index, hwQSPI_OpMode opMode)
 
     MAP_SSIConfigSetExpClk(
         base,
-        MAP_SysCtlClockGet(),
+        g_sys_clock_hz,
         QSPI_Map_Mode(opMode),
         SSI_MODE_MASTER,
         Qspi_Master_Clock_Hz[index],

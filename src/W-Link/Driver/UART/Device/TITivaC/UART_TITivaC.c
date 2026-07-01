@@ -10,6 +10,8 @@
 
 #include "UART/UART.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef DEVICE_TITIVAC
 
 #include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
@@ -268,7 +270,7 @@ hwUART_OpResult UART_Open_Specific_Format(hwUART_Index index, uint32_t baudrate,
             break;
     }
 
-    MAP_UARTConfigSetExpClk(base, MAP_SysCtlClockGet(), baudrate, cfgFlag);
+    MAP_UARTConfigSetExpClk(base, g_sys_clock_hz, baudrate, cfgFlag);
 
     if (rts_cts)
     {
@@ -415,17 +417,34 @@ hwUART_OpResult UART_Read(hwUART_Index index, uint8_t *data_rd, size_t size, uin
     s->rx_count = 0;
     s->rx_busy = true;
 
-    MAP_UARTIntEnable(base, UART_INT_RX | UART_INT_RT);
-
-    if (NeonRTOS_SyncObjWait(&UART_Recv_SyncHandle[index], wait_ms) != NeonRTOS_OK)
+    while (MAP_UARTCharsAvail(base) && s->rx_count < s->rx_size)
     {
-        MAP_UARTIntDisable(base, UART_INT_RX | UART_INT_RT);
+        int32_t ch = MAP_UARTCharGetNonBlocking(base);
+
+        if (ch >= 0)
+        {
+            s->rx_buf[s->rx_count++] = (uint8_t)ch;
+        }
+    }
+
+    if (s->rx_count >= s->rx_size)
+    {
         s->rx_busy = false;
+    }
+    else
+    {
+        MAP_UARTIntEnable(base, UART_INT_RX | UART_INT_RT);
 
-        if (s->rx_count > 0)
-            return (hwUART_OpResult)s->rx_count;
+        if (NeonRTOS_SyncObjWait(&UART_Recv_SyncHandle[index], wait_ms) != NeonRTOS_OK)
+        {
+            MAP_UARTIntDisable(base, UART_INT_RX | UART_INT_RT);
+            s->rx_busy = false;
 
-        return hwUART_Busy;
+            if (s->rx_count > 0)
+                return (hwUART_OpResult)s->rx_count;
+
+            return hwUART_Busy;
+        }
     }
 
     return (hwUART_OpResult)s->rx_count;
@@ -476,20 +495,43 @@ hwUART_OpResult UART_Write(hwUART_Index index, uint8_t *data_wr, size_t size, ui
     s->tx_count = 0;
     s->tx_busy = true;
 
-    MAP_UARTIntEnable(base, UART_INT_TX);
-
-    /* 手動先塞一次 FIFO，避免 TX interrupt 沒立刻觸發 */
-    UART_IRQ_Process(index);
-
-    if (NeonRTOS_SyncObjWait(&UART_Send_SyncHandle[index], wait_ms) != NeonRTOS_OK)
+    while (MAP_UARTSpaceAvail(base) && s->tx_count < s->tx_size)
     {
-        MAP_UARTIntDisable(base, UART_INT_TX);
+        MAP_UARTCharPutNonBlocking(base, s->tx_buf[s->tx_count++]);
+    }
+
+    if (s->tx_count >= s->tx_size)
+    {
+        NeonRTOS_Time_t t = 0;
+        
+        while (MAP_UARTBusy(base))
+        {
+            NeonRTOS_Sleep(1);
+
+            if (timeoutMs != NEONRT_WAIT_FOREVER && ++t >= wait_ms)
+            {
+                MAP_UARTIntDisable(base, UART_INT_TX);
+                s->tx_busy = false;
+                return hwUART_Busy;
+            }
+        }
+
         s->tx_busy = false;
+    }
+    else
+    {
+        MAP_UARTIntEnable(base, UART_INT_TX);
 
-        if (s->tx_count > 0)
-            return s->tx_count;
+        if (NeonRTOS_SyncObjWait(&UART_Send_SyncHandle[index], wait_ms) != NeonRTOS_OK)
+        {
+            MAP_UARTIntDisable(base, UART_INT_TX);
+            s->tx_busy = false;
 
-        return hwUART_Busy;
+            if (s->tx_count > 0)
+                return s->tx_count;
+
+            return hwUART_Busy;
+        }
     }
 
     return s->tx_count;

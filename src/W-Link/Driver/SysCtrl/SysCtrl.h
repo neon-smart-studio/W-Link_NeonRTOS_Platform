@@ -12,6 +12,10 @@
 extern "C" {
 #endif
 
+#ifdef DEVICE_TITIVAC
+extern uint32_t g_sys_clock_hz;
+#endif
+
 void SysCtrl_Init();
 
 #ifdef  __cplusplus

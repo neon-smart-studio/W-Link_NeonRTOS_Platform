@@ -5,7 +5,10 @@
 #include "soc.h"
 
 #include "NeonRTOS.h"
+
 #include "Timer/Timer.h"
+
+#include "SysCtrl/SysCtrl.h"
 
 #ifdef DEVICE_TITIVAC
 
@@ -66,7 +69,7 @@ static uint32_t Timer_Map_IRQ(hwTimer_Index index)
 
 static uint32_t Timer_Us_To_Ticks(uint32_t us)
 {
-    uint64_t clk = MAP_SysCtlClockGet();
+    uint64_t clk = g_sys_clock_hz;
     uint64_t ticks = (clk * us) / 1000000ULL;
 
     if (ticks == 0) {
@@ -431,7 +434,7 @@ hwTimer_OpResult Timer_Read_uSec(hwTimer_Index index, uint32_t *uSec)
         return ret;
     }
 
-    uint64_t us = ((uint64_t)ticks * 1000000ULL) / MAP_SysCtlClockGet();
+    uint64_t us = ((uint64_t)ticks * 1000000ULL) / g_sys_clock_hz;
 
     *uSec = (uint32_t)us;
 

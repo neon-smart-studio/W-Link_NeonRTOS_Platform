@@ -9,6 +9,8 @@
 
 #include "SPI/SPI_Master.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef DEVICE_TITIVAC
 
 #include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
@@ -253,7 +255,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
 
     MAP_SSIConfigSetExpClk(
         ssi_base,
-        MAP_SysCtlClockGet(),
+        g_sys_clock_hz,
         SPI_Map_Mode(opMode),
         SSI_MODE_MASTER,
         clock_rate_hz,
@@ -415,7 +417,7 @@ hwSPI_OpResult SPI_Change_Frequency(hwSPI_Index index, uint32_t clock_rate_hz)
 
     MAP_SSIConfigSetExpClk(
         ssi_base,
-        MAP_SysCtlClockGet(),
+        g_sys_clock_hz,
         SPI_Map_Mode(Spi_Master_Mode[index]),
         SSI_MODE_MASTER,
         clock_rate_hz,
@@ -459,7 +461,7 @@ hwSPI_OpResult SPI_Change_Mode(hwSPI_Index index, hwSPI_OpMode opMode)
 
     MAP_SSIConfigSetExpClk(
         ssi_base,
-        MAP_SysCtlClockGet(),
+        g_sys_clock_hz,
         SPI_Map_Mode(opMode),
         SSI_MODE_MASTER,
         Spi_Master_Clock_Hz[index],

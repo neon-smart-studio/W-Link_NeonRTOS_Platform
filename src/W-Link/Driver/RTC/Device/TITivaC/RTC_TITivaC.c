@@ -9,6 +9,8 @@
 
 #include "RTC/RTC.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef DEVICE_TITIVAC
 
 #include "RTC_TITivaC.h"
@@ -62,7 +64,7 @@ hwRTC_OpResult RTC_Timer_Init(hwRTC_Index index)
 
     while (!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_HIBERNATE));
 
-    MAP_HibernateEnableExpClk(MAP_SysCtlClockGet());
+    MAP_HibernateEnableExpClk(g_sys_clock_hz);
 
     /*
      * 使用 32.768 kHz 外部晶振。

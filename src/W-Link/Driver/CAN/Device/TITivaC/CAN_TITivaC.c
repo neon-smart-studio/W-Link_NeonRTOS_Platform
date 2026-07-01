@@ -9,7 +9,10 @@
 #include "NeonRTOS.h"
 
 #include "GPIO/GPIO.h"
+
 #include "CAN/CAN.h"
+
+#include "SysCtrl/SysCtrl.h"
 
 #ifdef DEVICE_TITIVAC
 
@@ -155,7 +158,7 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
 
     MAP_CANInit(can_base);
 
-    if (MAP_CANBitRateSet(can_base, MAP_SysCtlClockGet(), 500000) == 0)
+    if (MAP_CANBitRateSet(can_base, g_sys_clock_hz, 500000) == 0)
     {
         NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
         NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);

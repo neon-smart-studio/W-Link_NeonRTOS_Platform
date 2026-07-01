@@ -10,6 +10,8 @@
 
 #include "PWM/PWM.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef DEVICE_TITIVAC
 
 #include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
@@ -76,7 +78,7 @@ hwPWM_OpResult PWM_Channel_Init(hwPWM_Channel channel_index, bool inverse_PWM)
         // function parameter, f is the desired frequency, and PWMClk is the
         // PWM clock frequency based on the system clock.
         //
-        MAP_PWMGenPeriodSet(PWM0_BASE, pwmGen, (MAP_SysCtlClockGet() / 8 / PWM_HZ));
+        MAP_PWMGenPeriodSet(PWM0_BASE, pwmGen, (g_sys_clock_hz / 8 / PWM_HZ));
 
         if(inverse_PWM==true)
         {

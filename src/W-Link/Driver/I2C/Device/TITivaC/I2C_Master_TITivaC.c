@@ -10,6 +10,8 @@
 
 #include "I2C/I2C_Master.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef DEVICE_TITIVAC
 
 #include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
@@ -207,10 +209,10 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
     switch(speed_mode)
     {
         case hwI2C_Standard_Mode:
-            MAP_I2CMasterInitExpClk(i2c_base, MAP_SysCtlClockGet(), false);
+            MAP_I2CMasterInitExpClk(i2c_base, g_sys_clock_hz, false);
             break;
         case hwI2C_Fast_Mode:
-            MAP_I2CMasterInitExpClk(i2c_base, MAP_SysCtlClockGet(), true);
+            MAP_I2CMasterInitExpClk(i2c_base, g_sys_clock_hz, true);
             break;
     }
     

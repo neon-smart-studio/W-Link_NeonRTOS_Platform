@@ -87,4 +87,10 @@ typedef enum hwI2C_Index_t
 #endif
 #endif // DEVICE_TITIVAC
 
+#ifdef DEVICE_TICC3200
+typedef enum {
+    hwI2C_Index_MAX
+} hwI2C_Index;
+#endif // DEVICE_TICC3200
+
 #endif //I2C_INDEX_H

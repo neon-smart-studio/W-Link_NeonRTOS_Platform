@@ -43,4 +43,10 @@ typedef enum {
 } hwCAN_Index;
 #endif // DEVICE_TITIVAC
 
+#ifdef DEVICE_TICC3200
+typedef enum {
+    hwCAN_Index_MAX
+} hwCAN_Index;
+#endif // DEVICE_TICC3200
+
 #endif //CAN_INDEX_H

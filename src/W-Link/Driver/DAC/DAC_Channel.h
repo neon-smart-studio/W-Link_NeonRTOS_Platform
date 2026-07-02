@@ -49,4 +49,11 @@ typedef enum hwDAC_Channel_Index_t
 }hwDAC_Channel_Index;
 #endif
 
+#ifdef DEVICE_TICC3200
+typedef enum hwDAC_Channel_Index_t
+{
+  hwDAC_Channel_Index_MAX = 0,
+}hwDAC_Channel_Index;
+#endif // DEVICE_TICC3200
+
 #endif //DAC_CHANNEL_H

@@ -34,4 +34,10 @@ typedef enum hwRTC_Index_t
 }hwRTC_Index;
 #endif // DEVICE_TITIVAC
 
+#ifdef DEVICE_TICC3200
+typedef enum {
+    hwRTC_Index_MAX
+} hwRTC_Index;
+#endif // DEVICE_TICC3200
+
 #endif //RTC_INDEX_H

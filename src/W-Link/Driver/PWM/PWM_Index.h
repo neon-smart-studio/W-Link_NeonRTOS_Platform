@@ -212,4 +212,10 @@ typedef enum
 #endif
 #endif //DEVICE_TITIVAC
 
+#ifdef DEVICE_TICC3200
+typedef enum {
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif // DEVICE_TICC3200
+
 #endif //PWM_INDEX_H

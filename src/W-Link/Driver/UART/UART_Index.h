@@ -112,4 +112,10 @@ typedef enum hwUART_Index_t
 }hwUART_Index;
 #endif //DEVICE_TM4C1294
 
+#ifdef DEVICE_TICC3200
+typedef enum {
+    hwUART_Index_MAX
+} hwUART_Index;
+#endif // DEVICE_TICC3200
+
 #endif //UART_INDEX_H

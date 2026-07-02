@@ -22,4 +22,8 @@
 #include "TITivaC/GPIO_Pin_TITivaC.h"
 #endif
 
+#ifdef DEVICE_TICC3200
+#include "TICC3200/GPIO_Pin_TICC3200.h"
+#endif // DEVICE_TICC3200
+
 #endif //GPIO_PIN_H

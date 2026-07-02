@@ -2,6 +2,28 @@
 #ifndef SOC_H
 #define SOC_H
 
+#if defined (CC3200)
+#include "inc/hw_ints.h"
+#include "inc/hw_i2c.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_types.h"
+#include "inc/hw_uart.h"
+#include "driverlib/rom.h"
+#include "driverlib/rom_map.h"
+#include "driverlib/debug.h"
+#include "driverlib/flash.h"
+#include "driverlib/gpio.h"
+#include "driverlib/i2c.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/pin.h"
+#include "driverlib/prcm.h"
+#include "driverlib/spi.h"
+#include "driverlib/timer.h"
+#include "driverlib/udma.h"
+#include "driverlib/uart.h"
+#define DEVICE_TICC3200
+#endif
+
 #if defined (NUC442) || defined (NUC472)
 #include "NUC472_442.h"
 #include "sys.h"

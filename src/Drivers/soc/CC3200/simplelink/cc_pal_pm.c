@@ -40,6 +40,8 @@
 #include <simplelink.h>
 #include <cc_pal.h>
 
+#include "NeonRTOS.h"
+
 //Driverlib Includes
 #include <hw_types.h>
 #include <pin.h>
@@ -57,9 +59,6 @@
 
 //Middleware Includes
 #include <spi_drv.h>
-
-//OSLib Includes
-#include <osi.h>
 
 #define REG_INT_MASK_SET                0x400F7088
 #define REG_INT_MASK_CLR                0x400F708C
@@ -228,27 +227,16 @@ int NwpRegisterInterruptHandler(P_EVENT_HANDLER InterruptHdl , void* pValue)    
 
     if(InterruptHdl == NULL)
     {
-        //De-register Interprocessor communication interrupt between App and NWP
-		#ifdef SL_PLATFORM_MULTI_THREADED
-         osi_InterruptDeRegister(INT_NWPIC);
-       	#else
          MAP_IntDisable(INT_NWPIC);
          MAP_IntUnregister(INT_NWPIC);
          MAP_IntPendClear(INT_NWPIC);
-		#endif
     }
     else
-    {
-          #ifdef SL_PLATFORM_MULTI_THREADED
-          	  MAP_IntPendClear(INT_NWPIC);
-             osi_InterruptRegister(INT_NWPIC, (P_OSI_INTR_ENTRY)InterruptHdl,
-            		 	 	 	   INT_PRIORITY_LVL_1);
-          #else             
+    {       
              MAP_IntRegister(INT_NWPIC, InterruptHdl);
              MAP_IntPrioritySet(INT_NWPIC, INT_PRIORITY_LVL_1);
              MAP_IntPendClear(INT_NWPIC);
              MAP_IntEnable(INT_NWPIC);
-          #endif
     }
 
   return 0;

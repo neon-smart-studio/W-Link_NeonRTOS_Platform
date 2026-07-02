@@ -39,6 +39,8 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
+#include "inc/hw_types.h"
+
 //*****************************************************************************
 //
 // Prototype for the function that is called when an invalid argument is passed

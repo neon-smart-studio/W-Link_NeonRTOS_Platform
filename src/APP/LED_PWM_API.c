@@ -10,7 +10,8 @@
 
 LED_PWM_Status All_LED_Status[MAX_NUM_OF_LED_PWM_SW];
 
-const hwPWM_Channel PWM_Channels[MAX_NUM_OF_LED_PWM_SW] = { hwPWM_Channel_1, hwPWM_Channel_2, hwPWM_Channel_3, hwPWM_Channel_4};
+//const hwPWM_Channel PWM_Channels[MAX_NUM_OF_LED_PWM_SW] = { hwPWM_Channel_1, hwPWM_Channel_2, hwPWM_Channel_3, hwPWM_Channel_4};
+const hwPWM_Channel PWM_Channels[MAX_NUM_OF_LED_PWM_SW] = { 0, 0, 0, 0};
 
 void LED_PWM_Init()
 {

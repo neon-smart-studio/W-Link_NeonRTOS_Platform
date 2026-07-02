@@ -6,7 +6,7 @@
 
 #include "soc.h"
 
-#ifdef DEVICE_TICC3200
+#if 0//def DEVICE_TICC3200
 
 uint32_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin)
 {

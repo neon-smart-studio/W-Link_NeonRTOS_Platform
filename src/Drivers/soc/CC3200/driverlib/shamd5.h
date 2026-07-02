@@ -40,6 +40,8 @@
 #ifndef __DRIVERLIB_SHAMD5_H__
 #define __DRIVERLIB_SHAMD5_H__
 
+#include "inc/hw_types.h"
+
 //*****************************************************************************
 //
 // If building with a C++ compiler, make all of the definitions in this header

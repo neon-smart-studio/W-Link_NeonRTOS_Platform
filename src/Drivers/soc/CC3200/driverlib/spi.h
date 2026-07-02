@@ -40,6 +40,8 @@
 #ifndef __SPI_H__
 #define __SPI_H__
 
+#include "inc/hw_types.h"
+
 //*****************************************************************************
 //
 // If building with a C++ compiler, make all of the definitions in this header

@@ -40,6 +40,8 @@
 #ifndef __SYSTICK_H__
 #define __SYSTICK_H__
 
+#include "inc/hw_types.h"
+
 //*****************************************************************************
 //
 // If building with a C++ compiler, make all of the definitions in this header

@@ -36,6 +36,9 @@
 #ifndef __HW_TYPES_H__
 #define __HW_TYPES_H__
 
+#include <stdbool.h>
+#include <stdint.h>
+
 //*****************************************************************************
 //
 // Define a boolean type, and values for true and false.

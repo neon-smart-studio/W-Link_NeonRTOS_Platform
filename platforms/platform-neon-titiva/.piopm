@@ -1,1 +1,1 @@
-{"type": "platform", "name": "titiva", "version": "3.1.0", "spec": {"owner": "platformio", "id": 8023, "name": "titiva", "requirements": null, "uri": null}}
+{"type": "platform", "name": "titiva", "version": "1.0.0", "spec": {"owner": "platformio", "id": 8023, "name": "titiva", "requirements": null, "uri": null}}

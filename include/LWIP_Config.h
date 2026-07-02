@@ -32,7 +32,7 @@
 #define CONFIG_LWIP_NUM_SND_BUF_QUEUELEN  16
 */
 
-#define CONFIG_LWIP_HEAP_SIZE             (65 * 1024)
+#define CONFIG_LWIP_HEAP_SIZE             (60 * 1024)
 #define CONFIG_LWIP_NUM_NETCONN           16
 #define CONFIG_LWIP_NUM_PBUF              64
 #define CONFIG_LWIP_NUM_TCP_PCB           16

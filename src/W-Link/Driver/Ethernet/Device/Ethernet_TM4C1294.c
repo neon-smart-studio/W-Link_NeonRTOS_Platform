@@ -243,6 +243,9 @@ hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up
     onLinkUpCB = link_up_cb;
     onLinkDownCB = link_down_cb;
     
+    gpio_pin_init_status[hwGPIO_Pin_F0] = true;
+    gpio_pin_init_status[hwGPIO_Pin_F4] = true;
+
     ETH_Init = true;
 
     return hwEthernet_OK;

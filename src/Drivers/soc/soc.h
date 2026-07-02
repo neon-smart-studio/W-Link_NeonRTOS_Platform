@@ -409,11 +409,14 @@
 #endif
 
 #if defined (TM4C1294) || defined (TM4C123)
-#include "inc/hw_ints.h"
 #include "inc/hw_can.h"
 #include "inc/hw_emac.h"
+#include "inc/hw_ints.h"
+#include "inc/hw_i2c.h"
 #include "inc/hw_memmap.h"
+#include "inc/hw_ssi.h"
 #include "inc/hw_types.h"
+#include "inc/hw_uart.h"
 #include "driverlib/rom.h"
 #include "driverlib/rom_map.h"
 #include "driverlib/can.h"
@@ -429,6 +432,7 @@
 #include "driverlib/ssi.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/timer.h"
+#include "driverlib/udma.h"
 #include "driverlib/uart.h"
 #define DEVICE_TITIVAC
 #endif

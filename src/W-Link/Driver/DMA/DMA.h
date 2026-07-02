@@ -7,6 +7,7 @@
 #include "CAN/CAN.h"
 #include "I2C/I2C_Master.h"
 #include "SPI/SPI_Master.h"
+#include "QSPI/QSPI_Master.h"
 #include "UART/UART.h"
 
 #include "Driver_Config.h"
@@ -24,6 +25,8 @@ hwDMA_OpResult DMA_I2C_Write(hwI2C_Index index, uint16_t dev_addr, uint8_t *buf,
 hwDMA_OpResult DMA_I2C_Read(hwI2C_Index index, uint16_t dev_addr, uint8_t *buf, size_t len);
 hwDMA_OpResult DMA_SPI_Write(hwSPI_Index index, uint8_t *buf, size_t len);
 hwDMA_OpResult DMA_SPI_Read(hwSPI_Index index, uint8_t *buf, size_t len);
+hwDMA_OpResult DMA_QSPI_Write(hwQSPI_Index index, uint8_t *buf, size_t len);
+hwDMA_OpResult DMA_QSPI_Read(hwQSPI_Index index, uint8_t *buf, size_t len);
 
 #ifdef  __cplusplus
 }

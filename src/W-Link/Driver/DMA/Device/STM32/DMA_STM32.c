@@ -17,12 +17,6 @@
 
 #include "DMA_STM32_Index.h"
 
-#define DMA_IRQ_NVIC_PRIORITY 5
-#define DMA_IRQ_NVIC_SUB_PRIORITY 0
-
-#define DMA_WAIT_ALLOCATED_TIMEOUT  1000
-#define DMA_WAIT_TRANSFER_TIMEOUT   1000
-
 #if defined (STM32F0) || defined (STM32F1) || defined (STM32F3) || \
     defined (STM32G0) || defined (STM32G4) || \
     defined (STM32C0) || defined (STM32H5) || \

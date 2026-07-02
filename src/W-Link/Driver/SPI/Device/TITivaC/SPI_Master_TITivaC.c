@@ -9,6 +9,8 @@
 
 #include "SPI/SPI_Master.h"
 
+#include "DMA/DMA.h"
+
 #include "SysCtrl/SysCtrl.h"
 
 #ifdef DEVICE_TITIVAC
@@ -880,6 +882,86 @@ hwSPI_OpResult SPI_Master_Stream_Transfer(hwSPI_Index index, const uint8_t *tx_b
     SPI_MASTER_MUTEX_UNLOCK(index);
 
     return hwSPI_OK;
+}
+
+hwSPI_OpResult SPI_Master_Burst_Write(hwSPI_Index index, uint8_t* buf, uint32_t size)
+{
+        if(index>=hwSPI_Index_MAX)
+        {
+              return hwSPI_InvalidParameter;
+        }
+        
+        if(Spi_Master_Init_Status[index]==false)
+        {
+                return hwSPI_NotInit;
+        }
+
+        if(size==0)
+        {
+            if(buf==NULL)
+            {
+                  return hwSPI_OK;
+            }
+        }
+        else{
+            if(buf==NULL)
+            {
+                  return hwSPI_InvalidParameter;
+            }
+        }
+        
+        SPI_MASTER_MUTEX_LOCK(index, SPI_MASTER_MUTEX_ACCESS_TIMEOUT);
+
+        hwDMA_OpResult dma_op_status = DMA_SPI_Write(index, buf, size);
+        if(dma_op_status < hwDMA_OK)
+        {
+            SPI_MASTER_MUTEX_UNLOCK(index);
+            return SPI_Map_DMA_HW_Error_Code(dma_op_status);
+        }
+        
+        SPI_MASTER_MUTEX_UNLOCK(index);
+
+        return hwSPI_OK;
+}
+
+hwSPI_OpResult SPI_Master_Burst_Read(hwSPI_Index index, uint8_t* buf, uint32_t size)
+{
+        if(index>=hwSPI_Index_MAX)
+        {
+              return hwSPI_InvalidParameter;
+        }
+        
+        if(Spi_Master_Init_Status[index]==false)
+        {
+                return hwSPI_NotInit;
+        }
+
+        if(size==0)
+        {
+            if(buf==NULL)
+            {
+                  return hwSPI_OK;
+            }
+        }
+        else{
+            if(buf==NULL)
+            {
+                  return hwSPI_InvalidParameter;
+            }
+        }
+        
+        SPI_MASTER_MUTEX_LOCK(index, SPI_MASTER_MUTEX_ACCESS_TIMEOUT);
+
+        hwDMA_OpResult dma_op_status = DMA_SPI_Read(index, buf, size);
+        if(dma_op_status < hwDMA_OK)
+        {
+            SPI_MASTER_MUTEX_UNLOCK(index);
+            return SPI_Map_DMA_HW_Error_Code(dma_op_status);
+        }
+        
+        SPI_MASTER_MUTEX_UNLOCK(index);
+
+        return hwSPI_OK;
 }
 
 #endif // DEVICE_TITIVAC

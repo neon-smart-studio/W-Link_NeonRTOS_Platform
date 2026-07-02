@@ -10,6 +10,8 @@
 
 #include "QSPI/QSPI_Master.h"
 
+#include "DMA/DMA.h"
+
 #include "SysCtrl/SysCtrl.h"
 
 #ifdef DEVICE_TITIVAC
@@ -188,7 +190,7 @@ hwQSPI_OpResult QSPI_Master_Init(hwQSPI_Index index, uint32_t clock_rate_hz, hwQ
 
     if (ssi_base == 0 || ssi_periph == 0)
     {
-        return hwSPI_InvalidParameter;
+        return hwQSPI_InvalidParameter;
     }
 
     hwGPIO_Pin io0_pin  = QSPI_Pin_Def_Table[index].io0_pin;
@@ -230,7 +232,7 @@ hwQSPI_OpResult QSPI_Master_Init(hwQSPI_Index index, uint32_t clock_rate_hz, hwQ
     {
         if (cs_cfg == 0 || cs_port == 0 || cs_pin_mask == 0)
         {
-            return hwSPI_InvalidParameter;
+            return hwQSPI_InvalidParameter;
         }
     }
 
@@ -389,7 +391,7 @@ hwQSPI_OpResult QSPI_Master_DeInit(hwQSPI_Index index)
     {
         if(cs_port == 0  || cs_pin_mask == 0)
         {
-            return hwSPI_InvalidParameter;
+            return hwQSPI_InvalidParameter;
         }
     }
 
@@ -756,18 +758,84 @@ hwQSPI_OpResult QSPI_Master_Stream_Read(hwQSPI_Index index, uint8_t *buf, uint16
     return hwQSPI_OK;
 }
 
-hwQSPI_OpResult QSPI_Master_Burst_Write(hwQSPI_Index index, uint8_t *buf, uint32_t size)
+hwQSPI_OpResult QSPI_Master_Burst_Write(hwQSPI_Index index, uint8_t* buf, uint32_t size)
 {
-    if (buf == NULL || size == 0 || size > 0xFFFF) return hwQSPI_InvalidParameter;
+        if(index>=hwQSPI_Index_MAX)
+        {
+              return hwQSPI_InvalidParameter;
+        }
+        
+        if(Qspi_Master_Init_Status[index]==false)
+        {
+                return hwQSPI_NotInit;
+        }
 
-    return QSPI_Master_Stream_Write(index, buf, (uint16_t)size);
+        if(size==0)
+        {
+            if(buf==NULL)
+            {
+                  return hwQSPI_OK;
+            }
+        }
+        else{
+            if(buf==NULL)
+            {
+                  return hwQSPI_InvalidParameter;
+            }
+        }
+        
+        QSPI_MASTER_MUTEX_LOCK(index, QSPI_MASTER_MUTEX_ACCESS_TIMEOUT);
+
+        hwDMA_OpResult dma_op_status = DMA_QSPI_Write(index, buf, size);
+        if(dma_op_status < hwDMA_OK)
+        {
+            QSPI_MASTER_MUTEX_UNLOCK(index);
+            return QSPI_Map_DMA_HW_Error_Code(dma_op_status);
+        }
+        
+        QSPI_MASTER_MUTEX_UNLOCK(index);
+
+        return hwQSPI_OK;
 }
 
-hwQSPI_OpResult QSPI_Master_Burst_Read(hwQSPI_Index index, uint8_t *buf, uint32_t size)
+hwQSPI_OpResult QSPI_Master_Burst_Read(hwQSPI_Index index, uint8_t* buf, uint32_t size)
 {
-    if (buf == NULL || size == 0 || size > 0xFFFF) return hwQSPI_InvalidParameter;
+        if(index>=hwQSPI_Index_MAX)
+        {
+              return hwQSPI_InvalidParameter;
+        }
+        
+        if(Qspi_Master_Init_Status[index]==false)
+        {
+                return hwQSPI_NotInit;
+        }
 
-    return QSPI_Master_Stream_Read(index, buf, (uint16_t)size);
+        if(size==0)
+        {
+            if(buf==NULL)
+            {
+                  return hwQSPI_OK;
+            }
+        }
+        else{
+            if(buf==NULL)
+            {
+                  return hwQSPI_InvalidParameter;
+            }
+        }
+        
+        QSPI_MASTER_MUTEX_LOCK(index, QSPI_MASTER_MUTEX_ACCESS_TIMEOUT);
+
+        hwDMA_OpResult dma_op_status = DMA_QSPI_Read(index, buf, size);
+        if(dma_op_status < hwDMA_OK)
+        {
+            QSPI_MASTER_MUTEX_UNLOCK(index);
+            return QSPI_Map_DMA_HW_Error_Code(dma_op_status);
+        }
+        
+        QSPI_MASTER_MUTEX_UNLOCK(index);
+
+        return hwQSPI_OK;
 }
 
 #endif // DEVICE_TITIVAC

@@ -11,14 +11,14 @@
 #include "UART/UART.h"
 #include "I2C/I2C_Master.h"
 #include "DMA/DMA.h"
-
+/*
 #include "Sensor/HTS221/HTS221.h"
 
 #include "Sensor/VL53L0X/VL53L0X.h"
 #include "Sensor/VL53L1X/VL53L1X.h"
 #include "Sensor/VL53L4CD/VL53L4CD.h"
 #include "Sensor/VL53L5CX/VL53L5CX.h"
-
+*/
 //#include "NFC/Device/M24SR/M24SR.h"
 //#include "NFC/Devce/ST25R95//RFal_ST25R95.h"
 
@@ -69,7 +69,7 @@ void vApplicationTickHook(void) {
 void vSensor_Task(void* p)
 {
     uint16_t sensorID;
-
+/*
     I2C_Master_Init(hwI2C_Index_1, hwI2C_Standard_Mode);
 
     VL53L1X_Init();
@@ -109,14 +109,14 @@ void vSensor_Task(void* p)
     {
         UART_Printf("VL53L4CD init failed\n");
         while(1);
-    }
+    }*/
 /*
     if(VL53L5CX_SensorInit() < VL53L5CX_OK)
     {
         UART_Printf("VL53L5CX init failed\n");
         while(1);
     }
-*/
+*//*
     VL53L1X_SetDistanceMode(2);
     VL53L1X_SetTimingBudgetInMs(50);
     VL53L1X_SetInterMeasurementInMs(100);
@@ -124,13 +124,14 @@ void vSensor_Task(void* p)
 
     VL53L4CD_SetRangeTiming(200, 0);
     VL53L4CD_StartRanging();
-
+*/
     //VL53L5CX_Set_Resolution(VL53L5CX_RESOLUTION_8X8);
     
     //VL53L5CX_Start_Ranging();
 
     while(1)
     {
+/*
         uint8_t ready = 0;
         VL53L4CD_Result_t result;
         VL53L5CX_ResultsData resultData;
@@ -150,7 +151,7 @@ void vSensor_Task(void* p)
             VL53L4CD_GetResult(&result);
 
             UART_Printf("VL53L4CD distance = %d\n", result.distance_mm);
-        }
+        }*/
 /*
         if(VL53L5CX_Check_Data_Ready(&ready) == VL53L5CX_OK && ready)
         {
@@ -167,113 +168,6 @@ void vSensor_Task(void* p)
             UART_Printf("\r\n");
         }
         */
-
-        NeonRTOS_Sleep(10);
-    }
-}
-
-void VL53L0X_Sensor_Task(void* p)
-{
-    uint16_t sensorID;
-
-    I2C_Master_Init(hwI2C_Index_1, hwI2C_Standard_Mode);
-
-    VL53L0X_GetSensorId(&sensorID);
-    UART_Printf("sensorID = 0x%4x\n", sensorID);
-
-    if(VL53L0X_SensorInit() < VL53L0X_OK)
-    {
-        UART_Printf("VL53L1X init failed\n");
-        while(1);
-    }
-
-    while(1)
-    {
-        uint32_t dist = 0;
-
-        VL53L0X_GetDistance(&dist);
-
-        UART_Printf("distance = %d\n", dist);
-
-        NeonRTOS_Sleep(20);
-    }
-}
-
-void VL53L1X_Sensor_Task(void* p)
-{
-    uint16_t sensorID;
-
-    I2C_Master_Init(hwI2C_Index_1, hwI2C_Standard_Mode);
-
-    VL53L1X_GetSensorId(&sensorID);
-    UART_Printf("sensorID = 0x%4x\n", sensorID);
-
-    if(VL53L1X_SensorInit() < VL53L1X_OK)
-    {
-        UART_Printf("VL53L1X init failed\n");
-        while(1);
-    }
-
-    VL53L1X_SetDistanceMode(2);
-    VL53L1X_SetTimingBudgetInMs(50);
-    VL53L1X_SetInterMeasurementInMs(100);
-    VL53L1X_StartRanging();
-
-    while(1)
-    {
-        uint8_t ready = 0;
-        uint16_t dist = 0;
-
-        if(VL53L1X_CheckForDataReady(&ready) == VL53L1X_OK && ready)
-        {
-            VL53L1X_GetDistance(&dist);
-            VL53L1X_ClearInterrupt();
-
-            UART_Printf("distance = %d\n", dist);
-        }
-
-        NeonRTOS_Sleep(10);
-    }
-}
-
-void VL53L4CD_Sensor_Task(void* p)
-{
-    uint16_t sensorID;
-    
-    I2C_Master_Init(hwI2C_Index_1, hwI2C_Fast_Mode);
-
-    VL53L4CD_Init();
-
-    VL53L4CD_Power_Off();
-
-    NeonRTOS_Sleep(100);
-
-    VL53L4CD_Power_On();
-
-    VL53L4CD_GetSensorId(&sensorID);
-    UART_Printf("sensorID = 0x%4x\n", sensorID);
-
-    if(VL53L4CD_SensorInit() < VL53L4CD_OK)
-    {
-        UART_Printf("VL53L1X init failed\n");
-        while(1);
-    }
-
-    VL53L4CD_SetRangeTiming(200, 0);
-    VL53L4CD_StartRanging();
-
-    while(1)
-    {
-        uint8_t ready = 0;
-        VL53L4CD_Result_t result;
-
-        if(VL53L4CD_CheckForDataReady(&ready) == VL53L4CD_OK && ready)
-        {
-            VL53L4CD_ClearInterrupt();
-            VL53L4CD_GetResult(&result);
-
-            UART_Printf("distance = %d\n", result.distance_mm);
-        }
 
         NeonRTOS_Sleep(10);
     }

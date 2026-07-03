@@ -29,7 +29,6 @@
 
 #ifdef CONFIG_INTERNET_LWIP
 
-
 /* Maximum number of client per server */
 #define MAX_CLIENT  32
 
@@ -1148,10 +1147,385 @@ int32_t NeonTCPIP_Socket_Select(NeonTCPIP_SocketHandle *read_socks,
 
     return NeonTCPIP_Map_Error(errno);
 }
-
 #endif
 
 #ifdef CONFIG_INTERNET_SIMPLELINK
+
+void SimpleLinkNetAppEventHandler(SlNetAppEvent_t *pNetAppEvent)
+{
+    if(!pNetAppEvent)
+    {
+        return;
+    }
+
+    switch(pNetAppEvent->Event)
+    {
+        case SL_NETAPP_IPV4_IPACQUIRED_EVENT:
+        {
+            UART_Printf("Assigned IP: %d.%d.%d.%d\n",
+              SL_IPV4_BYTE(pNetAppEvent->EventData.ipAcquiredV4.ip,3),
+              SL_IPV4_BYTE(pNetAppEvent->EventData.ipAcquiredV4.ip,2),
+              SL_IPV4_BYTE(pNetAppEvent->EventData.ipAcquiredV4.ip,1),
+              SL_IPV4_BYTE(pNetAppEvent->EventData.ipAcquiredV4.ip,0)
+            );
+            UART_Printf("Gateway: %d.%d.%d.%d\n",
+              SL_IPV4_BYTE(pNetAppEvent->EventData.ipAcquiredV4.gateway,3),
+              SL_IPV4_BYTE(pNetAppEvent->EventData.ipAcquiredV4.gateway,2),
+              SL_IPV4_BYTE(pNetAppEvent->EventData.ipAcquiredV4.gateway,1),
+              SL_IPV4_BYTE(pNetAppEvent->EventData.ipAcquiredV4.gateway,0)
+            );
+        }
+        break;
+        case SL_NETAPP_IP_LEASED_EVENT:
+        {
+        }
+        break;
+
+        case SL_NETAPP_IP_RELEASED_EVENT:
+        {
+        }
+        break;
+
+        default:
+        {
+        }
+        break;
+    }
+}
+
+static int32_t NeonTCPIP_Map_Error(int32_t err)
+{
+    if (err == 0)
+    {
+        return NeonTCPIP_OK;
+    }
+
+    switch (err)
+    {
+#ifdef SL_EAGAIN
+        case SL_EAGAIN:
+            return NeonTCPIP_WouldBlock;
+#endif
+
+#ifdef SL_EALREADY
+        case SL_EALREADY:
+            return NeonTCPIP_WouldBlock;
+#endif
+/*
+#ifdef SL_EWOULDBLOCK
+        case SL_EWOULDBLOCK:
+            return NeonTCPIP_WouldBlock;
+#endif
+*/
+#ifdef SL_ETIMEDOUT
+        case SL_ETIMEDOUT:
+            return NeonTCPIP_Timeout;
+#endif
+
+        default:
+            return NeonTCPIP_Error;
+    }
+}
+
+NeonTCPIP_SocketHandle NeonTCPIP_Socket_Open(bool udp)
+{
+    int16_t type = udp ? SL_SOCK_DGRAM : SL_SOCK_STREAM;
+    int16_t proto = udp ? SL_IPPROTO_UDP : SL_IPPROTO_TCP;
+
+    int16_t s = sl_Socket(SL_AF_INET, type, proto);
+    if (s < 0)
+    {
+        return (NeonTCPIP_SocketHandle)s;
+    }
+
+    return (NeonTCPIP_SocketHandle)s;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetNonBlock(NeonTCPIP_SocketHandle sock, bool enable)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    SlSockNonblocking_t nb;
+    nb.NonblockingEnabled = enable ? 1 : 0;
+
+    int16_t ret = sl_SetSockOpt((int16_t)sock,
+                                SL_SOL_SOCKET,
+                                SL_SO_NONBLOCKING,
+                                &nb,
+                                sizeof(nb));
+
+    if (ret < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(ret);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_Bind(NeonTCPIP_SocketHandle sock, uint16_t port)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    SlSockAddrIn_t addr;
+    memset(&addr, 0, sizeof(addr));
+
+    addr.sin_family = SL_AF_INET;
+    addr.sin_port = sl_Htons(port);
+    addr.sin_addr.s_addr = 0;
+
+    int16_t ret = sl_Bind((int16_t)sock,
+                          (SlSockAddr_t *)&addr,
+                          sizeof(addr));
+
+    if (ret < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(ret);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_Listen(NeonTCPIP_SocketHandle sock, int32_t backlog)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int16_t ret = sl_Listen((int16_t)sock, (int16_t)backlog);
+    if (ret < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(ret);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_SocketHandle NeonTCPIP_Socket_Accept(NeonTCPIP_SocketHandle sock)
+{
+    if (sock < 0)
+    {
+        return -1;
+    }
+
+    SlSockAddrIn_t addr;
+    SlSocklen_t addr_len = sizeof(addr);
+
+    int16_t client = sl_Accept((int16_t)sock,
+                               (SlSockAddr_t *)&addr,
+                               &addr_len);
+
+    if (client < 0)
+    {
+        return (NeonTCPIP_SocketHandle)client;
+    }
+
+    return (NeonTCPIP_SocketHandle)client;
+}
+
+int32_t NeonTCPIP_Socket_Recv(NeonTCPIP_SocketHandle sock, void *buf, uint32_t len)
+{
+    if ((sock < 0) || (buf == NULL) || (len == 0))
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int16_t ret = sl_Recv((int16_t)sock, buf, (int16_t)len, 0);
+
+    if (ret > 0)
+    {
+        return ret;
+    }
+
+    if (ret == 0)
+    {
+        return NeonTCPIP_Closed;
+    }
+
+    return NeonTCPIP_Map_Error(ret);
+}
+
+int32_t NeonTCPIP_Socket_Send(NeonTCPIP_SocketHandle sock, const void *buf, uint32_t len)
+{
+    if ((sock < 0) || (buf == NULL) || (len == 0))
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int16_t ret = sl_Send((int16_t)sock, buf, (int16_t)len, 0);
+
+    if (ret >= 0)
+    {
+        return ret;
+    }
+
+    return NeonTCPIP_Map_Error(ret);
+}
+
+int32_t NeonTCPIP_Socket_RecvFrom(NeonTCPIP_SocketHandle sock,
+                                  void *buf,
+                                  uint32_t len,
+                                  NeonTCPIP_SocketAddr *from)
+{
+    if ((sock < 0) || (buf == NULL) || (len == 0))
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    SlSockAddrIn_t addr;
+    SlSocklen_t addr_len = sizeof(addr);
+    memset(&addr, 0, sizeof(addr));
+
+    int16_t ret = sl_RecvFrom((int16_t)sock,
+                              buf,
+                              (int16_t)len,
+                              0,
+                              (SlSockAddr_t *)&addr,
+                              &addr_len);
+
+    if (ret >= 0)
+    {
+        if (from != NULL)
+        {
+            uint32_t ip = sl_Htonl(addr.sin_addr.s_addr);
+
+            from->ip[0] = (uint8_t)((ip >> 24) & 0xFF);
+            from->ip[1] = (uint8_t)((ip >> 16) & 0xFF);
+            from->ip[2] = (uint8_t)((ip >> 8) & 0xFF);
+            from->ip[3] = (uint8_t)(ip & 0xFF);
+            from->port = sl_Htons(addr.sin_port);
+        }
+
+        return ret;
+    }
+
+    return NeonTCPIP_Map_Error(ret);
+}
+
+int32_t NeonTCPIP_Socket_SendTo(NeonTCPIP_SocketHandle sock,
+                                const void *buf,
+                                uint32_t len,
+                                const NeonTCPIP_SocketAddr *to)
+{
+    if ((sock < 0) || (buf == NULL) || (len == 0) || (to == NULL))
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    SlSockAddrIn_t addr;
+    memset(&addr, 0, sizeof(addr));
+
+    uint32_t ip =
+        ((uint32_t)to->ip[0] << 24) |
+        ((uint32_t)to->ip[1] << 16) |
+        ((uint32_t)to->ip[2] << 8) |
+        ((uint32_t)to->ip[3]);
+
+    addr.sin_family = SL_AF_INET;
+    addr.sin_port = sl_Htons(to->port);
+    addr.sin_addr.s_addr = sl_Htonl(ip);
+
+    int16_t ret = sl_SendTo((int16_t)sock,
+                            buf,
+                            (int16_t)len,
+                            0,
+                            (SlSockAddr_t *)&addr,
+                            sizeof(addr));
+
+    if (ret >= 0)
+    {
+        return ret;
+    }
+
+    return NeonTCPIP_Map_Error(ret);
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_Close(NeonTCPIP_SocketHandle sock)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int16_t ret = sl_Close((int16_t)sock);
+    if (ret < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(ret);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+int32_t NeonTCPIP_Socket_GetLastError(void)
+{
+    return 0;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetTcpNoDelay(NeonTCPIP_SocketHandle sock, bool enable)
+{
+    (void)sock;
+    (void)enable;
+
+    return NeonTCPIP_Unsupported;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetKeepAlive(NeonTCPIP_SocketHandle sock, bool enable)
+{
+    (void)sock;
+    (void)enable;
+
+    return NeonTCPIP_Unsupported;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetReuseAddr(NeonTCPIP_SocketHandle sock, bool enable)
+{
+    (void)sock;
+    (void)enable;
+
+    return NeonTCPIP_Unsupported;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetSendBlockTime(NeonTCPIP_SocketHandle sock, int sendBlockTime)
+{
+    (void)sock;
+    (void)sendBlockTime;
+
+    return NeonTCPIP_Unsupported;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetRecvBlockTime(NeonTCPIP_SocketHandle sock, int recvBlockTime)
+{
+    (void)sock;
+    (void)recvBlockTime;
+
+    return NeonTCPIP_Unsupported;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetLinger(NeonTCPIP_SocketHandle sock, bool onoff, bool linger)
+{
+    (void)sock;
+    (void)onoff;
+    (void)linger;
+
+    return NeonTCPIP_Unsupported;
+}
+
+int32_t NeonTCPIP_Socket_Select(NeonTCPIP_SocketHandle *read_socks,
+                                uint32_t read_count,
+                                uint32_t timeout_ms)
+{
+    (void)read_socks;
+    (void)read_count;
+    (void)timeout_ms;
+
+    return NeonTCPIP_Unsupported;
+}
 #endif
 
 
@@ -1160,5 +1534,28 @@ void NeonTCPIP_init(const uint8_t *ip, const uint8_t *gw, const uint8_t *netmask
 #ifdef CONFIG_INTERNET_LWIP
     NeonTCPIP_ETH_Init(ip, gw, netmask);
 #endif
+#ifdef CONFIG_INTERNET_SIMPLELINK
+    long lRetVal = -1;
+    
+    lRetVal = sl_WlanSetMode(ROLE_STA);
+    if(lRetVal < 0)
+    {
+        UART_Printf("Failed to set WLAN mode\n");
+        return;
+    }
 
+    lRetVal = sl_Stop(0xFF);
+    if(lRetVal < 0)
+    {
+        UART_Printf("Failed to stop SimpleLink\n");
+        return;
+    }
+
+    lRetVal = sl_Start(0, 0, 0);
+    if(lRetVal < 0)
+    {
+        UART_Printf("Failed to start SimpleLink\n");
+        return;
+    }
+#endif
 }

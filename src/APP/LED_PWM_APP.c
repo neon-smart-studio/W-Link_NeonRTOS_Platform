@@ -6,6 +6,8 @@
 
 #include "NeonRTOS.h"
 
+#include "NeonTCPIP.h"
+
 #include "Utils/cJSON/cJSON.h"
 
 #include "NeonServices/HTTPd/HTTPd.h"

@@ -4,46 +4,13 @@
 
 #include <stdint.h>
 
-#include "lwip/ip_addr.h"
+#include "TCPIP_Config.h"
 
-#ifdef	__cplusplus
-extern "C" {
+#ifdef CONFIG_INTERNET_LWIP
+#include "lwipopts.h"
 #endif
 
-/* Exported types ------------------------------------------------------------*/
-/* TCP connection state */
-typedef enum {
-  TCP_NONE = 0,
-  TCP_CONNECTED,
-  TCP_RECEIVED,
-  TCP_SENT,
-  TCP_ACCEPTED,
-  TCP_CLOSING,
-} tcp_client_states;
-
-/* Struct to store received data */
-struct pbuf_data {
-  struct pbuf *p;     // the packet buffer that was received
-  uint16_t available; // number of data
-};
-
-/* UDP structure */
-struct udp_struct {
-  struct udp_pcb *pcb; /* pointer on the current udp_pcb */
-  struct pbuf_data data;
-  ip_addr_t ip;       // the remote IP address from which the packet was received
-  uint16_t port;         // the remote port from which the packet was received
-  void (*onDataArrival)(void); // Callback function pointer for data arrival
-};
-
-/* TCP structure */
-struct tcp_struct {
-  struct tcp_pcb *pcb;          /* pointer on the current tcp_pcb */
-  struct pbuf_data data;
-  tcp_client_states state;      /* current connection state */
-};
-
-/* Exported constants --------------------------------------------------------*/
+#ifdef CONFIG_INTERNET_LWIP
 /*Static IP ADDRESS: IP_ADDR0.IP_ADDR1.IP_ADDR2.IP_ADDR3 */
 #define IP_ADDR0   (uint8_t) 192
 #define IP_ADDR1   (uint8_t) 168
@@ -70,22 +37,32 @@ struct tcp_struct {
 #define DHCP_TIMEOUT               (uint8_t) 4
 #define DHCP_LINK_DOWN             (uint8_t) 5
 #define DHCP_ASK_RELEASE           (uint8_t) 6
+#endif //CONFIG_INTERNET_LWIP
 
-/* Maximum number of client per server */
-#define MAX_CLIENT  32
+typedef int32_t NeonTCPIP_SocketHandle;
 
-#ifdef IF_INPUT_USE_IT
-  extern struct netif gnetif;
+typedef enum
+{
+    NeonTCPIP_OK = 0,
+    NeonTCPIP_Error = -1,
+    NeonTCPIP_WouldBlock = -2,
+    NeonTCPIP_Closed = -3,
+    NeonTCPIP_Unsupported = -4,
+    NeonTCPIP_InvalidParameter = -5,
+    NeonTCPIP_Timeout = -6
+} NeonTCPIP_Result;
+
+typedef struct
+{
+    uint8_t  ip[4];
+    uint16_t port;
+} NeonTCPIP_SocketAddr;
+
+#ifdef	__cplusplus
+extern "C" {
 #endif
 
 void NeonTCPIP_init(const uint8_t *ip, const uint8_t *gw, const uint8_t *netmask);
-
-#if LWIP_DHCP
-void NeonTCPIP_DHCP_Manual_Config(void);
-uint8_t NeonTCPIP_Get_DHCP_Lease_State(void);
-void NeonTCPIP_Set_DHCP_State(uint8_t state);
-uint8_t NeonTCPIP_Get_DHCP_State(void);
-#endif /* LWIP_DHCP */
 
 uint8_t NeonTCPIP_IF_isInit(void);
 uint8_t NeonTCPIP_IF_isLinkUp(void);
@@ -111,6 +88,41 @@ int8_t NeonTCPIP_DNS_GetHostByName(const char *hostname, uint32_t *ipaddr);
 
 uint32_t ip_string_to_u32(const char *ip_str);
 void ip_u32_to_string(uint32_t ip_u32, char *buf, size_t buflen);
+
+
+NeonTCPIP_SocketHandle NeonTCPIP_Socket_Open(bool udp);
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetNonBlock(NeonTCPIP_SocketHandle sock, bool enable);
+NeonTCPIP_Result NeonTCPIP_Socket_Bind(NeonTCPIP_SocketHandle sock, uint16_t port);
+NeonTCPIP_Result NeonTCPIP_Socket_Listen(NeonTCPIP_SocketHandle sock, int32_t backlog);
+NeonTCPIP_SocketHandle NeonTCPIP_Socket_Accept(NeonTCPIP_SocketHandle sock);
+
+int32_t NeonTCPIP_Socket_Recv(NeonTCPIP_SocketHandle sock, void *buf, uint32_t len);
+int32_t NeonTCPIP_Socket_Send(NeonTCPIP_SocketHandle sock, const void *buf, uint32_t len);
+
+int32_t NeonTCPIP_Socket_RecvFrom(NeonTCPIP_SocketHandle sock,
+                                  void *buf,
+                                  uint32_t len,
+                                  NeonTCPIP_SocketAddr *from);
+
+int32_t NeonTCPIP_Socket_SendTo(NeonTCPIP_SocketHandle sock,
+                                const void *buf,
+                                uint32_t len,
+                                const NeonTCPIP_SocketAddr *to);
+
+NeonTCPIP_Result NeonTCPIP_Socket_Close(NeonTCPIP_SocketHandle sock);
+int32_t NeonTCPIP_Socket_GetLastError(void);
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetTcpNoDelay(NeonTCPIP_SocketHandle sock, bool enable);
+NeonTCPIP_Result NeonTCPIP_Socket_SetKeepAlive(NeonTCPIP_SocketHandle sock, bool enable);
+NeonTCPIP_Result NeonTCPIP_Socket_SetReuseAddr(NeonTCPIP_SocketHandle sock, bool enable);
+NeonTCPIP_Result NeonTCPIP_Socket_SetSendBlockTime(NeonTCPIP_SocketHandle sock, int sendBlockTime);
+NeonTCPIP_Result NeonTCPIP_Socket_SetRecvBlockTime(NeonTCPIP_SocketHandle sock, int recvBlockTime);
+NeonTCPIP_Result NeonTCPIP_Socket_SetLinger(NeonTCPIP_SocketHandle sock, bool onoff, bool linger);
+
+int32_t NeonTCPIP_Socket_Select(NeonTCPIP_SocketHandle *read_socks,
+                                uint32_t read_count,
+                                uint32_t timeout_ms);
 
 #ifdef  __cplusplus
 }

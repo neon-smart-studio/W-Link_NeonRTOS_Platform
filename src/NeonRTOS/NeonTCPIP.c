@@ -2,6 +2,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "NeonRTOS.h"
+
+#include "NeonTCPIP.h"
+
+#ifdef CONFIG_INTERNET_LWIP
 #include "lwip/init.h"
 #include "lwip/netif.h"
 #include "lwip/timeouts.h"
@@ -10,19 +15,27 @@
 #include "lwip/prot/dhcp.h"
 #include "lwip/dns.h"
 #include "lwip/tcpbase.h"
+#include "lwip/ip_addr.h"
 #include "netif/ethernet.h"
+#include "lwip/err.h"
+#include "lwip/sockets.h"
 
 #include "ethernet_if/ethernet_if_lwip.h"
+#endif
 
-#include "NeonTCPIP.h"
+#ifdef CONFIG_INTERNET_SIMPLELINK
+#include "simplelink.h"
+#endif
 
-#if !NO_SYS
-#include "NeonRTOS.h"
+#ifdef CONFIG_INTERNET_LWIP
+
+
+/* Maximum number of client per server */
+#define MAX_CLIENT  32
 
 // 定義網絡任務的相關屬性
 #define NEON_TCPIP_TASK_STACK_SIZE 2048
 #define NEON_TCPIP_TASK_PRIORITY   tskIDLE_PRIORITY + 1
-#endif
 
 /* Check ethernet link status every seconds */
 #define TIME_CHECK_ETH_LINK_STATE 500U
@@ -44,6 +57,13 @@
 static void NeonTCPIP_ETH_Scheduler(void);
 static void NeonTCPIP_DHCP_Periodic_Handle(struct netif *netif);
 static void NeonTCPIP_DHCP_Process(struct netif *netif);
+
+#if LWIP_DHCP
+void NeonTCPIP_DHCP_Manual_Config(void);
+uint8_t NeonTCPIP_Get_DHCP_Lease_State(void);
+void NeonTCPIP_Set_DHCP_State(uint8_t state);
+uint8_t NeonTCPIP_Get_DHCP_State(void);
+#endif /* LWIP_DHCP */
 
 /* Ethernet configuration: user parameters */
 struct neonRT_eth_config {
@@ -182,6 +202,13 @@ static void NeonTCPIP_ETH_Scheduler(void)
   NeonTCPIP_ETH_Poll();
 }
 
+static void NeonTCPIP_Task(void *pValue) {
+    while (1) {
+      NeonTCPIP_ETH_Scheduler(); // 調用調度函數
+      NeonRTOS_Sleep(1);    // 每 1 毫秒調用一次
+    }
+}
+
 static void NeonTCPIP_ETH_Init(const uint8_t *ip, const uint8_t *gw, const uint8_t *netmask)
 {
     bool use_dhcp = false;
@@ -258,18 +285,6 @@ static void NeonTCPIP_ETH_Init(const uint8_t *ip, const uint8_t *gw, const uint8
 #if LWIP_DHCP
     DHCP_enabled = use_dhcp ? 1 : 0;
 #endif
-}
-
-void NeonTCPIP_Task(void *pValue) {
-    while (1) {
-      NeonTCPIP_ETH_Scheduler(); // 調用調度函數
-      NeonRTOS_Sleep(1);    // 每 1 毫秒調用一次
-    }
-}
-
-void NeonTCPIP_init(const uint8_t *ip, const uint8_t *gw, const uint8_t *netmask)
-{
-    NeonTCPIP_ETH_Init(ip, gw, netmask);
 
     // 創建 NeonRTOS 網絡任務
     NeonRTOS_ReturnVal_e ret = NeonRTOS_TaskCreate(
@@ -678,4 +693,472 @@ void ip_u32_to_string(uint32_t ip_u32, char *buf, size_t buflen)
     ip4_addr_t ipaddr;
     ip4_addr_set_u32(&ipaddr, ip_u32);
     snprintf(buf, buflen, "%s", ip4addr_ntoa(&ipaddr));
+}
+
+static int32_t NeonTCPIP_Map_Error(int err)
+{
+    switch (err)
+    {
+        case 0:
+            return NeonTCPIP_OK;
+
+#if defined(EWOULDBLOCK)
+        case EWOULDBLOCK:
+            return NeonTCPIP_WouldBlock;
+#endif
+
+#if defined(EAGAIN) && (!defined(EWOULDBLOCK) || (EAGAIN != EWOULDBLOCK))
+        case EAGAIN:
+            return NeonTCPIP_WouldBlock;
+#endif
+
+#if defined(ETIMEDOUT)
+        case ETIMEDOUT:
+            return NeonTCPIP_Timeout;
+#endif
+
+        default:
+            return NeonTCPIP_Error;
+    }
+}
+
+NeonTCPIP_SocketHandle NeonTCPIP_Socket_Open(bool udp)
+{
+    int type = udp ? SOCK_DGRAM : SOCK_STREAM;
+    int proto = udp ? IPPROTO_UDP : IPPROTO_TCP;
+
+    int s = lwip_socket(AF_INET, type, proto);
+    if (s < 0)
+    {
+        return s;
+    }
+
+    return (NeonTCPIP_SocketHandle)s;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetNonBlock(NeonTCPIP_SocketHandle sock, bool enable)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int flags = lwip_fcntl(sock, F_GETFL, 0);
+    if (flags < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    if (enable)
+    {
+        flags |= O_NONBLOCK;
+    }
+    else
+    {
+        flags &= ~O_NONBLOCK;
+    }
+
+    if (lwip_fcntl(sock, F_SETFL, flags) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_Bind(NeonTCPIP_SocketHandle sock, uint16_t port)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+
+    addr.sin_family = AF_INET;
+    addr.sin_port = lwip_htons(port);
+    addr.sin_addr.s_addr = PP_HTONL(INADDR_ANY);
+
+    if (lwip_bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_Listen(NeonTCPIP_SocketHandle sock, int32_t backlog)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    if (lwip_listen(sock, backlog) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_SocketHandle NeonTCPIP_Socket_Accept(NeonTCPIP_SocketHandle sock)
+{
+    if (sock < 0)
+    {
+        return -1;
+    }
+
+    int client_socet = lwip_accept(sock, NULL, NULL);
+    if (client_socet < 0)
+    {
+        return client_socet;
+    }
+
+    return (NeonTCPIP_SocketHandle)client_socet;
+}
+
+int32_t NeonTCPIP_Socket_Recv(NeonTCPIP_SocketHandle sock, void *buf, uint32_t len)
+{
+    if ((sock < 0) || (buf == NULL) || (len == 0))
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int32_t ret = lwip_recv(sock, buf, len, 0);
+
+    if (ret > 0)
+    {
+        return ret;
+    }
+
+    if (ret == 0)
+    {
+        return NeonTCPIP_Closed;
+    }
+
+    return NeonTCPIP_Map_Error(errno);
+}
+
+int32_t NeonTCPIP_Socket_Send(NeonTCPIP_SocketHandle sock, const void *buf, uint32_t len)
+{
+    if ((sock < 0) || (buf == NULL) || (len == 0))
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int32_t ret = lwip_send(sock, buf, len, 0);
+
+    if (ret >= 0)
+    {
+        return ret;
+    }
+
+    return NeonTCPIP_Map_Error(errno);
+}
+
+int32_t NeonTCPIP_Socket_RecvFrom(NeonTCPIP_SocketHandle sock,
+                                  void *buf,
+                                  uint32_t len,
+                                  NeonTCPIP_SocketAddr *from)
+{
+    if ((sock < 0) || (buf == NULL) || (len == 0))
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    struct sockaddr_in addr;
+    socklen_t addr_len = sizeof(addr);
+    memset(&addr, 0, sizeof(addr));
+
+    int32_t ret = lwip_recvfrom(sock,
+                            buf,
+                            len,
+                            0,
+                            (struct sockaddr *)&addr,
+                            &addr_len);
+
+    if (ret >= 0)
+    {
+        if (from != NULL)
+        {
+            uint32_t ip = lwip_ntohl(addr.sin_addr.s_addr);
+
+            from->ip[0] = (uint8_t)((ip >> 24) & 0xFF);
+            from->ip[1] = (uint8_t)((ip >> 16) & 0xFF);
+            from->ip[2] = (uint8_t)((ip >> 8) & 0xFF);
+            from->ip[3] = (uint8_t)(ip & 0xFF);
+            from->port = lwip_ntohs(addr.sin_port);
+        }
+
+        return ret;
+    }
+
+    return NeonTCPIP_Map_Error(errno);
+}
+
+int32_t NeonTCPIP_Socket_SendTo(NeonTCPIP_SocketHandle sock,
+                                const void *buf,
+                                uint32_t len,
+                                const NeonTCPIP_SocketAddr *to)
+{
+    if ((sock < 0) || (buf == NULL) || (len == 0) || (to == NULL))
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+
+    uint32_t ip =
+        ((uint32_t)to->ip[0] << 24) |
+        ((uint32_t)to->ip[1] << 16) |
+        ((uint32_t)to->ip[2] << 8) |
+        ((uint32_t)to->ip[3]);
+
+    addr.sin_family = AF_INET;
+    addr.sin_port = lwip_htons(to->port);
+    addr.sin_addr.s_addr = lwip_htonl(ip);
+
+    int32_t ret = lwip_sendto(sock,
+                          buf,
+                          len,
+                          0,
+                          (struct sockaddr *)&addr,
+                          sizeof(addr));
+
+    if (ret >= 0)
+    {
+        return ret;
+    }
+
+    return NeonTCPIP_Map_Error(errno);
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_Close(NeonTCPIP_SocketHandle sock)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    if (lwip_close(sock) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+int32_t NeonTCPIP_Socket_GetLastError(void)
+{
+    return errno;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetTcpNoDelay(NeonTCPIP_SocketHandle sock, bool enable)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int value = enable ? 1 : 0;
+
+    if (lwip_setsockopt(sock,
+                        IPPROTO_TCP,
+                        TCP_NODELAY,
+                        &value,
+                        sizeof(value)) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetKeepAlive(NeonTCPIP_SocketHandle sock, bool enable)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int value = enable ? 1 : 0;
+
+    if (lwip_setsockopt(sock,
+                        IPPROTO_TCP,
+                        SO_KEEPALIVE,
+                        &value,
+                        sizeof(value)) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetReuseAddr(NeonTCPIP_SocketHandle sock, bool enable)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int value = enable ? 1 : 0;
+
+    if (lwip_setsockopt(sock,
+                        SOL_SOCKET,
+                        SO_REUSEADDR,
+                        &value,
+                        sizeof(value)) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetSendBlockTime(NeonTCPIP_SocketHandle sock, int sendBlockTime)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int value = sendBlockTime;
+
+    if (lwip_setsockopt(sock,
+                        SOL_SOCKET,
+                        SO_SNDTIMEO,
+                        &value,
+                        sizeof(value)) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetRecvBlockTime(NeonTCPIP_SocketHandle sock, int recvBlockTime)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    int value = recvBlockTime;
+
+    if (lwip_setsockopt(sock,
+                        SOL_SOCKET,
+                        SO_RCVTIMEO,
+                        &value,
+                        sizeof(value)) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+
+NeonTCPIP_Result NeonTCPIP_Socket_SetLinger(NeonTCPIP_SocketHandle sock, bool onoff, bool linger)
+{
+    if (sock < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    struct linger so_linger;
+    so_linger.l_onoff = onoff ? 1 : 0;
+    so_linger.l_linger = linger ? 1 : 0;
+
+    if (lwip_setsockopt(sock,
+                        SOL_SOCKET,
+                        SO_LINGER,
+                        &so_linger,
+                        sizeof(so_linger)) < 0)
+    {
+        return (NeonTCPIP_Result)NeonTCPIP_Map_Error(errno);
+    }
+
+    return NeonTCPIP_OK;
+}
+                        
+int32_t NeonTCPIP_Socket_Select(NeonTCPIP_SocketHandle *read_socks,
+                                uint32_t read_count,
+                                uint32_t timeout_ms)
+{
+    if ((read_socks == NULL) || (read_count == 0))
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    fd_set rfds;
+    FD_ZERO(&rfds);
+
+    int max_fd = -1;
+
+    for (uint32_t i = 0; i < read_count; i++)
+    {
+        if (read_socks[i] >= 0)
+        {
+            FD_SET(read_socks[i], &rfds);
+
+            if (read_socks[i] > max_fd)
+            {
+                max_fd = read_socks[i];
+            }
+        }
+    }
+
+    if (max_fd < 0)
+    {
+        return NeonTCPIP_InvalidParameter;
+    }
+
+    struct timeval tv;
+    tv.tv_sec = timeout_ms / 1000;
+    tv.tv_usec = (timeout_ms % 1000) * 1000;
+
+    int ret = lwip_select(max_fd + 1, &rfds, NULL, NULL, &tv);
+
+    if (ret > 0)
+    {
+        uint32_t ready_count = 0;
+
+        for (uint32_t i = 0; i < read_count; i++)
+        {
+            if ((read_socks[i] >= 0) && FD_ISSET(read_socks[i], &rfds))
+            {
+                ready_count++;
+            }
+            else
+            {
+                read_socks[i] = -1;
+            }
+        }
+
+        return (int32_t)ready_count;
+    }
+
+    if (ret == 0)
+    {
+        return 0;
+    }
+
+    return NeonTCPIP_Map_Error(errno);
+}
+
+#endif
+
+#ifdef CONFIG_INTERNET_SIMPLELINK
+#endif
+
+
+void NeonTCPIP_init(const uint8_t *ip, const uint8_t *gw, const uint8_t *netmask)
+{
+#ifdef CONFIG_INTERNET_LWIP
+    NeonTCPIP_ETH_Init(ip, gw, netmask);
+#endif
+
 }

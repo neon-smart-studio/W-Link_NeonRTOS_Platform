@@ -2,29 +2,6 @@
 #ifndef SOC_H
 #define SOC_H
 
-#if defined (CC3200)
-#include "inc/hw_types.h"
-#include "inc/hw_ints.h"
-#include "inc/hw_i2c.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_uart.h"
-#include "driverlib/rom.h"
-#include "driverlib/rom_map.h"
-#include "driverlib/debug.h"
-#include "driverlib/flash.h"
-#include "driverlib/gpio.h"
-#include "driverlib/i2c.h"
-#include "driverlib/interrupt.h"
-#include "driverlib/pin.h"
-#include "driverlib/prcm.h"
-#include "driverlib/spi.h"
-#include "driverlib/timer.h"
-#include "driverlib/udma.h"
-#include "driverlib/uart.h"
-#define DEVICE_TICC3200
-#define TCPIP_SIMPLELINK
-#endif
-
 #if defined (NUC442) || defined (NUC472)
 #include "NUC472_442.h"
 #include "sys.h"
@@ -39,7 +16,6 @@
 #include "rtc.h"
 #include "can.h"
 #define DEVICE_NUVOTON
-#define TCPIP_LWIP
 #endif //NUC442 || NUC472
 
 #if defined (RP2040) || defined (RP2350)
@@ -60,7 +36,6 @@
 #include "hardware/structs/resets.h"
 #include "hardware/structs/clocks.h"
 #define DEVICE_RP2
-#define TCPIP_LWIP
 #endif
 
 #if defined (STM32C011xx) || defined (STM32C031xx) || \
@@ -431,7 +406,6 @@
     defined (STM32U0) || defined (STM32U5) || \
     defined (STM32WBA) || defined (STM32WB) || defined (STM32WL)
 #define DEVICE_STM32
-#define TCPIP_LWIP
 #endif
 
 #if defined (TM4C1294) || defined (TM4C123)
@@ -461,7 +435,6 @@
 #include "driverlib/udma.h"
 #include "driverlib/uart.h"
 #define DEVICE_TITIVAC
-#define TCPIP_LWIP
 #endif
 
 #endif //SOC_H

@@ -5,7 +5,6 @@
 #include "time.h"
 
 #include "NeonRTOS.h"
-
 #include "NeonTCPIP.h"
 
 #include "GPIO/GPIO.h"
@@ -559,7 +558,7 @@ void Init_Thread(void* p)
 
 void Neon_App_Init(void)
 {
-        //UART_Open(LOG_UART_INDEX, 115200, false);
+        UART_Open(LOG_UART_INDEX, 115200, false);
 
 #ifdef CONFIG_SUPPORT_INTERNET
         WebsocketServer_RegisterMsgCallback(Process_Websocket_Incomming_Message);

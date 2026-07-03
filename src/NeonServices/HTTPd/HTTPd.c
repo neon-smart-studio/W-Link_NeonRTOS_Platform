@@ -6,10 +6,12 @@
 #include <limits.h>
 
 #include "NeonRTOS.h"
-
-#include "NeonTCPIP.h"
-
 #include "NeonRtFs.h"
+
+#include "lwip/err.h"
+#include "lwip/sockets.h"
+#include "lwip/ip_addr.h"
+#include "lwip/inet.h"
 
 #include "HTTPd_def.h"
 #include "HTTPd_Utils.h"
@@ -35,8 +37,12 @@
 
 typedef struct HTTPd_WebSocked_Client_Connection
 {
-	NeonTCPIP_SocketHandle socket_id;
+	int socket_id;
+#ifdef HTTPD_USE_SSL
+	ssl_context client_ssl_ctx;
+#endif
         NeonRTOS_TaskHandle clientTaskHandle;
+	struct sockaddr client_socket_addr;
         HTTPd_Connection_Mode connetion_mode;
 	NeonRTOS_TimerHandle connection_timeout_timer;
 	bool connection_destruct_flag;
@@ -56,13 +62,35 @@ typedef struct HTTPd_WebSocked_Client_Connection
 	cgiSendCallback cgi;
 }HTTPd_WebSocked_Client_Connection;
 
-NeonTCPIP_SocketHandle HTTP_WebSocket_Server_Socket = -1;
+int HTTP_WebSocket_Server_Socket = -1;
 
 //Connection pool
 HTTPd_WebSocked_Client_Connection* HTTPd_WebSocketd_Client_List[HTTPD_MAX_CLIENTS];
 
 static HTTPd_WsServerOnMessageCB wsServerOnMessageCallback = NULL;
-                       
+        
+#ifdef CONFIG_SUPPORT_OTA
+const char    OTA_Update_Page_HTML[]=  "\
+<html>\r\n<head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\r\n\
+    <title>Uploade OTA Image</title>\r\n<script type=\"text/javascript\">\r\n\
+        var xhr = new XMLHttpRequest();\r\n\
+        window.onload=function(e) {\r\n\
+            document.getElementById('file-input').addEventListener('change', function(e){\r\n\
+                var file = e.target.files[0];\r\n\
+                if (!file) {return;}\r\n\
+                var formData = new FormData();\r\n\
+                formData.append(\"UploadOtaImage\", file);\r\n\
+                xhr.open(\"POST\", '/OTA', true);\r\n\
+                xhr.onreadystatechange=function() {\r\n\
+                        if (xhr.readyState==4) sendInProgress=false;\r\n\
+                }\r\n\
+                xhr.send(formData);\r\n\
+            }, false);\r\n\
+        }\r\n\
+    </script>\r\n</head>\r\n<body>\r\n<h3>Uploade OTA Image To NeonRT(.bin)</h3>\r\n<input type=\"file\" id=\"file-input\" />\r\n</body>\r\n";
+#endif
+            
+                                
 const char    HTTP_API_Debug_Tool_Page_HTML[]=  "\
 <html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head>\r\n\
     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1252\">\r\n\
@@ -280,9 +308,12 @@ static void HTTPd_WebsocketServer_Send_Message(HTTPd_WebSocked_Client_Connection
 
         while (sent < len)
         {
-                int32_t ret;
-                
-                ret = NeonTCPIP_Socket_Send(ws_client->socket_id, &buf[sent], len - sent);
+                int ret;
+#ifdef HTTPD_USE_SSL
+                ret = ssl_write(&ws_client->client_ssl_ctx, &buf[sent], len - sent, 0);
+#else
+                ret = send(ws_client->socket_id, &buf[sent], len - sent, 0);
+#endif
 
                 if (ret <= 0)
                 {
@@ -301,9 +332,12 @@ static void HTTPd_WebsocketServer_Send_Message(HTTPd_WebSocked_Client_Connection
 
                 while (sent < len)
                 {
-                        int32_t ret;
-                        
-                        ret = NeonTCPIP_Socket_Send(ws_client->socket_id, &payload[sent], len - sent);
+                        int ret;
+#ifdef HTTPD_USE_SSL
+                        ret = ssl_write(&ws_client->client_ssl_ctx, &payload[sent], len - sent, 0);
+#else
+                        ret = send(ws_client->socket_id, &payload[sent], len - sent, 0);
+#endif
 
                         if (ret <= 0)
                         {
@@ -453,11 +487,17 @@ int WebSocketServer_ReceiveWsFrame(HTTPd_WebSocked_Client_Connection *conn,
 
     memset(frame, 0, sizeof(HTTPd_WSFrame));
 
-    ret = NeonTCPIP_Socket_Recv(conn->socket_id, header_buf, 2);
+    ret = recv(conn->socket_id, header_buf, 2, 0);
 
     if (ret < 0)
     {
-        if (ret == NeonTCPIP_WouldBlock)
+        socket_errno = 0;
+        getsockopt(conn->socket_id, SOL_SOCKET, SO_ERROR,
+                   &socket_errno, &socket_errno_optlen);
+
+        if (socket_errno == EAGAIN ||
+            socket_errno == EWOULDBLOCK ||
+            socket_errno == 0)
         {
             return WS_RECV_NODATA;
         }
@@ -484,7 +524,7 @@ int WebSocketServer_ReceiveWsFrame(HTTPd_WebSocked_Client_Connection *conn,
     {
         uint8_t len_data_buf[2];
 
-        ret = NeonTCPIP_Socket_Recv(conn->socket_id, len_data_buf, 2);
+        ret = recv(conn->socket_id, len_data_buf, 2, 0);
         if (ret != 2) return WS_RECV_CLOSE;
 
         frame->payloadLength =
@@ -500,7 +540,7 @@ int WebSocketServer_ReceiveWsFrame(HTTPd_WebSocked_Client_Connection *conn,
     {
         uint8_t masking_key_buf[4];
 
-        ret = NeonTCPIP_Socket_Recv(conn->socket_id, masking_key_buf, 4);
+        ret = recv(conn->socket_id, masking_key_buf, 4, 0);
         if (ret != 4) return WS_RECV_CLOSE;
 
         memcpy(&frame->maskingKey, masking_key_buf, 4);
@@ -784,6 +824,13 @@ const char* HTTPd_Get_CGI_Request_AuthToken(HTTPd_WebSocked_Client_Connection *c
       return (const char*)connData->auth_token;
 }
 
+uint32_t HTTPd_Get_CGI_Client_IP(HTTPd_WebSocked_Client_Connection *connData)
+{
+      if (connData == NULL) return 0;
+      struct sockaddr_in *addr_in = (struct sockaddr_in*)&connData->client_socket_addr;
+      return addr_in->sin_addr.s_addr;  /* network byte order */
+}
+
 const char* HTTPd_Get_CGI_Request_Args(HTTPd_WebSocked_Client_Connection *connData)
 {
       if (connData == NULL) return NULL;
@@ -880,9 +927,12 @@ int HTTPd_Send_CGI_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_
 
         while (sent < len)
         {
-                int32_t ret;
-                
-                ret = NeonTCPIP_Socket_Send(connData->socket_id, &http_cmd_buf[sent], len - sent);
+                int ret;
+#ifdef HTTPD_USE_SSL
+                ret = ssl_write(&connData->client_ssl_ctx, &http_cmd_buf[sent], len - sent, 0);
+#else
+                ret = send(connData->socket_id, &http_cmd_buf[sent], len - sent, 0);
+#endif
 
                 if (ret <= 0)
                 {
@@ -905,9 +955,12 @@ int HTTPd_Send_CGI_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_
 
                 while (sent < len)
                 {
-                        int32_t ret;
-
-                        ret = NeonTCPIP_Socket_Send(connData->socket_id, &rsp_data[sent], len - sent);
+                        int ret;
+#ifdef HTTPD_USE_SSL
+                        ret = ssl_write(&connData->client_ssl_ctx, &rsp_data[sent], len - sent, 0);
+#else
+                        ret = send(connData->socket_id, &rsp_data[sent], len - sent, 0);
+#endif
 
                         if (ret <= 0)
                         {
@@ -1018,9 +1071,12 @@ static int HTTP_SendHeader(HTTPd_WebSocked_Client_Connection *connData, int stat
 
         while (sent < len)
         {
-                int32_t ret;
-                
-                ret = NeonTCPIP_Socket_Send(connData->socket_id, &http_cmd_buf[sent], len - sent);
+                int ret;
+#ifdef HTTPD_USE_SSL
+                ret = ssl_write(&connData->client_ssl_ctx, &http_cmd_buf[sent], len - sent, 0);
+#else
+                ret = send(connData->socket_id, &http_cmd_buf[sent], len - sent, 0);
+#endif
 
                 if (ret <= 0)
                 {
@@ -1097,9 +1153,12 @@ int HTTPd_SendWebFile(HTTPd_WebSocked_Client_Connection *connData)
 
                 while (sent < len)
                 {
-                        int32_t ret;
-                        
-                        ret = NeonTCPIP_Socket_Send(connData->socket_id, &web_send_buf[sent], len - sent);
+                        int ret;
+#ifdef HTTPD_USE_SSL
+                        ret = ssl_write(&connData->client_ssl_ctx, &web_send_buf[sent], len - sent, 0);
+#else
+                        ret = send(connData->socket_id, &web_send_buf[sent], len - sent, 0);
+#endif
 
                         if (ret <= 0)
                         {
@@ -1167,9 +1226,12 @@ int HTTPd_Redirect(HTTPd_WebSocked_Client_Connection *connData, char *newUrl)
 
                                 while (sent < len)
                                 {
-                                        int32_t ret;
-                                        
-                                        ret = NeonTCPIP_Socket_Send(connData->socket_id, &pRetMsg[sent], len - sent);
+                                        int ret;
+#ifdef HTTPD_USE_SSL
+                                        ret = ssl_write(&connData->client_ssl_ctx, &pRetMsg[sent], len - sent, 0);
+#else
+                                        ret = send(connData->socket_id, &pRetMsg[sent], len - sent, 0);
+#endif
 
                                         if (ret <= 0)
                                         {
@@ -1229,9 +1291,12 @@ int HTTPd_Redirect(HTTPd_WebSocked_Client_Connection *connData, char *newUrl)
 
                         while (sent < len)
                         {
-                                int32_t ret;
-                                
-                                ret = NeonTCPIP_Socket_Send(connData->socket_id, &web_send_buf[sent], len - sent);
+                                int ret;
+#ifdef HTTPD_USE_SSL
+                                ret = ssl_write(&connData->client_ssl_ctx, &web_send_buf[sent], len - sent, 0);
+#else
+                                ret = send(connData->socket_id, &web_send_buf[sent], len - sent, 0);
+#endif
 
                                 if (ret <= 0)
                                 {
@@ -1260,9 +1325,12 @@ int HTTPd_Redirect(HTTPd_WebSocked_Client_Connection *connData, char *newUrl)
 
                 while (sent < len)
                 {
-                        int32_t ret;
-                        
-                        ret = NeonTCPIP_Socket_Send(connData->socket_id, &pRedirMsg[sent], len - sent);
+                        int ret;
+#ifdef HTTPD_USE_SSL
+                        ret = ssl_write(&connData->client_ssl_ctx, &pRedirMsg[sent], len - sent, 0);
+#else
+                        ret = send(connData->socket_id, &pRedirMsg[sent], len - sent, 0);
+#endif
 
                         if (ret <= 0)
                         {
@@ -1321,9 +1389,12 @@ int HTTPd_NotFound(HTTPd_WebSocked_Client_Connection *connData)
 
                                 while (sent < len)
                                 {
-                                        int32_t ret;
-                                        
-                                        ret = NeonTCPIP_Socket_Send(connData->socket_id, &pRetMsg[sent], len - sent);
+                                        int ret;
+#ifdef HTTPD_USE_SSL
+                                        ret = ssl_write(&connData->client_ssl_ctx, &pRetMsg[sent], len - sent, 0);
+#else
+                                        ret = send(connData->socket_id, &pRetMsg[sent], len - sent, 0);
+#endif
 
                                         if (ret <= 0)
                                         {
@@ -1383,9 +1454,12 @@ int HTTPd_NotFound(HTTPd_WebSocked_Client_Connection *connData)
 
                         while (sent < len)
                         {
-                                int32_t ret;
-                                
-                                ret = NeonTCPIP_Socket_Send(connData->socket_id, &web_send_buf[sent], len - sent);
+                                int ret;
+#ifdef HTTPD_USE_SSL
+                                ret = ssl_write(&connData->client_ssl_ctx, &web_send_buf[sent], len - sent, 0);
+#else
+                                ret = send(connData->socket_id, &web_send_buf[sent], len - sent, 0);
+#endif
 
                                 if (ret <= 0)
                                 {
@@ -1414,9 +1488,12 @@ int HTTPd_NotFound(HTTPd_WebSocked_Client_Connection *connData)
 
                 while (sent < len)
                 {
-                        int32_t ret;
-                        
-                        ret = NeonTCPIP_Socket_Send(connData->socket_id, &pNotFoundMsg[sent], len - sent);
+                        int ret;
+#ifdef HTTPD_USE_SSL
+                        ret = ssl_write(&connData->client_ssl_ctx, &pNotFoundMsg[sent], len - sent, 0);
+#else
+                        ret = send(connData->socket_id, &pNotFoundMsg[sent], len - sent, 0);
+#endif
 
                         if (ret <= 0)
                         {
@@ -1457,9 +1534,12 @@ int HTTPdSendApiDebugToolPage(HTTPd_WebSocked_Client_Connection *connData)
 
         while (sent < len)
         {
-                int32_t ret;
-
-                ret = NeonTCPIP_Socket_Send(connData->socket_id, &HTTP_API_Debug_Tool_Page_HTML[sent], len - sent);
+                int ret;
+#ifdef HTTPD_USE_SSL
+                ret = ssl_write(&connData->client_ssl_ctx, &HTTP_API_Debug_Tool_Page_HTML[sent], len - sent, 0);
+#else
+                ret = send(connData->socket_id, &HTTP_API_Debug_Tool_Page_HTML[sent], len - sent, 0);
+#endif
 
                 if (ret <= 0)
                 {
@@ -1558,14 +1638,22 @@ int HTTPd_Process_POST_Request(HTTPd_WebSocked_Client_Connection *connData)
 
 	if (HTTPd_isMatch_CGI(connData))
 	{
-                NeonTCPIP_Socket_SetRecvBlockTime(connData->socket_id, 10000);
-
+                int recvBlockTime = 0;
+                
+                recvBlockTime = 10000;
+                if(setsockopt(connData->socket_id, SOL_SOCKET, SO_RCVTIMEO, &recvBlockTime, sizeof(recvBlockTime)) < 0) {
+                        return HTTPD_CGI_DONE;
+                }
+                
 		r = connData->cgi(connData);
                 
-                NeonTCPIP_Socket_SetRecvBlockTime(connData->socket_id, 500);
-
                 connData->cgi = NULL;
                 connData->cgiArg = NULL;
+                
+                recvBlockTime = 500;
+                if(setsockopt(connData->socket_id, SOL_SOCKET, SO_RCVTIMEO, &recvBlockTime, sizeof(recvBlockTime)) < 0) {
+                        return HTTPD_CGI_DONE;
+                }
                 
                 if(r==HTTPD_CGI_NOTFOUND)
                 {
@@ -1610,9 +1698,12 @@ int HTTPd_Process_GET_Request(HTTPd_WebSocked_Client_Connection *connData)
 
                 while (sent < len)
                 {
-                        int32_t ret;
-                        
-                        ret = NeonTCPIP_Socket_Send(connData->socket_id, &ws_cmd_send_buf[sent], len - sent);
+                        int ret;
+#ifdef HTTPD_USE_SSL
+                        ret = ssl_write(&connData->client_ssl_ctx, &ws_cmd_send_buf[sent], len - sent, 0);
+#else
+                        ret = send(connData->socket_id, &ws_cmd_send_buf[sent], len - sent, 0);
+#endif
 
                         if (ret <= 0)
                         {
@@ -1723,7 +1814,48 @@ void HTTP_Server_Task(void *pvParameters)
         bool add_HTTP_client;
         
         //struct timeval timeout;
+        struct sockaddr_in server_addr;
         int current_http_socketID;
+        struct sockaddr current_http_socket_addr;
+        socklen_t sin_size = sizeof(current_http_socket_addr);
+        
+        /* Construct local address structure */
+        memset(&server_addr, 0, sizeof(server_addr)); /* Zero out structure */
+        server_addr.sin_family = AF_INET;            /* Internet address family */
+        server_addr.sin_addr.s_addr = INADDR_ANY;   /* Any incoming interface */
+        server_addr.sin_len = sizeof(server_addr);
+        server_addr.sin_port = htons(HTTP_PORT); /* Local port */
+        int socket_errno;
+        const u32_t socket_errno_optlen = sizeof(socket_errno);
+
+        
+#ifdef HTTPD_USE_SSL
+        x509_crt server_x509;
+        pk_context server_pk;
+        ssl_context ssl;
+        
+        memset(&server_x509, 0, sizeof(x509_crt));
+        memset(&server_pk, 0, sizeof(pk_context));
+        memset(&ssl, 0, sizeof(ssl_context));
+        x509_crt_init(&server_x509);
+        pk_init(&server_pk);
+
+        if((ret = x509_crt_parse(&server_x509, (const unsigned char *)test_srv_crt, strlen(test_srv_crt))) != 0) {
+                //UART_Printf(" failed\n  ! x509_crt_parse returned %d\n\n", ret);
+                goto exit;
+        }
+
+        if((ret = x509_crt_parse(&server_x509, (const unsigned char *)test_ca_list, strlen(test_ca_list))) != 0) {
+                //UART_Printf(" failed\n  ! x509_crt_parse returned %d\n\n", ret);
+                goto exit;
+        }
+
+        if((ret = pk_parse_key(&server_pk, test_srv_key, strlen(test_srv_key), NULL, 0)) != 0) {
+                //UART_Printf(" failed\n  ! pk_parse_key returned %d\n\n", ret);
+                goto exit;
+        }
+
+#endif
         
         if(HTTP_WebSocket_Server_Socket>=0)
         {
@@ -1732,59 +1864,81 @@ void HTTP_Server_Task(void *pvParameters)
         }
         
         /* Create socket for incoming connections */
-        HTTP_WebSocket_Server_Socket = NeonTCPIP_Socket_Open(false);
+        HTTP_WebSocket_Server_Socket = socket(AF_INET, SOCK_STREAM, 0);
         if (HTTP_WebSocket_Server_Socket < 0)
         {
                 NeonRTOS_TaskDelete(NULL);
                 return;
         }
 
-        NeonTCPIP_Socket_SetReuseAddr(HTTP_WebSocket_Server_Socket, true);
+        int enable = 1;
+        setsockopt(HTTP_WebSocket_Server_Socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
         
         /* Bind to the local port */
-        ret = NeonTCPIP_Socket_Bind(HTTP_WebSocket_Server_Socket, HTTP_PORT);
+        ret = bind(HTTP_WebSocket_Server_Socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
         if (ret < 0)
         {
-                NeonTCPIP_Socket_Close(HTTP_WebSocket_Server_Socket);
+                close(HTTP_WebSocket_Server_Socket);
                 NeonRTOS_TaskDelete(NULL);
                 return;
         }
         
         /* Listen to the local connection */
-        ret = NeonTCPIP_Socket_Listen(HTTP_WebSocket_Server_Socket, HTTPD_MAX_CLIENTS);
+        ret = listen(HTTP_WebSocket_Server_Socket, HTTPD_MAX_CLIENTS);
         if (ret < 0)
         {
-                NeonTCPIP_Socket_Close(HTTP_WebSocket_Server_Socket);
+                close(HTTP_WebSocket_Server_Socket);
                 NeonRTOS_TaskDelete(NULL);
                 return;
         }
         
-        NeonTCPIP_Socket_SetNonBlock(HTTP_WebSocket_Server_Socket, true);
+        ret = fcntl(HTTP_WebSocket_Server_Socket, F_GETFL, 0);
+        if(ret < 0)
+        {
+                close(HTTP_WebSocket_Server_Socket);
+                NeonRTOS_TaskDelete(NULL);
+                return;
+        }
+
+        ret = fcntl(HTTP_WebSocket_Server_Socket, F_SETFL, ret | O_NONBLOCK); 
+        if(ret < 0)
+        {
+                close(HTTP_WebSocket_Server_Socket);
+                NeonRTOS_TaskDelete(NULL);
+                return;
+        }
 
         while(true){
                 
                 add_HTTP_client = false;
 
                 do{
-                        ret = NeonTCPIP_Socket_Accept(HTTP_WebSocket_Server_Socket);
+                        socket_errno = 0;
+                        ret = accept(HTTP_WebSocket_Server_Socket, (struct sockaddr *) &current_http_socket_addr, &sin_size);
                         if (ret >= 0) 
                         {
                                 //UART_Printf("[HTTPD Server] accept = %d!\n", ret);
                                 add_HTTP_client = true;
-                                break;
                         }
                         else{
-                                if(ret == NeonTCPIP_WouldBlock)
+                                ret = getsockopt(HTTP_WebSocket_Server_Socket, SOL_SOCKET, SO_ERROR, &socket_errno, &socket_errno_optlen);
+                                if(ret<0)
                                 {
                                         NeonRTOS_Sleep(500);
                                         continue;
                                 }
-                                else
+                                if(socket_errno>0)
                                 {
-                                        break;
+                                        //UART_Printf("[HTTPD Server] accept socket_errno = %d!\n", socket_errno);
+
+                                        if(socket_errno != EAGAIN && socket_errno != EWOULDBLOCK)
+                                        {
+                                                NeonRTOS_Sleep(500);
+                                                continue;
+                                        }
                                 }
                         }
-                }while(1);
+                }while(ret<0 && socket_errno>=0);
                 
                 if(add_HTTP_client)
                 {
@@ -1824,6 +1978,7 @@ void HTTP_Server_Task(void *pvParameters)
                                                 NeonRTOS_TimerStop(&HTTPd_WebSocketd_Client_List[j]->connection_timeout_timer);
                                                 
                                                 HTTPd_WebSocketd_Client_List[j]->socket_id = current_http_socketID;
+                                                memcpy(&HTTPd_WebSocketd_Client_List[j]->client_socket_addr, &current_http_socket_addr, sizeof(struct sockaddr));
                                                 HTTPd_WebSocketd_Client_List[j]->connection_destruct_flag = false;
                                                 
                                                 HTTPd_WebSocketd_Client_List[j]->data_len = 0;
@@ -1839,19 +1994,60 @@ void HTTP_Server_Task(void *pvParameters)
                         /* 防止 client_index 仍然是 -1 時後面炸掉 */
                         if (client_index < 0)
                         {
-                                NeonTCPIP_Socket_Close(current_http_socketID);
+                                close(current_http_socketID);
                                 continue;
                         }
                         
                         //UART_Printf("[HTTPD Server] AddHttpClient --> client_index = %d\n", client_index);
 
-                        NeonTCPIP_Socket_SetKeepAlive(current_http_socketID, false);
+                        int socket_errno;
+                        const u32_t socket_errno_optlen = sizeof(socket_errno);
+
+                        int keepAlive = 0; //disable keepalive
+                        int ret = setsockopt(current_http_socketID, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepAlive, sizeof(keepAlive));
+                        if(ret < 0)
+                        {
+                                HTTPd_WebSocketd_Client_List[client_index]->connection_destruct_flag = true;
+                                continue;
+                        }
                         
-                        NeonTCPIP_Socket_SetTcpNoDelay(current_http_socketID, true);
+                        int enable = 1;
                         
+                        ret = setsockopt(current_http_socketID, IPPROTO_TCP, TCP_NODELAY, (void *)&enable, sizeof(enable));
+                        if(ret < 0)
+                        {
+                                HTTPd_WebSocketd_Client_List[client_index]->connection_destruct_flag = true;
+                                continue;
+                        }
+
+#ifdef HTTPD_USE_SSL
+                        if((ret = ssl_init(&ssl)) != 0) {
+                                //UART_Printf("[HTTPD Server] failed\n  ! ssl_init returned %d\n\n", ret);
+                                HTTPd_WebSocketd_Client_List[client_index].client_destruct_flag = true;
+                                continue;
+                        }
+
+                        ssl_set_endpoint(&ssl, SSL_IS_SERVER);
+                        ssl_set_ca_chain(&ssl, server_x509.next, NULL, NULL);
+                        ssl_set_authmode(&ssl, SSL_VERIFY_NONE);
+                        ssl_set_rng(&ssl, SSL_Random, NULL);
+                        ssl_set_bio(&ssl, lwip_read, &HTTPd_WebSocketd_Client_List[client_index].socket_id, lwip_write, &HTTPd_WebSocketd_Client_List[client_index].socket_id);
+                        if((ret = ssl_set_own_cert(&ssl, &server_x509, &server_pk)) != 0) {
+                                //UART_Printf("[HTTPD Server] failed\n  ! ssl_set_own_cert returned %d\n\n", ret);
+                                HTTPd_WebSocketd_Client_List[client_index].client_destruct_flag = true;
+                                continue;
+                        }
+                        
+                        if((ret = ssl_handshake(&ssl)) != 0) {
+                                //UART_Printf("[HTTPD Server] failed\n  ! ssl_handshake returned %d\n\n", ret);
+                                HTTPd_WebSocketd_Client_List[client_index].client_destruct_flag = true;
+                                continue;
+                        }
+#endif
+
                         int recvBlockTime = HTTPD_RECV_BLOCK_INTERVAL/HTTPD_MAX_CLIENTS;
 
-                        ret = NeonTCPIP_Socket_SetRecvBlockTime(current_http_socketID, recvBlockTime);
+                        ret = setsockopt(current_http_socketID, SOL_SOCKET, SO_RCVTIMEO, &recvBlockTime, sizeof(recvBlockTime));
 
                         if(ret < 0)
                         { 
@@ -1859,8 +2055,11 @@ void HTTP_Server_Task(void *pvParameters)
                                 continue;
                         }
                         
-                        NeonTCPIP_Socket_SetLinger(current_http_socketID, true, false);
-
+                        struct linger so_linger;
+                        so_linger.l_onoff = 1;  // 啟用 linger
+                        so_linger.l_linger = 0; // 強制關閉
+                        setsockopt(current_http_socketID, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
+                        
                         NeonRTOS_TimerStart(&HTTPd_WebSocketd_Client_List[client_index]->connection_timeout_timer);
                         //UART_Printf("[HTTPD %d] httpserver acpt sockfd %d!\n", client_index, current_http_socketID);
                 }
@@ -1905,7 +2104,8 @@ void HTTP_Server_Task(void *pvParameters)
                                         HTTPd_WebSocketd_Client_List[i]->data_buff = NULL;
                                 }
                                         
-                                NeonTCPIP_Socket_Close(HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                shutdown(HTTPd_WebSocketd_Client_List[i]->socket_id, SHUT_RDWR);
+                                close(HTTPd_WebSocketd_Client_List[i]->socket_id);
                                 HTTPd_WebSocketd_Client_List[i]->socket_id = -1;
 
                                 mem_Free(HTTPd_WebSocketd_Client_List[i]);
@@ -1943,16 +2143,22 @@ void HTTP_Server_Task(void *pvParameters)
                                                 break;
                                         }
 
-                                        ret = NeonTCPIP_Socket_Recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &http_cmd_buf[recv_len], remain);
+#ifdef HTTPD_USE_SSL
+                                        ret = ssl_read(&ssl, &http_cmd_buf[recv_len], remain);
+#else
+                                        ret = recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &http_cmd_buf[recv_len], remain, 0);
+#endif
 
                                         if (ret < 0)
                                         {
-                                                if (HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag) {
+                                                ret = getsockopt(HTTPd_WebSocketd_Client_List[i]->socket_id, SOL_SOCKET, SO_ERROR, &socket_errno, &socket_errno_optlen);
+
+                                                if (ret < 0 || HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag) {
                                                         client_close = true;
                                                         break;
                                                 }
 
-                                                if (ret == NeonTCPIP_WouldBlock) {
+                                                if (socket_errno == EAGAIN || socket_errno == EWOULDBLOCK || socket_errno == 0) {
                                                         client_skip = true;
                                                         break;
                                                 }
@@ -2043,10 +2249,22 @@ void HTTP_Server_Task(void *pvParameters)
                                                         bool cgi_client_close = false;
                                                         bool cgi_client_skip = false;
                                                         do{
-                                                                ret = NeonTCPIP_Socket_Recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], HTTPd_WebSocketd_Client_List[i]->data_len - cgi_recv_len);
+#ifdef HTTPD_USE_SSL
+                                                                ret = ssl_read(&ssl, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], 1);
+#else
+                                                                ret = recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], HTTPd_WebSocketd_Client_List[i]->data_len - cgi_recv_len, 0);
+#endif
 
                                                                 if (ret < 0)
                                                                 {
+                                                                        ret = getsockopt(HTTPd_WebSocketd_Client_List[i]->socket_id, SOL_SOCKET, SO_ERROR, &socket_errno, &socket_errno_optlen);
+                                                                        if(ret<0)
+                                                                        {
+                                                                                cgi_client_close = true;
+                                                                                //UART_Printf("[HTTPD %d] cgi socket err sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                                break;
+                                                                        }
+                                                                        
                                                                         if (HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag)
                                                                         {
                                                                                 //UART_Printf("[HTTPD %d] cgi socket timeout sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
@@ -2054,13 +2272,20 @@ void HTTP_Server_Task(void *pvParameters)
                                                                                 break;
                                                                         }
 
-                                                                        if(ret == NeonTCPIP_WouldBlock)
+                                                                        if(socket_errno == EAGAIN || socket_errno == EWOULDBLOCK)
                                                                         {
                                                                                 //UART_Printf("[HTTPD %d] cgi socket errno: 0 EAGAIN --> Skip!\n", i);
                                                                                 cgi_client_skip = true;
                                                                                 break;
                                                                         }
                                                                         
+                                                                        if(socket_errno==0)
+                                                                        {
+                                                                                //UART_Printf("[HTTPD %d] cgi socket errno: 0 sockfd %d --> Skip!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                                cgi_client_skip = true;
+                                                                                break;
+                                                                        }
+
                                                                         cgi_client_close = true;
                                                                         //UART_Printf("[HTTPD %d] cgi socket errno: %d sockfd %d!\n", i, socket_errno, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                                         
@@ -2207,11 +2432,20 @@ void HTTP_Server_Task(void *pvParameters)
                                         {
                                                 uint16_t remain = rec_dat_len - ws_recv_len;
 
-                                                ret = NeonTCPIP_Socket_Recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &WebSocketServerDataBuf[ws_recv_len], remain);
+#ifdef HTTPD_USE_SSL
+                                                ret = ssl_read(&ssl, &WebSocketServerDataBuf[ws_recv_len], remain);
+#else
+                                                ret = recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &WebSocketServerDataBuf[ws_recv_len], remain, 0);
+#endif
 
                                                 if (ret < 0)
                                                 {
-                                                        if (ret == NeonTCPIP_WouldBlock)
+                                                        ret = getsockopt(HTTPd_WebSocketd_Client_List[i]->socket_id, SOL_SOCKET, SO_ERROR, &socket_errno, &socket_errno_optlen);
+
+                                                        if (ret < 0 ||
+                                                                socket_errno == 0 ||
+                                                                socket_errno == EAGAIN ||
+                                                                socket_errno == EWOULDBLOCK)
                                                         {
                                                                 ws_client_close = false;
                                                                 break;
@@ -2306,10 +2540,15 @@ void HTTP_Server_Task(void *pvParameters)
     
         if(HTTP_WebSocket_Server_Socket>=0)
         {
-                NeonTCPIP_Socket_Close(HTTP_WebSocket_Server_Socket);
+                close(HTTP_WebSocket_Server_Socket);
                 HTTP_WebSocket_Server_Socket = -1;
         }
     
+#ifdef HTTPD_USE_SSL
+        x509_crt_free(&server_x509);
+        pk_free(&server_pk);
+#endif
+        
         NeonRTOS_TaskDelete(NULL);
 }
 

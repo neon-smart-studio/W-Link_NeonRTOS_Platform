@@ -87,14 +87,6 @@ env.Append(
     LINKFLAGS=machine_flags + [
         "-Os",
         "-Wl,--gc-sections,--relax",
-        "-Wl,--wrap=malloc",
-        "-Wl,--wrap=free",
-        "-Wl,--wrap=calloc",
-        "-Wl,--wrap=realloc",
-        "-Wl,--wrap=_malloc_r",
-        "-Wl,--wrap=_free_r",
-        "-Wl,--wrap=_calloc_r",
-        "-Wl,--wrap=_realloc_r",
         "-mthumb"
     ],
 

@@ -28,8 +28,7 @@
       }
     }
   },
-  "frameworks": [
-  ],
+  "frameworks": ["cmsis"],
   "name": "TI LaunchPad (Tiva C) w/ tm4c123 (80MHz)",
   "upload": {
     "maximum_ram_size": 32768,

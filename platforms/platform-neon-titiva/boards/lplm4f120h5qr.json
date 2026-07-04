@@ -25,8 +25,7 @@
       }
     }
   },
-  "frameworks": [
-  ],
+  "frameworks": ["cmsis"],
   "name": "TI LaunchPad (Stellaris) w/ lm4f120 (80MHz)",
   "upload": {
     "maximum_ram_size": 32768,

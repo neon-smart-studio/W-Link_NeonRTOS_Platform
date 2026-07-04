@@ -1,6 +1,5 @@
 #include <sys/stat.h>
 #include <unistd.h>
-#include <errno.h>
 
 int _write(int file, char *ptr, int len)
 {

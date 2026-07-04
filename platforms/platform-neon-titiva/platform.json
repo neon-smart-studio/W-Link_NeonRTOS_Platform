@@ -19,6 +19,10 @@
   },
   "version": "1.0.0",
   "frameworks": {
+    "cmsis": {
+      "script": "builder/frameworks/cmsis.py",
+      "description": "CMSIS"
+    }
   },
   "packages": {
     "toolchain-gccarmnoneeabi": {

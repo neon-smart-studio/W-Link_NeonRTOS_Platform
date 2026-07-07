@@ -19,7 +19,7 @@
 
 #ifdef CONFIG_ETHERNET_DM9051
 
-#define LAN8742A_PHY_ADDRESS            0x00U
+#include "GPIO/Device/STM32/GPIO_STM32.h"
 
 /* Definition of the Ethernet driver buffers size and count */
 #define ETH_RX_BUF_SIZE     ETH_MAX_PACKET_SIZE /* buffer size for receive               */

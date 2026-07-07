@@ -40,9 +40,9 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "NeonRTOS.h"
 
@@ -53,8 +53,11 @@
 #include "VL53L0X_IO.h"
 
 static uint8_t g_num_of_sensor = 0;
-static uint8_t* p_power_pin_list = NULL;
+static hwGPIO_Pin* p_power_pin_list = NULL;
+static hwGPIO_Int_Pin* p_interrupt_pin_list = NULL;
 static uint8_t* p_sw_i2c_address_list = NULL;
+
+static VL53L0X_Interrupt_Handler sensor_int_callback = NULL;
 
 static VL53L0X_OpResult VL53L0X_IO_Map_GPIO_Error(hwGPIO_OpResult error_code)
 {
@@ -208,7 +211,180 @@ static VL53L0X_OpResult VL53L0X_IO_I2C_Read(uint8_t sensor_index, uint8_t Regist
     return VL53L0X_OK;
 }
 
-static VL53L0X_OpResult VL53L0X_IO_Power_On(uint8_t sensor_index)
+static void VL53L0X_GPIO_Int_Event_PendingFunctionCall(void* p1, uint32_t p2)
+{
+    uint8_t sensor_index = (uint8_t)p2;
+
+    if(sensor_int_callback!=NULL)
+    {
+        sensor_int_callback(sensor_index);
+    }
+}
+
+static void VL53L0X_GPIO_Int_Event_Handler(hwGPIO_Int_Pin pin, hwGPIO_Interrupt_Action action)
+{
+    int sensor_index = -1;
+
+    for(uint8_t i = 0; i<g_num_of_sensor; i++)
+    {
+        if(pin==p_interrupt_pin_list[i])
+        {
+            sensor_index = i;
+            break;
+        }
+    }
+
+    if(sensor_index>=0)
+    {
+        NeonRTOS_PendingFunctionCall(VL53L0X_GPIO_Int_Event_PendingFunctionCall, NULL, sensor_index);
+    }
+}
+
+VL53L0X_OpResult VL53L0X_IO_Init(uint8_t num_of_sensor, hwGPIO_Pin* p_pwr_pin_list, hwGPIO_Int_Pin* p_int_pin_list, VL53L0X_Interrupt_Handler callback)
+{
+    hwGPIO_OpResult gpio_status;
+
+    VL53L0X_OpResult status;
+   
+    g_num_of_sensor = num_of_sensor;
+
+    p_power_pin_list = mem_Malloc(sizeof(hwGPIO_Pin)*g_num_of_sensor);
+    if(p_power_pin_list==NULL)
+    {
+        g_num_of_sensor = 0;
+        return VL53L0X_MemoryError;
+    }
+
+    p_interrupt_pin_list = mem_Malloc(sizeof(hwGPIO_Int_Pin)*g_num_of_sensor);
+    if(p_interrupt_pin_list==NULL)
+    {
+        g_num_of_sensor = 0;
+        mem_Free(p_power_pin_list);
+        return VL53L0X_MemoryError;
+    }
+
+    p_sw_i2c_address_list = mem_Malloc(sizeof(uint8_t)*g_num_of_sensor);
+    if(p_sw_i2c_address_list==NULL)
+    {
+        g_num_of_sensor = 0;
+        mem_Free(p_power_pin_list);
+        mem_Free(p_interrupt_pin_list);
+        return VL53L0X_MemoryError;
+    }
+    
+    for(uint8_t i = 0; i<g_num_of_sensor; i++)
+    {
+        p_sw_i2c_address_list[i] = VL53L0X_ACC_I2C_ADDRESS;
+        p_power_pin_list[i] = p_pwr_pin_list[i];
+        p_interrupt_pin_list[i] = p_int_pin_list[i];
+    }
+
+    for(uint8_t i = 0; i<g_num_of_sensor; i++)
+    {
+        gpio_status = GPIO_Pin_Init(p_power_pin_list[i], hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
+        if(gpio_status<hwGPIO_OK)
+        {
+            g_num_of_sensor = 0;
+            mem_Free(p_power_pin_list);
+            mem_Free(p_sw_i2c_address_list);
+            mem_Free(p_interrupt_pin_list);
+            return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+        }
+        
+        if(callback!=NULL)
+        {
+            gpio_status = GPIO_Interrupt_Init(p_interrupt_pin_list[i], hwGPIO_Interrupt_Mode_Falling_Edge);
+            if(gpio_status<hwGPIO_OK)
+            {
+                g_num_of_sensor = 0;
+                mem_Free(p_power_pin_list);
+                mem_Free(p_sw_i2c_address_list);
+                mem_Free(p_interrupt_pin_list);
+                return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+            }
+            
+            gpio_status = GPIO_Register_Interrupt_Handler(p_interrupt_pin_list[i], VL53L0X_GPIO_Int_Event_Handler);
+            if(gpio_status<hwGPIO_OK)
+            {
+                g_num_of_sensor = 0;
+                mem_Free(p_power_pin_list);
+                mem_Free(p_sw_i2c_address_list);
+                mem_Free(p_interrupt_pin_list);
+                return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+            }
+            
+            gpio_status = GPIO_Interrupt_Enable(p_interrupt_pin_list[i]);
+            if(gpio_status<hwGPIO_OK)
+            {
+                g_num_of_sensor = 0;
+                mem_Free(p_power_pin_list);
+                mem_Free(p_sw_i2c_address_list);
+                mem_Free(p_interrupt_pin_list);
+                return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+            }
+        }
+    }
+
+    sensor_int_callback = callback;
+
+    return VL53L0X_OK;
+}
+
+VL53L0X_OpResult VL53L0X_IO_DeInit()
+{
+   hwGPIO_OpResult gpio_status;
+
+    if(p_power_pin_list == NULL)
+    {
+        return VL53L0X_NotInit;
+    }
+
+    if(p_sw_i2c_address_list == NULL)
+    {
+        return VL53L0X_NotInit;
+    }
+
+    if(p_interrupt_pin_list == NULL)
+    {
+        return VL53L0X_NotInit;
+    }
+
+    for(uint8_t i = 0; i<g_num_of_sensor; i++)
+    {
+        gpio_status = GPIO_Pin_DeInit(p_power_pin_list[i]);
+        if(gpio_status<hwGPIO_OK)
+        {
+            return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+        }
+        
+        if(sensor_int_callback!=NULL)
+        {
+            gpio_status = GPIO_Interrupt_Disable(p_interrupt_pin_list[i]);
+            if(gpio_status<hwGPIO_OK)
+            {
+                return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+            }
+
+            gpio_status = GPIO_Interrupt_DeInit(p_interrupt_pin_list[i]);
+            if(gpio_status<hwGPIO_OK)
+            {
+                return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+            }
+        }
+    }
+
+    mem_Free(p_power_pin_list);
+    mem_Free(p_sw_i2c_address_list);
+    mem_Free(p_interrupt_pin_list);
+
+    g_num_of_sensor = 0;
+
+    sensor_int_callback = NULL;
+
+    return VL53L0X_OK;
+}
+
+VL53L0X_OpResult VL53L0X_IO_Power_On(uint8_t sensor_index)
 {
     hwGPIO_OpResult gpio_status;
 
@@ -228,7 +404,7 @@ static VL53L0X_OpResult VL53L0X_IO_Power_On(uint8_t sensor_index)
     return VL53L0X_OK;
 }
 
-static VL53L0X_OpResult VL53L0X_IO_Power_Off(uint8_t sensor_index)
+VL53L0X_OpResult VL53L0X_IO_Power_Off(uint8_t sensor_index)
 {
     hwGPIO_OpResult gpio_status;
 
@@ -248,124 +424,19 @@ static VL53L0X_OpResult VL53L0X_IO_Power_Off(uint8_t sensor_index)
     return VL53L0X_OK;
 }
 
-static VL53L0X_OpResult VL53L0X_IO_SetI2CAddress(uint8_t sensor_index)
+VL53L0X_OpResult VL53L0X_IO_Set_I2C_Address(uint8_t sensor_index, uint8_t new_address)
 {
    VL53L0X_OpResult status;
    
-   status = VL53L0X_IO_Write_Byte(sensor_index, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, p_sw_i2c_address_list[sensor_index] >> 1);
+   status = VL53L0X_IO_Write_Byte(sensor_index, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, new_address >> 1);
    if(status < VL53L0X_OK)
    {
       return status;
    }
 
+   p_sw_i2c_address_list[sensor_index] = new_address;
+
    return VL53L0X_OK;
-}
-
-VL53L0X_OpResult VL53L0X_IO_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list)
-{
-    hwGPIO_OpResult gpio_status;
-
-    VL53L0X_OpResult status;
-   
-    g_num_of_sensor = num_of_sensor;
-
-    p_power_pin_list = mem_Malloc(sizeof(hwGPIO_Pin)*g_num_of_sensor);
-    if(p_power_pin_list==NULL)
-    {
-        g_num_of_sensor = 0;
-        return VL53L0X_MemoryError;
-    }
-
-    p_sw_i2c_address_list = mem_Malloc(sizeof(uint8_t)*g_num_of_sensor);
-    if(p_sw_i2c_address_list==NULL)
-    {
-        g_num_of_sensor = 0;
-        mem_Free(p_power_pin_list);
-        return VL53L0X_MemoryError;
-    }
-    
-    for(uint8_t i = 0; i<g_num_of_sensor; i++)
-    {
-        p_sw_i2c_address_list[i] = VL53L0X_ACC_I2C_ADDRESS;
-    }
-
-    for(uint8_t i = 0; i<g_num_of_sensor; i++)
-    {
-        gpio_status = GPIO_Pin_Init(p_power_pin_list[i], hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
-        if(gpio_status<hwGPIO_OK)
-        {
-            g_num_of_sensor = 0;
-            mem_Free(p_power_pin_list);
-            mem_Free(p_sw_i2c_address_list);
-            return VL53L0X_IO_Map_GPIO_Error(gpio_status);
-        }
-    }
-
-    for(uint8_t i = 0; i<g_num_of_sensor; i++)
-    {
-        status = VL53L0X_IO_Power_Off(i);
-        if(status < VL53L0X_OK)
-        {
-            g_num_of_sensor = 0;
-            mem_Free(p_power_pin_list);
-            mem_Free(p_sw_i2c_address_list);
-            return status;
-        }
-    }
-
-    for(uint8_t i = 0; i<g_num_of_sensor; i++)
-    {
-        status = VL53L0X_IO_Power_On(i);
-        if(status < VL53L0X_OK)
-        {
-            g_num_of_sensor = 0;
-            mem_Free(p_power_pin_list);
-            mem_Free(p_sw_i2c_address_list);
-            return status;
-        }
-
-        status = VL53L0X_IO_SetI2CAddress(i);
-        if(status < VL53L0X_OK)
-        {
-            g_num_of_sensor = 0;
-            mem_Free(p_power_pin_list);
-            mem_Free(p_sw_i2c_address_list);
-            return status;
-        }
-    }
-
-    return VL53L0X_OK;
-}
-
-VL53L0X_OpResult VL53L0X_IO_DeInit()
-{
-   hwGPIO_OpResult gpio_status;
-
-    if(p_power_pin_list == NULL)
-    {
-        return VL53L0X_NotInit;
-    }
-
-    if(p_sw_i2c_address_list == NULL)
-    {
-        return VL53L0X_NotInit;
-    }
-
-    for(uint8_t i = 0; i<g_num_of_sensor; i++)
-    {
-        gpio_status = GPIO_Pin_DeInit(p_power_pin_list[i]);
-        if(gpio_status<hwGPIO_OK)
-        {
-            return VL53L0X_IO_Map_GPIO_Error(gpio_status);
-        }
-    }
-
-    mem_Free(p_power_pin_list);
-    mem_Free(p_sw_i2c_address_list);
-
-    g_num_of_sensor = 0;
-
-    return VL53L0X_OK;
 }
 
 VL53L0X_OpResult VL53L0X_IO_Write_Multi(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t *pdata, uint32_t count)

@@ -145,14 +145,29 @@ const uint8_t VL51L1X_Default_Config[] =
    0x00  /* 0x87 : start ranging, use StartRanging() or StopRanging(), If you want an automatic start after VL53L1X_init() call, put 0x40 in location 0x87 */
 };
 
-VL53L1X_OpResult VL53L1X_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list)
+VL53L1X_OpResult VL53L1X_Init(uint8_t num_of_sensor, hwGPIO_Pin* p_pwr_pin_list, hwGPIO_Int_Pin* p_int_pin_list, VL53L1X_Interrupt_Handler callback)
 {
-   return VL53L1X_IO_Init(num_of_sensor, p_i2x_addr_list, p_pwr_pin_list);
+   return VL53L1X_IO_Init(num_of_sensor, p_pwr_pin_list, p_int_pin_list, callback);
 }
 
 VL53L1X_OpResult VL53L1X_DeInit()
 {
    return VL53L1X_IO_DeInit();
+}
+
+VL53L1X_OpResult VL53L1X_Power_On(uint8_t sensor_index)
+{
+   return VL53L1X_IO_Power_On(sensor_index);
+}
+
+VL53L1X_OpResult VL53L1X_Power_Off(uint8_t sensor_index)
+{
+   return VL53L1X_IO_Power_Off(sensor_index);
+}
+
+VL53L1X_OpResult VL53L1X_Set_I2C_Address(uint8_t sensor_index, uint8_t new_address)
+{
+   return VL53L1X_IO_Set_I2C_Address(sensor_index, new_address);
 }
 
 VL53L1X_OpResult VL53L1X_SensorInit(uint8_t sensor_index)

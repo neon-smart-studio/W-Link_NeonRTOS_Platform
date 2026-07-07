@@ -65,14 +65,19 @@
 extern "C" {
 #endif
 
-VL53L4CD_OpResult VL53L4CD_IO_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list);
+typedef void (*VL53L4CD_Interrupt_Handler)(uint8_t sensor_index);
+
+VL53L4CD_OpResult VL53L4CD_IO_Init(uint8_t num_of_sensor, hwGPIO_Pin* p_pwr_pin_list, hwGPIO_Int_Pin* p_int_pin_list, VL53L4CD_Interrupt_Handler callback);
 VL53L4CD_OpResult VL53L4CD_IO_DeInit();
-VL53L4CD_OpResult VL53L4CD_IO_Write_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t data);
-VL53L4CD_OpResult VL53L4CD_IO_Write_Word(uint8_t sensor_index, uint8_t RegisterAddr, uint16_t data);
-VL53L4CD_OpResult VL53L4CD_IO_Write_DWord(uint8_t sensor_index, uint8_t RegisterAddr, uint32_t data);
-VL53L4CD_OpResult VL53L4CD_IO_Read_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t *data);
-VL53L4CD_OpResult VL53L4CD_IO_Read_Word(uint8_t sensor_index, uint8_t RegisterAddr, uint16_t *data);
-VL53L4CD_OpResult VL53L4CD_IO_Read_DWord(uint8_t sensor_index, uint8_t RegisterAddr, uint32_t *data);
+VL53L4CD_OpResult VL53L4CD_IO_Power_On(uint8_t sensor_index);
+VL53L4CD_OpResult VL53L4CD_IO_Power_Off(uint8_t sensor_index);
+VL53L4CD_OpResult VL53L4CD_IO_Set_I2C_Address(uint8_t sensor_index, uint8_t new_address);
+VL53L4CD_OpResult VL53L4CD_IO_Write_Byte(uint8_t sensor_index, uint16_t RegisterAddr, uint8_t data);
+VL53L4CD_OpResult VL53L4CD_IO_Write_Word(uint8_t sensor_index, uint16_t RegisterAddr, uint16_t data);
+VL53L4CD_OpResult VL53L4CD_IO_Write_DWord(uint8_t sensor_index, uint16_t RegisterAddr, uint32_t data);
+VL53L4CD_OpResult VL53L4CD_IO_Read_Byte(uint8_t sensor_index, uint16_t RegisterAddr, uint8_t *data);
+VL53L4CD_OpResult VL53L4CD_IO_Read_Word(uint8_t sensor_index, uint16_t RegisterAddr, uint16_t *data);
+VL53L4CD_OpResult VL53L4CD_IO_Read_DWord(uint8_t sensor_index, uint16_t RegisterAddr, uint32_t *data);
 
 #ifdef __cplusplus
 }

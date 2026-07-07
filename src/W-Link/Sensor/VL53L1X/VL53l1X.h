@@ -38,6 +38,7 @@
 
 #include "GPIO/GPIO.h"
 
+#include "VL53L1X_IO.h"
 #include "VL53L1X_Def.h"
 
 #include "Sensor_Config.h"
@@ -46,8 +47,11 @@
 extern "C" {
 #endif
 
-VL53L1X_OpResult VL53L1X_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list);
+VL53L1X_OpResult VL53L1X_Init(uint8_t num_of_sensor, hwGPIO_Pin* p_pwr_pin_list, hwGPIO_Int_Pin* p_int_pin_list, VL53L1X_Interrupt_Handler callback);
 VL53L1X_OpResult VL53L1X_DeInit();
+VL53L1X_OpResult VL53L1X_Power_On(uint8_t sensor_index);
+VL53L1X_OpResult VL53L1X_Power_Off(uint8_t sensor_index);
+VL53L1X_OpResult VL53L1X_Set_I2C_Address(uint8_t sensor_index, uint8_t new_address);
 VL53L1X_OpResult VL53L1X_SensorInit(uint8_t sensor_index);
 VL53L1X_OpResult VL53L1X_ClearInterrupt(uint8_t sensor_index);
 VL53L1X_OpResult VL53L1X_SetInterruptPolarity(uint8_t sensor_index, uint8_t IntPol);

@@ -67,27 +67,42 @@ static VL53L0X_OpResult VL53L0X_Set_Limit_Check_Enable(uint8_t sensor_index, uin
 static VL53L0X_OpResult VL53L0X_Perform_Phase_Calibration(uint8_t sensor_index, uint8_t *pPhaseCal, const uint8_t get_data_enable, const uint8_t restore_config);
 static VL53L0X_OpResult VL53L0X_Set_Sequence_Step_Timeout(uint8_t sensor_index, VL53L0X_SequenceStepId SequenceStepId, uint32_t TimeOutMicroSecs);
 
-VL53L0X_OpResult VL53L0X_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list)
+VL53L0X_OpResult VL53L0X_Init(uint8_t num_of_sensor, hwGPIO_Pin* p_pwr_pin_list, hwGPIO_Int_Pin* p_int_pin_list, VL53L0X_Interrupt_Handler callback)
 {
 	p_devData = mem_Malloc(sizeof(VL53L0X_DevData_t)*num_of_sensor);
 	if(p_devData==NULL)
 	{
-		VL53L0X_MemoryError;
+		return VL53L0X_MemoryError;
 	}
 
-   	return VL53L0X_IO_Init(num_of_sensor, p_i2x_addr_list, p_pwr_pin_list);
+   	return VL53L0X_IO_Init(num_of_sensor, p_pwr_pin_list, p_int_pin_list, callback);
 }
 
 VL53L0X_OpResult VL53L0X_DeInit()
 {
 	if(p_devData==NULL)
 	{
-		VL53L0X_NotInit;
+		return VL53L0X_NotInit;
 	}
 	
 	mem_Free(p_devData);
 
     return VL53L0X_IO_DeInit();
+}
+
+VL53L0X_OpResult VL53L0X_Power_On(uint8_t sensor_index)
+{
+   return VL53L0X_IO_Power_On(sensor_index);
+}
+
+VL53L0X_OpResult VL53L0X_Power_Off(uint8_t sensor_index)
+{
+   return VL53L0X_IO_Power_Off(sensor_index);
+}
+
+VL53L0X_OpResult VL53L0X_Set_I2C_Address(uint8_t sensor_index, uint8_t new_address)
+{
+   return VL53L0X_IO_Set_I2C_Address(sensor_index, new_address);
 }
 
 static VL53L0X_OpResult VL53L0X_Device_Read_Strobe(uint8_t sensor_index)

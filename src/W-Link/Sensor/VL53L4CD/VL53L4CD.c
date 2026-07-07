@@ -157,14 +157,29 @@ static const uint8_t VL53L4CD_DEFAULT_CONFIGURATION[] = {
     put 0x40 in location 0x87 */
 };
 
-VL53L4CD_OpResult VL53L4CD_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list)
+VL53L4CD_OpResult VL53L4CD_Init(uint8_t num_of_sensor, hwGPIO_Pin* p_pwr_pin_list, hwGPIO_Int_Pin* p_int_pin_list, VL53L4CD_Interrupt_Handler callback)
 {
-   return VL53L4CD_IO_Init(num_of_sensor, p_i2x_addr_list, p_pwr_pin_list);
+   return VL53L4CD_IO_Init(num_of_sensor, p_pwr_pin_list, p_int_pin_list, callback);
 }
 
 VL53L4CD_OpResult VL53L4CD_DeInit()
 {
    return VL53L4CD_IO_DeInit();
+}
+
+VL53L4CD_OpResult VL53L4CD_Power_On(uint8_t sensor_index)
+{
+   return VL53L4CD_IO_Power_On(sensor_index);
+}
+
+VL53L4CD_OpResult VL53L4CD_Power_Off(uint8_t sensor_index)
+{
+   return VL53L4CD_IO_Power_Off(sensor_index);
+}
+
+VL53L4CD_OpResult VL53L4CD_Set_I2C_Address(uint8_t sensor_index, uint8_t new_address)
+{
+   return VL53L4CD_IO_Set_I2C_Address(sensor_index, new_address);
 }
 
 VL53L4CD_OpResult VL53L4CD_SensorInit(uint8_t sensor_index)

@@ -45,6 +45,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "GPIO/GPIO.h"
+
 #include "VL53L4CD_Def.h"
 
 #include "Sensor_Config.h"
@@ -53,39 +55,24 @@
 
 #define VL53L4CD_I2C_OP_TIMEOUT             500
 
-#ifndef CONFIG_VL53L4CD_NEW_I2C_ADDRESS
-#define VL53L4CD_I2C_NEW_I2C_ADDRESS        VL53L4CD_ACC_I2C_ADDRESS
-#else
-#define VL53L4CD_I2C_NEW_I2C_ADDRESS        CONFIG_VL53L4CD_NEW_I2C_ADDRESS
-#endif
-
 #ifndef CONFIG_VL53L4CD_I2C_INDEX
 #define VL53L4CD_I2C_INDEX                  hwI2C_Index_0
 #else
 #define VL53L4CD_I2C_INDEX                  CONFIG_VL53L4CD_I2C_INDEX
 #endif
 
-#ifndef CONFIG_VL53L4CD_POWER_PIN
-#define VL53L4CD_POWER_PIN                  hwGPIO_Pin_A0
-#else
-#define VL53L4CD_POWER_PIN                  CONFIG_VL53L4CD_POWER_PIN
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-VL53L4CD_OpResult VL53L4CD_IO_Init();
+VL53L4CD_OpResult VL53L4CD_IO_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list);
 VL53L4CD_OpResult VL53L4CD_IO_DeInit();
-VL53L4CD_OpResult VL53L4CD_IO_Power_On();
-VL53L4CD_OpResult VL53L4CD_IO_Power_Off();
-VL53L4CD_OpResult VL53L4CD_IO_SetI2CAddress(uint8_t new_address);
-VL53L4CD_OpResult VL53L4CD_IO_Write_Byte(uint16_t RegisterAdress, uint8_t value);
-VL53L4CD_OpResult VL53L4CD_IO_Write_Word(uint16_t RegisterAdress, uint16_t value);
-VL53L4CD_OpResult VL53L4CD_IO_Write_DWord(uint16_t RegisterAdress, uint32_t value);
-VL53L4CD_OpResult VL53L4CD_IO_Read_Byte(uint16_t RegisterAdress, uint8_t *value);
-VL53L4CD_OpResult VL53L4CD_IO_Read_Word(uint16_t RegisterAdress, uint16_t *value);
-VL53L4CD_OpResult VL53L4CD_IO_Read_DWord(uint16_t RegisterAdress, uint32_t *value);
+VL53L4CD_OpResult VL53L4CD_IO_Write_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t data);
+VL53L4CD_OpResult VL53L4CD_IO_Write_Word(uint8_t sensor_index, uint8_t RegisterAddr, uint16_t data);
+VL53L4CD_OpResult VL53L4CD_IO_Write_DWord(uint8_t sensor_index, uint8_t RegisterAddr, uint32_t data);
+VL53L4CD_OpResult VL53L4CD_IO_Read_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t *data);
+VL53L4CD_OpResult VL53L4CD_IO_Read_Word(uint8_t sensor_index, uint8_t RegisterAddr, uint16_t *data);
+VL53L4CD_OpResult VL53L4CD_IO_Read_DWord(uint8_t sensor_index, uint8_t RegisterAddr, uint32_t *data);
 
 #ifdef __cplusplus
 }

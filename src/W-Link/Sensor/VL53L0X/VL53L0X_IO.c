@@ -52,7 +52,9 @@
 #include "VL53L0X_Def.h"
 #include "VL53L0X_IO.h"
 
-static uint8_t sw_i2c_address = VL53L0X_ACC_I2C_ADDRESS;
+static uint8_t g_num_of_sensor = 0;
+static uint8_t* p_power_pin_list = NULL;
+static uint8_t* p_sw_i2c_address_list = NULL;
 
 static VL53L0X_OpResult VL53L0X_IO_Map_GPIO_Error(hwGPIO_OpResult error_code)
 {
@@ -107,7 +109,7 @@ static VL53L0X_OpResult VL53L0X_IO_Map_I2C_Error(hwI2C_OpResult error_code)
     }
 }
 
-static VL53L0X_OpResult VL53L0X_IO_I2C_Write(uint8_t RegisterAddr, uint8_t* pBuffer, uint16_t NumByteToWrite)
+static VL53L0X_OpResult VL53L0X_IO_I2C_Write(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t* pBuffer, uint16_t NumByteToWrite)
 {
     VL53L0X_OpResult status;
 
@@ -116,14 +118,24 @@ static VL53L0X_OpResult VL53L0X_IO_I2C_Write(uint8_t RegisterAddr, uint8_t* pBuf
         return VL53L0X_InvalidParameter;
     }
 
-   uint8_t buffer[NumByteToWrite+1];
-   buffer[0]=(uint8_t) (RegisterAddr&0xFF);
-   memcpy(&buffer[1], pBuffer, NumByteToWrite);
+    if(p_sw_i2c_address_list == NULL)
+    {
+        return VL53L0X_NotInit;
+    }
 
-   status = VL53L0X_IO_Map_I2C_Error(
+    if(sensor_index >= g_num_of_sensor)
+    {
+        return VL53L0X_InvalidParameter;
+    }
+
+    uint8_t buffer[NumByteToWrite+1];
+    buffer[0]=(uint8_t) (RegisterAddr&0xFF);
+    memcpy(&buffer[1], pBuffer, NumByteToWrite);
+
+    status = VL53L0X_IO_Map_I2C_Error(
         I2C_Master_Write(
             VL53L0X_I2C_INDEX,
-            sw_i2c_address >> 1,
+            p_sw_i2c_address_list[sensor_index] >> 1,
             buffer,
             NumByteToWrite+1,
             true,
@@ -139,7 +151,7 @@ static VL53L0X_OpResult VL53L0X_IO_I2C_Write(uint8_t RegisterAddr, uint8_t* pBuf
     return VL53L0X_OK;
 }
 
-static VL53L0X_OpResult VL53L0X_IO_I2C_Read(uint8_t RegisterAddr, uint8_t* pBuffer, uint16_t NumByteToRead)
+static VL53L0X_OpResult VL53L0X_IO_I2C_Read(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t* pBuffer, uint16_t NumByteToRead)
 {
     VL53L0X_OpResult status;
 
@@ -148,13 +160,23 @@ static VL53L0X_OpResult VL53L0X_IO_I2C_Read(uint8_t RegisterAddr, uint8_t* pBuff
         return VL53L0X_InvalidParameter;
     }
 
-   uint8_t buffer[1];
-   buffer[0]=(uint8_t) (RegisterAddr&0xFF);
+    if(p_sw_i2c_address_list == NULL)
+    {
+        return VL53L0X_NotInit;
+    }
 
-   status = VL53L0X_IO_Map_I2C_Error(
+    if(sensor_index >= g_num_of_sensor)
+    {
+        return VL53L0X_InvalidParameter;
+    }
+
+    uint8_t buffer[1];
+    buffer[0]=(uint8_t) (RegisterAddr&0xFF);
+
+    status = VL53L0X_IO_Map_I2C_Error(
         I2C_Master_Write(
             VL53L0X_I2C_INDEX,
-            sw_i2c_address >> 1,
+            p_sw_i2c_address_list[sensor_index] >> 1,
             buffer,
             1,
             false,
@@ -170,7 +192,7 @@ static VL53L0X_OpResult VL53L0X_IO_I2C_Read(uint8_t RegisterAddr, uint8_t* pBuff
     status = VL53L0X_IO_Map_I2C_Error(
         I2C_Master_Read(
             VL53L0X_I2C_INDEX,
-            sw_i2c_address >> 1,
+            p_sw_i2c_address_list[sensor_index] >> 1,
             pBuffer,
             NumByteToRead,
             true,
@@ -186,103 +208,192 @@ static VL53L0X_OpResult VL53L0X_IO_I2C_Read(uint8_t RegisterAddr, uint8_t* pBuff
     return VL53L0X_OK;
 }
 
-VL53L0X_OpResult VL53L0X_IO_Init()
+static VL53L0X_OpResult VL53L0X_IO_Power_On(uint8_t sensor_index)
 {
-   hwGPIO_OpResult gpio_status;
+    hwGPIO_OpResult gpio_status;
 
-   gpio_status = GPIO_Pin_Init(VL53L0X_POWER_PIN, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
-   if(gpio_status<hwGPIO_OK)
+    if(p_power_pin_list == NULL)
+    {
+        return VL53L0X_NotInit;
+    }
+
+    gpio_status = GPIO_Pin_Write(p_power_pin_list[sensor_index], true);
+    if(gpio_status<hwGPIO_OK)
+    {
+        return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+    }
+
+    NeonRTOS_Sleep(10);
+
+    return VL53L0X_OK;
+}
+
+static VL53L0X_OpResult VL53L0X_IO_Power_Off(uint8_t sensor_index)
+{
+    hwGPIO_OpResult gpio_status;
+
+    if(p_power_pin_list == NULL)
+    {
+        return VL53L0X_NotInit;
+    }
+
+    gpio_status = GPIO_Pin_Write(p_power_pin_list[sensor_index], false);
+    if(gpio_status<hwGPIO_OK)
+    {
+        return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+    }
+
+    NeonRTOS_Sleep(10);
+
+    return VL53L0X_OK;
+}
+
+static VL53L0X_OpResult VL53L0X_IO_SetI2CAddress(uint8_t sensor_index)
+{
+   VL53L0X_OpResult status;
+   
+   status = VL53L0X_IO_Write_Byte(sensor_index, VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, p_sw_i2c_address_list[sensor_index] >> 1);
+   if(status < VL53L0X_OK)
    {
-      return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+      return status;
    }
 
    return VL53L0X_OK;
+}
+
+VL53L0X_OpResult VL53L0X_IO_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list)
+{
+    hwGPIO_OpResult gpio_status;
+
+    VL53L0X_OpResult status;
+   
+    g_num_of_sensor = num_of_sensor;
+
+    p_power_pin_list = mem_Malloc(sizeof(hwGPIO_Pin)*g_num_of_sensor);
+    if(p_power_pin_list==NULL)
+    {
+        g_num_of_sensor = 0;
+        return VL53L0X_MemoryError;
+    }
+
+    p_sw_i2c_address_list = mem_Malloc(sizeof(uint8_t)*g_num_of_sensor);
+    if(p_sw_i2c_address_list==NULL)
+    {
+        g_num_of_sensor = 0;
+        mem_Free(p_power_pin_list);
+        return VL53L0X_MemoryError;
+    }
+    
+    for(uint8_t i = 0; i<g_num_of_sensor; i++)
+    {
+        p_sw_i2c_address_list[i] = VL53L0X_ACC_I2C_ADDRESS;
+    }
+
+    for(uint8_t i = 0; i<g_num_of_sensor; i++)
+    {
+        gpio_status = GPIO_Pin_Init(p_power_pin_list[i], hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
+        if(gpio_status<hwGPIO_OK)
+        {
+            g_num_of_sensor = 0;
+            mem_Free(p_power_pin_list);
+            mem_Free(p_sw_i2c_address_list);
+            return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+        }
+    }
+
+    for(uint8_t i = 0; i<g_num_of_sensor; i++)
+    {
+        status = VL53L0X_IO_Power_Off(i);
+        if(status < VL53L0X_OK)
+        {
+            g_num_of_sensor = 0;
+            mem_Free(p_power_pin_list);
+            mem_Free(p_sw_i2c_address_list);
+            return status;
+        }
+    }
+
+    for(uint8_t i = 0; i<g_num_of_sensor; i++)
+    {
+        status = VL53L0X_IO_Power_On(i);
+        if(status < VL53L0X_OK)
+        {
+            g_num_of_sensor = 0;
+            mem_Free(p_power_pin_list);
+            mem_Free(p_sw_i2c_address_list);
+            return status;
+        }
+
+        status = VL53L0X_IO_SetI2CAddress(i);
+        if(status < VL53L0X_OK)
+        {
+            g_num_of_sensor = 0;
+            mem_Free(p_power_pin_list);
+            mem_Free(p_sw_i2c_address_list);
+            return status;
+        }
+    }
+
+    return VL53L0X_OK;
 }
 
 VL53L0X_OpResult VL53L0X_IO_DeInit()
 {
    hwGPIO_OpResult gpio_status;
 
-   gpio_status = GPIO_Pin_DeInit(VL53L0X_POWER_PIN);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L0X_IO_Map_GPIO_Error(gpio_status);
-   }
+    if(p_power_pin_list == NULL)
+    {
+        return VL53L0X_NotInit;
+    }
 
-   return VL53L0X_OK;
+    if(p_sw_i2c_address_list == NULL)
+    {
+        return VL53L0X_NotInit;
+    }
+
+    for(uint8_t i = 0; i<g_num_of_sensor; i++)
+    {
+        gpio_status = GPIO_Pin_DeInit(p_power_pin_list[i]);
+        if(gpio_status<hwGPIO_OK)
+        {
+            return VL53L0X_IO_Map_GPIO_Error(gpio_status);
+        }
+    }
+
+    mem_Free(p_power_pin_list);
+    mem_Free(p_sw_i2c_address_list);
+
+    g_num_of_sensor = 0;
+
+    return VL53L0X_OK;
 }
 
-VL53L0X_OpResult VL53L0X_IO_Power_On()
+VL53L0X_OpResult VL53L0X_IO_Write_Multi(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t *pdata, uint32_t count)
 {
-   hwGPIO_OpResult gpio_status;
-
-   gpio_status = GPIO_Pin_Write(VL53L0X_POWER_PIN, true);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L0X_IO_Map_GPIO_Error(gpio_status);
-   }
-
-   NeonRTOS_Sleep(10);
-
-   return VL53L0X_OK;
+   return VL53L0X_IO_I2C_Write(sensor_index, RegisterAddr, pdata, (uint16_t)count);
 }
 
-VL53L0X_OpResult VL53L0X_IO_Power_Off()
+VL53L0X_OpResult VL53L0X_IO_Read_Multi(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t *pdata, uint32_t count)
 {
-   hwGPIO_OpResult gpio_status;
-
-   gpio_status = GPIO_Pin_Write(VL53L0X_POWER_PIN, false);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L0X_IO_Map_GPIO_Error(gpio_status);
-   }
-
-   NeonRTOS_Sleep(10);
-
-   return VL53L0X_OK;
+   return VL53L0X_IO_I2C_Read(sensor_index, RegisterAddr, pdata, (uint16_t)count);
 }
 
-VL53L0X_OpResult VL53L0X_IO_SetI2CAddress(uint8_t new_address)
+VL53L0X_OpResult VL53L0X_IO_Write_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t data)
 {
-   VL53L0X_OpResult status;
-   
-   status =  VL53L1X_IO_Write_Byte(VL53L0X_REG_I2C_SLAVE_DEVICE_ADDRESS, new_address >> 1);
-   if(status < VL53L0X_OK)
-   {
-      return status;
-   }
-
-   sw_i2c_address = new_address;
-
-   return VL53L0X_OK;
+   return VL53L0X_IO_I2C_Write(sensor_index, RegisterAddr, &data, 1);
 }
 
-VL53L0X_OpResult VL53L0X_IO_Write_Multi(uint8_t RegisterAddr, uint8_t *pdata, uint32_t count)
-{
-   return VL53L0X_IO_I2C_Write(RegisterAddr, pdata, (uint16_t)count);
-}
-
-VL53L0X_OpResult VL53L0X_IO_Read_Multi(uint8_t RegisterAddr, uint8_t *pdata, uint32_t count)
-{
-   return VL53L0X_IO_I2C_Read(RegisterAddr, pdata, (uint16_t)count);
-}
-
-VL53L0X_OpResult VL53L0X_IO_Write_Byte(uint8_t RegisterAddr, uint8_t data)
-{
-   return VL53L0X_IO_I2C_Write(RegisterAddr, &data, 1);
-}
-
-VL53L0X_OpResult VL53L0X_IO_Write_Word(uint8_t RegisterAddr, uint16_t data)
+VL53L0X_OpResult VL53L0X_IO_Write_Word(uint8_t sensor_index, uint8_t RegisterAddr, uint16_t data)
 {
    uint8_t buffer[2];
 
    buffer[0] = data >> 8;
    buffer[1] = data & 0x00FF;
 
-   return VL53L0X_IO_I2C_Write(RegisterAddr, (uint8_t *)buffer, 2);
+   return VL53L0X_IO_I2C_Write(sensor_index, RegisterAddr, (uint8_t *)buffer, 2);
 }
 
-VL53L0X_OpResult VL53L0X_IO_Write_DWord(uint8_t RegisterAddr, uint32_t data)
+VL53L0X_OpResult VL53L0X_IO_Write_DWord(uint8_t sensor_index, uint8_t RegisterAddr, uint32_t data)
 {
    uint8_t buffer[4];
 
@@ -291,20 +402,20 @@ VL53L0X_OpResult VL53L0X_IO_Write_DWord(uint8_t RegisterAddr, uint32_t data)
    buffer[2] = (data >>  8) & 0xFF;
    buffer[3] = (data >>  0) & 0xFF;
 
-   return VL53L0X_IO_I2C_Write(RegisterAddr, (uint8_t *)buffer, 4);
+   return VL53L0X_IO_I2C_Write(sensor_index, RegisterAddr, (uint8_t *)buffer, 4);
 }
 
-VL53L0X_OpResult VL53L0X_IO_Read_Byte(uint8_t RegisterAddr, uint8_t *data)
+VL53L0X_OpResult VL53L0X_IO_Read_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t *data)
 {
-   return VL53L0X_IO_I2C_Read(RegisterAddr, data, 1);
+   return VL53L0X_IO_I2C_Read(sensor_index, RegisterAddr, data, 1);
 }
 
-VL53L0X_OpResult VL53L0X_IO_Read_Word(uint8_t RegisterAddr, uint16_t *data)
+VL53L0X_OpResult VL53L0X_IO_Read_Word(uint8_t sensor_index, uint8_t RegisterAddr, uint16_t *data)
 {
    VL53L0X_OpResult status;
    uint8_t buffer[2] = {0,0};
 
-   status = VL53L0X_IO_I2C_Read(RegisterAddr, buffer, 2);
+   status = VL53L0X_IO_I2C_Read(sensor_index, RegisterAddr, buffer, 2);
    if (status<VL53L0X_OK)
    {
       return status;
@@ -315,12 +426,12 @@ VL53L0X_OpResult VL53L0X_IO_Read_Word(uint8_t RegisterAddr, uint16_t *data)
    return VL53L0X_OK;
 }
 
-VL53L0X_OpResult VL53L0X_IO_Read_DWord(uint8_t RegisterAddr, uint32_t *data)
+VL53L0X_OpResult VL53L0X_IO_Read_DWord(uint8_t sensor_index, uint8_t RegisterAddr, uint32_t *data)
 {
    VL53L0X_OpResult status;
    uint8_t buffer[4] = {0,0,0,0};
 
-   status = VL53L0X_IO_I2C_Read(RegisterAddr, buffer, 4);
+   status = VL53L0X_IO_I2C_Read(sensor_index, RegisterAddr, buffer, 4);
    if (status<VL53L0X_OK)
    {
       return status;
@@ -331,13 +442,13 @@ VL53L0X_OpResult VL53L0X_IO_Read_DWord(uint8_t RegisterAddr, uint32_t *data)
    return VL53L0X_OK;
 }
 
-VL53L0X_OpResult VL53L0X_IO_UpdateByte(uint8_t RegisterAddr, uint8_t AndData, uint8_t OrData)
+VL53L0X_OpResult VL53L0X_IO_Update_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t AndData, uint8_t OrData)
 {
    VL53L0X_OpResult status;
    uint8_t buffer = 0;
 
    /* read data direct onto buffer */
-   status = VL53L0X_IO_I2C_Read(RegisterAddr, &buffer, 1);
+   status = VL53L0X_IO_I2C_Read(sensor_index, RegisterAddr, &buffer, 1);
    if (status<VL53L0X_OK)
    {
       return status;
@@ -345,5 +456,5 @@ VL53L0X_OpResult VL53L0X_IO_UpdateByte(uint8_t RegisterAddr, uint8_t AndData, ui
    
    buffer = (buffer & AndData) | OrData;
 
-   return VL53L0X_IO_I2C_Write(RegisterAddr, &buffer, (uint16_t)1);
+   return VL53L0X_IO_I2C_Write(sensor_index, RegisterAddr, &buffer, (uint16_t)1);
 }

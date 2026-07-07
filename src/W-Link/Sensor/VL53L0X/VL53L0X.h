@@ -36,6 +36,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "GPIO/GPIO.h"
+
 #include "VL53L0x_Def.h"
 
 #include "Sensor_Config.h"
@@ -44,16 +46,13 @@
 extern "C" {
 #endif
 
-VL53L0X_OpResult VL53L0X_Init();
+VL53L0X_OpResult VL53L0X_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list);
 VL53L0X_OpResult VL53L0X_DeInit();
-VL53L0X_OpResult VL53L0X_Power_Off();
-VL53L0X_OpResult VL53L0X_Power_On();
-VL53L0X_OpResult VL53L0X_SetI2CAddress(uint8_t DeviceAddress);
-VL53L0X_OpResult VL53L0X_GetSensorId(uint16_t* rl_id);
-VL53L0X_OpResult VL53L0X_WaitMeasurementDataReady();
-VL53L0X_OpResult VL53L0X_WaitStopCompleted();
-VL53L0X_OpResult VL53L0X_SensorInit();
-VL53L0X_OpResult VL53L0X_GetDistance(uint32_t *piData);
+VL53L0X_OpResult VL53L0X_GetSensorId(uint8_t sensor_index, uint16_t* rl_id);
+VL53L0X_OpResult VL53L0X_WaitMeasurementDataReady(uint8_t sensor_index);
+VL53L0X_OpResult VL53L0X_WaitStopCompleted(uint8_t sensor_index);
+VL53L0X_OpResult VL53L0X_SensorInit(uint8_t sensor_index);
+VL53L0X_OpResult VL53L0X_GetDistance(uint8_t sensor_index, uint32_t *piData);
 
 #ifdef __cplusplus
 }

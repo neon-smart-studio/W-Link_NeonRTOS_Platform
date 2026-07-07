@@ -36,6 +36,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "GPIO/GPIO.h"
+
 #include "VL53L1X_Def.h"
 
 #include "Sensor_Config.h"
@@ -44,42 +46,27 @@
 
 #define VL53L1X_I2C_OP_TIMEOUT             500
 
-#ifndef CONFIG_VL53L1X_NEW_I2C_ADDRESS
-#define VL53L1X_I2C_NEW_I2C_ADDRESS        VL53L1X_ACC_I2C_ADDRESS
-#else
-#define VL53L1X_I2C_NEW_I2C_ADDRESS        CONFIG_VL53L1X_NEW_I2C_ADDRESS
-#endif
-
 #ifndef CONFIG_VL53L1X_I2C_INDEX
 #define VL53L1X_I2C_INDEX                  hwI2C_Index_0
 #else
 #define VL53L1X_I2C_INDEX                  CONFIG_VL53L1X_I2C_INDEX
 #endif
 
-#ifndef CONFIG_VL53L1X_POWER_PIN
-#define VL53L1X_POWER_PIN                  hwGPIO_Pin_A0
-#else
-#define VL53L1X_POWER_PIN                  CONFIG_VL53L1X_POWER_PIN
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-VL53L1X_OpResult VL53L1X_IO_Init();
+VL53L1X_OpResult VL53L1X_IO_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list);
 VL53L1X_OpResult VL53L1X_IO_DeInit();
-VL53L1X_OpResult VL53L1X_IO_Power_On();
-VL53L1X_OpResult VL53L1X_IO_Power_Off();
-VL53L1X_OpResult VL53L1X_IO_SetI2CAddress(uint8_t new_address);
-VL53L1X_OpResult VL53L1X_IO_Write_Multi(uint16_t RegisterAddr, uint8_t *pdata, uint32_t count);
-VL53L1X_OpResult VL53L1X_IO_Read_Multi(uint16_t RegisterAddr, uint8_t *pdata, uint32_t count);
-VL53L1X_OpResult VL53L1X_IO_Write_Byte(uint16_t RegisterAddr, uint8_t data);
-VL53L1X_OpResult VL53L1X_IO_Write_Word(uint16_t RegisterAddr, uint16_t data);
-VL53L1X_OpResult VL53L1X_IO_Write_DWord(uint16_t RegisterAddr, uint32_t data);
-VL53L1X_OpResult VL53L1X_IO_Read_Byte(uint16_t RegisterAddr, uint8_t *data);
-VL53L1X_OpResult VL53L1X_IO_Read_Word(uint16_t RegisterAddr, uint16_t *data);
-VL53L1X_OpResult VL53L1X_IO_Read_DWord(uint16_t RegisterAddr, uint32_t *data);
-VL53L1X_OpResult VL53L1X_IO_UpdateByte(uint16_t RegisterAddr, uint8_t AndData, uint8_t OrData);
+VL53L1X_OpResult VL53L1X_IO_Write_Multi(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t *pdata, uint32_t count);
+VL53L1X_OpResult VL53L1X_IO_Read_Multi(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t *pdata, uint32_t count);
+VL53L1X_OpResult VL53L1X_IO_Write_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t data);
+VL53L1X_OpResult VL53L1X_IO_Write_Word(uint8_t sensor_index, uint8_t RegisterAddr, uint16_t data);
+VL53L1X_OpResult VL53L1X_IO_Write_DWord(uint8_t sensor_index, uint8_t RegisterAddr, uint32_t data);
+VL53L1X_OpResult VL53L1X_IO_Read_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t *data);
+VL53L1X_OpResult VL53L1X_IO_Read_Word(uint8_t sensor_index, uint8_t RegisterAddr, uint16_t *data);
+VL53L1X_OpResult VL53L1X_IO_Read_DWord(uint8_t sensor_index, uint8_t RegisterAddr, uint32_t *data);
+VL53L1X_OpResult VL53L1X_IO_Update_Byte(uint8_t sensor_index, uint8_t RegisterAddr, uint8_t AndData, uint8_t OrData);
 
 #ifdef __cplusplus
 }

@@ -157,9 +157,9 @@ static const uint8_t VL53L4CD_DEFAULT_CONFIGURATION[] = {
     put 0x40 in location 0x87 */
 };
 
-VL53L4CD_OpResult VL53L4CD_Init()
+VL53L4CD_OpResult VL53L4CD_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list)
 {
-   return VL53L4CD_IO_Init();
+   return VL53L4CD_IO_Init(num_of_sensor, p_i2x_addr_list, p_pwr_pin_list);
 }
 
 VL53L4CD_OpResult VL53L4CD_DeInit()
@@ -167,22 +167,7 @@ VL53L4CD_OpResult VL53L4CD_DeInit()
    return VL53L4CD_IO_DeInit();
 }
 
-VL53L4CD_OpResult VL53L4CD_Power_Off()
-{
-   return VL53L4CD_IO_Power_Off();
-}
-
-VL53L4CD_OpResult VL53L4CD_Power_On()
-{
-   return VL53L4CD_IO_Power_On();
-}
-
-VL53L4CD_OpResult VL53L4CD_SetI2CAddress(uint8_t new_address)
-{
-   return VL53L4CD_IO_SetI2CAddress(new_address);
-}
-
-VL53L4CD_OpResult VL53L4CD_SensorInit()
+VL53L4CD_OpResult VL53L4CD_SensorInit(uint8_t sensor_index)
 {
   VL53L4CD_OpResult status;
   uint8_t Addr, tmp;
@@ -190,7 +175,7 @@ VL53L4CD_OpResult VL53L4CD_SensorInit()
 
   i = 0;
   do {
-    status = VL53L4CD_IO_Read_Byte(VL53L4CD_FIRMWARE_SYSTEM_STATUS, &tmp);
+    status = VL53L4CD_IO_Read_Byte(sensor_index, VL53L4CD_FIRMWARE_SYSTEM_STATUS, &tmp);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -214,7 +199,7 @@ VL53L4CD_OpResult VL53L4CD_SensorInit()
 
   /* Load default configuration */
   for (Addr = (uint8_t)0x2D; Addr <= (uint8_t)0x87; Addr++) {
-    status = VL53L4CD_IO_Write_Byte(Addr, VL53L4CD_DEFAULT_CONFIGURATION[Addr - (uint8_t)0x2D]);
+    status = VL53L4CD_IO_Write_Byte(sensor_index, Addr, VL53L4CD_DEFAULT_CONFIGURATION[Addr - (uint8_t)0x2D]);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -222,7 +207,7 @@ VL53L4CD_OpResult VL53L4CD_SensorInit()
   }
 
   /* Start VHV */
-  status = VL53L4CD_IO_Write_Byte(VL53L4CD_SYSTEM_START, (uint8_t)0x40);
+  status = VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_SYSTEM_START, (uint8_t)0x40);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -230,7 +215,7 @@ VL53L4CD_OpResult VL53L4CD_SensorInit()
 
   i = 0;
   do {
-    status = VL53L4CD_CheckForDataReady(&tmp);
+    status = VL53L4CD_CheckForDataReady(sensor_index, &tmp);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -251,37 +236,37 @@ VL53L4CD_OpResult VL53L4CD_SensorInit()
     NeonRTOS_Sleep(1);
   } while (1);
 
-  status = VL53L4CD_ClearInterrupt();
+  status = VL53L4CD_ClearInterrupt(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_StopRanging();
+  status = VL53L4CD_StopRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
   
-  status = VL53L4CD_IO_Write_Byte(VL53L4CD_VHV_CONFIG_TIMEOUT_MACROP_LOOP_BOUND, (uint8_t)0x09);
+  status = VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_VHV_CONFIG_TIMEOUT_MACROP_LOOP_BOUND, (uint8_t)0x09);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
   
-  status = VL53L4CD_IO_Write_Byte(0x0B, (uint8_t)0);
+  status = VL53L4CD_IO_Write_Byte(sensor_index, 0x0B, (uint8_t)0);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
   
-  status = VL53L4CD_IO_Write_Word(0x0024, 0x500);
+  status = VL53L4CD_IO_Write_Word(sensor_index, 0x0024, 0x500);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
   
-  status = VL53L4CD_SetRangeTiming(50, 0);
+  status = VL53L4CD_SetRangeTiming(sensor_index, 50, 0);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -290,24 +275,24 @@ VL53L4CD_OpResult VL53L4CD_SensorInit()
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_GetSensorId(uint16_t *p_id)
+VL53L4CD_OpResult VL53L4CD_GetSensorId(uint8_t sensor_index, uint16_t *p_id)
 {
-  return VL53L4CD_IO_Read_Word(VL53L4CD_IDENTIFICATION_MODEL_ID, p_id);
+  return VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_IDENTIFICATION_MODEL_ID, p_id);
 }
 
-VL53L4CD_OpResult VL53L4CD_ClearInterrupt()
+VL53L4CD_OpResult VL53L4CD_ClearInterrupt(uint8_t sensor_index)
 {
-  return VL53L4CD_IO_Write_Byte(VL53L4CD_SYSTEM_INTERRUPT_CLEAR, 0x01);
+  return VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_SYSTEM_INTERRUPT_CLEAR, 0x01);
 }
 
-VL53L4CD_OpResult VL53L4CD_StartRanging()
+VL53L4CD_OpResult VL53L4CD_StartRanging(uint8_t sensor_index)
 {
   VL53L4CD_OpResult status;
   uint8_t data_ready;
   uint16_t i = 0;
   uint32_t tmp;
 
-  status = VL53L4CD_IO_Read_DWord(VL53L4CD_INTERMEASUREMENT_MS, &tmp);
+  status = VL53L4CD_IO_Read_DWord(sensor_index, VL53L4CD_INTERMEASUREMENT_MS, &tmp);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -315,7 +300,7 @@ VL53L4CD_OpResult VL53L4CD_StartRanging()
 
   /* Sensor runs in continuous mode */
   if (tmp == (uint32_t)0) {
-    status = VL53L4CD_IO_Write_Byte(VL53L4CD_SYSTEM_START, 0x21);
+    status = VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_SYSTEM_START, 0x21);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -323,7 +308,7 @@ VL53L4CD_OpResult VL53L4CD_StartRanging()
   }
   /* Sensor runs in autonomous mode */
   else {
-    status = VL53L4CD_IO_Write_Byte(VL53L4CD_SYSTEM_START, 0x40);
+    status = VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_SYSTEM_START, 0x40);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -331,7 +316,7 @@ VL53L4CD_OpResult VL53L4CD_StartRanging()
   }
 
   do {
-    status = VL53L4CD_CheckForDataReady(&data_ready);
+    status = VL53L4CD_CheckForDataReady(sensor_index, &data_ready);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -352,7 +337,7 @@ VL53L4CD_OpResult VL53L4CD_StartRanging()
     NeonRTOS_Sleep(1);
   } while (1);
 
-  status = VL53L4CD_ClearInterrupt();
+  status = VL53L4CD_ClearInterrupt(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -361,18 +346,18 @@ VL53L4CD_OpResult VL53L4CD_StartRanging()
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_StopRanging()
+VL53L4CD_OpResult VL53L4CD_StopRanging(uint8_t sensor_index)
 {
-  return VL53L4CD_IO_Write_Byte(VL53L4CD_SYSTEM_START, 0x00);
+  return VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_SYSTEM_START, 0x00);
 }
 
-VL53L4CD_OpResult VL53L4CD_CheckForDataReady(uint8_t *p_is_data_ready)
+VL53L4CD_OpResult VL53L4CD_CheckForDataReady(uint8_t sensor_index, uint8_t *p_is_data_ready)
 {
   VL53L4CD_OpResult status;
   uint8_t temp;
   uint8_t int_pol;
 
-  status = VL53L4CD_IO_Read_Byte(VL53L4CD_GPIO_HV_MUX_CTRL, &temp);
+  status = VL53L4CD_IO_Read_Byte(sensor_index, VL53L4CD_GPIO_HV_MUX_CTRL, &temp);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -387,7 +372,7 @@ VL53L4CD_OpResult VL53L4CD_CheckForDataReady(uint8_t *p_is_data_ready)
     int_pol = (uint8_t)1;
   }
 
-  status = VL53L4CD_IO_Read_Byte(VL53L4CD_GPIO_TIO_HV_STATUS, &temp);
+  status = VL53L4CD_IO_Read_Byte(sensor_index, VL53L4CD_GPIO_TIO_HV_STATUS, &temp);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -402,14 +387,14 @@ VL53L4CD_OpResult VL53L4CD_CheckForDataReady(uint8_t *p_is_data_ready)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms, uint32_t inter_measurement_ms)
+VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint8_t sensor_index, uint32_t timing_budget_ms, uint32_t inter_measurement_ms)
 {
   VL53L4CD_OpResult status;
   uint16_t clock_pll, osc_frequency, ms_byte;
   uint32_t macro_period_us = 0, timing_budget_us = 0, ls_byte, tmp;
   float inter_measurement_factor = (float)1.055;
 
-  status = VL53L4CD_IO_Read_Word(0x0006, &osc_frequency);
+  status = VL53L4CD_IO_Read_Word(sensor_index, 0x0006, &osc_frequency);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -431,7 +416,7 @@ VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms, uint32_t in
 
   /* Sensor runs in continuous mode */
   if (inter_measurement_ms == (uint32_t)0) {
-    status = VL53L4CD_IO_Write_DWord(VL53L4CD_INTERMEASUREMENT_MS, 0);
+    status = VL53L4CD_IO_Write_DWord(sensor_index, VL53L4CD_INTERMEASUREMENT_MS, 0);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -441,7 +426,7 @@ VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms, uint32_t in
   }
   /* Sensor runs in autonomous low power mode */
   else if (inter_measurement_ms > timing_budget_ms) {
-    status = VL53L4CD_IO_Read_Word(VL53L4CD_RESULT_OSC_CALIBRATE_VAL, &clock_pll);
+    status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RESULT_OSC_CALIBRATE_VAL, &clock_pll);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -450,7 +435,7 @@ VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms, uint32_t in
     clock_pll = clock_pll & (uint16_t)0x3FF;
     inter_measurement_factor = inter_measurement_factor * (float)inter_measurement_ms * (float)clock_pll;
 
-    status = VL53L4CD_IO_Write_DWord(VL53L4CD_INTERMEASUREMENT_MS, (uint32_t)inter_measurement_factor);
+    status = VL53L4CD_IO_Write_DWord(sensor_index, VL53L4CD_INTERMEASUREMENT_MS, (uint32_t)inter_measurement_factor);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -477,7 +462,7 @@ VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms, uint32_t in
 
   ms_byte = (uint16_t)(ms_byte << 8) + (uint16_t)(ls_byte & (uint32_t)0xFF);
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_RANGE_CONFIG_A, ms_byte);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_RANGE_CONFIG_A, ms_byte);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -494,7 +479,7 @@ VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms, uint32_t in
 
   ms_byte = (uint16_t)(ms_byte << 8) + (uint16_t)(ls_byte & (uint32_t)0xFF);
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_RANGE_CONFIG_B, ms_byte);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_RANGE_CONFIG_B, ms_byte);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -503,7 +488,7 @@ VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms, uint32_t in
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint32_t *p_timing_budget_ms, uint32_t *p_inter_measurement_ms)
+VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint8_t sensor_index, uint32_t *p_timing_budget_ms, uint32_t *p_inter_measurement_ms)
 {
   VL53L4CD_OpResult status;
   uint16_t osc_frequency = 1, range_config_macrop_high, clock_pll = 1;
@@ -511,13 +496,13 @@ VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint32_t *p_timing_budget_ms, uint32_t
   float clock_pll_factor = (float)1.065;
 
   /* Get InterMeasurement */
-  status = VL53L4CD_IO_Read_DWord(VL53L4CD_INTERMEASUREMENT_MS, &tmp);
+  status = VL53L4CD_IO_Read_DWord(sensor_index, VL53L4CD_INTERMEASUREMENT_MS, &tmp);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_RESULT_OSC_CALIBRATE_VAL, &clock_pll);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RESULT_OSC_CALIBRATE_VAL, &clock_pll);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -529,13 +514,13 @@ VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint32_t *p_timing_budget_ms, uint32_t
   *p_inter_measurement_ms = (uint16_t)(tmp / (uint32_t)clock_pll);
 
   /* Get TimingBudget */
-  status = VL53L4CD_IO_Read_Word(0x0006, &osc_frequency);
+  status = VL53L4CD_IO_Read_Word(sensor_index, 0x0006, &osc_frequency);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_RANGE_CONFIG_A, &range_config_macrop_high);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RANGE_CONFIG_A, &range_config_macrop_high);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -569,7 +554,7 @@ VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint32_t *p_timing_budget_ms, uint32_t
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_GetResult(VL53L4CD_Result_t *p_result)
+VL53L4CD_OpResult VL53L4CD_GetResult(uint8_t sensor_index, VL53L4CD_Result_t *p_result)
 {
   VL53L4CD_OpResult status;
   uint16_t temp_16;
@@ -579,7 +564,7 @@ VL53L4CD_OpResult VL53L4CD_GetResult(VL53L4CD_Result_t *p_result)
                              255, 255, 11, 12
                            };
 
-  status = VL53L4CD_IO_Read_Byte(VL53L4CD_RESULT_RANGE_STATUS, &temp_8);
+  status = VL53L4CD_IO_Read_Byte(sensor_index, VL53L4CD_RESULT_RANGE_STATUS, &temp_8);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -593,7 +578,7 @@ VL53L4CD_OpResult VL53L4CD_GetResult(VL53L4CD_Result_t *p_result)
 
   p_result->range_status = temp_8;
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_RESULT_SPAD_NB, &temp_16);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RESULT_SPAD_NB, &temp_16);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -606,7 +591,7 @@ VL53L4CD_OpResult VL53L4CD_GetResult(VL53L4CD_Result_t *p_result)
     return status;
   }
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_RESULT_SIGNAL_RATE, &temp_16);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RESULT_SIGNAL_RATE, &temp_16);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -614,7 +599,7 @@ VL53L4CD_OpResult VL53L4CD_GetResult(VL53L4CD_Result_t *p_result)
 
   p_result->signal_rate_kcps = temp_16 * (uint16_t) 8;
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_RESULT_AMBIENT_RATE, &temp_16);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RESULT_AMBIENT_RATE, &temp_16);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -622,7 +607,7 @@ VL53L4CD_OpResult VL53L4CD_GetResult(VL53L4CD_Result_t *p_result)
 
   p_result->ambient_rate_kcps = temp_16 * (uint16_t) 8;
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_RESULT_SIGMA, &temp_16);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RESULT_SIGMA, &temp_16);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -630,7 +615,7 @@ VL53L4CD_OpResult VL53L4CD_GetResult(VL53L4CD_Result_t *p_result)
 
   p_result->sigma_mm = temp_16 / (uint16_t) 4;
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_RESULT_DISTANCE, &temp_16);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RESULT_DISTANCE, &temp_16);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -644,26 +629,26 @@ VL53L4CD_OpResult VL53L4CD_GetResult(VL53L4CD_Result_t *p_result)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_SetOffset(int16_t OffsetValueInMm)
+VL53L4CD_OpResult VL53L4CD_SetOffset(uint8_t sensor_index, int16_t OffsetValueInMm)
 {
   VL53L4CD_OpResult status;
   uint16_t temp;
 
   temp = (uint16_t)((uint16_t)OffsetValueInMm * (uint16_t)4);
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_RANGE_OFFSET_MM, temp);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_RANGE_OFFSET_MM, temp);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_INNER_OFFSET_MM, (uint8_t)0x0);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_INNER_OFFSET_MM, (uint8_t)0x0);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_OUTER_OFFSET_MM, (uint8_t)0x0);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_OUTER_OFFSET_MM, (uint8_t)0x0);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -672,12 +657,12 @@ VL53L4CD_OpResult VL53L4CD_SetOffset(int16_t OffsetValueInMm)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_GetOffset(int16_t *p_offset)
+VL53L4CD_OpResult VL53L4CD_GetOffset(uint8_t sensor_index, int16_t *p_offset)
 {
   VL53L4CD_OpResult status;
   uint16_t temp;
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_RANGE_OFFSET_MM, &temp);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RANGE_OFFSET_MM, &temp);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -695,23 +680,23 @@ VL53L4CD_OpResult VL53L4CD_GetOffset(int16_t *p_offset)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_SetXtalk(uint16_t XtalkValueKcps)
+VL53L4CD_OpResult VL53L4CD_SetXtalk(uint8_t sensor_index, uint16_t XtalkValueKcps)
 {
   VL53L4CD_OpResult status;
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_XTALK_X_PLANE_GRADIENT_KCPS, 0x0000);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_XTALK_X_PLANE_GRADIENT_KCPS, 0x0000);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_XTALK_Y_PLANE_GRADIENT_KCPS, 0x0000);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_XTALK_Y_PLANE_GRADIENT_KCPS, 0x0000);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_XTALK_PLANE_OFFSET_KCPS, (XtalkValueKcps << 9) / (uint16_t)1000);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_XTALK_PLANE_OFFSET_KCPS, (XtalkValueKcps << 9) / (uint16_t)1000);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -720,11 +705,11 @@ VL53L4CD_OpResult VL53L4CD_SetXtalk(uint16_t XtalkValueKcps)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_GetXtalk(uint16_t *p_xtalk_kcps)
+VL53L4CD_OpResult VL53L4CD_GetXtalk(uint8_t sensor_index, uint16_t *p_xtalk_kcps)
 {
   VL53L4CD_OpResult status;
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_XTALK_PLANE_OFFSET_KCPS, p_xtalk_kcps);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_XTALK_PLANE_OFFSET_KCPS, p_xtalk_kcps);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -735,23 +720,23 @@ VL53L4CD_OpResult VL53L4CD_GetXtalk(uint16_t *p_xtalk_kcps)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_SetDetectionThresholds(uint16_t distance_low_mm, uint16_t distance_high_mm, uint8_t window)
+VL53L4CD_OpResult VL53L4CD_SetDetectionThresholds(uint8_t sensor_index, uint16_t distance_low_mm, uint16_t distance_high_mm, uint8_t window)
 {
   VL53L4CD_OpResult status;
 
-  status = VL53L4CD_IO_Write_Byte(VL53L4CD_SYSTEM_INTERRUPT, window);
+  status = VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_SYSTEM_INTERRUPT, window);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_THRESH_HIGH, distance_high_mm);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_THRESH_HIGH, distance_high_mm);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_THRESH_LOW, distance_low_mm);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_THRESH_LOW, distance_low_mm);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -760,23 +745,23 @@ VL53L4CD_OpResult VL53L4CD_SetDetectionThresholds(uint16_t distance_low_mm, uint
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_GetDetectionThresholds(uint16_t *p_distance_low_mm, uint16_t *p_distance_high_mm, uint8_t *p_window)
+VL53L4CD_OpResult VL53L4CD_GetDetectionThresholds(uint8_t sensor_index, uint16_t *p_distance_low_mm, uint16_t *p_distance_high_mm, uint8_t *p_window)
 {
   VL53L4CD_OpResult status;
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_THRESH_HIGH, p_distance_high_mm);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_THRESH_HIGH, p_distance_high_mm);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_THRESH_LOW, p_distance_low_mm);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_THRESH_LOW, p_distance_low_mm);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Read_Byte(VL53L4CD_SYSTEM_INTERRUPT, p_window);
+  status = VL53L4CD_IO_Read_Byte(sensor_index, VL53L4CD_SYSTEM_INTERRUPT, p_window);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -787,17 +772,17 @@ VL53L4CD_OpResult VL53L4CD_GetDetectionThresholds(uint16_t *p_distance_low_mm, u
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_SetSignalThreshold(uint16_t signal_kcps)
+VL53L4CD_OpResult VL53L4CD_SetSignalThreshold(uint8_t sensor_index, uint16_t signal_kcps)
 {
-  return VL53L4CD_IO_Write_Word(VL53L4CD_MIN_COUNT_RATE_RTN_LIMIT_MCPS, signal_kcps >> 3);
+  return VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_MIN_COUNT_RATE_RTN_LIMIT_MCPS, signal_kcps >> 3);
 }
 
-VL53L4CD_OpResult VL53L4CD_GetSignalThreshold(uint16_t *p_signal_kcps)
+VL53L4CD_OpResult VL53L4CD_GetSignalThreshold(uint8_t sensor_index, uint16_t *p_signal_kcps)
 {
   VL53L4CD_OpResult status;
   uint16_t tmp = 0;
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_MIN_COUNT_RATE_RTN_LIMIT_MCPS, &tmp);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_MIN_COUNT_RATE_RTN_LIMIT_MCPS, &tmp);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -808,7 +793,7 @@ VL53L4CD_OpResult VL53L4CD_GetSignalThreshold(uint16_t *p_signal_kcps)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_SetSigmaThreshold(uint16_t sigma_mm)
+VL53L4CD_OpResult VL53L4CD_SetSigmaThreshold(uint8_t sensor_index, uint16_t sigma_mm)
 {
   VL53L4CD_OpResult status;
 
@@ -817,7 +802,7 @@ VL53L4CD_OpResult VL53L4CD_SetSigmaThreshold(uint16_t sigma_mm)
     return VL53L4CD_InvalidParameter;
   }
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_RANGE_CONFIG_SIGMA_THRESH, sigma_mm << 2);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_RANGE_CONFIG_SIGMA_THRESH, sigma_mm << 2);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -826,11 +811,11 @@ VL53L4CD_OpResult VL53L4CD_SetSigmaThreshold(uint16_t sigma_mm)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_GetSigmaThreshold(uint16_t *p_sigma_mm)
+VL53L4CD_OpResult VL53L4CD_GetSigmaThreshold(uint8_t sensor_index, uint16_t *p_sigma_mm)
 {
   VL53L4CD_OpResult status;
 
-  status = VL53L4CD_IO_Read_Word(VL53L4CD_RANGE_CONFIG_SIGMA_THRESH, p_sigma_mm);
+  status = VL53L4CD_IO_Read_Word(sensor_index, VL53L4CD_RANGE_CONFIG_SIGMA_THRESH, p_sigma_mm);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -841,32 +826,32 @@ VL53L4CD_OpResult VL53L4CD_GetSigmaThreshold(uint16_t *p_sigma_mm)
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_StartTemperatureUpdate()
+VL53L4CD_OpResult VL53L4CD_StartTemperatureUpdate(uint8_t sensor_index)
 {
   VL53L4CD_OpResult status;
   uint8_t tmp = 0;
   uint16_t i = 0;
 
-  status = VL53L4CD_IO_Write_Byte(VL53L4CD_VHV_CONFIG_TIMEOUT_MACROP_LOOP_BOUND, (uint8_t)0x81);
+  status = VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_VHV_CONFIG_TIMEOUT_MACROP_LOOP_BOUND, (uint8_t)0x81);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Write_Byte(0x0B, (uint8_t)0x92);
+  status = VL53L4CD_IO_Write_Byte(sensor_index, 0x0B, (uint8_t)0x92);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Write_Byte(VL53L4CD_SYSTEM_START, (uint8_t)0x40);
+  status = VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_SYSTEM_START, (uint8_t)0x40);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
   do {
-    status = VL53L4CD_CheckForDataReady(&tmp);
+    status = VL53L4CD_CheckForDataReady(sensor_index, &tmp);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -886,24 +871,24 @@ VL53L4CD_OpResult VL53L4CD_StartTemperatureUpdate()
     NeonRTOS_Sleep(1);
   } while (1);
 
-  status = VL53L4CD_ClearInterrupt();
+  status = VL53L4CD_ClearInterrupt(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
-  status = VL53L4CD_StopRanging();
-  if(status < VL53L4CD_OK)
-  {
-      return status;
-  }
-
-  status = VL53L4CD_IO_Write_Byte(VL53L4CD_VHV_CONFIG_TIMEOUT_MACROP_LOOP_BOUND, 0x09);
+  status = VL53L4CD_StopRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
-  status = VL53L4CD_IO_Write_Byte(0x0B, 0);
+  status = VL53L4CD_IO_Write_Byte(sensor_index, VL53L4CD_VHV_CONFIG_TIMEOUT_MACROP_LOOP_BOUND, 0x09);
+  if(status < VL53L4CD_OK)
+  {
+      return status;
+  }
+
+  status = VL53L4CD_IO_Write_Byte(sensor_index, 0x0B, 0);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -912,7 +897,7 @@ VL53L4CD_OpResult VL53L4CD_StartTemperatureUpdate()
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_measured_offset_mm, int16_t nb_samples)
+VL53L4CD_OpResult VL53L4CD_CalibrateOffset(uint8_t sensor_index, int16_t TargetDistInMm, int16_t *p_measured_offset_mm, int16_t nb_samples)
 {
   VL53L4CD_OpResult status;
   uint8_t i, tmp;
@@ -925,12 +910,12 @@ VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_me
     return VL53L4CD_InvalidParameter;
   }
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_RANGE_OFFSET_MM, 0x0);
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_INNER_OFFSET_MM, 0x0);
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_OUTER_OFFSET_MM, 0x0);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_RANGE_OFFSET_MM, 0x0);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_INNER_OFFSET_MM, 0x0);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_OUTER_OFFSET_MM, 0x0);
 
   /* Device heat loop (10 samples) */
-  status = VL53L4CD_StartRanging();
+  status = VL53L4CD_StartRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -941,7 +926,7 @@ VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_me
     j = (uint16_t)0;
 
     do {
-      status = VL53L4CD_CheckForDataReady(&tmp);
+      status = VL53L4CD_CheckForDataReady(sensor_index, &tmp);
       if(status < VL53L4CD_OK)
       {
           return status;
@@ -962,26 +947,26 @@ VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_me
       NeonRTOS_Sleep(1);
     } while (1);
 
-    status = VL53L4CD_GetResult(&results);
+    status = VL53L4CD_GetResult(sensor_index, &results);
     if(status < VL53L4CD_OK)
     {
         return status;
     }
-    status = VL53L4CD_ClearInterrupt();
+    status = VL53L4CD_ClearInterrupt(sensor_index);
     if(status < VL53L4CD_OK)
     {
         return status;
     }
   }
 
-  status = VL53L4CD_StopRanging();
+  status = VL53L4CD_StopRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
   /* Device ranging */
-  status = VL53L4CD_StartRanging();
+  status = VL53L4CD_StartRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -992,7 +977,7 @@ VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_me
     j = (uint16_t)0;
     
     do {
-      status = VL53L4CD_CheckForDataReady(&tmp);
+      status = VL53L4CD_CheckForDataReady(sensor_index, &tmp);
       if(status < VL53L4CD_OK)
       {
           return status;
@@ -1013,12 +998,12 @@ VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_me
       NeonRTOS_Sleep(1);
     } while (1);
 
-    status = VL53L4CD_GetResult(&results);
+    status = VL53L4CD_GetResult(sensor_index, &results);
     if(status < VL53L4CD_OK)
     {
         return status;
     }
-    status = VL53L4CD_ClearInterrupt();
+    status = VL53L4CD_ClearInterrupt(sensor_index);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -1027,7 +1012,7 @@ VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_me
     AvgDistance += (int16_t)results.distance_mm;
   }
 
-  status = VL53L4CD_StopRanging();
+  status = VL53L4CD_StopRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -1037,7 +1022,7 @@ VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_me
   *p_measured_offset_mm = (int16_t)TargetDistInMm - AvgDistance;
   tmpOff = (uint16_t) * p_measured_offset_mm * (uint16_t)4;
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_RANGE_OFFSET_MM, tmpOff);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_RANGE_OFFSET_MM, tmpOff);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -1046,10 +1031,10 @@ VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_me
   return VL53L4CD_OK;
 }
 
-VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(int16_t TargetDistInMm, uint16_t *p_measured_xtalk_kcps, int16_t nb_samples)
+VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(uint8_t sensor_index, int16_t TargetDistInMm, uint16_t *p_measured_xtalk_kcps, int16_t nb_samples)
 {
   VL53L4CD_OpResult status;
-  uint8_t i, tmp, continue_loop;
+  uint8_t i, tmp;
   float AverageSignal = (float)0.0;
   float AvgDistance = (float)0.0;
   float AverageSpadNb = (float)0.0;
@@ -1064,7 +1049,7 @@ VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(int16_t TargetDistInMm, uint16_t *p_me
   }
 
   /* Device heat loop (10 samples) */
-  status = VL53L4CD_StartRanging();
+  status = VL53L4CD_StartRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -1072,9 +1057,9 @@ VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(int16_t TargetDistInMm, uint16_t *p_me
   for (i = 0; i < (uint8_t)10; i++) {
     tmp = (uint8_t)0;
     j = (uint16_t)0;
-    continue_loop = (uint8_t)1;
+    
     do {
-      status = VL53L4CD_CheckForDataReady(&tmp);
+      status = VL53L4CD_CheckForDataReady(sensor_index, &tmp);
       if(status < VL53L4CD_OK)
       {
           return status;
@@ -1095,25 +1080,25 @@ VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(int16_t TargetDistInMm, uint16_t *p_me
       NeonRTOS_Sleep(1);
     } while (1);
 
-    status = VL53L4CD_GetResult(&results);
+    status = VL53L4CD_GetResult(sensor_index, &results);
     if(status < VL53L4CD_OK)
     {
         return status;
     }
-    status = VL53L4CD_ClearInterrupt();
+    status = VL53L4CD_ClearInterrupt(sensor_index);
     if(status < VL53L4CD_OK)
     {
         return status;
     }
   }
-  status = VL53L4CD_StopRanging();
+  status = VL53L4CD_StopRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
   }
 
   /* Device ranging loop */
-  status = VL53L4CD_StartRanging();
+  status = VL53L4CD_StartRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -1122,9 +1107,9 @@ VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(int16_t TargetDistInMm, uint16_t *p_me
   for (i = 0; i < (uint8_t)nb_samples; i++) {
     tmp = (uint8_t)0;
     j = (uint16_t)0;
-    continue_loop = (uint8_t)1;
+    
     do {
-      status = VL53L4CD_CheckForDataReady(&tmp);
+      status = VL53L4CD_CheckForDataReady(sensor_index, &tmp);
       if(status < VL53L4CD_OK)
       {
           return status;
@@ -1145,12 +1130,12 @@ VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(int16_t TargetDistInMm, uint16_t *p_me
       NeonRTOS_Sleep(1);
     } while (1);
 
-    status = VL53L4CD_GetResult(&results);
+    status = VL53L4CD_GetResult(sensor_index, &results);
     if(status < VL53L4CD_OK)
     {
         return status;
     }
-    status = VL53L4CD_ClearInterrupt();
+    status = VL53L4CD_ClearInterrupt(sensor_index);
     if(status < VL53L4CD_OK)
     {
         return status;
@@ -1161,7 +1146,7 @@ VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(int16_t TargetDistInMm, uint16_t *p_me
     AverageSignal += (float)results.signal_rate_kcps;
   }
 
-  status = VL53L4CD_StopRanging();
+  status = VL53L4CD_StopRanging(sensor_index);
   if(status < VL53L4CD_OK)
   {
       return status;
@@ -1175,7 +1160,7 @@ VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(int16_t TargetDistInMm, uint16_t *p_me
   calXtalk = (uint16_t)tmp_xtalk;
   *p_measured_xtalk_kcps = (uint16_t)(calXtalk * (uint16_t)1000) >> 9;
 
-  status = VL53L4CD_IO_Write_Word(VL53L4CD_XTALK_PLANE_OFFSET_KCPS, calXtalk);
+  status = VL53L4CD_IO_Write_Word(sensor_index, VL53L4CD_XTALK_PLANE_OFFSET_KCPS, calXtalk);
   if(status < VL53L4CD_OK)
   {
       return status;

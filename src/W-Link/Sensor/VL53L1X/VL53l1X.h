@@ -36,6 +36,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "GPIO/GPIO.h"
+
 #include "VL53L1X_Def.h"
 
 #include "Sensor_Config.h"
@@ -44,52 +46,49 @@
 extern "C" {
 #endif
 
-VL53L1X_OpResult VL53L1X_Init();
+VL53L1X_OpResult VL53L1X_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list);
 VL53L1X_OpResult VL53L1X_DeInit();
-VL53L1X_OpResult VL53L1X_Power_Off();
-VL53L1X_OpResult VL53L1X_Power_On();
-VL53L1X_OpResult VL53L1X_SetI2CAddress(uint8_t new_address);
-VL53L1X_OpResult VL53L1X_SensorInit();
-VL53L1X_OpResult VL53L1X_ClearInterrupt();
-VL53L1X_OpResult VL53L1X_SetInterruptPolarity(uint8_t IntPol);
-VL53L1X_OpResult VL53L1X_GetInterruptPolarity(uint8_t *pIntPol);
-VL53L1X_OpResult VL53L1X_StartRanging();
-VL53L1X_OpResult VL53L1X_StopRanging();
-VL53L1X_OpResult VL53L1X_CheckForDataReady(uint8_t *isDataReady);
-VL53L1X_OpResult VL53L1X_SetTimingBudgetInMs(uint16_t TimingBudgetInMs);
-VL53L1X_OpResult VL53L1X_GetTimingBudgetInMs(uint16_t *pTimingBudgetInMs);
-VL53L1X_OpResult VL53L1X_SetDistanceMode(uint16_t DistanceMode);
-VL53L1X_OpResult VL53L1X_GetDistanceMode(uint16_t *pDistanceMode);
-VL53L1X_OpResult VL53L1X_SetInterMeasurementInMs(uint16_t InterMeasurementInMs);
-VL53L1X_OpResult VL53L1X_GetInterMeasurementInMs(uint16_t * pIM);
-VL53L1X_OpResult VL53L1X_BootState(uint8_t *state);
-VL53L1X_OpResult VL53L1X_GetSensorId(uint16_t *id);
-VL53L1X_OpResult VL53L1X_GetDistance(uint16_t *distance);
-VL53L1X_OpResult VL53L1X_GetSignalPerSpad(uint16_t *signalPerSp);
-VL53L1X_OpResult VL53L1X_GetAmbientPerSpad(uint16_t *amb);
-VL53L1X_OpResult VL53L1X_GetSignalRate(uint16_t *signalRate);
-VL53L1X_OpResult VL53L1X_GetSpadNb(uint16_t *spNb);
-VL53L1X_OpResult VL53L1X_GetAmbientRate(uint16_t *ambRate);
-VL53L1X_OpResult VL53L1X_GetRangeStatus(uint8_t *rangeStatus);
-VL53L1X_OpResult VL53L1X_SetOffset(int16_t OffsetValue);
-VL53L1X_OpResult VL53L1X_GetOffset(int16_t *Offset);
-VL53L1X_OpResult VL53L1X_SetXtalk(uint16_t XtalkValue);
-VL53L1X_OpResult VL53L1X_GetXtalk(uint16_t *Xtalk);
-VL53L1X_OpResult VL53L1X_SetDistanceThreshold(uint16_t ThreshLow, uint16_t ThreshHigh, uint8_t Window, uint8_t IntOnNoTarget);
-VL53L1X_OpResult VL53L1X_GetDistanceThresholdWindow(uint16_t *window);
-VL53L1X_OpResult VL53L1X_GetDistanceThresholdLow(uint16_t *low);
-VL53L1X_OpResult VL53L1X_GetDistanceThresholdHigh(uint16_t *high);
-VL53L1X_OpResult VL53L1X_SetROI(uint16_t X, uint16_t Y);
-VL53L1X_OpResult VL53L1X_GetROI_XY(uint16_t *ROI_X, uint16_t *ROI_Y);
-VL53L1X_OpResult VL53L1X_SetROICenter(uint8_t ROICenter);
-VL53L1X_OpResult VL53L1X_GetROICenter(uint8_t *ROICenter);
-VL53L1X_OpResult VL53L1X_SetSignalThreshold(uint16_t signal);
-VL53L1X_OpResult VL53L1X_GetSignalThreshold(uint16_t *signal);
-VL53L1X_OpResult VL53L1X_SetSigmaThreshold(uint16_t sigma);
-VL53L1X_OpResult VL53L1X_GetSigmaThreshold(uint16_t *signal);
-VL53L1X_OpResult VL53L1X_StartTemperatureUpdate();
-VL53L1X_OpResult VL53L1X_CalibrateOffset(uint16_t TargetDistInMm, int16_t *offset);
-VL53L1X_OpResult VL53L1X_CalibrateXtalk(uint16_t TargetDistInMm, uint16_t *xtalk);
+VL53L1X_OpResult VL53L1X_SensorInit(uint8_t sensor_index);
+VL53L1X_OpResult VL53L1X_ClearInterrupt(uint8_t sensor_index);
+VL53L1X_OpResult VL53L1X_SetInterruptPolarity(uint8_t sensor_index, uint8_t IntPol);
+VL53L1X_OpResult VL53L1X_GetInterruptPolarity(uint8_t sensor_index, uint8_t *pIntPol);
+VL53L1X_OpResult VL53L1X_StartRanging(uint8_t sensor_index);
+VL53L1X_OpResult VL53L1X_StopRanging(uint8_t sensor_index);
+VL53L1X_OpResult VL53L1X_CheckForDataReady(uint8_t sensor_index, uint8_t *isDataReady);
+VL53L1X_OpResult VL53L1X_SetTimingBudgetInMs(uint8_t sensor_index, uint16_t TimingBudgetInMs);
+VL53L1X_OpResult VL53L1X_GetTimingBudgetInMs(uint8_t sensor_index, uint16_t *pTimingBudgetInMs);
+VL53L1X_OpResult VL53L1X_SetDistanceMode(uint8_t sensor_index, uint16_t DistanceMode);
+VL53L1X_OpResult VL53L1X_GetDistanceMode(uint8_t sensor_index, uint16_t *pDistanceMode);
+VL53L1X_OpResult VL53L1X_SetInterMeasurementInMs(uint8_t sensor_index, uint16_t InterMeasurementInMs);
+VL53L1X_OpResult VL53L1X_GetInterMeasurementInMs(uint8_t sensor_index, uint16_t* pIM);
+VL53L1X_OpResult VL53L1X_BootState(uint8_t sensor_index, uint8_t *state);
+VL53L1X_OpResult VL53L1X_GetSensorId(uint8_t sensor_index, uint16_t *id);
+VL53L1X_OpResult VL53L1X_GetDistance(uint8_t sensor_index, uint16_t *distance);
+VL53L1X_OpResult VL53L1X_GetSignalPerSpad(uint8_t sensor_index, uint16_t *signalPerSp);
+VL53L1X_OpResult VL53L1X_GetAmbientPerSpad(uint8_t sensor_index, uint16_t *amb);
+VL53L1X_OpResult VL53L1X_GetSignalRate(uint8_t sensor_index, uint16_t *signalRate);
+VL53L1X_OpResult VL53L1X_GetSpadNb(uint8_t sensor_index, uint16_t *spNb);
+VL53L1X_OpResult VL53L1X_GetAmbientRate(uint8_t sensor_index, uint16_t *ambRate);
+VL53L1X_OpResult VL53L1X_GetRangeStatus(uint8_t sensor_index, uint8_t *rangeStatus);
+VL53L1X_OpResult VL53L1X_SetOffset(uint8_t sensor_index, int16_t OffsetValue);
+VL53L1X_OpResult VL53L1X_GetOffset(uint8_t sensor_index, int16_t *Offset);
+VL53L1X_OpResult VL53L1X_SetXtalk(uint8_t sensor_index, uint16_t XtalkValue);
+VL53L1X_OpResult VL53L1X_GetXtalk(uint8_t sensor_index, uint16_t *Xtalk);
+VL53L1X_OpResult VL53L1X_SetDistanceThreshold(uint8_t sensor_index, uint16_t ThreshLow, uint16_t ThreshHigh, uint8_t Window, uint8_t IntOnNoTarget);
+VL53L1X_OpResult VL53L1X_GetDistanceThresholdWindow(uint8_t sensor_index, uint16_t *window);
+VL53L1X_OpResult VL53L1X_GetDistanceThresholdLow(uint8_t sensor_index, uint16_t *low);
+VL53L1X_OpResult VL53L1X_GetDistanceThresholdHigh(uint8_t sensor_index, uint16_t *high);
+VL53L1X_OpResult VL53L1X_SetROI(uint8_t sensor_index, uint16_t X, uint16_t Y);
+VL53L1X_OpResult VL53L1X_GetROI_XY(uint8_t sensor_index, uint16_t *ROI_X, uint16_t *ROI_Y);
+VL53L1X_OpResult VL53L1X_SetROICenter(uint8_t sensor_index, uint8_t ROICenter);
+VL53L1X_OpResult VL53L1X_GetROICenter(uint8_t sensor_index, uint8_t *ROICenter);
+VL53L1X_OpResult VL53L1X_SetSignalThreshold(uint8_t sensor_index, uint16_t signal);
+VL53L1X_OpResult VL53L1X_GetSignalThreshold(uint8_t sensor_index, uint16_t *signal);
+VL53L1X_OpResult VL53L1X_SetSigmaThreshold(uint8_t sensor_index, uint16_t sigma);
+VL53L1X_OpResult VL53L1X_GetSigmaThreshold(uint8_t sensor_index, uint16_t *signal);
+VL53L1X_OpResult VL53L1X_StartTemperatureUpdate(uint8_t sensor_index);
+VL53L1X_OpResult VL53L1X_CalibrateOffset(uint8_t sensor_index, uint16_t TargetDistInMm, int16_t *offset);
+VL53L1X_OpResult VL53L1X_CalibrateXtalk(uint8_t sensor_index, uint16_t TargetDistInMm, uint16_t *xtalk);
 
 #ifdef __cplusplus
 }

@@ -45,6 +45,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "GPIO/GPIO.h"
+
 #include "VL53L4CD_Def.h"
 
 #include "Sensor_Config.h"
@@ -53,33 +55,30 @@
 extern "C" {
 #endif
 
-VL53L4CD_OpResult VL53L4CD_Init();
+VL53L4CD_OpResult VL53L4CD_Init(uint8_t num_of_sensor, uint8_t* p_i2x_addr_list, hwGPIO_Pin* p_pwr_pin_list);
 VL53L4CD_OpResult VL53L4CD_DeInit();
-VL53L4CD_OpResult VL53L4CD_Power_Off();
-VL53L4CD_OpResult VL53L4CD_Power_On();
-VL53L4CD_OpResult VL53L4CD_SetI2CAddress(uint8_t new_address);
-VL53L4CD_OpResult VL53L4CD_SensorInit();
-VL53L4CD_OpResult VL53L4CD_GetSensorId(uint16_t *p_id);
-VL53L4CD_OpResult VL53L4CD_ClearInterrupt();
-VL53L4CD_OpResult VL53L4CD_StartRanging();
-VL53L4CD_OpResult VL53L4CD_StopRanging();
-VL53L4CD_OpResult VL53L4CD_CheckForDataReady(uint8_t *p_is_data_ready);
-VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint32_t timing_budget_ms, uint32_t inter_measurement_ms);
-VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint32_t *p_timing_budget_ms, uint32_t *p_inter_measurement_ms);
-VL53L4CD_OpResult VL53L4CD_GetResult(VL53L4CD_Result_t *pResult);
-VL53L4CD_OpResult VL53L4CD_SetOffset(int16_t OffsetValueInMm);
-VL53L4CD_OpResult VL53L4CD_GetOffset(int16_t *Offset);
-VL53L4CD_OpResult VL53L4CD_SetXtalk(uint16_t XtalkValueKcps);
-VL53L4CD_OpResult VL53L4CD_GetXtalk(uint16_t *p_xtalk_kcps);
-VL53L4CD_OpResult VL53L4CD_SetDetectionThresholds(uint16_t distance_low_mm, uint16_t distance_high_mm, uint8_t window);
-VL53L4CD_OpResult VL53L4CD_GetDetectionThresholds(uint16_t *p_distance_low_mm, uint16_t *p_distance_high_mm, uint8_t *p_window);
-VL53L4CD_OpResult VL53L4CD_SetSignalThreshold(uint16_t signal_kcps);
-VL53L4CD_OpResult VL53L4CD_GetSignalThreshold(uint16_t *p_signal_kcps);
-VL53L4CD_OpResult VL53L4CD_SetSigmaThreshold(uint16_t sigma_mm);
-VL53L4CD_OpResult VL53L4CD_GetSigmaThreshold(uint16_t *p_sigma_mm);
-VL53L4CD_OpResult VL53L4CD_StartTemperatureUpdate();
-VL53L4CD_OpResult VL53L4CD_CalibrateOffset(int16_t TargetDistInMm, int16_t *p_measured_offset_mm, int16_t nb_samples);
-VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(int16_t TargetDistInMm, uint16_t *p_measured_xtalk_kcps, int16_t nb_samples);
+VL53L4CD_OpResult VL53L4CD_SensorInit(uint8_t num_of_sensor);
+VL53L4CD_OpResult VL53L4CD_GetSensorId(uint8_t num_of_sensor, uint16_t *p_id);
+VL53L4CD_OpResult VL53L4CD_ClearInterrupt(uint8_t num_of_sensor);
+VL53L4CD_OpResult VL53L4CD_StartRanging(uint8_t num_of_sensor);
+VL53L4CD_OpResult VL53L4CD_StopRanging(uint8_t num_of_sensor);
+VL53L4CD_OpResult VL53L4CD_CheckForDataReady(uint8_t num_of_sensor, uint8_t *p_is_data_ready);
+VL53L4CD_OpResult VL53L4CD_SetRangeTiming(uint8_t num_of_sensor, uint32_t timing_budget_ms, uint32_t inter_measurement_ms);
+VL53L4CD_OpResult VL53L4CD_GetRangeTiming(uint8_t num_of_sensor, uint32_t *p_timing_budget_ms, uint32_t *p_inter_measurement_ms);
+VL53L4CD_OpResult VL53L4CD_GetResult(uint8_t num_of_sensor, VL53L4CD_Result_t *pResult);
+VL53L4CD_OpResult VL53L4CD_SetOffset(uint8_t num_of_sensor, int16_t OffsetValueInMm);
+VL53L4CD_OpResult VL53L4CD_GetOffset(uint8_t num_of_sensor, int16_t *Offset);
+VL53L4CD_OpResult VL53L4CD_SetXtalk(uint8_t num_of_sensor, uint16_t XtalkValueKcps);
+VL53L4CD_OpResult VL53L4CD_GetXtalk(uint8_t num_of_sensor, uint16_t *p_xtalk_kcps);
+VL53L4CD_OpResult VL53L4CD_SetDetectionThresholds(uint8_t num_of_sensor, uint16_t distance_low_mm, uint16_t distance_high_mm, uint8_t window);
+VL53L4CD_OpResult VL53L4CD_GetDetectionThresholds(uint8_t num_of_sensor, uint16_t *p_distance_low_mm, uint16_t *p_distance_high_mm, uint8_t *p_window);
+VL53L4CD_OpResult VL53L4CD_SetSignalThreshold(uint8_t num_of_sensor, uint16_t signal_kcps);
+VL53L4CD_OpResult VL53L4CD_GetSignalThreshold(uint8_t num_of_sensor, uint16_t *p_signal_kcps);
+VL53L4CD_OpResult VL53L4CD_SetSigmaThreshold(uint8_t num_of_sensor, uint16_t sigma_mm);
+VL53L4CD_OpResult VL53L4CD_GetSigmaThreshold(uint8_t num_of_sensor, uint16_t *p_sigma_mm);
+VL53L4CD_OpResult VL53L4CD_StartTemperatureUpdate(uint8_t num_of_sensor);
+VL53L4CD_OpResult VL53L4CD_CalibrateOffset(uint8_t num_of_sensor, int16_t TargetDistInMm, int16_t *p_measured_offset_mm, int16_t nb_samples);
+VL53L4CD_OpResult VL53L4CD_CalibrateXtalk(uint8_t num_of_sensor, int16_t TargetDistInMm, uint16_t *p_measured_xtalk_kcps, int16_t nb_samples);
 
 #ifdef __cplusplus
 }

@@ -9,7 +9,7 @@
         "0xbef3"
       ]
     ],
-    "mcu": "cortex-m4",
+    "mcu": "msp432e401y",
     "variant": "EK_MSP432E401Y"
   },
   "frameworks": [

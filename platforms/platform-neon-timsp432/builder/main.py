@@ -37,10 +37,7 @@ env.Append(
         "-ffunction-sections",
         "-fdata-sections",
         "-mthumb",
-        "-mcpu=$BOARD_MCU",
-        "-mfpu=fpv4-sp-d16",
         "-mabi=aapcs",
-        "-mfloat-abi=hard",
         "-march=armv7e-m",
         "-MMD",
     ],
@@ -59,9 +56,6 @@ env.Append(
     LINKFLAGS=[
         "-Os",
         "-mthumb",
-        "-mcpu=$BOARD_MCU",
-        "-mfpu=fpv4-sp-d16",
-        "-mfloat-abi=hard",
         "-mabi=aapcs",
         "-specs=nosys.specs",
     ],
@@ -84,6 +78,47 @@ env.Append(
     )
 )
 
+if "BOARD" in env:
+
+    board_cfg = env.BoardConfig()
+
+    cpu = board_cfg.get("build.cpu", "cortex-m4")
+    fpu = board_cfg.get("build.fpu", None)
+    float_abi = board_cfg.get("build.float-abi", None)
+
+    asflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    ccflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    linkflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    if fpu and float_abi:
+        asflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        ccflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        linkflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+    env.Append(
+        ASFLAGS=asflags,
+        CCFLAGS=ccflags,
+        LINKFLAGS=linkflags
+    )
 
 # Allow user to override via pre:script
 if env.get("PROGNAME", "program") == "program":

@@ -1,46 +1,67 @@
-from os.path import isdir, join
+"""
+CMSIS for Nuvoton NUC4x2
+"""
 
+import os
 from SCons.Script import DefaultEnvironment
 
 env = DefaultEnvironment()
 platform = env.PioPlatform()
-
-FRAMEWORK_DIR = platform.get_package_dir("framework-energiamsp432r")
-FRAMEWORK_VERSION = platform.get_package_version("framework-energiamsp432r")
-assert isdir(FRAMEWORK_DIR)
-
 board = env.BoardConfig()
 
-variants_dir = join(
-    "$PROJECT_DIR", board.get("build.variants_dir")) if board.get(
-        "build.variants_dir", "") else join(FRAMEWORK_DIR, "variants")
+mcu = board.get("build.mcu", "")
 
-board_name = board.get('build.variant').lower().replace('_exp', '')
+platform_dir = platform.get_dir()
 
-env.Replace(
-    LIBPATH=[],
-)
+def get_cmsis_family(mcu):
+    mcu = mcu.lower()
+
+    if mcu.startswith("msp432p"):
+        return "msp432p"
+
+    if mcu.startswith("msp432e"):
+        return "msp432e"
+
+    return mcu
+
+cmsis_family = get_cmsis_family(mcu)
+
+CMSIS_ROOT = os.path.join(platform_dir, "packages", "cmsis_" + cmsis_family)
+CMSIS_INC  = os.path.join(CMSIS_ROOT, "Include")
+CMSIS_DEVICE_INC  = os.path.join(CMSIS_ROOT, "Device", "Include")
+CMSIS_SRC  = os.path.join(CMSIS_ROOT, "Device", "Source")
+
 env.Append(
     CPPPATH=[
-        join(variants_dir, board.get("build.variant")),
-        join(FRAMEWORK_DIR, 'system/source'),
-        join(FRAMEWORK_DIR, 'system/source/ti/devices/msp432p4xx/driverlib'),
-        join(FRAMEWORK_DIR, 'system/source/ti/devices/msp432p4xx/inc'),
-        join(FRAMEWORK_DIR, 'system/source/third_party/CMSIS/Include'),
-        join(FRAMEWORK_DIR, 'system/kernel/tirtos/boards', board.get("build.variant")),
+        CMSIS_INC,
+        CMSIS_DEVICE_INC,
     ],
 
-    _LIBDIRFLAGS=[
-        '-Wl,-T' + join(FRAMEWORK_DIR, "system/source/ti/devices/msp432p4xx/linker_files/gcc/%s.lds" % board_name),
+    CCFLAGS=[
+        "-I" + CMSIS_INC,
+        "-I" + CMSIS_DEVICE_INC,
     ],
 
-    LIBSOURCE_DIRS=[
-        join(FRAMEWORK_DIR, "libraries")
+    CXXFLAGS=[
+        "-I" + CMSIS_INC,
+        "-I" + CMSIS_DEVICE_INC,
     ],
+
+    ASFLAGS=[
+        "-I" + CMSIS_INC,
+        "-I" + CMSIS_DEVICE_INC,
+    ]
 )
 
-env.BuildSources(
-   join("$BUILD_DIR", "startup_%s" % (board.get("build.core"))),
-   join(FRAMEWORK_DIR, 'system/source/ti/devices/msp432p4xx/startup_system_files/'),
-   ["+<system_%s.c>" % board_name, "+<gcc/startup_%s_gcc.c>" % board_name]
-)
+if not env.get("TIVAC_CMSIS_BUILT"):
+    env["TIVAC_CMSIS_BUILT"] = True
+
+    env.BuildSources(
+        os.path.join("$BUILD_DIR", "cmsis_" + cmsis_family),
+        CMSIS_SRC,
+        src_filter=[
+            "+<*.c>",
+            "+<*.S>",
+            "+<*.s>"
+        ]
+    )

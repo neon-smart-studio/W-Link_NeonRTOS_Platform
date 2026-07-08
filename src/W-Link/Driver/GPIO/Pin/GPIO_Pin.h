@@ -22,8 +22,12 @@
 #include "TITivaC/GPIO_Pin_TITivaC.h"
 #endif
 
-#ifdef DEVICE_TICC3200
-#include "TICC3200/GPIO_Pin_TICC3200.h"
-#endif // DEVICE_TICC3200
+#ifdef DEVICE_TIMSP432P
+#include "TIMSP432/GPIO_Pin_TIMSP432P.h"
+#endif // DEVICE_TIMSP432P
+
+#ifdef DEVICE_TIMSP432E
+#include "TIMSP432/GPIO_Pin_TIMSP432E.h"
+#endif // DEVICE_TIMSP432E
 
 #endif //GPIO_PIN_H

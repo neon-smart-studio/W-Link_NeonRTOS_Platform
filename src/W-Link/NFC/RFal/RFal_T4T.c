@@ -93,8 +93,8 @@ NFC_OpResult RFal_T4T_PollerComposeCAPDU(const RFal_T4T_CApduParam *apduParam)
   /* Prepend the ADPDU's header */
   apduParam->cApduBuf->apdu[msgIt++] = apduParam->CLA;
   apduParam->cApduBuf->apdu[msgIt++] = apduParam->INS;
-  apduParam->cApduBuf->apdu[msgIt++] = apduParam->P1;
-  apduParam->cApduBuf->apdu[msgIt++] = apduParam->P2;
+  apduParam->cApduBuf->apdu[msgIt++] = apduParam->Param1;
+  apduParam->cApduBuf->apdu[msgIt++] = apduParam->Param2;
 
 
   /* Check if Data field length is to be added */
@@ -149,8 +149,8 @@ NFC_OpResult RFal_T4T_PollerComposeSelectAppl(RFal_ISO_Dep_ApduBufFormat *cApduB
   /* 00h A4h 00h 00h  07h AID    00h */
   cAPDU.CLA      = RFAL_T4T_CLA;
   cAPDU.INS      = (uint8_t)RFAL_T4T_INS_SELECT;
-  cAPDU.P1       = RFAL_T4T_ISO7816_P1_SELECT_BY_DF_NAME;
-  cAPDU.P2       = RFAL_T4T_ISO7816_P2_SELECT_FIRST_OR_ONLY_OCCURENCE | RFAL_T4T_ISO7816_P2_SELECT_RETURN_FCI_TEMPLATE;
+  cAPDU.Param1   = RFAL_T4T_ISO7816_P1_SELECT_BY_DF_NAME;
+  cAPDU.Param2   = RFAL_T4T_ISO7816_P2_SELECT_FIRST_OR_ONLY_OCCURENCE | RFAL_T4T_ISO7816_P2_SELECT_RETURN_FCI_TEMPLATE;
   cAPDU.Lc       = aidLen;
   cAPDU.Le       = 0x00;
   cAPDU.LcFlag   = true;
@@ -179,8 +179,8 @@ NFC_OpResult RFal_T4T_PollerComposeSelectFile(RFal_ISO_Dep_ApduBufFormat *cApduB
   /* 00h A4h 00h 0Ch  02h FID    -   */
   cAPDU.CLA      = RFAL_T4T_CLA;
   cAPDU.INS      = (uint8_t)RFAL_T4T_INS_SELECT;
-  cAPDU.P1       = RFAL_T4T_ISO7816_P1_SELECT_BY_FILEID;
-  cAPDU.P2       = RFAL_T4T_ISO7816_P2_SELECT_FIRST_OR_ONLY_OCCURENCE | RFAL_T4T_ISO7816_P2_SELECT_NO_RESPONSE_DATA;
+  cAPDU.Param1   = RFAL_T4T_ISO7816_P1_SELECT_BY_FILEID;
+  cAPDU.Param2   = RFAL_T4T_ISO7816_P2_SELECT_FIRST_OR_ONLY_OCCURENCE | RFAL_T4T_ISO7816_P2_SELECT_NO_RESPONSE_DATA;
   cAPDU.Lc       = fidLen;
   cAPDU.Le       = 0x00;
   cAPDU.LcFlag   = true;
@@ -209,8 +209,8 @@ NFC_OpResult RFal_T4T_PollerComposeSelectFileV1Mapping(RFal_ISO_Dep_ApduBufForma
   /* 00h A4h 00h 00h  02h FID    -   */
   cAPDU.CLA      = RFAL_T4T_CLA;
   cAPDU.INS      = (uint8_t)RFAL_T4T_INS_SELECT;
-  cAPDU.P1       = RFAL_T4T_ISO7816_P1_SELECT_BY_FILEID;
-  cAPDU.P2       = RFAL_T4T_ISO7816_P2_SELECT_FIRST_OR_ONLY_OCCURENCE | RFAL_T4T_ISO7816_P2_SELECT_RETURN_FCI_TEMPLATE;
+  cAPDU.Param1   = RFAL_T4T_ISO7816_P1_SELECT_BY_FILEID;
+  cAPDU.Param2   = RFAL_T4T_ISO7816_P2_SELECT_FIRST_OR_ONLY_OCCURENCE | RFAL_T4T_ISO7816_P2_SELECT_RETURN_FCI_TEMPLATE;
   cAPDU.Lc       = fidLen;
   cAPDU.Le       = 0x00;
   cAPDU.LcFlag   = true;
@@ -237,8 +237,8 @@ NFC_OpResult RFal_T4T_PollerComposeReadData(RFal_ISO_Dep_ApduBufFormat *cApduBuf
   /* 00h B0h [Offset] -   -      len */
   cAPDU.CLA      = RFAL_T4T_CLA;
   cAPDU.INS      = (uint8_t)RFAL_T4T_INS_READBINARY;
-  cAPDU.P1       = (uint8_t)((offset >> 8U) & 0xFFU);
-  cAPDU.P2       = (uint8_t)((offset >> 0U) & 0xFFU);
+  cAPDU.Param1   = (uint8_t)((offset >> 8U) & 0xFFU);
+  cAPDU.Param2   = (uint8_t)((offset >> 0U) & 0xFFU);
   cAPDU.Le       = expLen;
   cAPDU.LcFlag   = false;
   cAPDU.LeFlag   = true;
@@ -260,8 +260,8 @@ NFC_OpResult RFal_T4T_PollerComposeReadDataODO(RFal_ISO_Dep_ApduBufFormat *cApdu
   /*                          [Offset]    */
   cAPDU.CLA      = RFAL_T4T_CLA;
   cAPDU.INS      = (uint8_t)RFAL_T4T_INS_READBINARY_ODO;
-  cAPDU.P1       = 0x00U;
-  cAPDU.P2       = 0x00U;
+  cAPDU.Param1   = 0x00U;
+  cAPDU.Param2   = 0x00U;
   cAPDU.Le       = expLen;
   cAPDU.LcFlag   = true;
   cAPDU.LeFlag   = true;
@@ -295,8 +295,8 @@ NFC_OpResult RFal_T4T_PollerComposeWriteData(RFal_ISO_Dep_ApduBufFormat *cApduBu
   /* 00h D6h [Offset] len Data   -   */
   cAPDU.CLA      = RFAL_T4T_CLA;
   cAPDU.INS      = (uint8_t)RFAL_T4T_INS_UPDATEBINARY;
-  cAPDU.P1       = (uint8_t)((offset >> 8U) & 0xFFU);
-  cAPDU.P2       = (uint8_t)((offset >> 0U) & 0xFFU);
+  cAPDU.Param1   = (uint8_t)((offset >> 8U) & 0xFFU);
+  cAPDU.Param2   = (uint8_t)((offset >> 0U) & 0xFFU);
   cAPDU.Lc       = dataLen;
   cAPDU.LcFlag   = true;
   cAPDU.LeFlag   = false;
@@ -327,8 +327,8 @@ NFC_OpResult RFal_T4T_PollerComposeWriteDataODO(RFal_ISO_Dep_ApduBufFormat *cApd
   /*                           [offset]     [data]     */
   cAPDU.CLA      = RFAL_T4T_CLA;
   cAPDU.INS      = (uint8_t)RFAL_T4T_INS_UPDATEBINARY_ODO;
-  cAPDU.P1       = 0x00U;
-  cAPDU.P2       = 0x00U;
+  cAPDU.Param1   = 0x00U;
+  cAPDU.Param2   = 0x00U;
   cAPDU.LcFlag   = true;
   cAPDU.LeFlag   = false;
   cAPDU.cApduBuf = cApduBuf;

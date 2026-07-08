@@ -62,8 +62,8 @@
 typedef struct {
   uint8_t                  CLA;                              /*!< Class byte                                         */
   uint8_t                  INS;                              /*!< Instruction byte                                   */
-  uint8_t                  P1;                               /*!< Parameter byte 1                                   */
-  uint8_t                  P2;                               /*!< Parameter byte 2                                   */
+  uint8_t                  Param1;                           /*!< Parameter byte 1                                   */
+  uint8_t                  Param2;                           /*!< Parameter byte 2                                   */
   uint8_t                  Lc;                               /*!< Data field length                                  */
   bool                     LcFlag;                           /*!< Lc flag (append Lc when true)                      */
   uint8_t                  Le;                               /*!< Expected Response Length                           */

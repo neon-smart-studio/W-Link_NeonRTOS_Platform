@@ -408,6 +408,52 @@
 #define DEVICE_STM32
 #endif
 
+#if defined (MSP432P)
+#include "driverlib/rom.h"
+#include "driverlib/rom_map.h"
+#include "driverlib/debug.h"
+#include "driverlib/flash.h"
+#include "driverlib/gpio.h"
+#include "driverlib/i2c.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/spi.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/timer_a.h"
+#include "driverlib/timer32.h"
+#include "driverlib/dma.h"
+#include "driverlib/uart.h"
+#define DEVICE_TIMSP432P
+#endif
+
+#if defined (MSP432E)
+#include "inc/hw_can.h"
+#include "inc/hw_emac.h"
+#include "inc/hw_ints.h"
+#include "inc/hw_i2c.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_ssi.h"
+#include "inc/hw_types.h"
+#include "inc/hw_uart.h"
+#include "driverlib/rom.h"
+#include "driverlib/rom_map.h"
+#include "driverlib/can.h"
+#include "driverlib/debug.h"
+#include "driverlib/emac.h"
+#include "driverlib/flash.h"
+#include "driverlib/gpio.h"
+#include "driverlib/hibernate.h"
+#include "driverlib/i2c.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/pin_map.h"
+#include "driverlib/pwm.h"
+#include "driverlib/ssi.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/timer.h"
+#include "driverlib/udma.h"
+#include "driverlib/uart.h"
+#define DEVICE_TIMSP432E
+#endif
+
 #if defined (TM4C1294) || defined (TM4C123)
 #include "inc/hw_can.h"
 #include "inc/hw_emac.h"

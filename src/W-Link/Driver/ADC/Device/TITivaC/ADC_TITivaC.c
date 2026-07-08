@@ -359,4 +359,4 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
     return hwADC_OK;
 }
 
-#endif // DEVICE_NUVOTON
+#endif // DEVICE_TITIVAC

@@ -33,6 +33,11 @@ bool GPIO_Pin_is_Init(hwGPIO_Pin pin)
 
 hwGPIO_OpResult GPIO_Pin_Init(hwGPIO_Pin pin, hwGPIO_Direction dir, hwGPIO_Pull_Mode pull_mode)
 {
+    if(pin==hwGPIO_Pin_NC)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+  
     if(pin>=hwGPIO_Pin_MAX)
     {
       return hwGPIO_InvalidParameter;
@@ -112,6 +117,11 @@ hwGPIO_OpResult GPIO_Pin_DeInit(hwGPIO_Pin pin)
 
 hwGPIO_OpResult GPIO_Pin_Set_Direction(hwGPIO_Pin pin, hwGPIO_Direction dir)
 {
+    if(pin==hwGPIO_Pin_NC)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+  
     if(pin>=hwGPIO_Pin_MAX)
     {
       return hwGPIO_InvalidParameter;
@@ -166,6 +176,11 @@ hwGPIO_OpResult GPIO_Pin_Set_Direction(hwGPIO_Pin pin, hwGPIO_Direction dir)
 
 hwGPIO_OpResult GPIO_Pin_Get_Direction(hwGPIO_Pin pin, hwGPIO_Direction* dir)
 {
+    if(pin==hwGPIO_Pin_NC)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+  
     if(pin>=hwGPIO_Pin_MAX)
     {
       return hwGPIO_InvalidParameter;
@@ -183,6 +198,11 @@ hwGPIO_OpResult GPIO_Pin_Get_Direction(hwGPIO_Pin pin, hwGPIO_Direction* dir)
 
 hwGPIO_OpResult GPIO_Pin_Set_PullMode(hwGPIO_Pin pin, hwGPIO_Pull_Mode pull_mode)
 {
+    if(pin==hwGPIO_Pin_NC)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+  
     if(pin>=hwGPIO_Pin_MAX)
     {
       return hwGPIO_InvalidParameter;
@@ -230,6 +250,11 @@ hwGPIO_OpResult GPIO_Pin_Set_PullMode(hwGPIO_Pin pin, hwGPIO_Pull_Mode pull_mode
 
 hwGPIO_OpResult GPIO_Pin_Get_PullMode(hwGPIO_Pin pin, hwGPIO_Pull_Mode* pull_mode)
 {
+    if(pin==hwGPIO_Pin_NC)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+  
     if(pin>=hwGPIO_Pin_MAX)
     {
       return hwGPIO_InvalidParameter;
@@ -247,6 +272,11 @@ hwGPIO_OpResult GPIO_Pin_Get_PullMode(hwGPIO_Pin pin, hwGPIO_Pull_Mode* pull_mod
 
 hwGPIO_OpResult GPIO_Pin_Read(hwGPIO_Pin pin, bool* level)
 {
+    if(pin==hwGPIO_Pin_NC)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+  
     if(pin>=hwGPIO_Pin_MAX)
     {
       return hwGPIO_InvalidParameter;
@@ -269,6 +299,11 @@ hwGPIO_OpResult GPIO_Pin_Read(hwGPIO_Pin pin, bool* level)
 
 hwGPIO_OpResult GPIO_Pin_Write(hwGPIO_Pin pin, bool level)
 {
+    if(pin==hwGPIO_Pin_NC)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+  
     if(pin>=hwGPIO_Pin_MAX)
     {
       return hwGPIO_InvalidParameter;
@@ -286,6 +321,11 @@ hwGPIO_OpResult GPIO_Pin_Write(hwGPIO_Pin pin, bool level)
 
 hwGPIO_OpResult GPIO_Pin_Toggle(hwGPIO_Pin pin)
 {
+    if(pin==hwGPIO_Pin_NC)
+    {
+      return hwGPIO_InvalidParameter;
+    }
+  
     if(pin>=hwGPIO_Pin_MAX)
     {
       return hwGPIO_InvalidParameter;
@@ -325,6 +365,11 @@ static void rpi_gpio_irq_callback(uint irq_pin, uint32_t events)
 
 hwGPIO_OpResult GPIO_Interrupt_Init(hwGPIO_Int_Pin irq_pin, hwGPIO_Interrupt_Mode mode)
 {
+    if(irq_pin==hwGPIO_Int_Pin_NC)
+    {
+        return hwGPIO_InvalidParameter;
+    }
+  
     if(irq_pin>=hwGPIO_Int_Pin_MAX)
     {
         return hwGPIO_InvalidParameter;
@@ -370,6 +415,11 @@ hwGPIO_OpResult GPIO_Interrupt_Init(hwGPIO_Int_Pin irq_pin, hwGPIO_Interrupt_Mod
 
 hwGPIO_OpResult GPIO_Interrupt_DeInit(hwGPIO_Int_Pin irq_pin)
 {
+    if(irq_pin==hwGPIO_Int_Pin_NC)
+    {
+        return hwGPIO_InvalidParameter;
+    }
+  
     if(irq_pin>=hwGPIO_Int_Pin_MAX)
     {
         return hwGPIO_InvalidParameter;
@@ -393,6 +443,11 @@ hwGPIO_OpResult GPIO_Interrupt_DeInit(hwGPIO_Int_Pin irq_pin)
 
 hwGPIO_OpResult GPIO_Config_Interrupt_Mode(hwGPIO_Int_Pin irq_pin, hwGPIO_Interrupt_Mode mode)
 {
+    if(irq_pin==hwGPIO_Int_Pin_NC)
+    {
+        return hwGPIO_InvalidParameter;
+    }
+  
     if(irq_pin>=hwGPIO_Int_Pin_MAX)
     {
         return hwGPIO_InvalidParameter;
@@ -433,6 +488,11 @@ hwGPIO_OpResult GPIO_Config_Interrupt_Mode(hwGPIO_Int_Pin irq_pin, hwGPIO_Interr
 
 hwGPIO_OpResult GPIO_Register_Interrupt_Handler(hwGPIO_Int_Pin irq_pin, GPIO_Interrupt_Event_Handler handler)
 {
+    if(irq_pin==hwGPIO_Int_Pin_NC)
+    {
+        return hwGPIO_InvalidParameter;
+    }
+  
     if(irq_pin>=hwGPIO_Int_Pin_MAX)
     {
         return hwGPIO_InvalidParameter;
@@ -450,6 +510,11 @@ hwGPIO_OpResult GPIO_Register_Interrupt_Handler(hwGPIO_Int_Pin irq_pin, GPIO_Int
 
 hwGPIO_OpResult GPIO_Unregister_Interrupt_Handler(hwGPIO_Int_Pin irq_pin)
 {
+    if(irq_pin==hwGPIO_Int_Pin_NC)
+    {
+        return hwGPIO_InvalidParameter;
+    }
+  
     if(irq_pin>=hwGPIO_Int_Pin_MAX)
     {
         return hwGPIO_InvalidParameter;
@@ -462,6 +527,11 @@ hwGPIO_OpResult GPIO_Unregister_Interrupt_Handler(hwGPIO_Int_Pin irq_pin)
 
 hwGPIO_OpResult GPIO_Interrupt_Enable(hwGPIO_Int_Pin irq_pin)
 {
+    if(irq_pin==hwGPIO_Int_Pin_NC)
+    {
+        return hwGPIO_InvalidParameter;
+    }
+  
     if(irq_pin>=hwGPIO_Int_Pin_MAX)
     {
         return hwGPIO_InvalidParameter;
@@ -481,6 +551,11 @@ hwGPIO_OpResult GPIO_Interrupt_Enable(hwGPIO_Int_Pin irq_pin)
 
 hwGPIO_OpResult GPIO_Interrupt_Disable(hwGPIO_Int_Pin irq_pin)
 {
+    if(irq_pin==hwGPIO_Int_Pin_NC)
+    {
+        return hwGPIO_InvalidParameter;
+    }
+  
     if(irq_pin>=hwGPIO_Int_Pin_MAX)
     {
         return hwGPIO_InvalidParameter;
@@ -498,9 +573,14 @@ hwGPIO_OpResult GPIO_Interrupt_Disable(hwGPIO_Int_Pin irq_pin)
     return hwGPIO_OK;
 }
 
-hwGPIO_OpResult GPIO_Interrupt_Pin_Read(hwGPIO_Int_Pin pin, bool* level)
+hwGPIO_OpResult GPIO_Interrupt_Pin_Read(hwGPIO_Int_Pin irq_pin, bool* level)
 {
-    if(pin>=hwGPIO_Int_Pin_MAX)
+    if(irq_pin==hwGPIO_Int_Pin_NC)
+    {
+        return hwGPIO_InvalidParameter;
+    }
+  
+    if(irq_pin>=hwGPIO_Int_Pin_MAX)
     {
       return hwGPIO_InvalidParameter;
     }
@@ -510,7 +590,7 @@ hwGPIO_OpResult GPIO_Interrupt_Pin_Read(hwGPIO_Int_Pin pin, bool* level)
       return hwGPIO_InvalidParameter;
     }
   
-    *level = gpio_get((uint)pin);
+    *level = gpio_get((uint)irq_pin);
     
     return hwGPIO_OK;
 }

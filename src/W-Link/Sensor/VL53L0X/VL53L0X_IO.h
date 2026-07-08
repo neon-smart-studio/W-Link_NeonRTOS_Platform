@@ -42,7 +42,7 @@
 
 #include "Sensor_Config.h"
 
-#define VL53L0X_ACC_I2C_ADDRESS            0x52
+#define VL53L0X_DEFAULT_I2C_ADDRESS        0x52
 
 #define VL53L0X_I2C_OP_TIMEOUT             500
 

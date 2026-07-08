@@ -10,7 +10,7 @@
   ******************************************************************************
   */
 /*
- * Based on STMicroelectronics VL53L5CX driver
+ * Based on STMicroelectronics VL53L8CX driver
  * Modified by Neon Smart Studio for W-Link
  */
 
@@ -21,6 +21,7 @@
 #include <stdbool.h>
 
 #include "VL53L8CX_Def.h"
+#include "VL53L8CX_IO.h"
 
 #include "Sensor_Config.h"
 
@@ -28,7 +29,7 @@
 extern "C" {
 #endif
 
-VL53L8CX_OpResult VL53L8CX_Init();
+VL53L8CX_OpResult VL53L8CX_Init(hwGPIO_Pin lpn_pin, hwGPIO_Int_Pin int_pin, VL53L8CX_Interrupt_Handler callback);
 VL53L8CX_OpResult VL53L8CX_DeInit();
 VL53L8CX_OpResult VL53L8CX_Power_Off();
 VL53L8CX_OpResult VL53L8CX_Power_On();

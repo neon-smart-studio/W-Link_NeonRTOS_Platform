@@ -40,9 +40,9 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "NeonRTOS.h"
 
@@ -54,7 +54,11 @@
 
 #define VL53L8CX_I2C_CHUNK_SIZE 128
 
-static uint8_t sw_i2c_address = VL53L8CX_I2C_NEW_I2C_ADDRESS;
+static uint8_t sw_i2c_address = VL53L8CX_DEFAULT_I2C_ADDRESS;
+
+static hwGPIO_Pin g_lpn_pin = hwGPIO_Pin_NC;
+static hwGPIO_Int_Pin g_int_pin = hwGPIO_Int_Pin_NC;
+static VL53L8CX_Interrupt_Handler sensor_int_callback = NULL;
 
 static VL53L8CX_OpResult VL53L8CX_IO_Map_GPIO_Error(hwGPIO_OpResult error_code)
 {
@@ -197,49 +201,104 @@ static VL53L8CX_OpResult VL53L8CX_IO_I2C_Read(uint16_t RegisterAddr, uint8_t* pB
     return VL53L8CX_OK;
 }
 
-VL53L8CX_OpResult VL53L8CX_IO_Init()
+static void VL53L8CX_GPIO_Int_Event_PendingFunctionCall(void* p1, uint32_t p2)
 {
-   hwGPIO_OpResult gpio_status;
+    if(sensor_int_callback!=NULL)
+    {
+        sensor_int_callback();
+    }
+}
 
-   gpio_status = GPIO_Pin_Init(VL53L8CX_LPN_PIN, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
-   }
+static void VL53L8CX_GPIO_Int_Event_Handler(hwGPIO_Int_Pin pin, hwGPIO_Interrupt_Action action)
+{
+    NeonRTOS_PendingFunctionCall(VL53L8CX_GPIO_Int_Event_PendingFunctionCall, NULL, 0);
+}
 
-   gpio_status = GPIO_Pin_Init(VL53L8CX_RST_PIN, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
-   }
+VL53L8CX_OpResult VL53L8CX_IO_Init(hwGPIO_Pin lpn_pin, hwGPIO_Int_Pin int_pin, VL53L8CX_Interrupt_Handler callback)
+{
+    hwGPIO_OpResult gpio_status;
 
-   return VL53L8CX_OK;
+    g_lpn_pin = lpn_pin;
+    g_int_pin = int_pin;
+
+    gpio_status = GPIO_Pin_Init(g_lpn_pin, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
+    if(gpio_status<hwGPIO_OK)
+    {
+        g_lpn_pin = hwGPIO_Pin_NC;
+        g_int_pin = hwGPIO_Int_Pin_NC;
+        return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
+    }
+
+    if(g_int_pin!=hwGPIO_Int_Pin_NC && callback!=NULL)
+    {
+        gpio_status = GPIO_Interrupt_Init(g_int_pin, hwGPIO_Interrupt_Mode_Falling_Edge);
+        if(gpio_status<hwGPIO_OK)
+        {
+            g_lpn_pin = hwGPIO_Pin_NC;
+            g_int_pin = hwGPIO_Int_Pin_NC;
+            return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
+        }
+        
+        gpio_status = GPIO_Register_Interrupt_Handler(g_int_pin, VL53L8CX_GPIO_Int_Event_Handler);
+        if(gpio_status<hwGPIO_OK)
+        {
+            g_lpn_pin = hwGPIO_Pin_NC;
+            g_int_pin = hwGPIO_Int_Pin_NC;
+            return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
+        }
+        
+        gpio_status = GPIO_Interrupt_Enable(g_int_pin);
+        if(gpio_status<hwGPIO_OK)
+        {
+            g_lpn_pin = hwGPIO_Pin_NC;
+            g_int_pin = hwGPIO_Int_Pin_NC;
+            return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
+        }
+
+        sensor_int_callback = callback;
+    }
+
+    return VL53L8CX_OK;
 }
 
 VL53L8CX_OpResult VL53L8CX_IO_DeInit()
 {
-   hwGPIO_OpResult gpio_status;
+    hwGPIO_OpResult gpio_status;
 
-   gpio_status = GPIO_Pin_DeInit(VL53L8CX_LPN_PIN);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
-   }
+    gpio_status = GPIO_Pin_DeInit(g_lpn_pin);
+    if(gpio_status<hwGPIO_OK)
+    {
+        return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
+    }
 
-   gpio_status = GPIO_Pin_DeInit(VL53L8CX_RST_PIN);
-   if(gpio_status<hwGPIO_OK)
-   {
-      return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
-   }
+    if(g_int_pin!=hwGPIO_Int_Pin_NC && sensor_int_callback!=NULL)
+    {
+        gpio_status = GPIO_Interrupt_Disable(g_int_pin);
+        if(gpio_status<hwGPIO_OK)
+        {
+            return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
+        }
 
-   return VL53L8CX_OK;
+        gpio_status = GPIO_Interrupt_DeInit(g_int_pin);
+        if(gpio_status<hwGPIO_OK)
+        {
+            return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
+        }
+    }
+
+    g_lpn_pin = hwGPIO_Pin_NC;
+    g_int_pin = hwGPIO_Int_Pin_NC;
+
+    sensor_int_callback = NULL;
+
+    return VL53L8CX_OK;
 }
 
 VL53L8CX_OpResult VL53L8CX_IO_Power_On()
 {
    hwGPIO_OpResult gpio_status;
 
-   gpio_status = GPIO_Pin_Write(VL53L8CX_LPN_PIN, true);
+   gpio_status = GPIO_Pin_Write(g_lpn_pin, true);
    if(gpio_status<hwGPIO_OK)
    {
       return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
@@ -254,12 +313,12 @@ VL53L8CX_OpResult VL53L8CX_IO_I2C_Reset()
 {
     hwGPIO_OpResult gpio_status;
 
-    gpio_status = GPIO_Pin_Write(VL53L8CX_LPN_PIN, false);
+    gpio_status = GPIO_Pin_Write(g_lpn_pin, false);
     if(gpio_status < hwGPIO_OK) return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
 
     NeonRTOS_Sleep(10);
 
-    gpio_status = GPIO_Pin_Write(VL53L8CX_LPN_PIN, true);
+    gpio_status = GPIO_Pin_Write(g_lpn_pin, true);
     if(gpio_status < hwGPIO_OK) return VL53L8CX_IO_Map_GPIO_Error(gpio_status);
 
     NeonRTOS_Sleep(100);
@@ -271,7 +330,7 @@ VL53L8CX_OpResult VL53L8CX_IO_Power_Off()
 {
    hwGPIO_OpResult gpio_status;
 
-   gpio_status = GPIO_Pin_Write(VL53L8CX_LPN_PIN, false);
+   gpio_status = GPIO_Pin_Write(g_lpn_pin, false);
    if(gpio_status<hwGPIO_OK)
    {
       return VL53L8CX_IO_Map_GPIO_Error(gpio_status);

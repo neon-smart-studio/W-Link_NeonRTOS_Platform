@@ -46,6 +46,7 @@
 #include <stdbool.h>
 
 #include "VL53L5CX_Def.h"
+#include "VL53L5CX_IO.h"
 
 #include "Sensor_Config.h"
 
@@ -53,7 +54,7 @@
 extern "C" {
 #endif
 
-VL53L5CX_OpResult VL53L5CX_Init();
+VL53L5CX_OpResult VL53L5CX_Init(hwGPIO_Pin lpn_pin, hwGPIO_Int_Pin int_pin, VL53L5CX_Interrupt_Handler callback);
 VL53L5CX_OpResult VL53L5CX_DeInit();
 VL53L5CX_OpResult VL53L5CX_Power_Off();
 VL53L5CX_OpResult VL53L5CX_Power_On();

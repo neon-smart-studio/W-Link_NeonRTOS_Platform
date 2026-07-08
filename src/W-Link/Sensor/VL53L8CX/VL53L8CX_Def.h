@@ -325,7 +325,7 @@ typedef struct {
 
 #ifndef BLOCK_HEADER
 #define BLOCK_HEADER
-union Block_header {
+union VL53L8CX_Block_header {
   uint32_t bytes;
   struct {
     uint32_t type : 4;

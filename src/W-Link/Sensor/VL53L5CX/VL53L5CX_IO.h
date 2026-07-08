@@ -45,19 +45,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "GPIO/GPIO.h"
+
 #include "VL53L5CX_Def.h"
 
 #include "Sensor_Config.h"
 
-#define VL53L5CX_ACC_I2C_ADDRESS            0x52
+#define VL53L5CX_DEFAULT_I2C_ADDRESS        0x52
 
 #define VL53L5CX_I2C_OP_TIMEOUT             500
-
-#ifndef CONFIG_VL53L5CX_NEW_I2C_ADDRESS
-#define VL53L5CX_I2C_NEW_I2C_ADDRESS        VL53L5CX_ACC_I2C_ADDRESS
-#else
-#define VL53L5CX_I2C_NEW_I2C_ADDRESS        CONFIG_VL53L5CX_NEW_I2C_ADDRESS
-#endif
 
 #ifndef CONFIG_VL53L5CX_I2C_INDEX
 #define VL53L5CX_I2C_INDEX                  hwI2C_Index_0
@@ -65,23 +61,13 @@
 #define VL53L5CX_I2C_INDEX                  CONFIG_VL53L5CX_I2C_INDEX
 #endif
 
-#ifndef CONFIG_VL53L5CX_LPN_PIN
-#define VL53L5CX_LPN_PIN                    hwGPIO_Pin_A0
-#else
-#define VL53L5CX_LPN_PIN                    CONFIG_VL53L5CX_LPN_PIN
-#endif
-
-#ifndef CONFIG_VL53L5CX_RST_PIN
-#define VL53L5CX_RST_PIN                    hwGPIO_Pin_A0
-#else
-#define VL53L5CX_RST_PIN                    CONFIG_VL53L5CX_RST_PIN
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-VL53L5CX_OpResult VL53L5CX_IO_Init();
+typedef void (*VL53L5CX_Interrupt_Handler)();
+
+VL53L5CX_OpResult VL53L5CX_IO_Init(hwGPIO_Pin lpn_pin, hwGPIO_Int_Pin int_pin, VL53L5CX_Interrupt_Handler callback);
 VL53L5CX_OpResult VL53L5CX_IO_DeInit();
 VL53L5CX_OpResult VL53L5CX_IO_Power_On();
 VL53L5CX_OpResult VL53L5CX_IO_Power_Off();

@@ -301,7 +301,7 @@ typedef struct {
 } VL53L5CX_ResultsData;
 
 
-union Block_header {
+union VL53L5CX_Block_header {
   uint32_t bytes;
   struct {
     uint32_t type : 4;

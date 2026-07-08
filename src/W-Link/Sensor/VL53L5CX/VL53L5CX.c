@@ -283,9 +283,9 @@ static VL53L5CX_OpResult VL53L5CX_Send_Xtalk_Data(uint8_t resolution)
   return VL53L5CX_OK;
 }
 
-VL53L5CX_OpResult VL53L5CX_Init()
+VL53L5CX_OpResult VL53L5CX_Init(hwGPIO_Pin lpn_pin, hwGPIO_Int_Pin int_pin, VL53L5CX_Interrupt_Handler callback)
 {
-   return VL53L5CX_IO_Init();
+   return VL53L5CX_IO_Init(lpn_pin, int_pin, callback);
 }
 
 VL53L5CX_OpResult VL53L5CX_DeInit()
@@ -640,7 +640,7 @@ VL53L5CX_OpResult VL53L5CX_Start_Ranging()
   uint32_t i;
   uint32_t header_config[2] = {0, 0};
 
-  union Block_header *bh_ptr;
+  union VL53L5CX_Block_header *bh_ptr;
   uint8_t cmd[] = {0x00, 0x03, 0x00, 0x00};
 
   status = VL53L5CX_Get_Resolution(&resolution);
@@ -712,7 +712,7 @@ VL53L5CX_OpResult VL53L5CX_Start_Ranging()
       continue;
     }
 
-    bh_ptr = (union Block_header *) & (output[i]);
+    bh_ptr = (union VL53L5CX_Block_header *) & (output[i]);
     if (((uint8_t)bh_ptr->type >= (uint8_t)0x1)
         && ((uint8_t)bh_ptr->type < (uint8_t)0x0d)) {
       if ((bh_ptr->idx >= (uint16_t)0x54d0)
@@ -893,7 +893,7 @@ VL53L5CX_OpResult VL53L5CX_Check_Data_Ready(uint8_t *p_isReady)
 VL53L5CX_OpResult VL53L5CX_Get_Ranging_Data(VL53L5CX_ResultsData *p_results)
 {
   VL53L5CX_OpResult status;
-  union Block_header *bh_ptr;
+  union VL53L5CX_Block_header *bh_ptr;
   uint32_t i, j, msize;
 
   status = VL53L5CX_IO_Read_Bytes(0x0, VL53L5CX_Temp_Buffer, VL53L5CX_Data_Read_Size);
@@ -909,7 +909,7 @@ VL53L5CX_OpResult VL53L5CX_Get_Ranging_Data(VL53L5CX_ResultsData *p_results)
   /* Start conversion at position 16 to avoid headers */
   for (i = (uint32_t)16; i
        < (uint32_t)VL53L5CX_Data_Read_Size; i += (uint32_t)4) {
-    bh_ptr = (union Block_header *) & (VL53L5CX_Temp_Buffer[i]);
+    bh_ptr = (union VL53L5CX_Block_header *) & (VL53L5CX_Temp_Buffer[i]);
     if ((bh_ptr->type > (uint32_t)0x1)
         && (bh_ptr->type < (uint32_t)0xd)) {
       msize = bh_ptr->type * bh_ptr->size;

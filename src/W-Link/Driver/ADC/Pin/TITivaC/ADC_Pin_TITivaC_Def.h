@@ -1,6 +1,6 @@
 
-#ifndef ADC_PIN_TI_DEF_H
-#define ADC_PIN_TI_DEF_H
+#ifndef ADC_PIN_TITIVAC_DEF_H
+#define ADC_PIN_TITIVAC_DEF_H
 
 #include "soc.h"
 
@@ -13,4 +13,4 @@ typedef struct {
     hwADC_Instance inst;
 } ADC_Channel_Def;
 
-#endif //ADC_PIN_TI_DEF_H
+#endif //ADC_PIN_TITIVAC_DEF_H

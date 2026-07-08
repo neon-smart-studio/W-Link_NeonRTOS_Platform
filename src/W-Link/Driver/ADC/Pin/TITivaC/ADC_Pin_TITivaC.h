@@ -1,6 +1,6 @@
 
-#ifndef ADC_PIN_STM32H723xx_H
-#define ADC_PIN_STM32H723xx_H
+#ifndef ADC_PIN_TITIVAC_H
+#define ADC_PIN_TITIVAC_H
 
 #include "ADC_Pin_TITivaC_Def.h"
 
@@ -16,4 +16,4 @@ const ADC_Channel_Def ADC_Channel_Def_Table[hwADC_Channel_Index_MAX] = {
     { hwGPIO_Pin_D4, hwADC_Instance_2 },   // ADC_IN7
 };
 
-#endif //ADC_PIN_STM32H723xx_H
+#endif //ADC_PIN_TITIVAC_H

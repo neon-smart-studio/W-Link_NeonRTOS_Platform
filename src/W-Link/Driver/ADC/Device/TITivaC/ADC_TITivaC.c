@@ -14,14 +14,6 @@
 
 #include "ADC/Pin/TITivaC/ADC_Pin_TITivaC.h"
 
-#include "inc/hw_memmap.h"
-#include "inc/hw_ints.h"
-
-#include "driverlib/sysctl.h"
-#include "driverlib/gpio.h"
-#include "driverlib/adc.h"
-#include "driverlib/interrupt.h"
-
 bool ADC_NVIC_Init_Status = false;
 bool ADC_Instance_Init_Status[hwADC_Instance_MAX] = {false};
 bool ADC_Channel_Init_Status[hwADC_Channel_Index_MAX] = {false};

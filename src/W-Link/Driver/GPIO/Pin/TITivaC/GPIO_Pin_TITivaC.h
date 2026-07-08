@@ -7,6 +7,7 @@
 typedef enum hwGPIO_Pin_t
 {
   hwGPIO_Pin_NC = -1,
+
   hwGPIO_Pin_A0 = 0,
   hwGPIO_Pin_A1,
   hwGPIO_Pin_A2,
@@ -15,12 +16,14 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_A5,
   hwGPIO_Pin_A6,
   hwGPIO_Pin_A7,
+
   hwGPIO_Pin_B0,
   hwGPIO_Pin_B1,
   hwGPIO_Pin_B2,
   hwGPIO_Pin_B3,
   hwGPIO_Pin_B4,
   hwGPIO_Pin_B5,
+
   hwGPIO_Pin_C0,
   hwGPIO_Pin_C1,
   hwGPIO_Pin_C2,
@@ -29,6 +32,7 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_C5,
   hwGPIO_Pin_C6,
   hwGPIO_Pin_C7,
+
   hwGPIO_Pin_D0,
   hwGPIO_Pin_D1,
   hwGPIO_Pin_D2,
@@ -37,25 +41,31 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_D5,
   hwGPIO_Pin_D6,
   hwGPIO_Pin_D7,
+
   hwGPIO_Pin_E0,
   hwGPIO_Pin_E1,
   hwGPIO_Pin_E2,
   hwGPIO_Pin_E3,
   hwGPIO_Pin_E4,
   hwGPIO_Pin_E5,
+
   hwGPIO_Pin_F0,
   hwGPIO_Pin_F1,
   hwGPIO_Pin_F2,
   hwGPIO_Pin_F3,
   hwGPIO_Pin_F4,
+
   hwGPIO_Pin_G0,
   hwGPIO_Pin_G1,
+
   hwGPIO_Pin_H0,
   hwGPIO_Pin_H1,
   hwGPIO_Pin_H2,
   hwGPIO_Pin_H3,
+
   hwGPIO_Pin_J0,
   hwGPIO_Pin_J1,
+
   hwGPIO_Pin_K0,
   hwGPIO_Pin_K1,
   hwGPIO_Pin_K2,
@@ -64,6 +74,7 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_K5,
   hwGPIO_Pin_K6,
   hwGPIO_Pin_K7,
+
   hwGPIO_Pin_L0,
   hwGPIO_Pin_L1,
   hwGPIO_Pin_L2,
@@ -72,6 +83,7 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_L5,
   hwGPIO_Pin_L6,
   hwGPIO_Pin_L7,
+
   hwGPIO_Pin_M0,
   hwGPIO_Pin_M1,
   hwGPIO_Pin_M2,
@@ -80,29 +92,35 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_M5,
   hwGPIO_Pin_M6,
   hwGPIO_Pin_M7,
+
   hwGPIO_Pin_N0,
   hwGPIO_Pin_N1,
   hwGPIO_Pin_N2,
   hwGPIO_Pin_N3,
   hwGPIO_Pin_N4,
   hwGPIO_Pin_N5,
+
   hwGPIO_Pin_P0,
   hwGPIO_Pin_P1,
   hwGPIO_Pin_P2,
   hwGPIO_Pin_P3,
   hwGPIO_Pin_P4,
   hwGPIO_Pin_P5,
+
   hwGPIO_Pin_Q0,
   hwGPIO_Pin_Q1,
   hwGPIO_Pin_Q2,
   hwGPIO_Pin_Q3,
   hwGPIO_Pin_Q4,
+
   hwGPIO_Pin_MAX
 } hwGPIO_Pin;
+
 
 typedef enum hwGPIO_Int_Pin_t
 {
   hwGPIO_Int_Pin_NC = -1,
+
   hwGPIO_Int_Pin_A0 = 0,
   hwGPIO_Int_Pin_A1,
   hwGPIO_Int_Pin_A2,
@@ -111,12 +129,14 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_A5,
   hwGPIO_Int_Pin_A6,
   hwGPIO_Int_Pin_A7,
+
   hwGPIO_Int_Pin_B0,
   hwGPIO_Int_Pin_B1,
   hwGPIO_Int_Pin_B2,
   hwGPIO_Int_Pin_B3,
   hwGPIO_Int_Pin_B4,
   hwGPIO_Int_Pin_B5,
+
   hwGPIO_Int_Pin_C0,
   hwGPIO_Int_Pin_C1,
   hwGPIO_Int_Pin_C2,
@@ -125,6 +145,7 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_C5,
   hwGPIO_Int_Pin_C6,
   hwGPIO_Int_Pin_C7,
+
   hwGPIO_Int_Pin_D0,
   hwGPIO_Int_Pin_D1,
   hwGPIO_Int_Pin_D2,
@@ -133,25 +154,31 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_D5,
   hwGPIO_Int_Pin_D6,
   hwGPIO_Int_Pin_D7,
+
   hwGPIO_Int_Pin_E0,
   hwGPIO_Int_Pin_E1,
   hwGPIO_Int_Pin_E2,
   hwGPIO_Int_Pin_E3,
   hwGPIO_Int_Pin_E4,
   hwGPIO_Int_Pin_E5,
+
   hwGPIO_Int_Pin_F0,
   hwGPIO_Int_Pin_F1,
   hwGPIO_Int_Pin_F2,
   hwGPIO_Int_Pin_F3,
   hwGPIO_Int_Pin_F4,
+
   hwGPIO_Int_Pin_G0,
   hwGPIO_Int_Pin_G1,
+
   hwGPIO_Int_Pin_H0,
   hwGPIO_Int_Pin_H1,
   hwGPIO_Int_Pin_H2,
   hwGPIO_Int_Pin_H3,
+
   hwGPIO_Int_Pin_J0,
   hwGPIO_Int_Pin_J1,
+
   hwGPIO_Int_Pin_K0,
   hwGPIO_Int_Pin_K1,
   hwGPIO_Int_Pin_K2,
@@ -160,6 +187,7 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_K5,
   hwGPIO_Int_Pin_K6,
   hwGPIO_Int_Pin_K7,
+
   hwGPIO_Int_Pin_L0,
   hwGPIO_Int_Pin_L1,
   hwGPIO_Int_Pin_L2,
@@ -168,6 +196,7 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_L5,
   hwGPIO_Int_Pin_L6,
   hwGPIO_Int_Pin_L7,
+
   hwGPIO_Int_Pin_M0,
   hwGPIO_Int_Pin_M1,
   hwGPIO_Int_Pin_M2,
@@ -176,25 +205,30 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_M5,
   hwGPIO_Int_Pin_M6,
   hwGPIO_Int_Pin_M7,
+
   hwGPIO_Int_Pin_N0,
   hwGPIO_Int_Pin_N1,
   hwGPIO_Int_Pin_N2,
   hwGPIO_Int_Pin_N3,
   hwGPIO_Int_Pin_N4,
   hwGPIO_Int_Pin_N5,
+
   hwGPIO_Int_Pin_P0,
   hwGPIO_Int_Pin_P1,
   hwGPIO_Int_Pin_P2,
   hwGPIO_Int_Pin_P3,
   hwGPIO_Int_Pin_P4,
   hwGPIO_Int_Pin_P5,
+
   hwGPIO_Int_Pin_Q0,
   hwGPIO_Int_Pin_Q1,
   hwGPIO_Int_Pin_Q2,
   hwGPIO_Int_Pin_Q3,
   hwGPIO_Int_Pin_Q4,
+  
   hwGPIO_Int_Pin_MAX
 } hwGPIO_Int_Pin;
+
 
 uint32_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin);
 uint32_t GPIO_Map_Soc_Port_HighSpeed_Base(hwGPIO_Pin pin);

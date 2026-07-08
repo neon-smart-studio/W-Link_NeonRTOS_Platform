@@ -1,27 +1,51 @@
 
-#ifndef GPIO_PIN_TITIVAC_H
-#define GPIO_PIN_TITIVAC_H
+#ifndef GPIO_PIN_TIMSP432P_H
+#define GPIO_PIN_TIMSP432P_H
 
 #include <stdint.h>
 
 typedef enum hwGPIO_Pin_t
 {
   hwGPIO_Pin_NC = -1,
-  hwGPIO_Pin_A0 = 0,
-  hwGPIO_Pin_A1,
-  hwGPIO_Pin_A2,
-  hwGPIO_Pin_A3,
-  hwGPIO_Pin_A4,
-  hwGPIO_Pin_A5,
-  hwGPIO_Pin_A6,
-  hwGPIO_Pin_A7,
-  hwGPIO_Pin_B0,
+
+  // A = P1 + P2
+  hwGPIO_Pin_A0 = 0,   // P1.0
+  hwGPIO_Pin_A1,       // P1.1
+  hwGPIO_Pin_A2,       // P1.2
+  hwGPIO_Pin_A3,       // P1.3
+  hwGPIO_Pin_A4,       // P1.4
+  hwGPIO_Pin_A5,       // P1.5
+  hwGPIO_Pin_A6,       // P1.6
+  hwGPIO_Pin_A7,       // P1.7
+  hwGPIO_Pin_A8,       // P2.0
+  hwGPIO_Pin_A9,       // P2.1
+  hwGPIO_Pin_A10,      // P2.2
+  hwGPIO_Pin_A11,      // P2.3
+  hwGPIO_Pin_A12,      // P2.4
+  hwGPIO_Pin_A13,      // P2.5
+  hwGPIO_Pin_A14,      // P2.6
+  hwGPIO_Pin_A15,      // P2.7
+
+  // B = P3 + P4
+  hwGPIO_Pin_B0,       // P3.0
   hwGPIO_Pin_B1,
   hwGPIO_Pin_B2,
   hwGPIO_Pin_B3,
   hwGPIO_Pin_B4,
   hwGPIO_Pin_B5,
-  hwGPIO_Pin_C0,
+  hwGPIO_Pin_B6,
+  hwGPIO_Pin_B7,
+  hwGPIO_Pin_B8,       // P4.0
+  hwGPIO_Pin_B9,
+  hwGPIO_Pin_B10,
+  hwGPIO_Pin_B11,
+  hwGPIO_Pin_B12,
+  hwGPIO_Pin_B13,
+  hwGPIO_Pin_B14,
+  hwGPIO_Pin_B15,
+
+  // C = P5 + P6
+  hwGPIO_Pin_C0,       // P5.0
   hwGPIO_Pin_C1,
   hwGPIO_Pin_C2,
   hwGPIO_Pin_C3,
@@ -29,7 +53,17 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_C5,
   hwGPIO_Pin_C6,
   hwGPIO_Pin_C7,
-  hwGPIO_Pin_D0,
+  hwGPIO_Pin_C8,       // P6.0
+  hwGPIO_Pin_C9,
+  hwGPIO_Pin_C10,
+  hwGPIO_Pin_C11,
+  hwGPIO_Pin_C12,
+  hwGPIO_Pin_C13,
+  hwGPIO_Pin_C14,
+  hwGPIO_Pin_C15,
+
+  // D = P7 + P8
+  hwGPIO_Pin_D0,       // P7.0
   hwGPIO_Pin_D1,
   hwGPIO_Pin_D2,
   hwGPIO_Pin_D3,
@@ -37,87 +71,84 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_D5,
   hwGPIO_Pin_D6,
   hwGPIO_Pin_D7,
-  hwGPIO_Pin_E0,
+  hwGPIO_Pin_D8,       // P8.0
+  hwGPIO_Pin_D9,
+  hwGPIO_Pin_D10,
+  hwGPIO_Pin_D11,
+  hwGPIO_Pin_D12,
+  hwGPIO_Pin_D13,
+  hwGPIO_Pin_D14,
+  hwGPIO_Pin_D15,
+
+  // E = P9 + P10
+  hwGPIO_Pin_E0,       // P9.0
   hwGPIO_Pin_E1,
   hwGPIO_Pin_E2,
   hwGPIO_Pin_E3,
   hwGPIO_Pin_E4,
   hwGPIO_Pin_E5,
-  hwGPIO_Pin_F0,
-  hwGPIO_Pin_F1,
-  hwGPIO_Pin_F2,
-  hwGPIO_Pin_F3,
-  hwGPIO_Pin_F4,
-  hwGPIO_Pin_G0,
-  hwGPIO_Pin_G1,
-  hwGPIO_Pin_H0,
-  hwGPIO_Pin_H1,
-  hwGPIO_Pin_H2,
-  hwGPIO_Pin_H3,
-  hwGPIO_Pin_J0,
-  hwGPIO_Pin_J1,
-  hwGPIO_Pin_K0,
-  hwGPIO_Pin_K1,
-  hwGPIO_Pin_K2,
-  hwGPIO_Pin_K3,
-  hwGPIO_Pin_K4,
-  hwGPIO_Pin_K5,
-  hwGPIO_Pin_K6,
-  hwGPIO_Pin_K7,
-  hwGPIO_Pin_L0,
-  hwGPIO_Pin_L1,
-  hwGPIO_Pin_L2,
-  hwGPIO_Pin_L3,
-  hwGPIO_Pin_L4,
-  hwGPIO_Pin_L5,
-  hwGPIO_Pin_L6,
-  hwGPIO_Pin_L7,
-  hwGPIO_Pin_M0,
-  hwGPIO_Pin_M1,
-  hwGPIO_Pin_M2,
-  hwGPIO_Pin_M3,
-  hwGPIO_Pin_M4,
-  hwGPIO_Pin_M5,
-  hwGPIO_Pin_M6,
-  hwGPIO_Pin_M7,
-  hwGPIO_Pin_N0,
-  hwGPIO_Pin_N1,
-  hwGPIO_Pin_N2,
-  hwGPIO_Pin_N3,
-  hwGPIO_Pin_N4,
-  hwGPIO_Pin_N5,
-  hwGPIO_Pin_P0,
-  hwGPIO_Pin_P1,
-  hwGPIO_Pin_P2,
-  hwGPIO_Pin_P3,
-  hwGPIO_Pin_P4,
-  hwGPIO_Pin_P5,
-  hwGPIO_Pin_Q0,
-  hwGPIO_Pin_Q1,
-  hwGPIO_Pin_Q2,
-  hwGPIO_Pin_Q3,
-  hwGPIO_Pin_Q4,
+  hwGPIO_Pin_E6,
+  hwGPIO_Pin_E7,
+  hwGPIO_Pin_E8,       // P10.0
+  hwGPIO_Pin_E9,
+  hwGPIO_Pin_E10,
+  hwGPIO_Pin_E11,
+  hwGPIO_Pin_E12,
+  hwGPIO_Pin_E13,
+  hwGPIO_Pin_E14,
+  hwGPIO_Pin_E15,
+
+  // PJ
+  hwGPIO_Pin_PJ0,       // PJ.0
+  hwGPIO_Pin_PJ1,
+  hwGPIO_Pin_PJ2,
+  hwGPIO_Pin_PJ3,
+
   hwGPIO_Pin_MAX
 } hwGPIO_Pin;
 
 typedef enum hwGPIO_Int_Pin_t
 {
   hwGPIO_Int_Pin_NC = -1,
-  hwGPIO_Int_Pin_A0 = 0,
-  hwGPIO_Int_Pin_A1,
-  hwGPIO_Int_Pin_A2,
-  hwGPIO_Int_Pin_A3,
-  hwGPIO_Int_Pin_A4,
-  hwGPIO_Int_Pin_A5,
-  hwGPIO_Int_Pin_A6,
-  hwGPIO_Int_Pin_A7,
-  hwGPIO_Int_Pin_B0,
+
+  // A = P1 + P2
+  hwGPIO_Int_Pin_A0 = 0,   // P1.0
+  hwGPIO_Int_Pin_A1,       // P1.1
+  hwGPIO_Int_Pin_A2,       // P1.2
+  hwGPIO_Int_Pin_A3,       // P1.3
+  hwGPIO_Int_Pin_A4,       // P1.4
+  hwGPIO_Int_Pin_A5,       // P1.5
+  hwGPIO_Int_Pin_A6,       // P1.6
+  hwGPIO_Int_Pin_A7,       // P1.7
+  hwGPIO_Int_Pin_A8,       // P2.0
+  hwGPIO_Int_Pin_A9,       // P2.1
+  hwGPIO_Int_Pin_A10,      // P2.2
+  hwGPIO_Int_Pin_A11,      // P2.3
+  hwGPIO_Int_Pin_A12,      // P2.4
+  hwGPIO_Int_Pin_A13,      // P2.5
+  hwGPIO_Int_Pin_A14,      // P2.6
+  hwGPIO_Int_Pin_A15,      // P2.7
+
+  // B = P3 + P4
+  hwGPIO_Int_Pin_B0,       // P3.0
   hwGPIO_Int_Pin_B1,
   hwGPIO_Int_Pin_B2,
   hwGPIO_Int_Pin_B3,
   hwGPIO_Int_Pin_B4,
   hwGPIO_Int_Pin_B5,
-  hwGPIO_Int_Pin_C0,
+  hwGPIO_Int_Pin_B6,
+  hwGPIO_Int_Pin_B7,
+  hwGPIO_Int_Pin_B8,       // P4.0
+  hwGPIO_Int_Pin_B9,
+  hwGPIO_Int_Pin_B10,
+  hwGPIO_Int_Pin_B11,
+  hwGPIO_Int_Pin_B12,
+  hwGPIO_Int_Pin_B13,
+  hwGPIO_Int_Pin_B14,
+  hwGPIO_Int_Pin_B15,
+
+  // C = P5 + P6
+  hwGPIO_Int_Pin_C0,       // P5.0
   hwGPIO_Int_Pin_C1,
   hwGPIO_Int_Pin_C2,
   hwGPIO_Int_Pin_C3,
@@ -125,7 +156,17 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_C5,
   hwGPIO_Int_Pin_C6,
   hwGPIO_Int_Pin_C7,
-  hwGPIO_Int_Pin_D0,
+  hwGPIO_Int_Pin_C8,       // P6.0
+  hwGPIO_Int_Pin_C9,
+  hwGPIO_Int_Pin_C10,
+  hwGPIO_Int_Pin_C11,
+  hwGPIO_Int_Pin_C12,
+  hwGPIO_Int_Pin_C13,
+  hwGPIO_Int_Pin_C14,
+  hwGPIO_Int_Pin_C15,
+
+  // D = P7 + P8
+  hwGPIO_Int_Pin_D0,       // P7.0
   hwGPIO_Int_Pin_D1,
   hwGPIO_Int_Pin_D2,
   hwGPIO_Int_Pin_D3,
@@ -133,76 +174,45 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_D5,
   hwGPIO_Int_Pin_D6,
   hwGPIO_Int_Pin_D7,
-  hwGPIO_Int_Pin_E0,
+  hwGPIO_Int_Pin_D8,       // P8.0
+  hwGPIO_Int_Pin_D9,
+  hwGPIO_Int_Pin_D10,
+  hwGPIO_Int_Pin_D11,
+  hwGPIO_Int_Pin_D12,
+  hwGPIO_Int_Pin_D13,
+  hwGPIO_Int_Pin_D14,
+  hwGPIO_Int_Pin_D15,
+
+  // E = P9 + P10
+  hwGPIO_Int_Pin_E0,       // P9.0
   hwGPIO_Int_Pin_E1,
   hwGPIO_Int_Pin_E2,
   hwGPIO_Int_Pin_E3,
   hwGPIO_Int_Pin_E4,
   hwGPIO_Int_Pin_E5,
-  hwGPIO_Int_Pin_F0,
-  hwGPIO_Int_Pin_F1,
-  hwGPIO_Int_Pin_F2,
-  hwGPIO_Int_Pin_F3,
-  hwGPIO_Int_Pin_F4,
-  hwGPIO_Int_Pin_G0,
-  hwGPIO_Int_Pin_G1,
-  hwGPIO_Int_Pin_H0,
-  hwGPIO_Int_Pin_H1,
-  hwGPIO_Int_Pin_H2,
-  hwGPIO_Int_Pin_H3,
-  hwGPIO_Int_Pin_J0,
-  hwGPIO_Int_Pin_J1,
-  hwGPIO_Int_Pin_K0,
-  hwGPIO_Int_Pin_K1,
-  hwGPIO_Int_Pin_K2,
-  hwGPIO_Int_Pin_K3,
-  hwGPIO_Int_Pin_K4,
-  hwGPIO_Int_Pin_K5,
-  hwGPIO_Int_Pin_K6,
-  hwGPIO_Int_Pin_K7,
-  hwGPIO_Int_Pin_L0,
-  hwGPIO_Int_Pin_L1,
-  hwGPIO_Int_Pin_L2,
-  hwGPIO_Int_Pin_L3,
-  hwGPIO_Int_Pin_L4,
-  hwGPIO_Int_Pin_L5,
-  hwGPIO_Int_Pin_L6,
-  hwGPIO_Int_Pin_L7,
-  hwGPIO_Int_Pin_M0,
-  hwGPIO_Int_Pin_M1,
-  hwGPIO_Int_Pin_M2,
-  hwGPIO_Int_Pin_M3,
-  hwGPIO_Int_Pin_M4,
-  hwGPIO_Int_Pin_M5,
-  hwGPIO_Int_Pin_M6,
-  hwGPIO_Int_Pin_M7,
-  hwGPIO_Int_Pin_N0,
-  hwGPIO_Int_Pin_N1,
-  hwGPIO_Int_Pin_N2,
-  hwGPIO_Int_Pin_N3,
-  hwGPIO_Int_Pin_N4,
-  hwGPIO_Int_Pin_N5,
-  hwGPIO_Int_Pin_P0,
-  hwGPIO_Int_Pin_P1,
-  hwGPIO_Int_Pin_P2,
-  hwGPIO_Int_Pin_P3,
-  hwGPIO_Int_Pin_P4,
-  hwGPIO_Int_Pin_P5,
-  hwGPIO_Int_Pin_Q0,
-  hwGPIO_Int_Pin_Q1,
-  hwGPIO_Int_Pin_Q2,
-  hwGPIO_Int_Pin_Q3,
-  hwGPIO_Int_Pin_Q4,
+  hwGPIO_Int_Pin_E6,
+  hwGPIO_Int_Pin_E7,
+  hwGPIO_Int_Pin_E8,       // P10.0
+  hwGPIO_Int_Pin_E9,
+  hwGPIO_Int_Pin_E10,
+  hwGPIO_Int_Pin_E11,
+  hwGPIO_Int_Pin_E12,
+  hwGPIO_Int_Pin_E13,
+  hwGPIO_Int_Pin_E14,
+  hwGPIO_Int_Pin_E15,
+
+  // PJ
+  hwGPIO_Int_Pin_PJ0,       // PJ.0
+  hwGPIO_Int_Pin_PJ1,
+  hwGPIO_Int_Pin_PJ2,
+  hwGPIO_Int_Pin_PJ3,
+
   hwGPIO_Int_Pin_MAX
 } hwGPIO_Int_Pin;
 
-uint32_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin);
-uint32_t GPIO_Map_Soc_Port_HighSpeed_Base(hwGPIO_Pin pin);
-uint32_t GPIO_Map_Soc_Int_Port_Base(hwGPIO_Int_Pin pin);
-uint32_t GPIO_Map_Soc_Int_Port_HighSpeed_Base(hwGPIO_Int_Pin pin);
-uint32_t GPIO_Map_Soc_Pin_Mask(hwGPIO_Pin pin);
-uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin);
-uint32_t GPIO_Map_Pin_Int_Mask(uint32_t pinMask);
-hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(uint32_t portBase, uint32_t intMask);
+uint8_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin);
+uint8_t GPIO_Map_Soc_Int_Port_Base(hwGPIO_Int_Pin pin);
+uint16_t GPIO_Map_Soc_Pin_Mask(hwGPIO_Pin pin);
+uint16_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin);
 
-#endif //GPIO_PIN_TITIVAC_H
+#endif //GPIO_PIN_TIMSP432P_H

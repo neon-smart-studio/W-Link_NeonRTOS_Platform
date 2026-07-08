@@ -1,5 +1,5 @@
-#ifndef GPIO_TITIVAC_H
-#define GPIO_TITIVAC_H
+#ifndef GPIO_TIMSP432E_H
+#define GPIO_TIMSP432E_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -9,4 +9,4 @@
 
 extern bool gpio_pin_init_status[hwGPIO_Pin_MAX];
 
-#endif //GPIO_TITIVAC_H
+#endif //GPIO_TIMSP432E_H

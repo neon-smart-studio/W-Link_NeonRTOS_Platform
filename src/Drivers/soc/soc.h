@@ -411,6 +411,8 @@
 #if defined (MSP432P)
 #include "driverlib/rom.h"
 #include "driverlib/rom_map.h"
+#include "driverlib/adc14.h"
+#include "driverlib/cs.h"
 #include "driverlib/debug.h"
 #include "driverlib/flash.h"
 #include "driverlib/gpio.h"

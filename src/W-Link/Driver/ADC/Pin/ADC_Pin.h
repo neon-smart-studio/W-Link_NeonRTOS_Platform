@@ -22,4 +22,12 @@
 #include "TI/ADC_Pin_TM4C1294.h"
 #endif
 
+#ifdef DEVICE_TIMSP432P
+#include "TI/ADC_Pin_TIMSP432P.h"
+#endif
+
+#ifdef DEVICE_TIMSP432E
+#include "TI/ADC_Pin_TIMSP432E.h"
+#endif
+
 #endif //ADC_PIN_H

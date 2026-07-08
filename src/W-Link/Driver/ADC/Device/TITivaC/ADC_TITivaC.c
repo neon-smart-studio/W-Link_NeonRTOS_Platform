@@ -324,7 +324,11 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
     }
 
     if (ADC_ConfigChannel(inst, ch) < hwADC_OK)
+    {
         return hwADC_HwError;
+    }
+
+    adc_active_inst = inst;
 
     MAP_ADCProcessorTrigger(base, 3);
 

@@ -2,7 +2,7 @@
 #ifndef ADC_PIN_TIMSP432E_H
 #define ADC_PIN_TIMSP432E_H
 
-#include "ADC_Pin_TIMSP432E_Def.h"
+#include "ADC_Pin_TIMSP432_Def.h"
 
 const ADC_Channel_Def ADC_Channel_Def_Table[hwADC_Channel_Index_MAX] =
 {

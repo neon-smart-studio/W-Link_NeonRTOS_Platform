@@ -4,9 +4,9 @@
 
 #include "soc.h"
 
-#include "GPIO/Device/TIMSP432/GPIO_TIMSP432P.h"
+#include "GPIO/GPIO.h"
 
-#include "ADC/Device/TIMSP432/ADC_TIMSP432P_Instance.h"
+#include "ADC/Device/TIMSP432/ADC_TIMSP432_Instance.h"
 
 typedef struct {
     hwGPIO_Pin adc_pin;

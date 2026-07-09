@@ -4,8 +4,6 @@
 
 #include "SPI_Pin_TITivaC_Def.h"
 
-#if defined(TM4C123)
-
 static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX] =
 {
     /* SPI0 (SSI0) */
@@ -40,7 +38,5 @@ static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX] =
         hwGPIO_Pin_D1     // CS/FSS
     }
 };
-
-#endif //TM4C123
 
 #endif //SPI_PIN_DEF_TM4C123_H

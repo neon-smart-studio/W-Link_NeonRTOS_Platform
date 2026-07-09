@@ -18,8 +18,16 @@
 #include "RP2/SPI_Pin_RP2.h"
 #endif
 
-#ifdef DEVICE_TM4C1294
-#include "TI/SPI_Pin_TM4C1294.h"
+#ifdef DEVICE_TITIVAC
+#include "TITivaC/SPI_Pin_TITivaC.h"
+#endif
+
+#ifdef DEVICE_TIMSP432P
+#include "TIMSP432/SPI_Pin_TIMSP432P.h"
+#endif
+
+#ifdef DEVICE_TIMSP432E
+#include "TIMSP432/SPI_Pin_TIMSP432E.h"
 #endif
 
 #endif //SPI_MASTER_PIN_H

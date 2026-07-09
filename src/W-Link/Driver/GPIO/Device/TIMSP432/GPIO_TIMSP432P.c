@@ -41,6 +41,11 @@ hwGPIO_OpResult GPIO_Pin_Init(hwGPIO_Pin pin, hwGPIO_Direction dir, hwGPIO_Pull_
       return hwGPIO_InvalidParameter;
     }
   
+    if(pull_mode==hwGPIO_Pull_Mode_OpenDrain)
+    {
+      return hwGPIO_Unsupport;
+    }
+  
     if(gpio_pin_init_status[pin]==true)
     {
       return hwGPIO_PinConflict;
@@ -60,28 +65,22 @@ hwGPIO_OpResult GPIO_Pin_Init(hwGPIO_Pin pin, hwGPIO_Direction dir, hwGPIO_Pull_
             switch (pull_mode)
             {
                 case hwGPIO_Pull_Mode_None:
-                    GPIO_setAsInputPin(portBase, pinMask);
+                    MAP_GPIO_setAsInputPin(portBase, pinMask);
                     break;
 
                 case hwGPIO_Pull_Mode_Up:
-                    GPIO_setAsInputPinWithPullUpResistor(portBase, pinMask);
+                    MAP_GPIO_setAsInputPinWithPullUpResistor(portBase, pinMask);
                     break;
 
                 case hwGPIO_Pull_Mode_Down:
-                    GPIO_setAsInputPinWithPullDownResistor(portBase, pinMask);
+                    MAP_GPIO_setAsInputPinWithPullDownResistor(portBase, pinMask);
                     break;
-
-                case hwGPIO_Pull_Mode_OpenDrain:
-                    return hwGPIO_InvalidParameter;
-
-                default:
-                    return hwGPIO_InvalidParameter;
             }
             break;
 
         case hwGPIO_Direction_Output:
         case hwGPIO_Direction_Output_Only:
-            GPIO_setAsOutputPin(portBase, pinMask);
+            MAP_GPIO_setAsOutputPin(portBase, pinMask);
             break;
 
         default:
@@ -111,7 +110,7 @@ hwGPIO_OpResult GPIO_Pin_DeInit(hwGPIO_Pin pin)
       return hwGPIO_InvalidParameter;
     }
 
-    GPIO_setAsInputPin(portBase, pinMask);
+    MAP_GPIO_setAsInputPin(portBase, pinMask);
 
     gpio_current_dir[pin] = hwGPIO_Direction_Input;
     gpio_current_mode[pin] = hwGPIO_Pull_Mode_None;
@@ -167,32 +166,23 @@ hwGPIO_OpResult GPIO_Pin_Set_Direction(hwGPIO_Pin pin, hwGPIO_Direction dir)
             switch (gpio_current_mode[pin])
             {
                 case hwGPIO_Pull_Mode_None:
-                    GPIO_setAsInputPin(portBase, pinMask);
+                    MAP_GPIO_setAsInputPin(portBase, pinMask);
                     break;
 
                 case hwGPIO_Pull_Mode_Up:
-                    GPIO_setAsInputPinWithPullUpResistor(portBase, pinMask);
+                    MAP_GPIO_setAsInputPinWithPullUpResistor(portBase, pinMask);
                     break;
 
                 case hwGPIO_Pull_Mode_Down:
-                    GPIO_setAsInputPinWithPullDownResistor(portBase, pinMask);
+                    MAP_GPIO_setAsInputPinWithPullDownResistor(portBase, pinMask);
                     break;
-
-                case hwGPIO_Pull_Mode_OpenDrain:
-                    return hwGPIO_InvalidParameter;
-
-                default:
-                    return hwGPIO_InvalidParameter;
             }
             break;
 
         case hwGPIO_Direction_Output:
         case hwGPIO_Direction_Output_Only:
-            GPIO_setAsOutputPin(portBase, pinMask);
+            MAP_GPIO_setAsOutputPin(portBase, pinMask);
             break;
-
-        default:
-            return hwGPIO_InvalidParameter;
     }
 
     gpio_current_dir[pin] = dir;
@@ -239,6 +229,11 @@ hwGPIO_OpResult GPIO_Pin_Set_PullMode(hwGPIO_Pin pin, hwGPIO_Pull_Mode pull_mode
       return hwGPIO_InvalidParameter;
     }
   
+    if(pull_mode==hwGPIO_Pull_Mode_OpenDrain)
+    {
+      return hwGPIO_Unsupport;
+    }
+  
     uint8_t portBase = GPIO_Map_Soc_Port_Base(pin);
     uint16_t pinMask = GPIO_Map_Soc_Pin_Mask(pin);
 
@@ -253,32 +248,23 @@ hwGPIO_OpResult GPIO_Pin_Set_PullMode(hwGPIO_Pin pin, hwGPIO_Pull_Mode pull_mode
             switch (pull_mode)
             {
                 case hwGPIO_Pull_Mode_None:
-                    GPIO_setAsInputPin(portBase, pinMask);
+                    MAP_GPIO_setAsInputPin(portBase, pinMask);
                     break;
 
                 case hwGPIO_Pull_Mode_Up:
-                    GPIO_setAsInputPinWithPullUpResistor(portBase, pinMask);
+                    MAP_GPIO_setAsInputPinWithPullUpResistor(portBase, pinMask);
                     break;
 
                 case hwGPIO_Pull_Mode_Down:
-                    GPIO_setAsInputPinWithPullDownResistor(portBase, pinMask);
+                    MAP_GPIO_setAsInputPinWithPullDownResistor(portBase, pinMask);
                     break;
-
-                case hwGPIO_Pull_Mode_OpenDrain:
-                    return hwGPIO_InvalidParameter;
-
-                default:
-                    return hwGPIO_InvalidParameter;
             }
             break;
 
         case hwGPIO_Direction_Output:
         case hwGPIO_Direction_Output_Only:
-            GPIO_setAsOutputPin(portBase, pinMask);
+            MAP_GPIO_setAsOutputPin(portBase, pinMask);
             break;
-
-        default:
-            return hwGPIO_InvalidParameter;
     }
 
     gpio_current_mode[pin] = pull_mode;
@@ -338,7 +324,7 @@ hwGPIO_OpResult GPIO_Pin_Read(hwGPIO_Pin pin, bool* level)
       return hwGPIO_InvalidParameter;
     }
 
-    *level = GPIO_getInputPinValue(portBase, pinMask) ? 1 : 0;
+    *level = MAP_GPIO_getInputPinValue(portBase, pinMask) ? 1 : 0;
 
     return hwGPIO_OK;
 }
@@ -370,11 +356,11 @@ hwGPIO_OpResult GPIO_Pin_Write(hwGPIO_Pin pin, bool level)
 
     if(level)
     {
-        GPIO_setOutputHighOnPin(portBase, pinMask);
+        MAP_GPIO_setOutputHighOnPin(portBase, pinMask);
     }
     else
     {
-        GPIO_setOutputLowOnPin(portBase, pinMask);
+        MAP_GPIO_setOutputLowOnPin(portBase, pinMask);
     }
     
     return hwGPIO_OK;
@@ -405,7 +391,7 @@ hwGPIO_OpResult GPIO_Pin_Toggle(hwGPIO_Pin pin)
       return hwGPIO_InvalidParameter;
     }
 
-    GPIO_toggleOutputOnPin(portBase, pinMask);
+    MAP_GPIO_toggleOutputOnPin(portBase, pinMask);
     
     return hwGPIO_OK;
 }
@@ -415,8 +401,8 @@ void GPIO_IRQ_Handler(uint_fast8_t portBase)
     uint_fast16_t flags;
     uint_fast16_t bit;
 
-    flags = GPIO_getEnabledInterruptStatus(portBase);
-    GPIO_clearInterruptFlag(portBase, flags);
+    flags = MAP_GPIO_getEnabledInterruptStatus(portBase);
+    MAP_GPIO_clearInterruptFlag(portBase, flags);
 
     for (bit = 0; bit < 16; bit++)
     {
@@ -442,18 +428,18 @@ void GPIO_IRQ_Handler(uint_fast8_t portBase)
                 action = hwGPIO_Interrupt_Action_Falling_Edge;
                 break;
 
-            case hwGPIO_Interrupt_Mode_Both_Edge:
-                bool nowHigh = GPIO_getInputPinValue(portBase, intMask) ? 1 : 0;
+            case hwGPIO_Interrupt_Mode_Both_Edge:;
+                bool nowHigh = MAP_GPIO_getInputPinValue(portBase, intMask) ? 1 : 0;
 
                 if (nowHigh)
                 {
                     action = hwGPIO_Interrupt_Action_Rising_Edge;
-                    GPIO_interruptEdgeSelect(portBase, intMask, GPIO_HIGH_TO_LOW_TRANSITION);
+                    MAP_GPIO_interruptEdgeSelect(portBase, intMask, GPIO_HIGH_TO_LOW_TRANSITION);
                 }
                 else
                 {
                     action = hwGPIO_Interrupt_Action_Falling_Edge;
-                    GPIO_interruptEdgeSelect(portBase, intMask, GPIO_LOW_TO_HIGH_TRANSITION);
+                    MAP_GPIO_interruptEdgeSelect(portBase, intMask, GPIO_LOW_TO_HIGH_TRANSITION);
                 }
                 break;
 
@@ -507,54 +493,52 @@ hwGPIO_OpResult GPIO_Interrupt_Init(hwGPIO_Int_Pin irq_pin, hwGPIO_Interrupt_Mod
       return hwGPIO_Unsupport;
     }
 
-    GPIO_Enable_Port_Clock(portBase);
-
-    GPIO_setAsInputPin(portBase, pinMask);
+    MAP_GPIO_setAsInputPin(portBase, pinMask);
 
     switch (mode)
     {
         case hwGPIO_Interrupt_Mode_Falling_Edge:
-            GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_HIGH_TO_LOW_TRANSITION);
+            MAP_GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_HIGH_TO_LOW_TRANSITION);
             break;
 
         case hwGPIO_Interrupt_Mode_Rising_Edge:
-            GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_LOW_TO_HIGH_TRANSITION);
+            MAP_GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_LOW_TO_HIGH_TRANSITION);
             break;
 
-        case hwGPIO_Interrupt_Mode_Both_Edge:
-            bool nowHigh = GPIO_getInputPinValue(portBase, pinMask) ? 1 : 0;
+        case hwGPIO_Interrupt_Mode_Both_Edge:;
+            bool nowHigh = MAP_GPIO_getInputPinValue(portBase, pinMask) ? 1 : 0;
 
             if (nowHigh)
             {
-                GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_HIGH_TO_LOW_TRANSITION);
+                MAP_GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_HIGH_TO_LOW_TRANSITION);
             }
             else
             {
-                GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_LOW_TO_HIGH_TRANSITION);
+                MAP_GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_LOW_TO_HIGH_TRANSITION);
             }
             break;
     }
 
-    GPIO_clearInterruptFlag(portBase, pinMask);
+    MAP_GPIO_clearInterruptFlag(portBase, pinMask);
 
     switch (portBase)
     {
         case GPIO_PORT_PA:
-            GPIO_registerInterrupt(GPIO_PORT_PA, GPIOA_IRQ_Handler);
-            Interrupt_enableInterrupt(INT_PORT1);
-            Interrupt_enableInterrupt(INT_PORT2);
+            MAP_GPIO_registerInterrupt(GPIO_PORT_PA, GPIOA_IRQ_Handler);
+            MAP_Interrupt_enableInterrupt(INT_PORT1);
+            MAP_Interrupt_enableInterrupt(INT_PORT2);
             break;
 
         case GPIO_PORT_PB:
-            GPIO_registerInterrupt(GPIO_PORT_PB, GPIOB_IRQ_Handler);
-            Interrupt_enableInterrupt(INT_PORT3);
-            Interrupt_enableInterrupt(INT_PORT4);
+            MAP_GPIO_registerInterrupt(GPIO_PORT_PB, GPIOB_IRQ_Handler);
+            MAP_Interrupt_enableInterrupt(INT_PORT3);
+            MAP_Interrupt_enableInterrupt(INT_PORT4);
             break;
 
         case GPIO_PORT_PC:
-            GPIO_registerInterrupt(GPIO_PORT_PC, GPIOC_IRQ_Handler);
-            Interrupt_enableInterrupt(INT_PORT5);
-            Interrupt_enableInterrupt(INT_PORT6);
+            MAP_GPIO_registerInterrupt(GPIO_PORT_PC, GPIOC_IRQ_Handler);
+            MAP_Interrupt_enableInterrupt(INT_PORT5);
+            MAP_Interrupt_enableInterrupt(INT_PORT6);
             break;
 
         case GPIO_PORT_PD:
@@ -563,7 +547,7 @@ hwGPIO_OpResult GPIO_Interrupt_Init(hwGPIO_Int_Pin irq_pin, hwGPIO_Interrupt_Mod
             return hwGPIO_Unsupport;
     }
 
-    GPIO_enableInterrupt(portBase, pinMask);
+    MAP_GPIO_enableInterrupt(portBase, pinMask);
 
     gpio_current_irq_mode[irq_pin] = mode;
 
@@ -597,8 +581,8 @@ hwGPIO_OpResult GPIO_Interrupt_DeInit(hwGPIO_Int_Pin irq_pin)
       return hwGPIO_InvalidParameter;
     }
 
-    GPIO_disableInterrupt(portBase, pinMask);
-    GPIO_clearInterruptFlag(portBase, pinMask);
+    MAP_GPIO_disableInterrupt(portBase, pinMask);
+    MAP_GPIO_clearInterruptFlag(portBase, pinMask);
 
     gpio_pin_init_status[irq_pin] = false;
 
@@ -633,24 +617,24 @@ hwGPIO_OpResult GPIO_Config_Interrupt_Mode(hwGPIO_Int_Pin irq_pin, hwGPIO_Interr
     switch (mode)
     {
         case hwGPIO_Interrupt_Mode_Falling_Edge:
-            GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_HIGH_TO_LOW_TRANSITION);
+            MAP_GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_HIGH_TO_LOW_TRANSITION);
             break;
 
         case hwGPIO_Interrupt_Mode_Rising_Edge:
-            GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_LOW_TO_HIGH_TRANSITION);
+            MAP_GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_LOW_TO_HIGH_TRANSITION);
             break;
 
         case hwGPIO_Interrupt_Mode_Both_Edge:
         {
-            bool nowHigh = GPIO_getInputPinValue(portBase, pinMask) ? true : false;
+            bool nowHigh = MAP_GPIO_getInputPinValue(portBase, pinMask) ? true : false;
 
             if (nowHigh)
             {
-                GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_HIGH_TO_LOW_TRANSITION);
+                MAP_GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_HIGH_TO_LOW_TRANSITION);
             }
             else
             {
-                GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_LOW_TO_HIGH_TRANSITION);
+                MAP_GPIO_interruptEdgeSelect(portBase, pinMask, GPIO_LOW_TO_HIGH_TRANSITION);
             }
             break;
         }
@@ -659,7 +643,7 @@ hwGPIO_OpResult GPIO_Config_Interrupt_Mode(hwGPIO_Int_Pin irq_pin, hwGPIO_Interr
             return hwGPIO_InvalidParameter;
     }
 
-    GPIO_clearInterruptFlag(portBase, pinMask);
+    MAP_GPIO_clearInterruptFlag(portBase, pinMask);
 
     gpio_current_irq_mode[irq_pin] = mode;
 
@@ -725,8 +709,8 @@ hwGPIO_OpResult GPIO_Interrupt_Enable(hwGPIO_Int_Pin irq_pin)
       return hwGPIO_InvalidParameter;
     }
 
-    GPIO_clearInterruptFlag(portBase, pinMask);
-    GPIO_enableInterrupt(portBase, pinMask);
+    MAP_GPIO_clearInterruptFlag(portBase, pinMask);
+    MAP_GPIO_enableInterrupt(portBase, pinMask);
 
     return hwGPIO_OK;
 }
@@ -751,8 +735,8 @@ hwGPIO_OpResult GPIO_Interrupt_Disable(hwGPIO_Int_Pin irq_pin)
       return hwGPIO_InvalidParameter;
     }
 
-    GPIO_disableInterrupt(portBase, pinMask);
-    GPIO_clearInterruptFlag(portBase, pinMask);
+    MAP_GPIO_disableInterrupt(portBase, pinMask);
+    MAP_GPIO_clearInterruptFlag(portBase, pinMask);
 
     return hwGPIO_OK;
 }
@@ -777,7 +761,7 @@ hwGPIO_OpResult GPIO_Interrupt_Pin_Read(hwGPIO_Int_Pin irq_pin, bool* level)
       return hwGPIO_InvalidParameter;
     }
 
-    *level = GPIO_getInputPinValue(portBase, pinMask) ? 1 : 0;
+    *level = MAP_GPIO_getInputPinValue(portBase, pinMask) ? 1 : 0;
 
     return hwGPIO_OK;
 }

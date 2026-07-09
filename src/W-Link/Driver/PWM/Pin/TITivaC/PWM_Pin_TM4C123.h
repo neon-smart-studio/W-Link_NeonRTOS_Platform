@@ -4,8 +4,6 @@
 
 #include "PWM_Pin_TITivaC_Def.h"
 
-#if defined(TM4C123)
-
 static const PWM_Pin_Def PWM_Pin_Def_Table[hwPWM_Channel_MAX] =
 {
     /* ================= PWM0 ================= */
@@ -28,7 +26,5 @@ static const PWM_Pin_Def PWM_Pin_Def_Table[hwPWM_Channel_MAX] =
     { hwPWM_Channel_15, hwPWM_Base_1, hwGPIO_Pin_F2 }, // M1PWM6
     { hwPWM_Channel_16, hwPWM_Base_1, hwGPIO_Pin_F3 }, // M1PWM7
 };
-
-#endif // TM4C123
 
 #endif //PWM_PIN_TM4C123_H

@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#ifdef DEVICE_TITIVAC
+#if defined (DEVICE_TITIVAC) || defined (DEVICE_TIMSP432P) || defined (DEVICE_TIMSP432E)
 extern uint32_t g_sys_clock_hz;
 #endif
 

@@ -212,10 +212,48 @@ typedef enum
 #endif
 #endif //DEVICE_TITIVAC
 
-#ifdef DEVICE_TICC3200
+#ifdef DEVICE_TIMSP432P
 typedef enum {
+	hwPWM_Channel_1 = 0,
+	hwPWM_Channel_2,
+	hwPWM_Channel_3,
+	hwPWM_Channel_4,
+	hwPWM_Channel_5,
+	hwPWM_Channel_6,
+	hwPWM_Channel_7,
+	hwPWM_Channel_8,
+	hwPWM_Channel_9,
+	hwPWM_Channel_10,
+	hwPWM_Channel_11,
+	hwPWM_Channel_12,
+	hwPWM_Channel_13,
+	hwPWM_Channel_14,
+	hwPWM_Channel_15,
+	hwPWM_Channel_16,
     hwPWM_Channel_MAX
 } hwPWM_Channel;
-#endif // DEVICE_TICC3200
+#endif // DEVICE_TIMSP432P
+
+#ifdef DEVICE_TIMSP432E
+typedef enum {
+	hwPWM_Channel_1 = 0,
+	hwPWM_Channel_2,
+	hwPWM_Channel_3,
+	hwPWM_Channel_4,
+	hwPWM_Channel_5,
+	hwPWM_Channel_6,
+	hwPWM_Channel_7,
+	hwPWM_Channel_8,
+	hwPWM_Channel_9,
+	hwPWM_Channel_10,
+	hwPWM_Channel_11,
+	hwPWM_Channel_12,
+	hwPWM_Channel_13,
+	hwPWM_Channel_14,
+	hwPWM_Channel_15,
+	hwPWM_Channel_16,
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif // DEVICE_TIMSP432E
 
 #endif //PWM_INDEX_H

@@ -4,7 +4,7 @@
 
 #include "soc.h"
 
-#include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
+#include "GPIO/GPIO.h"
 
 #include "ADC/Device/TITivaC/ADC_TITivaC_Instance.h"
 

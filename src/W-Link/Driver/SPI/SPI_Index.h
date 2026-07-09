@@ -68,10 +68,26 @@ typedef enum hwSPI_Index_t
 }hwSPI_Index;
 #endif // DEVICE_TITIVAC
 
-#ifdef DEVICE_TICC3200
-typedef enum {
-    hwSPI_Index_MAX
-} hwSPI_Index;
-#endif // DEVICE_TICC3200
+#ifdef DEVICE_TIMSP432P
+typedef enum hwSPI_Index_t
+{
+  hwSPI_Index_0 = 0,
+  hwSPI_Index_1,
+  hwSPI_Index_2,
+  hwSPI_Index_3,
+  hwSPI_Index_MAX,
+}hwSPI_Index;
+#endif // DEVICE_TIMSP432P
+
+#ifdef DEVICE_TIMSP432E
+typedef enum hwSPI_Index_t
+{
+  hwSPI_Index_0 = 0,
+  hwSPI_Index_1,
+  hwSPI_Index_2,
+  hwSPI_Index_3,
+  hwSPI_Index_MAX,
+}hwSPI_Index;
+#endif // DEVICE_TIMSP432E
 
 #endif //SPI_MASTER_INDEX_H

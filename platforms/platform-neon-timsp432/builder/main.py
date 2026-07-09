@@ -55,9 +55,8 @@ env.Append(
 
     LINKFLAGS=[
         "-Os",
-        "-mthumb",
-        "-mabi=aapcs",
-        "-specs=nosys.specs",
+        "-Wl,--gc-sections,--relax",
+        "-mthumb"
     ],
 
     LIBS=["m", "stdc++", "gcc", "nosys", "c"],

@@ -12,6 +12,8 @@
 
 #include "ADC_TITivaC.h"
 
+#include "GPIO/Device/TITivaC/GPIO_TITivaC.h"
+
 #include "ADC/Pin/TITivaC/ADC_Pin_TITivaC.h"
 
 bool ADC_NVIC_Init_Status = false;

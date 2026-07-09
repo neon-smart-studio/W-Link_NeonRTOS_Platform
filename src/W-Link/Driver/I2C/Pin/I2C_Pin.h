@@ -17,7 +17,15 @@
 #endif
 
 #ifdef DEVICE_TITIVAC
-#include "TI/I2C_Pin_TITivaC.h"
+#include "TITivaC/I2C_Pin_TITivaC.h"
+#endif
+
+#ifdef DEVICE_TIMSP432P
+#include "TIMSP432/I2C_Pin_TIMSP432P.h"
+#endif
+
+#ifdef DEVICE_TIMSP432E
+#include "TIMSP432/I2C_Pin_TIMSP432E.h"
 #endif
 
 #endif //I2C_PIN_H

@@ -418,6 +418,7 @@
 #include "driverlib/gpio.h"
 #include "driverlib/i2c.h"
 #include "driverlib/interrupt.h"
+#include "driverlib/rtc_c.h"
 #include "driverlib/spi.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/timer_a.h"

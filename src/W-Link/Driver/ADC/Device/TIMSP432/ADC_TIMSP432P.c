@@ -12,6 +12,8 @@
 
 #include "ADC_TIMSP432P.h"
 
+#include "GPIO/Device/TIMSP432/GPIO_TIMSP432P.h"
+
 #include "ADC/Pin/TIMSP432/ADC_Pin_TIMSP432P.h"
 
 bool ADC_NVIC_Init_Status = false;

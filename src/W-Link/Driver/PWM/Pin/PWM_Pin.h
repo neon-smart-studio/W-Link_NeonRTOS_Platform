@@ -22,4 +22,12 @@
 #include "TITivaC/PWM_Pin_TITivaC.h"
 #endif
 
+#ifdef DEVICE_TIMSP432P
+#include "TIMSP432/PWM_Pin_TIMSP432P.h"
+#endif
+
+#ifdef DEVICE_TIMSP432E
+#include "TIMSP432/PWM_Pin_TIMSP432E.h"
+#endif
+
 #endif //PWM_PIN_H

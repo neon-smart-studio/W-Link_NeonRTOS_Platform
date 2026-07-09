@@ -18,8 +18,16 @@
 #include "RP2/UART_Pin_RP2.h"
 #endif
 
-#ifdef DEVICE_TM4C1294
-#include "TI/UART_Pin_TM4C1294.h"
+#ifdef DEVICE_TITIVAC
+#include "TITivaC/UART_Pin_TITivaC.h"
+#endif
+
+#ifdef DEVICE_TIMSP432P
+#include "TIMSP432/UART_Pin_TIMSP432P.h"
+#endif
+
+#ifdef DEVICE_TIMSP432E
+#include "TIMSP432/UART_Pin_TIMSP432E.h"
 #endif
 
 #endif //UART_PIN_H

@@ -87,10 +87,29 @@ typedef enum hwI2C_Index_t
 #endif
 #endif // DEVICE_TITIVAC
 
-#ifdef DEVICE_TICC3200
+#ifdef DEVICE_TIMSP432P
 typedef enum {
+#if defined(EUSCI_B0_BASE)
+    hwI2C_Index_0 = 0,
+#endif
+#if defined(EUSCI_B1_BASE)
+    hwI2C_Index_1,
+#endif
+#if defined(EUSCI_B2_BASE)
+    hwI2C_Index_2,
+#endif
+#if defined(EUSCI_B3_BASE)
+    hwI2C_Index_3,
+#endif
     hwI2C_Index_MAX
 } hwI2C_Index;
-#endif // DEVICE_TICC3200
+#endif // DEVICE_TIMSP432P
+
+#ifdef DEVICE_TIMSP432E
+typedef enum {
+    hwI2C_Index_0 = 0,
+    hwI2C_Index_MAX
+} hwI2C_Index;
+#endif // DEVICE_TIMSP432E
 
 #endif //I2C_INDEX_H

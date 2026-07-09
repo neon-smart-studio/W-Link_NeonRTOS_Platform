@@ -1,5 +1,5 @@
-#ifndef UART_RP2_H
-#define UART_RP2_H
+#ifndef UART_TITIVAC_H
+#define UART_TITIVAC_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -28,4 +28,4 @@ void UART_NVIC_DeInit(hwUART_Index index);
 }
 #endif // __cplusplus
 
-#endif // UART_RP2_H
+#endif // UART_TITIVAC_H

@@ -32,10 +32,16 @@ typedef enum hwQSPI_Index_t
 }hwQSPI_Index;
 #endif // DEVICE_TITIVAC
 
-#ifdef DEVICE_TICC3200
+#ifdef DEVICE_TIMSP432P
 typedef enum {
     hwQSPI_Index_MAX
 } hwQSPI_Index;
-#endif // DEVICE_TICC3200
+#endif // DEVICE_TIMSP432P
+
+#ifdef DEVICE_TIMSP432E
+typedef enum {
+    hwQSPI_Index_MAX
+} hwQSPI_Index;
+#endif // DEVICE_TIMSP432E
 
 #endif //QSPI_MASTER_INDEX_H

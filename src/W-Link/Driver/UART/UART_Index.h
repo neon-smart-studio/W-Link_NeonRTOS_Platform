@@ -112,10 +112,28 @@ typedef enum hwUART_Index_t
 }hwUART_Index;
 #endif //DEVICE_TM4C1294
 
-#ifdef DEVICE_TICC3200
+#ifdef DEVICE_TIMSP432P
 typedef enum {
+    hwUART_Index_0 = 0,   // EUSCI_A0
+    hwUART_Index_1,       // EUSCI_A1
+    hwUART_Index_2,       // EUSCI_A2
+    hwUART_Index_3,       // EUSCI_A3
     hwUART_Index_MAX
 } hwUART_Index;
-#endif // DEVICE_TICC3200
+#endif // DEVICE_TIMSP432P
+
+#ifdef DEVICE_TIMSP432E
+typedef enum {
+    hwUART_Index_0 = 0,   // UART0
+    hwUART_Index_1,       // UART1
+    hwUART_Index_2,       // UART2
+    hwUART_Index_3,       // UART3
+    hwUART_Index_4,       // UART4
+    hwUART_Index_5,       // UART5
+    hwUART_Index_6,       // UART6
+    hwUART_Index_7,       // UART7
+    hwUART_Index_MAX
+} hwUART_Index;
+#endif // DEVICE_TIMSP432E
 
 #endif //UART_INDEX_H

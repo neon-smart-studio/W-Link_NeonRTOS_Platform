@@ -37,10 +37,18 @@ typedef enum {
 } hwRTC_Alarm_Channel_Index;
 #endif // DEVICE_TITIVAC
 
-#ifdef DEVICE_TICC3200
+#ifdef DEVICE_TIMSP432P
 typedef enum {
+    hwRTC_Alarm_Channel_Index_0 = 0,
     hwRTC_Alarm_Channel_Index_MAX
 } hwRTC_Alarm_Channel_Index;
-#endif // DEVICE_TICC3200
+#endif // DEVICE_TIMSP432P
+
+#ifdef DEVICE_TIMSP432E
+typedef enum {
+    hwRTC_Alarm_Channel_Index_0 = 0,
+    hwRTC_Alarm_Channel_Index_MAX
+} hwRTC_Alarm_Channel_Index;
+#endif // DEVICE_TIMSP432E
 
 #endif //RTC_ALARM_CHANNEL_H

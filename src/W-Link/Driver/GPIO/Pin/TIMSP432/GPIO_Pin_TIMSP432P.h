@@ -99,10 +99,10 @@ typedef enum hwGPIO_Pin_t
   hwGPIO_Pin_E15,
 
   // PJ
-  hwGPIO_Pin_PJ0,       // PJ.0
-  hwGPIO_Pin_PJ1,
-  hwGPIO_Pin_PJ2,
-  hwGPIO_Pin_PJ3,
+  hwGPIO_Pin_J0,       // PJ.0
+  hwGPIO_Pin_J1,
+  hwGPIO_Pin_J2,
+  hwGPIO_Pin_J3,
 
   hwGPIO_Pin_MAX
 } hwGPIO_Pin;
@@ -202,10 +202,10 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_E15,
 
   // PJ
-  hwGPIO_Int_Pin_PJ0,       // PJ.0
-  hwGPIO_Int_Pin_PJ1,
-  hwGPIO_Int_Pin_PJ2,
-  hwGPIO_Int_Pin_PJ3,
+  hwGPIO_Int_Pin_J0,       // PJ.0
+  hwGPIO_Int_Pin_J1,
+  hwGPIO_Int_Pin_J2,
+  hwGPIO_Int_Pin_J3,
 
   hwGPIO_Int_Pin_MAX
 } hwGPIO_Int_Pin;
@@ -214,5 +214,6 @@ uint8_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin);
 uint8_t GPIO_Map_Soc_Int_Port_Base(hwGPIO_Int_Pin pin);
 uint16_t GPIO_Map_Soc_Pin_Mask(hwGPIO_Pin pin);
 uint16_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin);
+hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(uint8_t portBase, uint16_t intMask);
 
 #endif //GPIO_PIN_TIMSP432P_H

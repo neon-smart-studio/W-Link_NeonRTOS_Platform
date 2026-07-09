@@ -134,10 +134,18 @@ typedef enum hwTimer_Index_t
 }hwTimer_Index;
 #endif // DEVICE_TITIVAC
 
-#ifdef DEVICE_TICC3200
+#ifdef DEVICE_TIMSP432P
+typedef enum {
+    hwTimer_Index_0 = 0,   // TIMER32_0
+    hwTimer_Index_1,       // TIMER32_1
+    hwTimer_Index_MAX
+} hwTimer_Index;
+#endif // DEVICE_TIMSP432P
+
+#ifdef DEVICE_TIMSP432E
 typedef enum {
     hwTimer_Index_MAX
 } hwTimer_Index;
-#endif // DEVICE_TICC3200
+#endif // DEVICE_TIMSP432E
 
 #endif //TIMER_INDEX_H

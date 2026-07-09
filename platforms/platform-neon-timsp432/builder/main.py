@@ -123,9 +123,6 @@ if "BOARD" in env:
 if env.get("PROGNAME", "program") == "program":
     env.Replace(PROGNAME="firmware")
 
-if "energia" in env.get("PIOFRAMEWORK", []):
-    env.Replace(PIOFRAMEWORK=["arduino"])
-
 # Target: Build executable and linkable firmware
 target_elf = None
 if "nobuild" in COMMAND_LINE_TARGETS:

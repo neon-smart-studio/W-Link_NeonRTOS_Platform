@@ -1,6 +1,6 @@
 
-#ifndef I2C_PIN_STM32_Def_H
-#define I2C_PIN_STM32_Def_H
+#ifndef I2C_PIN_TITIVAC_DEF_H
+#define I2C_PIN_TITIVAC_DEF_H
 
 #include "GPIO/GPIO.h"
 
@@ -11,4 +11,4 @@ typedef struct {
     hwGPIO_Pin sda_pin;
 } I2C_Pin_Def;
 
-#endif //I2C_PIN_STM32_Def_H
+#endif //I2C_PIN_TITIVAC_DEF_H

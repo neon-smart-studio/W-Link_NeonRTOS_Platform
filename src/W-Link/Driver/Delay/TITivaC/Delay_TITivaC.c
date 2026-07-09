@@ -6,8 +6,6 @@
 
 #ifdef DEVICE_TITIVAC
 
-#include "driverlib/sysctl.h"
-
 #define DEMCR_REG       (*((volatile uint32_t *)0xE000EDFCUL))
 #define DWT_CTRL_REG    (*((volatile uint32_t *)0xE0001000UL))
 #define DWT_CYCCNT_REG  (*((volatile uint32_t *)0xE0001004UL))

@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "soc.h"
+
 #include "NeonRTOS.h"
 
 #include "GPIO/GPIO.h"
@@ -348,10 +349,6 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
 
     uint32_t raw = item.raw;
 
-    /*
-     * NUC4x2 ADC is 12-bit.
-     * Vref = AVDD, normally 3300mV.
-     */
     *readMv = ((float)raw * ADC_VREF_MV) / ADC_MAX_COUNT;
 
     return hwADC_OK;

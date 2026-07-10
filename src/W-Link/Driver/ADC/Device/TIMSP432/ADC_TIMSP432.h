@@ -1,5 +1,5 @@
-#ifndef ADC_NUC4x2_H
-#define ADC_NUC4x2_H
+#ifndef ADC_TIMSP432_H
+#define ADC_TIMSP432_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -23,4 +23,4 @@ typedef struct {
 extern bool ADC_Instance_Init_Status[hwADC_Instance_MAX];
 extern bool ADC_Channel_Init_Status[hwADC_Channel_Index_MAX];
 
-#endif // ADC_NUC4x2_H
+#endif // ADC_TIMSP432_H

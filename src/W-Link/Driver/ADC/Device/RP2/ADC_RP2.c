@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "soc.h"
+
 #include "NeonRTOS.h"
 
 #include "GPIO/GPIO.h"

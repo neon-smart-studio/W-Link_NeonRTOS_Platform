@@ -9,13 +9,13 @@
 
 #include "ADC/ADC.h"
 
-#ifdef DEVICE_TIMSP432P
+#ifdef DEVICE_TIMSP432E
 
 #include "ADC_TIMSP432.h"
 
-#include "GPIO/Device/TIMSP432/GPIO_TIMSP432P.h"
+#include "GPIO/Device/TIMSP432/GPIO_TIMSP432E.h"
 
-#include "ADC/Pin/TIMSP432/ADC_Pin_TIMSP432P.h"
+#include "ADC/Pin/TIMSP432/ADC_Pin_TIMSP432E.h"
 
 bool ADC_NVIC_Init_Status = false;
 bool ADC_Instance_Init_Status[hwADC_Instance_MAX] = {false};
@@ -25,119 +25,109 @@ NeonRTOS_MsgQ_t ADC_Channel_SyncQueue[hwADC_Instance_MAX] = {NULL};
 
 static volatile hwADC_Instance adc_active_inst = hwADC_Instance_1;
 
-static uint32_t ADC_Channel_Index_To_Input(hwADC_Channel_Index ch)
+static uint32_t ADC_Instance_To_Base(hwADC_Instance inst)
+{
+    switch(inst)
+    {
+        case hwADC_Instance_1: return ADC0_BASE;
+        case hwADC_Instance_2: return ADC1_BASE;
+        default: return 0;
+    }
+}
+
+static uint32_t ADC_Instance_To_Periph(hwADC_Instance inst)
+{
+    switch(inst)
+    {
+        case hwADC_Instance_1: return SYSCTL_PERIPH_ADC0;
+        case hwADC_Instance_2: return SYSCTL_PERIPH_ADC1;
+        default: return 0;
+    }
+}
+
+static uint32_t ADC_Channel_Index_To_Ctl(hwADC_Channel_Index ch)
 {
     switch(ch)
     {
-        case hwADC_Channel_Index_0:  return ADC_INPUT_A0;
-        case hwADC_Channel_Index_1:  return ADC_INPUT_A1;
-        case hwADC_Channel_Index_2:  return ADC_INPUT_A2;
-        case hwADC_Channel_Index_3:  return ADC_INPUT_A3;
-        case hwADC_Channel_Index_4:  return ADC_INPUT_A4;
-        case hwADC_Channel_Index_5:  return ADC_INPUT_A5;
-        case hwADC_Channel_Index_6:  return ADC_INPUT_A6;
-        case hwADC_Channel_Index_7:  return ADC_INPUT_A7;
-        case hwADC_Channel_Index_8:  return ADC_INPUT_A8;
-        case hwADC_Channel_Index_9:  return ADC_INPUT_A9;
-        case hwADC_Channel_Index_10: return ADC_INPUT_A10;
-        case hwADC_Channel_Index_11: return ADC_INPUT_A11;
-        case hwADC_Channel_Index_12: return ADC_INPUT_A12;
-        case hwADC_Channel_Index_13: return ADC_INPUT_A13;
-        case hwADC_Channel_Index_14: return ADC_INPUT_A14;
-        case hwADC_Channel_Index_15: return ADC_INPUT_A15;
-        case hwADC_Channel_Index_16: return ADC_INPUT_A16;
-        case hwADC_Channel_Index_17: return ADC_INPUT_A17;
-        case hwADC_Channel_Index_18: return ADC_INPUT_A18;
-        case hwADC_Channel_Index_19: return ADC_INPUT_A19;
-        case hwADC_Channel_Index_20: return ADC_INPUT_A20;
-        case hwADC_Channel_Index_21: return ADC_INPUT_A21;
-        case hwADC_Channel_Index_22: return ADC_INPUT_A22;
-        case hwADC_Channel_Index_23: return ADC_INPUT_A23;
-        default: return 0xFFFFFFFF;
+        case hwADC_Channel_Index_0: return ADC_CTL_CH0;
+        case hwADC_Channel_Index_1: return ADC_CTL_CH1;
+        case hwADC_Channel_Index_2: return ADC_CTL_CH2;
+        case hwADC_Channel_Index_3: return ADC_CTL_CH3;
+        case hwADC_Channel_Index_4: return ADC_CTL_CH4;
+        case hwADC_Channel_Index_5: return ADC_CTL_CH5;
+        case hwADC_Channel_Index_6: return ADC_CTL_CH6;
+        case hwADC_Channel_Index_7: return ADC_CTL_CH7;
+        default: return 0;
     }
 }
 
 hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
 {
-    if(inst >= hwADC_Instance_MAX)
-    {
+    uint32_t periph = ADC_Instance_To_Periph(inst);
+    uint32_t base   = ADC_Instance_To_Base(inst);
+
+    if(base == 0 || periph == 0)
         return hwADC_InvalidParameter;
-    }
 
-    MAP_ADC14_enableModule();
+    MAP_SysCtlPeripheralEnable(periph);
+    while(!MAP_SysCtlPeripheralReady(periph));
 
-    MAP_ADC14_initModule(
-        ADC_CLOCKSOURCE_MCLK,
-        ADC_PREDIVIDER_1,
-        ADC_DIVIDER_1,
-        0
-    );
+    MAP_ADCSequenceDisable(base, 3);
 
-    MAP_ADC14_setResolution(ADC_14BIT);
+    MAP_ADCSequenceConfigure(base, 3, ADC_TRIGGER_PROCESSOR, 0);
 
-    MAP_ADC14_enableSampleTimer(ADC_MANUAL_ITERATION);
+    MAP_ADCIntClear(base, 3);
+    MAP_ADCIntEnable(base, 3);
 
-    MAP_ADC14_clearInterruptFlag(ADC_INT0);
-    MAP_ADC14_enableInterrupt(ADC_INT0);
-
-    MAP_ADC14_enableConversion();
+    MAP_ADCSequenceEnable(base, 3);
 
     return hwADC_OK;
 }
 
 hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
 {
-    if(inst >= hwADC_Instance_MAX)
-    {
-        return hwADC_InvalidParameter;
-    }
+    uint32_t periph = ADC_Instance_To_Periph(inst);
+    uint32_t base   = ADC_Instance_To_Base(inst);
 
-    MAP_ADC14_disableInterrupt(ADC_INT0);
-    MAP_ADC14_disableConversion();
-    MAP_ADC14_disableModule();
+    if(base == 0 || periph == 0)
+        return hwADC_InvalidParameter;
+
+    MAP_ADCIntDisable(base, 3);
+    MAP_ADCSequenceDisable(base, 3);
+
+    MAP_SysCtlPeripheralDisable(periph);
 
     return hwADC_OK;
 }
 
 hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
 {
-    if(inst >= hwADC_Instance_MAX)
-    {
+    uint32_t base = ADC_Instance_To_Base(inst);
+    uint32_t ctl_ch = ADC_Channel_Index_To_Ctl(ch);
+
+    if(base == 0 || ctl_ch == 0)
         return hwADC_InvalidParameter;
-    }
 
-    uint32_t adc_input = ADC_Channel_Index_To_Input(ch);
+    MAP_ADCSequenceDisable(base, 3);
 
-    if(adc_input == 0xFFFFFFFF)
-    {
-        return hwADC_InvalidParameter;
-    }
+    MAP_ADCSequenceStepConfigure(base, 3, 0, ctl_ch | ADC_CTL_IE | ADC_CTL_END);
 
-    MAP_ADC14_disableConversion();
-
-    MAP_ADC14_configureSingleSampleMode(ADC_MEM0, true);
-
-    MAP_ADC14_configureConversionMemory(
-        ADC_MEM0,
-        ADC_VREFPOS_AVCC_VREFNEG_VSS,
-        adc_input,
-        false
-    );
-
-    MAP_ADC14_clearInterruptFlag(ADC_INT0);
-    MAP_ADC14_enableConversion();
+    MAP_ADCIntClear(base, 3);
+    MAP_ADCSequenceEnable(base, 3);
 
     return hwADC_OK;
 }
 
 void ADC_NVIC_Init(void)
 {
-    MAP_Interrupt_enableInterrupt(INT_ADC14);
+    MAP_IntEnable(INT_ADC0SS3);
+    MAP_IntEnable(INT_ADC1SS3);
 }
 
 void ADC_NVIC_DeInit(void)
 {
-    MAP_Interrupt_disableInterrupt(INT_ADC14);
+    MAP_IntDisable(INT_ADC0SS3);
+    MAP_IntDisable(INT_ADC1SS3);
 }
 
 bool ADC_IsInstanceChannelUsed(hwADC_Instance inst)
@@ -176,17 +166,24 @@ void ADC_ConvCpltCallback(uint16_t raw)
                         NEONRT_NO_WAIT);
 }
 
-void ADC14_IRQHandler(void)
+void ADC0SS3_Handler(void)
 {
-    uint64_t status = MAP_ADC14_getEnabledInterruptStatus();
+    uint32_t raw;
 
-    MAP_ADC14_clearInterruptFlag(status);
+    MAP_ADCIntClear(ADC0_BASE, 3);
+    MAP_ADCSequenceDataGet(ADC0_BASE, 3, &raw);
 
-    if(status & ADC_INT0)
-    {
-        uint16_t raw = (uint16_t)MAP_ADC14_getResult(ADC_MEM0);
-        ADC_ConvCpltCallback(raw);
-    }
+    ADC_ConvCpltCallback((uint16_t)raw);
+}
+
+void ADC1SS3_Handler(void)
+{
+    uint32_t raw;
+
+    MAP_ADCIntClear(ADC1_BASE, 3);
+    MAP_ADCSequenceDataGet(ADC1_BASE, 3, &raw);
+
+    ADC_ConvCpltCallback((uint16_t)raw);
 }
 
 hwADC_OpResult ADC_Channel_Init(hwADC_Channel_Index ch)
@@ -212,11 +209,9 @@ hwADC_OpResult ADC_Channel_Init(hwADC_Channel_Index ch)
       return hwGPIO_InvalidParameter;
     }
 
-    MAP_GPIO_setAsPeripheralModuleFunctionInputPin(
-        portBase,
-        pinMask,
-        GPIO_TERTIARY_MODULE_FUNCTION
-    );
+    GPIO_Enable_Port_Clock(portBase);
+
+    MAP_GPIOPinTypeADC(portBase, pinMask);
 
     if(!ADC_Instance_Init_Status[inst])
     {
@@ -273,7 +268,7 @@ hwADC_OpResult ADC_Channel_DeInit(hwADC_Channel_Index ch)
       return hwGPIO_InvalidParameter;
     }
 
-    MAP_GPIO_setAsInputPin(portBase, pinMask);
+    MAP_GPIOPinTypeGPIOInput(portBase, pinMask);
 
     ADC_Channel_Init_Status[ch] = false;
 
@@ -325,6 +320,12 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
         return hwADC_InvalidParameter;
     }
 
+    uint32_t base = ADC_Instance_To_Base(inst);
+    if(base == 0)
+    {
+        return hwADC_InvalidParameter;
+    }
+
     if (ADC_ConfigChannel(inst, ch) < hwADC_OK)
     {
         return hwADC_HwError;
@@ -332,7 +333,7 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
 
     adc_active_inst = inst;
 
-    MAP_ADC14_toggleConversionTrigger();
+    MAP_ADCProcessorTrigger(base, 3);
 
     ADC_QueueItem item;
 
@@ -340,6 +341,9 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
                          &item,
                          ADC_CONV_TIMEOUT_MS) != NeonRTOS_OK)
     {
+        uint32_t base = ADC_Instance_To_Base(inst);
+        MAP_ADCSequenceDisable(base, 3);
+        MAP_ADCSequenceEnable(base, 3);
         return hwADC_HwError;
     }
 
@@ -350,4 +354,4 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
     return hwADC_OK;
 }
 
-#endif // DEVICE_TIMSP432P
+#endif // DEVICE_TIMSP432E

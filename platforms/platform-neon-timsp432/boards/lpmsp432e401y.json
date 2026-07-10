@@ -1,6 +1,7 @@
 {
   "build": {
     "core": "msp432e",
+    "ldscript": "msp432e401y.ld",
     "extra_flags": "-DENERGIA_EK_MSP432E401Y -DENERGIA_ARCH_MSP432E -D__MSP432E401Y__ -DBOARD_EK_MSP432E401Y -DMSP432E401Y -DMSP432E",
     "f_cpu": "120000000L",
     "hwids": [
@@ -24,10 +25,8 @@
           "package": "tool-openocd",
           "executable": "bin/openocd",
           "arguments": [
-            "-s",
-            "$PACKAGE_DIR/scripts",
-            "-f",
-            "board/ti_msp432e4_launchpad.cfg"
+            "-s", "$PACKAGE_DIR/scripts",
+            "-f", "board/ti_msp432_launchpad.cfg"
           ]
         }
       }

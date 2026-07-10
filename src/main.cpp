@@ -40,11 +40,6 @@
 #define TEMP_CHAR_UUID        "a32e5520-e477-11e2-a9e3-0002a5d5c51b"
 #define HUMIDITY_CHAR_UUID    "01c50b60-e48c-11e2-a073-0002a5d5c51b"
 */
-void HardFault_Handler()
-{
-    while (1);
-}
-
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
     // 堆疊溢出處理
     while (1);

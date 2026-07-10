@@ -55,7 +55,9 @@ env.Append(
 
     LINKFLAGS=[
         "-Os",
-        "-Wl,--gc-sections,--relax",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Wl,--gc-sections",
         "-mthumb"
     ],
 

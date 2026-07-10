@@ -52,11 +52,11 @@ extern void SystemInit(void);
 
 /* Forward declaration of the default fault handlers.   */
 void Default_Handler                (void) __attribute__((weak));
+void HardFault_Handler              (void) __attribute__((weak));
 extern void Reset_Handler           (void) __attribute__((weak));
 
 /* Cortex-M4 Processor Exceptions */
 extern void NMI_Handler             (void) __attribute__((weak, alias("Default_Handler")));
-extern void HardFault_Handler       (void) __attribute__((weak, alias("Default_Handler")));
 extern void MemManage_Handler       (void) __attribute__((weak, alias("Default_Handler")));
 extern void BusFault_Handler        (void) __attribute__((weak, alias("Default_Handler")));
 extern void UsageFault_Handler      (void) __attribute__((weak, alias("Default_Handler")));
@@ -172,7 +172,8 @@ extern void I2C9_IRQHandler         (void) __attribute__((weak, alias("Default_H
 /* ensure that it ends up at physical address 0x0000.0000 or at the start of    */
 /* the program if located at a start address other than 0.                      */
 
-void (* const interruptVectors[])(void) __attribute__ ((section (".intvecs"))) =
+__attribute__((used, section(".isr_vector")))
+const pFunc interruptVectors[] =
 {
     (pFunc)&__StackTop,
                                             /* The initial stack pointer */
@@ -350,6 +351,11 @@ void Default_Handler(void)
 	while(1)
 	{
 	}
+}
+
+void HardFault_Handler()
+{
+    while (1);
 }
 
 #endif // MSP432E401Y

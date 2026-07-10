@@ -1,7 +1,7 @@
 {
   "build": {
     "core": "msp432r",
-    "ldscript": "lpmsp432p401r.ld",
+    "ldscript": "msp432p401r.ld",
     "extra_flags": "-DENERGIA_MSP_EXP432P401R -DENERGIA_ARCH_MSP432R -D__MSP432P401R__ -DBOARD_MSP_EXP432P401R -DMSP432P401R -DMSP432P",
     "f_cpu": "48000000L",
     "hwids": [

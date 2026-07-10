@@ -19,7 +19,7 @@ static hwGPIO_Pull_Mode gpio_current_mode[hwGPIO_Int_Pin_MAX] = {hwGPIO_Pull_Mod
 static hwGPIO_Interrupt_Mode gpio_current_irq_mode[hwGPIO_Int_Pin_MAX] = {hwGPIO_Interrupt_Mode_MAX};
 static GPIO_Interrupt_Event_Handler gpio_irq_handlers[hwGPIO_Int_Pin_MAX];
 
-static void GPIO_Enable_Port_Clock(uint32_t base)
+void GPIO_Enable_Port_Clock(uint32_t base)
 {
   switch(base)
   {
@@ -82,7 +82,7 @@ static void GPIO_Enable_Port_Clock(uint32_t base)
   }
 }
 
-static void GPIO_Disable_Port_Clock(uint32_t base)
+void GPIO_Disable_Port_Clock(uint32_t base)
 {
   switch(base)
   {

@@ -380,6 +380,14 @@ hwUART_OpResult UART_Open_Specific_Format(hwUART_Index index, uint32_t baudrate,
         return hwUART_MemoryError;
     }
 
+    GPIO_Enable_Port_Clock(txPortBase);
+    GPIO_Enable_Port_Clock(rxPortBase);
+    if(rts_cts)
+    {
+        GPIO_Enable_Port_Clock(rtsPortBase);
+        GPIO_Enable_Port_Clock(ctsPortBase);
+    }
+
     uint32_t base = UART_Map_Soc_Base(index);
     uint32_t sysCtrlPeriph = UART_Map_Soc_Periph(index);
 

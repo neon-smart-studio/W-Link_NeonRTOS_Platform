@@ -19,10 +19,10 @@ extern uint32_t __bss_end__;
 typedef void (*pFunc)(void);
 
 void Reset_Handler(void);
+void HardFault_Handler(void);
 void Default_Handler(void);
 
 void NMI_Handler(void)         __attribute__((weak, alias("Default_Handler")));
-void HardFault_Handler(void)   __attribute__((weak, alias("Default_Handler")));
 void MemManage_Handler(void)   __attribute__((weak, alias("Default_Handler")));
 void BusFault_Handler(void)    __attribute__((weak, alias("Default_Handler")));
 void UsageFault_Handler(void)  __attribute__((weak, alias("Default_Handler")));
@@ -161,5 +161,10 @@ void Reset_Handler(void)
 
 void Default_Handler(void)
 {
-    while (1) {}
+    while (1);
+}
+
+void HardFault_Handler()
+{
+    while (1);
 }

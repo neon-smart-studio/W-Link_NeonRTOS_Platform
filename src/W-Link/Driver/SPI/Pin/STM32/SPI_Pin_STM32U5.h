@@ -59,8 +59,8 @@ static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX][SPI_Pinset_MAX] =
     {
         { hwGPIO_Pin_B5,  hwGPIO_Pin_B4,  hwGPIO_Pin_B3,  hwGPIO_Pin_A15 },
         { hwGPIO_Pin_C12, hwGPIO_Pin_C11, hwGPIO_Pin_C10, hwGPIO_Pin_A4  },
-        { hwGPIO_Pin_D6,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
-        { hwGPIO_Pin_NC,  hwGPIO_Pin_G10, hwGPIO_Pin_G9,  hwGPIO_Pin_G12 },
+        { hwGPIO_Pin_G11, hwGPIO_Pin_G10, hwGPIO_Pin_G9,  hwGPIO_Pin_G12 },
+        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
     },
 #endif
 };
@@ -153,6 +153,7 @@ static const SPI_AF_Map SPI_Pin_AF_Map[] =
 #if defined(GPIOG)
     { hwSPI_Index_2, hwGPIO_Pin_G9,  GPIO_AF6_SPI3 },
     { hwSPI_Index_2, hwGPIO_Pin_G10, GPIO_AF6_SPI3 },
+    { hwSPI_Index_2, hwGPIO_Pin_G11, GPIO_AF6_SPI3 },
     { hwSPI_Index_2, hwGPIO_Pin_G12, GPIO_AF6_SPI3 },
 #endif
 #endif

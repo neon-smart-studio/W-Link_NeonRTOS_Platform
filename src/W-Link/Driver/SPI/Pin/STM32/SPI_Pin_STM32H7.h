@@ -70,8 +70,8 @@ static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX][SPI_Pinset_MAX] =
     /* ================= SPI2 (SPI1) ================= */
     {
         { hwGPIO_Pin_B15, hwGPIO_Pin_B14, hwGPIO_Pin_B13, hwGPIO_Pin_B12 },
-        { hwGPIO_Pin_C1,  hwGPIO_Pin_C2,  hwGPIO_Pin_B10, hwGPIO_Pin_B9  },
-        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
+        { hwGPIO_Pin_C3,  hwGPIO_Pin_C2,  hwGPIO_Pin_B10, hwGPIO_Pin_B9  },
+        { hwGPIO_Pin_B15, hwGPIO_Pin_B14, hwGPIO_Pin_D3,  hwGPIO_Pin_NC  },
     },
 #endif
 #if defined(SPI3_BASE)
@@ -79,7 +79,7 @@ static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX][SPI_Pinset_MAX] =
     {
         { hwGPIO_Pin_C12, hwGPIO_Pin_C11, hwGPIO_Pin_C10, hwGPIO_Pin_A15 },
         { hwGPIO_Pin_B2,  hwGPIO_Pin_B4,  hwGPIO_Pin_B3,  hwGPIO_Pin_A4  },
-        { hwGPIO_Pin_D6,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
+        { hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC,  hwGPIO_Pin_NC  },
     },
 #endif
 #if defined(SPI4_BASE)

@@ -1,6 +1,6 @@
 
-#ifndef QSPI_PIN_DEF_H
-#define QSPI_PIN_DEF_H
+#ifndef QSPI_PIN_TITIVAC_H
+#define QSPI_PIN_TITIVAC_H
 
 #include "soc.h"
 
@@ -8,4 +8,4 @@
 #include "QSPI_Pin_TM4C1294.h"
 #endif
 
-#endif //QSPI_PIN_DEF_H
+#endif //QSPI_PIN_TITIVAC_H

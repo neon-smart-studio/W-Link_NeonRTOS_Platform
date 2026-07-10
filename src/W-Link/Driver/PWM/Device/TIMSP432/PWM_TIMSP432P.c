@@ -25,6 +25,65 @@ static uint16_t PWM_Channel_Current_Duty[hwPWM_Channel_MAX] = {0};
 
 static bool PWM_Base_Init_Status[hwPWM_Base_MAX] = {false};
 
+static uint32_t PWM_Map_Timer_Base(hwPWM_Channel ch)
+{
+    if (ch >= hwPWM_Channel_MAX)
+    {
+        return 0;
+    }
+
+    switch (PWM_Pin_Def_Table[ch].base)
+    {
+        case hwPWM_Base_0:
+            return TIMER_A0_BASE;
+
+        case hwPWM_Base_1:
+            return TIMER_A1_BASE;
+
+        case hwPWM_Base_2:
+            return TIMER_A2_BASE;
+
+        case hwPWM_Base_3:
+            return TIMER_A3_BASE;
+
+        default:
+            return 0;
+    }
+}
+
+static uint16_t PWM_Map_Timer_Compare_Register(hwPWM_Channel ch)
+{
+    switch (ch)
+    {
+        case hwPWM_Channel_1:
+        case hwPWM_Channel_5:
+        case hwPWM_Channel_9:
+        case hwPWM_Channel_13:
+            return TIMER_A_CAPTURECOMPARE_REGISTER_1;
+
+        case hwPWM_Channel_2:
+        case hwPWM_Channel_6:
+        case hwPWM_Channel_10:
+        case hwPWM_Channel_14:
+            return TIMER_A_CAPTURECOMPARE_REGISTER_2;
+
+        case hwPWM_Channel_3:
+        case hwPWM_Channel_7:
+        case hwPWM_Channel_11:
+        case hwPWM_Channel_15:
+            return TIMER_A_CAPTURECOMPARE_REGISTER_3;
+
+        case hwPWM_Channel_4:
+        case hwPWM_Channel_8:
+        case hwPWM_Channel_12:
+        case hwPWM_Channel_16:
+            return TIMER_A_CAPTURECOMPARE_REGISTER_4;
+
+        default:
+            return 0;
+    }
+}
+
 static uint32_t PWM_Get_Period(void)
 {
     return (g_sys_clock_hz / PWM_HZ);

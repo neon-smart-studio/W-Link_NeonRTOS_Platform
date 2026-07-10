@@ -144,6 +144,14 @@ typedef enum {
 
 #ifdef DEVICE_TIMSP432E
 typedef enum {
+    hwTimer_Index_0 = 0,
+    hwTimer_Index_1,
+    hwTimer_Index_2,
+    hwTimer_Index_3,
+    hwTimer_Index_4,
+    hwTimer_Index_5,
+    hwTimer_Index_6,
+    hwTimer_Index_7,
     hwTimer_Index_MAX
 } hwTimer_Index;
 #endif // DEVICE_TIMSP432E

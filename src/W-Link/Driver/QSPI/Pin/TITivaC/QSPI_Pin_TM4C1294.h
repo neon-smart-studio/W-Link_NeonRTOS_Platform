@@ -4,8 +4,6 @@
 
 #include "QSPI_Pin_TITivaC_Def.h"
 
-#if defined(TM4C1294)
-
 static const SPI_Pin_Def QSPI_Pin_Def_Table[hwSPI_Index_MAX] =
 {
     /* SSI0 */
@@ -48,7 +46,5 @@ static const SPI_Pin_Def QSPI_Pin_Def_Table[hwSPI_Index_MAX] =
         hwGPIO_Pin_Q1     // FSS
     }
 };
-
-#endif //TM4C1294
 
 #endif //QSPI_PIN_DEF_TM4C1294_H

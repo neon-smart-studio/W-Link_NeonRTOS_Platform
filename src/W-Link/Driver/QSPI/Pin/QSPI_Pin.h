@@ -15,7 +15,11 @@
 #endif
 
 #ifdef DEVICE_TITIVAC
-#include "TI/QSPI_Pin_TITivaC.h"
+#include "TITIVAC/QSPI_Pin_TITivaC.h"
+#endif
+
+#ifdef DEVICE_TIMSP432E
+#include "TIMSP432/QSPI_Pin_TIMSP432E.h"
 #endif
 
 #endif //QSPI_MASTER_PIN_H

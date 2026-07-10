@@ -40,6 +40,10 @@ typedef enum {
 
 #ifdef DEVICE_TIMSP432E
 typedef enum {
+    hwQSPI_Index_0 = 0,
+    hwQSPI_Index_1,
+    hwQSPI_Index_2,
+    hwQSPI_Index_3,
     hwQSPI_Index_MAX
 } hwQSPI_Index;
 #endif // DEVICE_TIMSP432E

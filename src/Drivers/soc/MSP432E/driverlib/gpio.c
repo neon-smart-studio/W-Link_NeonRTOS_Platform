@@ -42,7 +42,12 @@
 //
 //*****************************************************************************
 
-#include <ti/devices/msp432e4/inc/msp432e411y.h>
+#if defined (MSP432E401Y)
+#include "inc/msp432e401y.h"
+#endif
+#if defined (MSP432E411Y)
+#include "inc/msp432e411y.h"
+#endif
 #include "types.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -110,9 +115,11 @@ static const uint32_t g_pui32GPIOBaseAddrs[] =
     GPIO_PORTN_BASE,
     GPIO_PORTP_BASE,
     GPIO_PORTQ_BASE,
+#if defined (MSP432E411Y)
     GPIO_PORTR_BASE,
     GPIO_PORTS_BASE,
     GPIO_PORTT_BASE,
+#endif
 };
 
 //*****************************************************************************

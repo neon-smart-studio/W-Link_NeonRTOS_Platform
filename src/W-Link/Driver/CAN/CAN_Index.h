@@ -51,6 +51,12 @@ typedef enum {
 
 #ifdef DEVICE_TIMSP432E
 typedef enum {
+#if defined (CAN0_BASE)
+    hwCAN_Index_0 = 0,
+#endif
+#if defined (CAN1_BASE)
+    hwCAN_Index_1,
+#endif
     hwCAN_Index_MAX
 } hwCAN_Index;
 #endif // DEVICE_TIMSP432E

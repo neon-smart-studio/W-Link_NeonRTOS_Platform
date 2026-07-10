@@ -21,15 +21,15 @@
 #include "I2C_Master_TITivaC.h"
 
 typedef enum {
-    TIVA_I2C_IDLE = 0,
-    TIVA_I2C_TX,
-    TIVA_I2C_RX,
-    TIVA_I2C_DONE,
-    TIVA_I2C_ERROR
-} TIVA_I2C_State;
+    TITivaC_I2C_IDLE = 0,
+    TITivaC_I2C_TX,
+    TITivaC_I2C_RX,
+    TITivaC_I2C_DONE,
+    TITivaC_I2C_ERROR
+} TITivaC_I2C_State;
 
 typedef struct {
-    TIVA_I2C_State state;
+    TITivaC_I2C_State state;
 
     uint8_t addr;
 
@@ -43,7 +43,7 @@ typedef struct {
 
     bool stop;
     int error;
-} TIVA_I2C_Transfer;
+} TITivaC_I2C_Transfer;
 
 bool I2C_Master_Init_Status[hwI2C_Index_MAX] = {false};
 
@@ -52,12 +52,12 @@ static hwI2C_Speed_Mode I2C_Clock_Speed_Mode[hwI2C_Index_MAX] = {
 };
 
 static NeonRTOS_SyncObj_t I2C_Master_Done_SyncHandle[hwI2C_Index_MAX];
-static TIVA_I2C_Transfer i2c_xfer[hwI2C_Index_MAX];
+static TITivaC_I2C_Transfer i2c_xfer[hwI2C_Index_MAX];
 
-static void TIVA_I2C_StartNext(hwI2C_Index index)
+static void TITivaC_I2C_StartNext(hwI2C_Index index)
 {
     uint32_t base = I2C_Map_Soc_Base(index);
-    TIVA_I2C_Transfer *t = &i2c_xfer[index];
+    TITivaC_I2C_Transfer *t = &i2c_xfer[index];
 
     if (base == 0) {
         return;
@@ -65,15 +65,15 @@ static void TIVA_I2C_StartNext(hwI2C_Index index)
 
     if (MAP_I2CMasterErr(base) != I2C_MASTER_ERR_NONE) {
         t->error = MAP_I2CMasterErr(base);
-        t->state = TIVA_I2C_ERROR;
+        t->state = TITivaC_I2C_ERROR;
         MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
         NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
         return;
     }
 
-    if (t->state == TIVA_I2C_TX) {
+    if (t->state == TITivaC_I2C_TX) {
         if (t->tx_pos >= t->tx_len) {
-            t->state = TIVA_I2C_DONE;
+            t->state = TITivaC_I2C_DONE;
             MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
             NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
             return;
@@ -103,13 +103,13 @@ static void TIVA_I2C_StartNext(hwI2C_Index index)
         return;
     }
 
-    if (t->state == TIVA_I2C_RX) {
+    if (t->state == TITivaC_I2C_RX) {
         if (t->rx_pos > 0 && t->rx_pos <= t->rx_len) {
             t->rx_buf[t->rx_pos - 1] = (uint8_t)MAP_I2CMasterDataGet(base);
         }
 
         if (t->rx_pos >= t->rx_len) {
-            t->state = TIVA_I2C_DONE;
+            t->state = TITivaC_I2C_DONE;
             MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
             NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
             return;
@@ -149,7 +149,7 @@ void I2C_IRQ_Process(hwI2C_Index index)
         MAP_I2CMasterIntClear(base);
     }
 
-    TIVA_I2C_StartNext(index);
+    TITivaC_I2C_StartNext(index);
 }
 
 hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
@@ -226,7 +226,7 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
     }
 
     memset(&i2c_xfer[index], 0, sizeof(i2c_xfer[index]));
-    i2c_xfer[index].state = TIVA_I2C_IDLE;
+    i2c_xfer[index].state = TITivaC_I2C_IDLE;
 
     I2C_NVIC_Init(index);
 
@@ -331,15 +331,15 @@ hwI2C_OpResult I2C_Master_Read(
         return hwI2C_InvalidParameter;
     }
 
-    TIVA_I2C_Transfer *t = &i2c_xfer[index];
+    TITivaC_I2C_Transfer *t = &i2c_xfer[index];
 
-    if (t->state == TIVA_I2C_TX || t->state == TIVA_I2C_RX) {
+    if (t->state == TITivaC_I2C_TX || t->state == TITivaC_I2C_RX) {
         return hwI2C_BusError;
     }
 
     memset(t, 0, sizeof(*t));
 
-    t->state = TIVA_I2C_RX;
+    t->state = TITivaC_I2C_RX;
     t->addr = address;
     t->rx_buf = read_dat;
     t->rx_len = read_len;
@@ -350,15 +350,15 @@ hwI2C_OpResult I2C_Master_Read(
     MAP_I2CMasterIntClear(base);
     MAP_I2CMasterIntEnableEx(base, I2C_MASTER_INT_DATA);
 
-    TIVA_I2C_StartNext(index);
+    TITivaC_I2C_StartNext(index);
 
     if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeoutMs) != NeonRTOS_OK) {
         MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
-        t->state = TIVA_I2C_ERROR;
+        t->state = TITivaC_I2C_ERROR;
         return hwI2C_SlaveTimeout;
     }
 
-    return (t->state == TIVA_I2C_DONE) ? hwI2C_OK : hwI2C_BusError;
+    return (t->state == TITivaC_I2C_DONE) ? hwI2C_OK : hwI2C_BusError;
 }
 
 hwI2C_OpResult I2C_Master_Write(
@@ -387,15 +387,15 @@ hwI2C_OpResult I2C_Master_Write(
         return hwI2C_InvalidParameter;
     }
 
-    TIVA_I2C_Transfer *t = &i2c_xfer[index];
+    TITivaC_I2C_Transfer *t = &i2c_xfer[index];
 
-    if (t->state == TIVA_I2C_TX || t->state == TIVA_I2C_RX) {
+    if (t->state == TITivaC_I2C_TX || t->state == TITivaC_I2C_RX) {
         return hwI2C_BusError;
     }
 
     memset(t, 0, sizeof(*t));
 
-    t->state = TIVA_I2C_TX;
+    t->state = TITivaC_I2C_TX;
     t->addr = address;
     t->tx_buf = write_dat;
     t->tx_len = write_len;
@@ -406,15 +406,15 @@ hwI2C_OpResult I2C_Master_Write(
     MAP_I2CMasterIntClear(base);
     MAP_I2CMasterIntEnableEx(base, I2C_MASTER_INT_DATA);
 
-    TIVA_I2C_StartNext(index);
+    TITivaC_I2C_StartNext(index);
 
     if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeoutMs) != NeonRTOS_OK) {
         MAP_I2CMasterIntDisableEx(base, I2C_MASTER_INT_DATA);
-        t->state = TIVA_I2C_ERROR;
+        t->state = TITivaC_I2C_ERROR;
         return hwI2C_SlaveTimeout;
     }
 
-    return (t->state == TIVA_I2C_DONE) ? hwI2C_OK : hwI2C_BusError;
+    return (t->state == TITivaC_I2C_DONE) ? hwI2C_OK : hwI2C_BusError;
 }
 
 bool I2C_Master_isInit(hwI2C_Index index)

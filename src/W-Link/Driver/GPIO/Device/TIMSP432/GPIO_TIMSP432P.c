@@ -396,7 +396,7 @@ hwGPIO_OpResult GPIO_Pin_Toggle(hwGPIO_Pin pin)
     return hwGPIO_OK;
 }
 
-void GPIO_IRQ_Handler(uint_fast8_t portBase)
+static void GPIO_IRQ_Handler(uint_fast8_t portBase)
 {
     uint_fast16_t flags;
     uint_fast16_t bit;
@@ -454,9 +454,9 @@ void GPIO_IRQ_Handler(uint_fast8_t portBase)
     }
 }
 
-void GPIOA_IRQ_Handler(void) { GPIO_IRQ_Handler(GPIO_PORT_PA); }
-void GPIOB_IRQ_Handler(void) { GPIO_IRQ_Handler(GPIO_PORT_PB); }
-void GPIOC_IRQ_Handler(void) { GPIO_IRQ_Handler(GPIO_PORT_PC); }
+static void GPIOA_IRQ_Handler(void) { GPIO_IRQ_Handler(GPIO_PORT_PA); }
+static void GPIOB_IRQ_Handler(void) { GPIO_IRQ_Handler(GPIO_PORT_PB); }
+static void GPIOC_IRQ_Handler(void) { GPIO_IRQ_Handler(GPIO_PORT_PC); }
 
 hwGPIO_OpResult GPIO_Interrupt_Init(hwGPIO_Int_Pin irq_pin, hwGPIO_Interrupt_Mode mode)
 {

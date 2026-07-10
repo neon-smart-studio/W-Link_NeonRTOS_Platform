@@ -464,6 +464,7 @@
 #endif
 
 #if defined (TM4C1294) || defined (TM4C123)
+#include "inc/hw_adc.h"
 #include "inc/hw_can.h"
 #include "inc/hw_emac.h"
 #include "inc/hw_ints.h"
@@ -474,6 +475,7 @@
 #include "inc/hw_uart.h"
 #include "driverlib/rom.h"
 #include "driverlib/rom_map.h"
+#include "driverlib/adc.h"
 #include "driverlib/can.h"
 #include "driverlib/debug.h"
 #include "driverlib/emac.h"

@@ -34,6 +34,8 @@
 
 #include <stdint.h>
 
+#if defined (MSP432E401Y)
+
 #ifndef HWREG
 #define HWREG(x) (*((volatile uint32_t *)(x)))
 #endif
@@ -349,3 +351,5 @@ void Default_Handler(void)
 	{
 	}
 }
+
+#endif // MSP432E401Y

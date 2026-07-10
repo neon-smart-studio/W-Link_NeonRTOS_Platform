@@ -1,6 +1,6 @@
 
-#ifndef SPI_PIN_TITIVAC_DEF_H
-#define SPI_PIN_TITIVAC_DEF_H
+#ifndef QSPI_PIN_TITIVAC_DEF_H
+#define QSPI_PIN_TITIVAC_DEF_H
 
 #include "GPIO/GPIO.h"
 
@@ -15,4 +15,4 @@ typedef struct {
     hwGPIO_Pin cs_pin;
 } SPI_Pin_Def;
 
-#endif //SPI_PIN_TITIVAC_DEF_H
+#endif //QSPI_PIN_TITIVAC_DEF_H

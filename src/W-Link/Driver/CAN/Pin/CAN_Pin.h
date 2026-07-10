@@ -14,8 +14,8 @@
 #include "STM32/CAN_Pin_STM32.h"
 #endif
 
-#ifdef DEVICE_TM4C1294
-#include "TI/CAN_Pin_TM4C1294.h"
+#ifdef DEVICE_TITIVAC
+#include "TITivaC/CAN_Pin_TITivaC.h"
 #endif
 
 #endif //CAN_PIN_H

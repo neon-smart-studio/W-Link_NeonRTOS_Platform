@@ -1,5 +1,5 @@
-#ifndef SPI_STM32_H
-#define SPI_STM32_H
+#ifndef QSPI_TITIVAC_H
+#define QSPI_TITIVAC_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -31,4 +31,4 @@ void QSPI_NVIC_DeInit(hwQSPI_Index index);
 }
 #endif // __cplusplus
 
-#endif
+#endif //QSPI_TITIVAC_H

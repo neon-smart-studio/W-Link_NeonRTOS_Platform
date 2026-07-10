@@ -134,30 +134,30 @@ static hwDMA_Channel_Index DMA_Get_Channel_Index(uint32_t udma_assign)
 
 void DMA_Clock_Enable(void)
 {
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_UDMA);
+    MAP_SysCtlPeripheralEnable(SYSCTL_PERIPH_UDMA);
 
-    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_UDMA))
+    while (!MAP_SysCtlPeripheralReady(SYSCTL_PERIPH_UDMA))
     {
     }
 }
 
 void DMA_Clock_Disable(void)
 {
-    uDMADisable();
-    SysCtlPeripheralDisable(SYSCTL_PERIPH_UDMA);
+    MAP_uDMADisable();
+    MAP_SysCtlPeripheralDisable(SYSCTL_PERIPH_UDMA);
 }
 
 hwDMA_OpResult DMA_HW_Init(void)
 {
-    uDMAEnable();
-    uDMAControlBaseSet(g_udma_control_table);
+    MAP_uDMAEnable();
+    MAP_uDMAControlBaseSet(g_udma_control_table);
 
     return hwDMA_OK;
 }
 
 hwDMA_OpResult DMA_HW_DeInit(void)
 {
-    uDMADisable();
+    MAP_uDMADisable();
 
     return hwDMA_OK;
 }
@@ -166,7 +166,7 @@ static hwDMA_OpResult DMA_Wait_Channel_Done(uint32_t udma_channel)
 {
     uint32_t timeout = DMA_WAIT_TRANSFER_TIMEOUT;
 
-    while (uDMAChannelIsEnabled(udma_channel))
+    while (MAP_uDMAChannelIsEnabled(udma_channel))
     {
         if (timeout-- == 0)
         {
@@ -215,8 +215,8 @@ hwDMA_OpResult DMA_Xfer_UART(hwUART_Index index,
 
     DMA_CHANNEL_LOCK(channel_index);
 
-    uDMAChannelAssign(udma_channel);
-    uDMAChannelAttributeDisable(
+    MAP_uDMAChannelAssign(udma_channel);
+    MAP_uDMAChannelAttributeDisable(
         udma_channel,
         UDMA_ATTR_ALTSELECT |
         UDMA_ATTR_USEBURST |
@@ -226,7 +226,7 @@ hwDMA_OpResult DMA_Xfer_UART(hwUART_Index index,
 
     if (dir == hwDMA_Peripheral_Direction_TX)
     {
-        uDMAChannelControlSet(
+        MAP_uDMAChannelControlSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_SIZE_8 |
             UDMA_SRC_INC_8 |
@@ -234,7 +234,7 @@ hwDMA_OpResult DMA_Xfer_UART(hwUART_Index index,
             UDMA_ARB_4
         );
 
-        uDMAChannelTransferSet(
+        MAP_uDMAChannelTransferSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_BASIC,
             buf,
@@ -242,12 +242,12 @@ hwDMA_OpResult DMA_Xfer_UART(hwUART_Index index,
             len
         );
 
-        UARTDMAEnable(uart_base, UART_DMA_TX);
-        uDMAChannelEnable(udma_channel);
+        MAP_UARTDMAEnable(uart_base, UART_DMA_TX);
+        MAP_uDMAChannelEnable(udma_channel);
     }
     if (dir == hwDMA_Peripheral_Direction_RX)
     {
-        uDMAChannelControlSet(
+        MAP_uDMAChannelControlSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_SIZE_8 |
             UDMA_SRC_INC_NONE |
@@ -255,7 +255,7 @@ hwDMA_OpResult DMA_Xfer_UART(hwUART_Index index,
             UDMA_ARB_4
         );
 
-        uDMAChannelTransferSet(
+        MAP_uDMAChannelTransferSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_BASIC,
             (void *)(uart_base + UART_O_DR),
@@ -263,19 +263,19 @@ hwDMA_OpResult DMA_Xfer_UART(hwUART_Index index,
             len
         );
 
-        UARTDMAEnable(uart_base, UART_DMA_RX);
-        uDMAChannelEnable(udma_channel);
+        MAP_UARTDMAEnable(uart_base, UART_DMA_RX);
+        MAP_uDMAChannelEnable(udma_channel);
     }
 
     hwDMA_OpResult status = DMA_Wait_Channel_Done(udma_channel);
 
     if (dir == hwDMA_Peripheral_Direction_TX)
     {
-        UARTDMADisable(uart_base, UART_DMA_TX);
+        MAP_UARTDMADisable(uart_base, UART_DMA_TX);
     }
     if (dir == hwDMA_Peripheral_Direction_RX)
     {
-        UARTDMADisable(uart_base, UART_DMA_RX);
+        MAP_UARTDMADisable(uart_base, UART_DMA_RX);
     }
 
     DMA_CHANNEL_UNLOCK(channel_index);
@@ -319,8 +319,8 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index,
 
     DMA_CHANNEL_LOCK(channel_index);
 
-    uDMAChannelAssign(udma_channel);
-    uDMAChannelAttributeDisable(
+    MAP_uDMAChannelAssign(udma_channel);
+    MAP_uDMAChannelAttributeDisable(
         udma_channel,
         UDMA_ATTR_ALTSELECT |
         UDMA_ATTR_USEBURST |
@@ -330,7 +330,7 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index,
 
     if (dir == hwDMA_Peripheral_Direction_TX)
     {
-        uDMAChannelControlSet(
+        MAP_uDMAChannelControlSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_SIZE_8 |
             UDMA_SRC_INC_8 |
@@ -338,7 +338,7 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index,
             UDMA_ARB_4
         );
 
-        uDMAChannelTransferSet(
+        MAP_uDMAChannelTransferSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_BASIC,
             buf,
@@ -346,12 +346,12 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index,
             len
         );
 
-        SSIDMAEnable(ssi_base, SSI_DMA_TX);
-        uDMAChannelEnable(udma_channel);
+        MAP_SSIDMAEnable(ssi_base, SSI_DMA_TX);
+        MAP_uDMAChannelEnable(udma_channel);
     }
     if (dir == hwDMA_Peripheral_Direction_RX)
     {
-        uDMAChannelControlSet(
+        MAP_uDMAChannelControlSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_SIZE_8 |
             UDMA_SRC_INC_NONE |
@@ -359,7 +359,7 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index,
             UDMA_ARB_4
         );
 
-        uDMAChannelTransferSet(
+        MAP_uDMAChannelTransferSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_BASIC,
             (void *)(ssi_base + SSI_O_DR),
@@ -367,19 +367,19 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index,
             len
         );
 
-        SSIDMAEnable(ssi_base, SSI_DMA_RX);
-        uDMAChannelEnable(udma_channel);
+        MAP_SSIDMAEnable(ssi_base, SSI_DMA_RX);
+        MAP_uDMAChannelEnable(udma_channel);
     }
 
     hwDMA_OpResult status = DMA_Wait_Channel_Done(udma_channel);
 
     if (dir == hwDMA_Peripheral_Direction_TX)
     {
-        SSIDMADisable(ssi_base, SSI_DMA_TX);
+        MAP_SSIDMADisable(ssi_base, SSI_DMA_TX);
     }
     if (dir == hwDMA_Peripheral_Direction_RX)
     {
-        SSIDMADisable(ssi_base, SSI_DMA_RX);
+        MAP_SSIDMADisable(ssi_base, SSI_DMA_RX);
     }
 
     DMA_CHANNEL_UNLOCK(channel_index);
@@ -423,8 +423,8 @@ hwDMA_OpResult DMA_Xfer_QSPI(hwQSPI_Index index,
 
     DMA_CHANNEL_LOCK(channel_index);
 
-    uDMAChannelAssign(udma_channel);
-    uDMAChannelAttributeDisable(
+    MAP_uDMAChannelAssign(udma_channel);
+    MAP_uDMAChannelAttributeDisable(
         udma_channel,
         UDMA_ATTR_ALTSELECT |
         UDMA_ATTR_USEBURST |
@@ -434,7 +434,7 @@ hwDMA_OpResult DMA_Xfer_QSPI(hwQSPI_Index index,
 
     if (dir == hwDMA_Peripheral_Direction_TX)
     {
-        uDMAChannelControlSet(
+        MAP_uDMAChannelControlSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_SIZE_8 |
             UDMA_SRC_INC_8 |
@@ -442,7 +442,7 @@ hwDMA_OpResult DMA_Xfer_QSPI(hwQSPI_Index index,
             UDMA_ARB_4
         );
 
-        uDMAChannelTransferSet(
+        MAP_uDMAChannelTransferSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_BASIC,
             buf,
@@ -450,12 +450,12 @@ hwDMA_OpResult DMA_Xfer_QSPI(hwQSPI_Index index,
             len
         );
 
-        SSIDMAEnable(ssi_base, SSI_DMA_TX);
-        uDMAChannelEnable(udma_channel);
+        MAP_SSIDMAEnable(ssi_base, SSI_DMA_TX);
+        MAP_uDMAChannelEnable(udma_channel);
     }
     if (dir == hwDMA_Peripheral_Direction_RX)
     {
-        uDMAChannelControlSet(
+        MAP_uDMAChannelControlSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_SIZE_8 |
             UDMA_SRC_INC_NONE |
@@ -463,7 +463,7 @@ hwDMA_OpResult DMA_Xfer_QSPI(hwQSPI_Index index,
             UDMA_ARB_4
         );
 
-        uDMAChannelTransferSet(
+        MAP_uDMAChannelTransferSet(
             udma_channel | UDMA_PRI_SELECT,
             UDMA_MODE_BASIC,
             (void *)(ssi_base + SSI_O_DR),
@@ -471,19 +471,19 @@ hwDMA_OpResult DMA_Xfer_QSPI(hwQSPI_Index index,
             len
         );
 
-        SSIDMAEnable(ssi_base, SSI_DMA_RX);
-        uDMAChannelEnable(udma_channel);
+        MAP_SSIDMAEnable(ssi_base, SSI_DMA_RX);
+        MAP_uDMAChannelEnable(udma_channel);
     }
 
     hwDMA_OpResult status = DMA_Wait_Channel_Done(udma_channel);
 
     if (dir == hwDMA_Peripheral_Direction_TX)
     {
-        SSIDMADisable(ssi_base, SSI_DMA_TX);
+        MAP_SSIDMADisable(ssi_base, SSI_DMA_TX);
     }
     if (dir == hwDMA_Peripheral_Direction_RX)
     {
-        SSIDMADisable(ssi_base, SSI_DMA_RX);
+        MAP_SSIDMADisable(ssi_base, SSI_DMA_RX);
     }
 
     DMA_CHANNEL_UNLOCK(channel_index);

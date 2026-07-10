@@ -1,6 +1,6 @@
 
-#ifndef SPI_PIN_DEF_TM4C123_H
-#define SPI_PIN_DEF_TM4C123_H
+#ifndef SPI_PIN_TIMSP432P_H
+#define SPI_PIN_TIMSP432P_H
 
 #include "SPI_Pin_TIMSP432_Def.h"
 
@@ -39,4 +39,4 @@ static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX] =
     }
 };
 
-#endif //SPI_PIN_DEF_TM4C123_H
+#endif //SPI_PIN_TIMSP432P_H

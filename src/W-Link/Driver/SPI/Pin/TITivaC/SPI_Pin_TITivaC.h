@@ -1,6 +1,6 @@
 
-#ifndef SPI_PIN_DEF_H
-#define SPI_PIN_DEF_H
+#ifndef SPI_PIN_TITIVAC_H
+#define SPI_PIN_TITIVAC_H
 
 #include "soc.h"
 
@@ -12,4 +12,4 @@
 #include "SPI_Pin_TM4C1294.h"
 #endif
 
-#endif //SPI_PIN_DEF_H
+#endif //SPI_PIN_TITIVAC_H

@@ -1,6 +1,6 @@
 
-#ifndef SPI_PIN_DEF_TM4C1294_H
-#define SPI_PIN_DEF_TM4C1294_H
+#ifndef SPI_PIN_TM4C1294_H
+#define SPI_PIN_TM4C1294_H
 
 #include "SPI_Pin_TITivaC_Def.h"
 
@@ -39,4 +39,4 @@ static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX] =
     }
 };
 
-#endif //SPI_PIN_DEF_TM4C1294_H
+#endif //SPI_PIN_TM4C1294_H

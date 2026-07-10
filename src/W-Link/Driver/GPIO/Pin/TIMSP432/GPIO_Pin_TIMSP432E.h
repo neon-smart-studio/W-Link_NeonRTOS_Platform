@@ -229,9 +229,7 @@ typedef enum hwGPIO_Int_Pin_t
 } hwGPIO_Int_Pin;
 
 uint32_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin);
-uint32_t GPIO_Map_Soc_Port_HighSpeed_Base(hwGPIO_Pin pin);
 uint32_t GPIO_Map_Soc_Int_Port_Base(hwGPIO_Int_Pin pin);
-uint32_t GPIO_Map_Soc_Int_Port_HighSpeed_Base(hwGPIO_Int_Pin pin);
 uint32_t GPIO_Map_Soc_Pin_Mask(hwGPIO_Pin pin);
 uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin);
 uint32_t GPIO_Map_Pin_Int_Mask(uint32_t pinMask);

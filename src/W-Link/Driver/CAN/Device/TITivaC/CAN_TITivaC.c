@@ -298,4 +298,4 @@ bool CAN_isInit(hwCAN_Index index)
 
 #endif
 
-#endif
+#endif // DEVICE_TITIVAC

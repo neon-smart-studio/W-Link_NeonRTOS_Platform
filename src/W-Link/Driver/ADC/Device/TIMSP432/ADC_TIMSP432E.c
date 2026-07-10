@@ -61,7 +61,7 @@ static uint32_t ADC_Channel_Index_To_Ctl(hwADC_Channel_Index ch)
     }
 }
 
-hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
+static hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
 {
     uint32_t periph = ADC_Instance_To_Periph(inst);
     uint32_t base   = ADC_Instance_To_Base(inst);
@@ -84,7 +84,7 @@ hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
     return hwADC_OK;
 }
 
-hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
+static hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
 {
     uint32_t periph = ADC_Instance_To_Periph(inst);
     uint32_t base   = ADC_Instance_To_Base(inst);
@@ -100,7 +100,7 @@ hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
     return hwADC_OK;
 }
 
-hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
+static hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
 {
     uint32_t base = ADC_Instance_To_Base(inst);
     uint32_t ctl_ch = ADC_Channel_Index_To_Ctl(ch);
@@ -118,19 +118,19 @@ hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
     return hwADC_OK;
 }
 
-void ADC_NVIC_Init(void)
+static void ADC_NVIC_Init(void)
 {
     MAP_IntEnable(INT_ADC0SS3);
     MAP_IntEnable(INT_ADC1SS3);
 }
 
-void ADC_NVIC_DeInit(void)
+static void ADC_NVIC_DeInit(void)
 {
     MAP_IntDisable(INT_ADC0SS3);
     MAP_IntDisable(INT_ADC1SS3);
 }
 
-bool ADC_IsInstanceChannelUsed(hwADC_Instance inst)
+static bool ADC_IsInstanceChannelUsed(hwADC_Instance inst)
 {
     for(hwADC_Channel_Index ch = 0; ch < hwADC_Channel_Index_MAX; ch++)
     {
@@ -144,7 +144,7 @@ bool ADC_IsInstanceChannelUsed(hwADC_Instance inst)
     return false;
 }
 
-bool ADC_IsAnyInstanceUsed(void)
+static bool ADC_IsAnyInstanceUsed(void)
 {
     for(hwADC_Instance inst = 0; inst < hwADC_Instance_MAX; inst++)
     {
@@ -155,7 +155,7 @@ bool ADC_IsAnyInstanceUsed(void)
     return false;
 }
 
-void ADC_ConvCpltCallback(uint16_t raw)
+static void ADC_ConvCpltCallback(uint16_t raw)
 {
     ADC_QueueItem item;
 
@@ -166,7 +166,7 @@ void ADC_ConvCpltCallback(uint16_t raw)
                         NEONRT_NO_WAIT);
 }
 
-void ADC0SS3_Handler(void)
+static void ADC0SS3_Handler(void)
 {
     uint32_t raw;
 
@@ -176,7 +176,7 @@ void ADC0SS3_Handler(void)
     ADC_ConvCpltCallback((uint16_t)raw);
 }
 
-void ADC1SS3_Handler(void)
+static void ADC1SS3_Handler(void)
 {
     uint32_t raw;
 

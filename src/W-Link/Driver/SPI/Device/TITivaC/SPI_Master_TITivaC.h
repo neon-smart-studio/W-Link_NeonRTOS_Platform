@@ -1,5 +1,5 @@
-#ifndef SPI_RP2_H
-#define SPI_RP2_H
+#ifndef SPI_TITIVAC_H
+#define SPI_TITIVAC_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -28,4 +28,4 @@ void SPI_NVIC_DeInit(hwSPI_Index index);
 }
 #endif // __cplusplus
 
-#endif // SPI_RP2_H
+#endif // SPI_TITIVAC_H

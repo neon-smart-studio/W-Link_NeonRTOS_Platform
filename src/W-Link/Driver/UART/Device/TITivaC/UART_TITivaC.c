@@ -39,14 +39,14 @@ typedef struct
     size_t rx_size;
     volatile size_t rx_count;
     volatile bool rx_busy;
-} TM4C_UART_IT_State;
+} TITivaC_UART_IT_State;
 
-static TM4C_UART_IT_State UART_IT_State[hwUART_Index_MAX];
+static TITivaC_UART_IT_State UART_IT_State[hwUART_Index_MAX];
 
 void UART_IRQ_Process(hwUART_Index index)
 {
     uint32_t base = UART_Map_Soc_Base(index);
-    TM4C_UART_IT_State *s = &UART_IT_State[index];
+    TITivaC_UART_IT_State *s = &UART_IT_State[index];
 
     uint32_t status = MAP_UARTIntStatus(base, true);
     MAP_UARTIntClear(base, status);
@@ -400,7 +400,7 @@ hwUART_OpResult UART_Read(hwUART_Index index, uint8_t *data_rd, size_t size, uin
     }
 
     uint32_t base = UART_Map_Soc_Base(index);
-    TM4C_UART_IT_State *s = &UART_IT_State[index];
+    TITivaC_UART_IT_State *s = &UART_IT_State[index];
 
     if (s->rx_busy)
         return hwUART_Busy;
@@ -478,7 +478,7 @@ hwUART_OpResult UART_Write(hwUART_Index index, uint8_t *data_wr, size_t size, ui
     }
 
     uint32_t base = UART_Map_Soc_Base(index);
-    TM4C_UART_IT_State *s = &UART_IT_State[index];
+    TITivaC_UART_IT_State *s = &UART_IT_State[index];
 
     if (s->tx_busy)
         return hwUART_Busy;

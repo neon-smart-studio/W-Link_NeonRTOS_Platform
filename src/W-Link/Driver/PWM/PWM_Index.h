@@ -244,14 +244,6 @@ typedef enum {
 	hwPWM_Channel_6,
 	hwPWM_Channel_7,
 	hwPWM_Channel_8,
-	hwPWM_Channel_9,
-	hwPWM_Channel_10,
-	hwPWM_Channel_11,
-	hwPWM_Channel_12,
-	hwPWM_Channel_13,
-	hwPWM_Channel_14,
-	hwPWM_Channel_15,
-	hwPWM_Channel_16,
     hwPWM_Channel_MAX
 } hwPWM_Channel;
 #endif // DEVICE_TIMSP432E

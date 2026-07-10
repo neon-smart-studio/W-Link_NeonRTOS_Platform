@@ -42,7 +42,12 @@
 //
 //*****************************************************************************
 
-#include <ti/devices/msp432e4/inc/msp432e411y.h>
+#if defined (MSP432E401Y)
+#include "inc/msp432e401y.h"
+#endif
+#if defined (MSP432E411Y)
+#include "inc/msp432e411y.h"
+#endif
 #include "types.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -53,6 +58,7 @@
 #include "lcd.h"
 #include "debug.h"
 
+#if defined (MSP432E411Y)
 //*****************************************************************************
 //
 // These are currently missing from hw_lcd.h and included here as a stopgap
@@ -1800,3 +1806,5 @@ LCDIntUnregister(uint32_t ui32Base)
 //! @}
 //
 //*****************************************************************************
+
+#endif //MSP432E411Y

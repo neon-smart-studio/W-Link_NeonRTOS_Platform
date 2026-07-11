@@ -55,15 +55,6 @@ env.Append(
         "-mabi=aapcs",
         "-march=armv7e-m",
         "-MMD",
-
-        "-Wno-implicit-function-declaration",
-        "-Wno-error=implicit-function-declaration",
-
-        "-Wno-int-conversion",
-        "-Wno-error=int-conversion",
-
-        "-Wno-incompatible-pointer-types",
-        "-Wno-error=incompatible-pointer-types",
     ],
 
     CXXFLAGS=[

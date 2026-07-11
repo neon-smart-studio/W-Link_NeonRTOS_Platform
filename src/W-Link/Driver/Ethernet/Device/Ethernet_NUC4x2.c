@@ -12,18 +12,12 @@
 
 #if defined(NUC472) || defined(NUC442)
 
+#include "GPIO/Device/Nuvoton/GPIO_Nuvoton.h"
+
 /* ================= User Config ================= */
 
 #ifndef NUC472_PHY_ADDRESS
-#define NUC472_PHY_ADDRESS              0x01U
-#endif
-
-#ifndef ETH_RX_BUF_SIZE
-#define ETH_RX_BUF_SIZE                 ETH_MAX_PACKET_SIZE
-#endif
-
-#ifndef ETH_TX_BUF_SIZE
-#define ETH_TX_BUF_SIZE                 ETH_MAX_PACKET_SIZE
+#define NUC472_PHY_ADDRESS              0x0U
 #endif
 
 #ifndef NUC472_ETH_RX_CACHE_BUF_SIZE
@@ -128,6 +122,16 @@ void Ethernet_Board_PinMux_Init(void)
     PC->SLEWCTL |= GPIO_SLEWCTL_HSREN6_Msk |
                    GPIO_SLEWCTL_HSREN7_Msk |
                    GPIO_SLEWCTL_HSREN8_Msk;
+
+    gpio_pin_init_status[hwGPIO_Pin_C0]  = true;
+    gpio_pin_init_status[hwGPIO_Pin_C1]  = true;
+    gpio_pin_init_status[hwGPIO_Pin_C2]  = true;
+    gpio_pin_init_status[hwGPIO_Pin_C3]  = true;
+    gpio_pin_init_status[hwGPIO_Pin_C4]  = true;
+    gpio_pin_init_status[hwGPIO_Pin_C5]  = true;
+    gpio_pin_init_status[hwGPIO_Pin_C6]  = true;
+    gpio_pin_init_status[hwGPIO_Pin_C7]  = true;
+    gpio_pin_init_status[hwGPIO_Pin_C8]  = true;
 }
 
 static int32_t NUC472_EMAC_Open(uint8_t mac[6])
@@ -292,7 +296,12 @@ hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up
     SYS_UnlockReg();
 
     CLK_EnableModuleClock(EMAC_MODULE);
+    SYS_ResetModule(EMAC_RST);
 
+    /*
+    * NUC472 的 EMAC_MODULE 沒有獨立 clock selector，
+    * 不需要 CLK_SetModuleClock(EMAC_MODULE, 0, 0)。
+    */
     Ethernet_Board_PinMux_Init();
 
     SYS_LockReg();
@@ -455,13 +464,7 @@ void Ethernet_Update_Config(bool isLinkUp)
 
 uint32_t Ethernet_Get_Tick(void)
 {
-#if defined(NeonRTOS_GetTick)
-    return NeonRTOS_GetTick();
-#elif defined(NeonRTOS_Millis)
     return NeonRTOS_Millis();
-#else
-    return 0;
-#endif
 }
 
 void Ethernet_Get_Hardware_Mac(uint8_t mac[6])

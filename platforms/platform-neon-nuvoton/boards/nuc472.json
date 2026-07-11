@@ -18,7 +18,7 @@
 
   "upload": {
     "maximum_size": 524288,
-    "maximum_ram_size": 65535,
+    "maximum_ram_size": 65536,
     "protocol": "nulink",
     "protocols": ["nulink", "jlink", "custom"]
   },

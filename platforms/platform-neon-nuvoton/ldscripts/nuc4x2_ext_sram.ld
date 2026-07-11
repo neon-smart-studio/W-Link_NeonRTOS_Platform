@@ -1,9 +1,13 @@
 /* Linker script to configure memory regions. */
+APP_START = DEFINED(APP_START_LOC) ? APP_START_LOC : 0 ;
+APP_SIZE = DEFINED(APP_START_LOC) ? 0x80000 - APP_START : 0x80000 ;
+FREE_RAM_REQ = DEFINED(MIN_FREE_RAM) ? MIN_FREE_RAM : 0;
+
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x80000   /* 512k */
+  FLASH (rx) : ORIGIN = APP_START, LENGTH = APP_SIZE   /* 512k */
   RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 0x10000   /*  64k */
-  XRAM  (rwx) : ORIGIN = 0x60000000, LENGTH = 0x100000 /* 1024k */
+  RAM_EXTERN (rwx)  : ORIGIN = 0x60000000, LENGTH = 0x100000   /*  1024k */
 }
 
 /* Library configurations */
@@ -74,6 +78,30 @@ SECTIONS
 		*(.rodata*)
 
 		KEEP(*(.eh_frame*))
+		
+		__data_section_table = .;
+		LONG(LOADADDR(.data));
+		LONG(    ADDR(.data));
+		LONG(  SIZEOF(.data));
+		__data_section_table_end = .;
+
+		__data_extern_section_table = .;
+		LONG(LOADADDR(.data.extern));
+		LONG(    ADDR(.data.extern));
+		LONG(  SIZEOF(.data.extern));
+		__data_extern_section_table_end = .;
+
+		__bss_section_table = .;
+		LONG(    ADDR(.bss));
+		LONG(  SIZEOF(.bss));
+		__bss_section_table_end = .;
+
+		__bss_extern_section_table = .;
+		LONG(    ADDR(.bss.extern));
+		LONG(  SIZEOF(.bss.extern));
+		__bss_extern_section_table_end = .;
+
+		
 	} > FLASH
 
 	.ARM.extab :
@@ -122,14 +150,32 @@ SECTIONS
 	} > FLASH
 	*/
 
-	__etext = .;
+	__etext = ALIGN (4);
 
-	.data : AT (__etext)
+	.data.extern : AT (__etext)
+    {
+		/**
+		* Place large .data* sections into external SRAM if internal SRAM is insufficient.
+		* Such memory arrangement requires initializing .data.extern section in startup file. Check startup fiile in cmsis-core-* for support or not.
+		*/
+
+		. = ALIGN(4) ;
+		__data_extern_start__ = .;
+		*(.data.extern*)
+		*(.data.$RAM2*)
+		*\libtest.a:(.data*)		/*add libcli_service data section to external ram*/
+		. = ALIGN(4) ;
+		__data_extern_end__ = .;
+    } > RAM_EXTERN
+    
+   	__etext2 = __etext + ALIGN (SIZEOF(.data.extern), 4);
+
+	.data : AT (__etext2)
 	{
 		__data_start__ = .;
 		*(vtable)
 		*(.data*)
-
+		*\libc.a:(.data*)
 		. = ALIGN(4);
 		/* preinit data */
 		PROVIDE_HIDDEN (__preinit_array_start = .);
@@ -156,13 +202,32 @@ SECTIONS
 		/* All data end */
 		__data_end__ = .;
 
-	} > RAM
+	} > RAM 
+
+	.bss.extern (NOLOAD):
+    {
+		/**
+		* Place large .bss* sections into external SRAM if internal SRAM is insufficient.
+		* Such memory arrangement requires initializing .bss.extern section to zero in startup file. Check startup fiile in cmsis-core-* for support or not.
+		*/
+
+		. = ALIGN(4) ;
+		__bss_extern_start__ = .;
+		*(.bss.extern*)
+		*(.bss.$RAM2*)
+		*\libtest.a:(.bss*)			/*add libcli_service data section to external ram*/
+		*\libtest.a:(COMMON)		/*add libcli_service data section to external ram*/
+		. = ALIGN(4) ;
+		__bss_extern_end__ = .;
+    } > RAM_EXTERN
 
 	.bss :
 	{
 		. = ALIGN(4);
 		__bss_start__ = .;
 		*(.bss*)
+		*\libc.a:(.bss*)
+		*\libc.a:(COMMON)
 		*(COMMON)
 		. = ALIGN(4);
 		__bss_end__ = .;
@@ -193,16 +258,4 @@ SECTIONS
 
 	/* Check if data + heap + stack exceeds RAM limit */
 	ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
-
-	.ext_sram (NOLOAD) :
-	{
-		. = ALIGN(8);
-		__ext_sram_start__ = .;
-		KEEP(*(.ext_sram))
-		KEEP(*(.ext_sram*))
-		. = ALIGN(8);
-		__ext_sram_end__ = .;
-	} > XRAM
-
-	ASSERT(SIZEOF(.ext_sram) <= LENGTH(XRAM), "XRAM overflowed")
 }

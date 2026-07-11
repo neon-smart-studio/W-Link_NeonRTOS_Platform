@@ -15,7 +15,7 @@
     "toolchain-gccarmnoneeabi": {
       "type": "toolchain",
       "owner": "platformio",
-      "version": "^1.100301.0"
+      "version": "~1.60301.0"
     },
     "tool-openocd-nuvoton": {
       "type": "tool",

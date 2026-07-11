@@ -299,11 +299,6 @@ err_t ethernetif_init(struct netif *netif)
   netif_set_igmp_mac_filter(pNetif, igmp_mac_filter);
 #endif
 
-#if LWIP_IGMP
-  ETH_HashTableHigh = EthHandle.Instance->MACHTHR;
-  ETH_HashTableLow = EthHandle.Instance->MACHTLR;
-#endif
-
   return ERR_OK;
 }
 
@@ -332,7 +327,7 @@ __attribute__((weak)) void ethernetif_notify_conn_changed(struct netif *netif)
 }
 
 #if LWIP_IGMP
-err_t igmp_mac_filter(struct netif *netif, const ip4_addr_t *ip4_addr, netif_mac_filter_action action)
+err_t igmp_mac_filter(struct netif *netif, const ip4_addr_t *ip4_addr, enum netif_mac_filter_action action)
 {
   uint8_t mac[6];
   const uint8_t *p = (const uint8_t *)ip4_addr;

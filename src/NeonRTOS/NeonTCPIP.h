@@ -41,10 +41,6 @@ extern "C" {
 /* Maximum number of client per server */
 #define MAX_CLIENT  32
 
-#ifdef IF_INPUT_USE_IT
-  extern struct netif gnetif;
-#endif
-
 void NeonTCPIP_init(const uint8_t *ip, const uint8_t *gw, const uint8_t *netmask);
 
 #if LWIP_DHCP

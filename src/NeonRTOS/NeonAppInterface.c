@@ -14,8 +14,8 @@
 #include "Utils/cJSON/cJSON.h"
 
 #include "NeonServices/HTTPd/HTTPd.h"
-
-//#include "SSDP/SSDP.h"
+#include "NeonServices/SSDP/SSDP.h"
+#include "NeonServices/Telnet/Telnet.h"
 
 #include "NeonAppInterface.h"
 
@@ -520,7 +520,18 @@ void Init_Thread(void* p)
 #ifdef CONFIG_SUPPORT_INTERNET
     NeonTCPIP_init(NULL, NULL, NULL);
 
+    SSDP_SetServicePort(HTTP_PORT);
+    SSDP_SetServiceURL(HTTP_Host_Name);
+    SSDP_SetDeviceType(USER_APP_DEVIXE_TYPE);
+    SSDP_SetModelName(USER_APP_MODEL_NAME);
+    SSDP_SetModelVersion(USER_APP_VERSION);
+    SSDP_SetManufacturerName(MANUFACTURE_NAME);
+    
     HTTPd_Init();
+
+    SSDP_Init();
+
+    Telnet_Server_Init();
 
     Register_Neon_APP_Interface_Msg_CallBack("Network", Network_On_POST_Callback, Network_On_GET_Callback);
 #endif //CONFIG_SUPPORT_INTERNET

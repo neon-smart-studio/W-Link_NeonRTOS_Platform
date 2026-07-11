@@ -35,11 +35,6 @@
 
 #include "NFC_Demo.h"
 
-/*
-#define ENV_SERVICE_UUID      "42821a40-e477-11e2-82d0-0002a5d5c51b"
-#define TEMP_CHAR_UUID        "a32e5520-e477-11e2-a9e3-0002a5d5c51b"
-#define HUMIDITY_CHAR_UUID    "01c50b60-e48c-11e2-a073-0002a5d5c51b"
-*/
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
     // 堆疊溢出處理
     while (1);
@@ -66,9 +61,6 @@ int main(void) {
     SysCtrl_Init();
 
     DMA_Init();
-    
-    //__HAL_RCC_WWDG_CLK_DISABLE();  // 禁用窗口看門狗
-    //__HAL_RCC_IWDG_CLK_DISABLE();  // 禁用獨立看門狗
     
     Neon_App_Init();
 

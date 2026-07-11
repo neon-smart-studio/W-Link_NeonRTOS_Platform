@@ -6,6 +6,11 @@
 
 #include "GPIO/GPIO.h"
 
+#define USER_APP_MODEL_NAME    "NeonRT"
+#define USER_APP_VERSION       "V1.0.0"
+#define MANUFACTURE_NAME       "Neon Smart"
+#define USER_APP_DEVIXE_TYPE   "W-Link"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif

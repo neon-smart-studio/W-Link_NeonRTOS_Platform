@@ -10,6 +10,7 @@
 #include "lwip/prot/dhcp.h"
 #include "lwip/dns.h"
 #include "lwip/tcpbase.h"
+
 #include "netif/ethernet.h"
 
 #include "ethernet_if/ethernet_if_lwip.h"

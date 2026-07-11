@@ -1,5 +1,5 @@
 from os.path import join, dirname, abspath, isfile, isdir
-from SCons.Script import DefaultEnvironment
+from SCons.Script import (ARGUMENTS, COMMAND_LINE_TARGETS, AlwaysBuild, Builder, Default, DefaultEnvironment)
 
 env = DefaultEnvironment()
 board = env.BoardConfig()
@@ -29,23 +29,32 @@ env.Replace(
     CXX="arm-none-eabi-g++",
     GDB="arm-none-eabi-gdb",
     OBJCOPY="arm-none-eabi-objcopy",
-    SIZE="arm-none-eabi-size"
+    RANLIB="arm-none-eabi-ranlib",
+    SIZETOOL="arm-none-eabi-size",
+
+    ARFLAGS=["rc"],
+
+    PIODEBUGFLAGS=["-O0", "-g3", "-ggdb", "-gdwarf-2"],
+
+    SIZEPROGREGEXP=r"^(?:\.text|\.data|\.rodata|\.text.align|\.ARM.exidx)\s+(\d+).*",
+    SIZEDATAREGEXP=r"^(?:\.data|\.bss|\.noinit)\s+(\d+).*",
+    SIZECHECKCMD="$SIZETOOL -A -d $SOURCES",
+    SIZEPRINTCMD='$SIZETOOL -B -d $SOURCES',
+
+    PROGSUFFIX=".elf"
 )
 
-include_paths = [
-    join(project_dir, "include"),
-    project_include_dir,
-]
+env.Append(
+    ASFLAGS=["-x", "assembler-with-cpp"],
 
-env.AppendUnique(
-    CPPPATH=[
-        p for p in include_paths
-        if p and isdir(p)
-    ],
-
-    CFLAGS=[
+    CCFLAGS=[
+        "-Os",
         "-ffunction-sections",
         "-fdata-sections",
+        "-mthumb",
+        "-mabi=aapcs",
+        "-march=armv7e-m",
+        "-MMD",
 
         "-Wno-implicit-function-declaration",
         "-Wno-error=implicit-function-declaration",
@@ -56,46 +65,90 @@ env.AppendUnique(
         "-Wno-incompatible-pointer-types",
         "-Wno-error=incompatible-pointer-types",
     ],
+
     CXXFLAGS=[
-        "-ffunction-sections",
-        "-fdata-sections",
         "-fno-exceptions",
+        "-fno-threadsafe-statics",
         "-fno-rtti",
     ],
-    ASFLAGS=[
+
+    CPPDEFINES=[
+        ("F_CPU", "$BOARD_F_CPU"),
+        "gcc",
+    ],
+
+    LINKFLAGS=[
+        "-Os",
         "-ffunction-sections",
         "-fdata-sections",
-    ],
-    LINKFLAGS=[
-        "--specs=nano.specs",
-        "--specs=nosys.specs",
-        "-Wl,--wrap=memset",
         "-Wl,--gc-sections",
-        "-Wl,-Map,firmware.map",
         "-Wl,--print-memory-usage",
-    ]
+        "-mthumb"
+    ],
+
+    LIBS=["m", "stdc++", "gcc", "nosys", "c"],
+
+    BUILDERS=dict(
+        ElfToHex=Builder(
+            action=env.VerboseAction(" ".join([
+                "$OBJCOPY",
+                "-O",
+                "ihex",
+                "-R",
+                ".eeprom",
+                "$SOURCES",
+                "$TARGET"
+            ]), "Building $TARGET"),
+            suffix=".hex"
+        )
+    )
 )
 
-env.Append(
-    CPPDEFINES=[
-        ("F_CPU", board.get("build.f_cpu")),
+if "BOARD" in env:
+
+    board_cfg = env.BoardConfig()
+
+    cpu = board_cfg.get("build.cpu", "cortex-m4")
+    fpu = board_cfg.get("build.fpu", None)
+    float_abi = board_cfg.get("build.float-abi", None)
+
+    asflags = [
+        "-mcpu=%s" % cpu
     ]
-)
 
-env.MergeFlags(env.get("BUILD_FLAGS", []))
+    ccflags = [
+        "-mcpu=%s" % cpu
+    ]
 
-ldscript = board.get("build.ldscript")
-if ldscript:
-    env.Replace(
-        LDSCRIPT_PATH=join(platform_dir, "ldscripts", ldscript)
+    linkflags = [
+        "-mcpu=%s" % cpu
+    ]
+
+    if fpu and float_abi:
+        asflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        ccflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        linkflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+    env.Append(
+        ASFLAGS=asflags,
+        CCFLAGS=ccflags,
+        LINKFLAGS=linkflags
     )
 
-env.Replace(
-    PROGNAME="firmware",
-    PROGSUFFIX=".elf"
-)
-
-env.BuildFrameworks(env.get("PIOFRAMEWORK"))
+# Allow user to override via pre:script
+if env.get("PROGNAME", "program") == "program":
+    env.Replace(PROGNAME="firmware")
 
 target_elf = env.BuildProgram()
 elf_path = str(target_elf[0]).replace("\\", "/")

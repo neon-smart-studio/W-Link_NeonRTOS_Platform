@@ -1,6 +1,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "time.h"
 
@@ -438,7 +439,7 @@ int Network_On_POST_Callback(App_Interface_Protocol protocol, cJSON *in_json)
             if(cJSON_IsString(dns_item))
             {
                 uint32_t dns = ip_string_to_u32(dns_item->valuestring);
-                NeonTCPIP_IF_Set_DNS_Address(&dns);
+                NeonTCPIP_IF_Set_DNS_Address((uint8_t*)&dns);
             }
         }
         else if (strcmp(cmd->valuestring, "enable DHCP") == 0)

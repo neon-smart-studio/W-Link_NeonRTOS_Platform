@@ -14,6 +14,8 @@
 
 #include "ethernet_if/ethernet_if_lwip.h"
 
+#include "UART/UART.h"
+
 #include "NeonTCPIP.h"
 
 #if !NO_SYS

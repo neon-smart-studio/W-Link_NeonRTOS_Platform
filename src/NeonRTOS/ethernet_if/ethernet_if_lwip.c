@@ -11,6 +11,8 @@
 
 #include "NeonRTOS.h"
 
+#include "UART/UART.h"
+
 #include "Ethernet/Ethernet.h"
 
 #include "ethernet_if_lwip.h"

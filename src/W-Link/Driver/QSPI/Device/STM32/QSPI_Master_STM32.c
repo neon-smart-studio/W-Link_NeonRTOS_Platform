@@ -495,8 +495,10 @@ hwQSPI_OpResult QSPI_Master_WriteByte(hwQSPI_Index index, const uint8_t dat)
     qspi_cmd[index].DummyCycles       = 0;
     qspi_cmd[index].NbData            = 1;
     qspi_cmd[index].DdrMode           = QSPI_DDR_MODE_DISABLE;
+#ifndef STM32WB
     qspi_cmd[index].DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
     qspi_cmd[index].SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+#endif
 
     NeonRTOS_SyncObjClear(&Qspi_Master_Send_SyncHandle[index]);
 
@@ -541,8 +543,10 @@ hwQSPI_OpResult QSPI_Master_ReadByte(hwQSPI_Index index, uint8_t *dat)
     qspi_cmd[index].DummyCycles       = 0;
     qspi_cmd[index].NbData            = 1;
     qspi_cmd[index].DdrMode           = QSPI_DDR_MODE_DISABLE;
+#ifndef STM32WB
     qspi_cmd[index].DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
     qspi_cmd[index].SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+#endif
 
     NeonRTOS_SyncObjClear(&Qspi_Master_Recv_SyncHandle[index]);
 
@@ -604,8 +608,10 @@ hwQSPI_OpResult QSPI_Master_Stream_Write(hwQSPI_Index index, const uint8_t *buf,
     qspi_cmd[index].DummyCycles       = 0;
     qspi_cmd[index].NbData            = len;
     qspi_cmd[index].DdrMode           = QSPI_DDR_MODE_DISABLE;
+#ifndef STM32WB
     qspi_cmd[index].DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
     qspi_cmd[index].SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+#endif
 
     NeonRTOS_SyncObjClear(&Qspi_Master_Send_SyncHandle[index]);
 
@@ -650,8 +656,10 @@ hwQSPI_OpResult QSPI_Master_Stream_Read(hwQSPI_Index index, uint8_t *buf, uint16
     qspi_cmd[index].DummyCycles       = 0;
     qspi_cmd[index].NbData            = len;
     qspi_cmd[index].DdrMode           = QSPI_DDR_MODE_DISABLE;
+#ifndef STM32WB
     qspi_cmd[index].DdrHoldHalfCycle  = QSPI_DDR_HHC_ANALOG_DELAY;
     qspi_cmd[index].SIOOMode          = QSPI_SIOO_INST_EVERY_CMD;
+#endif
 
     NeonRTOS_SyncObjClear(&Qspi_Master_Recv_SyncHandle[index]);
 

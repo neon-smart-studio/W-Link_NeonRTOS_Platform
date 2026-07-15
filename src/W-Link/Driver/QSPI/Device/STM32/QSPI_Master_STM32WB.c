@@ -99,8 +99,6 @@ hwQSPI_OpResult QSPI_Instance_Init(hwQSPI_Index index,
     g_qspi[index].Init.FlashSize          = 27;
     g_qspi[index].Init.ChipSelectHighTime = QSPI_CS_HIGH_TIME_1_CYCLE;
     g_qspi[index].Init.ClockMode          = QSPI_CLOCK_MODE_0;
-    g_qspi[index].Init.FlashID            = QSPI_FLASH_ID_1;
-    g_qspi[index].Init.DualFlash          = QSPI_DUALFLASH_DISABLE;
 
     switch (opMode)
     {

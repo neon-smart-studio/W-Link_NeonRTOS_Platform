@@ -140,6 +140,9 @@ hwSPI_OpResult SPI_Instance_Init(
     hwSPI_OpMode opMode
 )
 {
+    if (index >= hwSPI_Index_MAX || clock_rate_hz == 0)
+        return hwSPI_InvalidParameter;
+
     SPI_TypeDef *spi_soc_base = SPI_Map_Soc_Base(index);
 
     if (spi_soc_base == NULL)
@@ -149,19 +152,17 @@ hwSPI_OpResult SPI_Instance_Init(
 
     SPI_EnableClock(index);
 
-    g_spi[index].Instance               = spi_soc_base;
-    g_spi[index].Init.Mode              = SPI_MODE_MASTER;
-    g_spi[index].Init.Direction         = SPI_DIRECTION_2LINES;
-    g_spi[index].Init.DataSize          = SPI_DATASIZE_8BIT;
-    g_spi[index].Init.NSS               = SPI_NSS_SOFT;
-    g_spi[index].Init.FirstBit          = SPI_FIRSTBIT_MSB;
-    g_spi[index].Init.TIMode            = SPI_TIMODE_DISABLE;
-    g_spi[index].Init.CRCCalculation    = SPI_CRCCALCULATION_DISABLE;
-    g_spi[index].Init.CRCPolynomial     = 7;
-
-#if defined(SPI_NSS_PULSE_DISABLE)
-    g_spi[index].Init.NSSPMode          = SPI_NSS_PULSE_DISABLE;
-#endif
+    g_spi[index].Instance                        = spi_soc_base;
+    g_spi[index].Init.Mode                       = SPI_MODE_MASTER;
+    g_spi[index].Init.Direction                  = SPI_DIRECTION_2LINES;
+    g_spi[index].Init.DataSize                   = SPI_DATASIZE_8BIT;
+    g_spi[index].Init.NSS                        = SPI_NSS_SOFT;
+    g_spi[index].Init.FirstBit                   = SPI_FIRSTBIT_MSB;
+    g_spi[index].Init.TIMode                     = SPI_TIMODE_DISABLE;
+    g_spi[index].Init.CRCCalculation             = SPI_CRCCALCULATION_DISABLE;
+    g_spi[index].Init.CRCPolynomial              = 7;
+    g_spi[index].Init.CRCLength                  = 0;
+    g_spi[index].Init.NSSPMode                   = SPI_NSS_PULSE_DISABLE;
 
     switch (opMode)
     {

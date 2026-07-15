@@ -71,13 +71,13 @@ static const hwDMA_Channel_Index SPI_DMA_Channel_Map[hwSPI_Index_MAX][hwDMA_Peri
 static const hwDMA_Channel_Index I2C_DMA_Channel_Map[hwI2C_Index_MAX][hwDMA_Peripheral_Direction_MAX] =
 {
 #if defined(I2C1_BASE)
-    {hwDMA_Channel_Index_9, hwDMA_Channel_Index_10},
+    {hwDMA_Channel_Index_7, hwDMA_Channel_Index_9},
 #endif
 #if defined(I2C2_BASE)
-    {hwDMA_Channel_Index_11, hwDMA_Channel_Index_12},
+    {hwDMA_Channel_Index_10, hwDMA_Channel_Index_11},
 #endif
 #if defined(I2C3_BASE)
-    {hwDMA_Channel_Index_13, hwDMA_Channel_Index_14},
+    {hwDMA_Channel_Index_12, hwDMA_Channel_Index_13},
 #endif
 };
 
@@ -764,31 +764,31 @@ hwDMA_OpResult DMA_NVIC_DeInit(hwDMA_Channel_Index channel_index)
 #endif
 #if defined (DMA2_BASE)
 #if defined (DMA2_Channel1)
-                                if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_8])
-                                {
-                                        dma1_4_7_dma2_1_5_used = true;
-                                }
-#endif
-#if defined (DMA2_Channel2)
                                 if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_9])
                                 {
                                         dma1_4_7_dma2_1_5_used = true;
                                 }
 #endif
-#if defined (DMA2_Channel3)
+#if defined (DMA2_Channel2)
                                 if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_10])
                                 {
                                         dma1_4_7_dma2_1_5_used = true;
                                 }
 #endif
-#if defined (DMA2_Channel4)
+#if defined (DMA2_Channel3)
                                 if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_11])
                                 {
                                         dma1_4_7_dma2_1_5_used = true;
                                 }
 #endif
-#if defined (DMA2_Channel5)
+#if defined (DMA2_Channel4)
                                 if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_12])
+                                {
+                                        dma1_4_7_dma2_1_5_used = true;
+                                }
+#endif
+#if defined (DMA2_Channel5)
+                                if(DMA_NVIC_Init_Status[hwDMA_Channel_Index_13])
                                 {
                                         dma1_4_7_dma2_1_5_used = true;
                                 }

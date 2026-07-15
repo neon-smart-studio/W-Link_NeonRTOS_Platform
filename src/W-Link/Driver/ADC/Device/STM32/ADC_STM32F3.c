@@ -123,6 +123,8 @@ hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
     {
 #if defined(ADC1_BASE)
         case hwADC_Instance_1:
+            __HAL_RCC_ADC12_CLK_DISABLE();
+            break;
 #endif
 #if defined(ADC2_BASE)
         case hwADC_Instance_2:
@@ -153,7 +155,7 @@ hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
     ADC_ChannelConfTypeDef cfg = {0};
     cfg.Channel = ADC_Channel_To_HAL(ch);
 
-    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_0)
+    if (cfg.Channel == 0 && ch != hwADC_Channel_Index_1)
         return hwADC_InvalidParameter;
 
 #if defined(ADC_REGULAR_RANK_1)

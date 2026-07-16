@@ -1,0 +1,31 @@
+{
+  "build": {
+    "core": "mspm0",
+    "cpu": "cortex-m0plus",
+    "f_cpu": "80000000L",
+    "mcu": "MSPM0G3519",
+    "variant": "MSPM0G3519"
+  },
+  "frameworks": [
+    "cmsis"
+  ],
+  "upload": {
+    "maximum_ram_size": 131072,
+    "maximum_size": 524288,
+    "protocol": "dslite",
+    "protocols": [
+      "dslite"
+    ]
+  },
+  "debug": {
+    "default_tools": [
+      "xds110"
+    ],
+    "onboard_tools": [
+      "xds110"
+    ]
+  },
+  "name": "TI MSPM0G3519",
+  "vendor": "Texas Instruments",
+  "url": "https://www.ti.com/tool/LP-MSPM0G3519"
+}

@@ -53,8 +53,8 @@ env.Append(
     ]
 )
 
-if not env.get("TIVAC_CMSIS_BUILT"):
-    env["TIVAC_CMSIS_BUILT"] = True
+if not env.get("TIMSP432_CMSIS_BUILT"):
+    env["TIMSP432_CMSIS_BUILT"] = True
 
     env.BuildSources(
         os.path.join("$BUILD_DIR", "cmsis_" + cmsis_family),

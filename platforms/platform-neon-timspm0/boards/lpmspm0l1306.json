@@ -1,0 +1,31 @@
+{
+  "build": {
+    "core": "mspm0",
+    "cpu": "cortex-m0plus",
+    "f_cpu": "32000000L",
+    "mcu": "MSPM0L1306",
+    "variant": "MSPM0L1306"
+  },
+  "frameworks": [
+    "cmsis"
+  ],
+  "upload": {
+    "maximum_ram_size": 4096,
+    "maximum_size": 65536,
+    "protocol": "dslite",
+    "protocols": [
+      "dslite"
+    ]
+  },
+  "debug": {
+    "default_tools": [
+      "xds110"
+    ],
+    "onboard_tools": [
+      "xds110"
+    ]
+  },
+  "name": "TI LaunchPad MSPM0L1306",
+  "vendor": "TI",
+  "url": "https://www.ti.com/tool/LP-MSPM0L1306"
+}

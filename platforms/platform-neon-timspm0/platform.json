@@ -1,0 +1,47 @@
+{
+  "name": "neon-mspm0",
+  "title": "TI MSPM0",
+  "description": "The MSPM0 is a 32-bit Arm Cortex-M0+ microcontroller family from Texas Instruments. The family is designed for cost-sensitive, low-power and real-time embedded applications, and provides integrated analog peripherals, timers, communication interfaces and device-specific hardware features.",
+  "license": "Apache-2.0",
+  "keywords": [
+    "dev-platform",
+    "Texas Instruments",
+    "MSPM0",
+    "Cortex-M0+"
+  ],
+  "engines": {
+    "platformio": "^5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neon-smart-studio/platform-neon-mspm0.git"
+  },
+  "version": "0.1.0",
+  "frameworks": {
+    "cmsis": {
+      "script": "builder/frameworks/cmsis.py",
+      "description": "The Arm Cortex Microcontroller Software Interface Standard provides a vendor-independent hardware abstraction layer for Cortex-M processors, including processor access definitions, startup support and standardized interfaces.",
+      "homepage": "https://www.arm.com/technologies/cmsis",
+      "title": "CMSIS"
+    }
+  },
+  "packages": {
+    "toolchain-gccarmnoneeabi": {
+      "type": "toolchain",
+      "owner": "platformio",
+      "version": "~1.60301.0"
+    },
+    "tool-dslite": {
+      "type": "uploader",
+      "optional": true,
+      "owner": "platformio",
+      "version": "~1.90200.1400"
+    },
+    "tool-openocd": {
+      "type": "uploader",
+      "optional": true,
+      "owner": "platformio",
+      "version": "~2.1100.0"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "build": {
+    "core": "mspm0",
+    "cpu": "cortex-m0plus",
+    "f_cpu": "24000000L",
+    "mcu": "MSPM0C1104",
+    "variant": "MSPM0C1104"
+  },
+  "frameworks": [
+    "cmsis"
+  ],
+  "upload": {
+    "maximum_ram_size": 1024,
+    "maximum_size": 16384,
+    "protocol": "dslite",
+    "protocols": [
+      "dslite"
+    ]
+  },
+  "debug": {
+    "default_tools": [
+      "xds110"
+    ],
+    "onboard_tools": [
+      "xds110"
+    ]
+  },
+  "name": "TI LaunchPad MSPM0C1104",
+  "vendor": "TI",
+  "url": "https://www.ti.com/tool/LP-MSPM0C1104"
+}

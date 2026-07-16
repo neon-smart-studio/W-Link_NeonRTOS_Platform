@@ -1,0 +1,31 @@
+{
+  "build": {
+    "core": "mspm0",
+    "cpu": "cortex-m0plus",
+    "f_cpu": "32000000L",
+    "mcu": "MSPM0L1117",
+    "variant": "MSPM0L1117"
+  },
+  "frameworks": [
+    "cmsis"
+  ],
+  "upload": {
+    "maximum_ram_size": 16384,
+    "maximum_size": 131072,
+    "protocol": "dslite",
+    "protocols": [
+      "dslite"
+    ]
+  },
+  "debug": {
+    "default_tools": [
+      "xds110"
+    ],
+    "onboard_tools": [
+      "xds110"
+    ]
+  },
+  "name": "TI LaunchPad MSPM0L1117",
+  "vendor": "TI",
+  "url": "https://www.ti.com/tool/LP-MSPM0L1117"
+}

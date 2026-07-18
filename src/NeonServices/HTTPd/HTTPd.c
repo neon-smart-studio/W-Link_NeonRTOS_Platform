@@ -52,7 +52,6 @@ typedef struct HTTPd_WebSocked_Client_Connection
 	HTTPd_Method requestType;
 	char *url;
 	char *hostName;
-        bool isLargeData;
 	uint32_t data_len;
         uint8_t* data_buff;
         char accept_encoding[64];
@@ -208,7 +207,6 @@ static void HTTPd_Restore_Variables(uint8_t client_index)
     c->hostName = NULL;
     c->getArgs = NULL;
 
-    c->isLargeData = false;
     c->data_len = 0;
     c->data_buff = NULL;
 
@@ -666,7 +664,6 @@ int HTTPd_Parse_InMsg_Headers(uint8_t *header, uint16_t header_len, HTTPd_WebSoc
                                         memcpy(content_len_str_buf, content_len_str, len);
 
                                         connData->data_len = atoi((char *)content_len_str_buf);
-                                        connData->isLargeData = false;
                                         connData->data_buff = NULL;
                                 }
                         }
@@ -1982,7 +1979,6 @@ void HTTP_Server_Task(void *pvParameters)
                                                 HTTPd_WebSocketd_Client_List[j]->connection_destruct_flag = false;
                                                 
                                                 HTTPd_WebSocketd_Client_List[j]->data_len = 0;
-                                                HTTPd_WebSocketd_Client_List[j]->isLargeData = false;
                                                 HTTPd_WebSocketd_Client_List[j]->data_buff = NULL;
                                                 client_index = j;
                                                 break;
@@ -2100,7 +2096,6 @@ void HTTP_Server_Task(void *pvParameters)
                                 {
                                         mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
 
-                                        HTTPd_WebSocketd_Client_List[i]->isLargeData = false;
                                         HTTPd_WebSocketd_Client_List[i]->data_buff = NULL;
                                 }
                                         
@@ -2216,125 +2211,116 @@ void HTTP_Server_Task(void *pvParameters)
                                         
                                         if(HTTPd_WebSocketd_Client_List[i]->data_len>0)
                                         {
-                                                if(HTTPd_WebSocketd_Client_List[i]->data_len>4096)
+                                                HTTPd_WebSocketd_Client_List[i]->data_buff = mem_Malloc(sizeof(uint8_t)*HTTPd_WebSocketd_Client_List[i]->data_len);
+                                                
+                                                if(HTTPd_WebSocketd_Client_List[i]->data_buff==NULL)
                                                 {
-                                                        HTTPd_WebSocketd_Client_List[i]->isLargeData = true;
-                                                }
-                                                else
-                                                {
-                                                        HTTPd_WebSocketd_Client_List[i]->data_buff = mem_Malloc(sizeof(uint8_t)*HTTPd_WebSocketd_Client_List[i]->data_len);
+                                                        mem_Free(http_cmd_buf);
                                                         
-                                                        if(HTTPd_WebSocketd_Client_List[i]->data_buff==NULL)
-                                                        {
-                                                                mem_Free(http_cmd_buf);
-                                                                
-                                                                HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
+                                                        HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
 
-                                                                //UART_Printf("[HTTPD %d] err request data too large\n", i);
-                                                                
-                                                                continue;
+                                                        //UART_Printf("[HTTPD %d] err request data too large\n", i);
+                                                        
+                                                        continue;
+                                                }
+
+                                                if (already_body_len > 0)
+                                                {
+                                                        if (already_body_len > HTTPd_WebSocketd_Client_List[i]->data_len)
+                                                        {
+                                                                already_body_len = HTTPd_WebSocketd_Client_List[i]->data_len;
                                                         }
 
-                                                        if (already_body_len > 0)
-                                                        {
-                                                                if (already_body_len > HTTPd_WebSocketd_Client_List[i]->data_len)
-                                                                {
-                                                                        already_body_len = HTTPd_WebSocketd_Client_List[i]->data_len;
-                                                                }
+                                                        memcpy(HTTPd_WebSocketd_Client_List[i]->data_buff, data_ptr, already_body_len);
+                                                }
 
-                                                                memcpy(HTTPd_WebSocketd_Client_List[i]->data_buff, data_ptr, already_body_len);
-                                                        }
-
-                                                        uint16_t cgi_recv_len = already_body_len;
-                                                        bool cgi_client_close = false;
-                                                        bool cgi_client_skip = false;
-                                                        do{
+                                                uint16_t cgi_recv_len = already_body_len;
+                                                bool cgi_client_close = false;
+                                                bool cgi_client_skip = false;
+                                                do{
 #ifdef HTTPD_USE_SSL
-                                                                ret = ssl_read(&ssl, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], 1);
+                                                        ret = ssl_read(&ssl, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], 1);
 #else
-                                                                ret = recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], HTTPd_WebSocketd_Client_List[i]->data_len - cgi_recv_len, 0);
+                                                        ret = recv(HTTPd_WebSocketd_Client_List[i]->socket_id, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], HTTPd_WebSocketd_Client_List[i]->data_len - cgi_recv_len, 0);
 #endif
 
-                                                                if (ret < 0)
+                                                        if (ret < 0)
+                                                        {
+                                                                ret = getsockopt(HTTPd_WebSocketd_Client_List[i]->socket_id, SOL_SOCKET, SO_ERROR, &socket_errno, &socket_errno_optlen);
+                                                                if(ret<0)
                                                                 {
-                                                                        ret = getsockopt(HTTPd_WebSocketd_Client_List[i]->socket_id, SOL_SOCKET, SO_ERROR, &socket_errno, &socket_errno_optlen);
-                                                                        if(ret<0)
-                                                                        {
-                                                                                cgi_client_close = true;
-                                                                                //UART_Printf("[HTTPD %d] cgi socket err sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
-                                                                                break;
-                                                                        }
-                                                                        
-                                                                        if (HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag)
-                                                                        {
-                                                                                //UART_Printf("[HTTPD %d] cgi socket timeout sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
-                                                                                cgi_client_close = true;
-                                                                                break;
-                                                                        }
-
-                                                                        if(socket_errno == EAGAIN || socket_errno == EWOULDBLOCK)
-                                                                        {
-                                                                                //UART_Printf("[HTTPD %d] cgi socket errno: 0 EAGAIN --> Skip!\n", i);
-                                                                                cgi_client_skip = true;
-                                                                                break;
-                                                                        }
-                                                                        
-                                                                        if(socket_errno==0)
-                                                                        {
-                                                                                //UART_Printf("[HTTPD %d] cgi socket errno: 0 sockfd %d --> Skip!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
-                                                                                cgi_client_skip = true;
-                                                                                break;
-                                                                        }
-
                                                                         cgi_client_close = true;
-                                                                        //UART_Printf("[HTTPD %d] cgi socket errno: %d sockfd %d!\n", i, socket_errno, HTTPd_WebSocketd_Client_List[i]->socket_id);
-                                                                        
+                                                                        //UART_Printf("[HTTPD %d] cgi socket err sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
                                                                         break;
                                                                 }
-                                                                else if(ret==0)
+                                                                
+                                                                if (HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag)
                                                                 {
-                                                                        //UART_Printf("[HTTPD %d] cgi socket remote close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
-                                                                        cgi_client_close = true; 
-                                                                        break;  
+                                                                        //UART_Printf("[HTTPD %d] cgi socket timeout sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                        cgi_client_close = true;
+                                                                        break;
+                                                                }
+
+                                                                if(socket_errno == EAGAIN || socket_errno == EWOULDBLOCK)
+                                                                {
+                                                                        //UART_Printf("[HTTPD %d] cgi socket errno: 0 EAGAIN --> Skip!\n", i);
+                                                                        cgi_client_skip = true;
+                                                                        break;
                                                                 }
                                                                 
-                                                                cgi_recv_len+=ret;
-                                                        }
-                                                        while(cgi_recv_len<HTTPd_WebSocketd_Client_List[i]->data_len);
+                                                                if(socket_errno==0)
+                                                                {
+                                                                        //UART_Printf("[HTTPD %d] cgi socket errno: 0 sockfd %d --> Skip!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                        cgi_client_skip = true;
+                                                                        break;
+                                                                }
 
-                                                        if(cgi_client_skip)
+                                                                cgi_client_close = true;
+                                                                //UART_Printf("[HTTPD %d] cgi socket errno: %d sockfd %d!\n", i, socket_errno, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                
+                                                                break;
+                                                        }
+                                                        else if(ret==0)
                                                         {
-                                                                if (HTTPd_WebSocketd_Client_List[i]->data_buff != NULL)
-                                                                {
-                                                                        mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
-                                                                        HTTPd_WebSocketd_Client_List[i]->data_buff = NULL;
-                                                                        HTTPd_WebSocketd_Client_List[i]->isLargeData = false;
-                                                                }
-
-                                                                mem_Free(http_cmd_buf);
-                                                                
-                                                                continue;
+                                                                //UART_Printf("[HTTPD %d] cgi socket remote close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+                                                                cgi_client_close = true; 
+                                                                break;  
                                                         }
-                                
-                                                        if(cgi_client_close)
+                                                        
+                                                        cgi_recv_len+=ret;
+                                                }
+                                                while(cgi_recv_len<HTTPd_WebSocketd_Client_List[i]->data_len);
+
+                                                if(cgi_client_skip)
+                                                {
+                                                        if (HTTPd_WebSocketd_Client_List[i]->data_buff != NULL)
                                                         {
-                                                                if(HTTPd_WebSocketd_Client_List[i]->data_buff!=NULL)
-                                                                {
-                                                                        //UART_Printf("[HTTPD %d] cgi HTTPd_WebSocketd_Client_List[%d]->data_buff!=NULL\n", i, i);
-
-                                                                        mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
-                                                                        
-                                                                        HTTPd_WebSocketd_Client_List[i]->isLargeData = false;
-                                                                        HTTPd_WebSocketd_Client_List[i]->data_buff = NULL;
-                                                                }
-
-                                                                mem_Free(http_cmd_buf);
-                                                                
-                                                                //UART_Printf("[HTTPD %d] cgi client_close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
-
-                                                                HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
-                                                                continue;
+                                                                mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
+                                                                HTTPd_WebSocketd_Client_List[i]->data_buff = NULL;
                                                         }
+
+                                                        mem_Free(http_cmd_buf);
+                                                        
+                                                        continue;
+                                                }
+                        
+                                                if(cgi_client_close)
+                                                {
+                                                        if(HTTPd_WebSocketd_Client_List[i]->data_buff!=NULL)
+                                                        {
+                                                                //UART_Printf("[HTTPD %d] cgi HTTPd_WebSocketd_Client_List[%d]->data_buff!=NULL\n", i, i);
+
+                                                                mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
+                                                                
+                                                                HTTPd_WebSocketd_Client_List[i]->data_buff = NULL;
+                                                        }
+
+                                                        mem_Free(http_cmd_buf);
+                                                        
+                                                        //UART_Printf("[HTTPD %d] cgi client_close sockfd %d!\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
+
+                                                        HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
+                                                        continue;
                                                 }
                                         }
                                         
@@ -2370,7 +2356,6 @@ void HTTP_Server_Task(void *pvParameters)
 
                                                 mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
                                                 
-                                                HTTPd_WebSocketd_Client_List[i]->isLargeData = false;
                                                 HTTPd_WebSocketd_Client_List[i]->data_buff = NULL;
                                         }
 

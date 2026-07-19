@@ -50,7 +50,7 @@
 #ifndef ti_dl_dl_uart_extend__include
 #define ti_dl_dl_uart_extend__include
 
-#include <ti/driverlib/dl_uart.h>
+#include <driverlib/dl_uart.h>
 
 #ifdef __MSPM0_HAS_UART_EXTD__
 

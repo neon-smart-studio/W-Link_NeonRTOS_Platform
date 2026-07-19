@@ -54,8 +54,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <ti/devices/msp/msp.h>
-#include <ti/driverlib/dl_common.h>
+#include <inc/msp.h>
+#include <driverlib/dl_common.h>
 
 #ifdef __MSPM0_HAS_OA__
 

@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_mcan.h>
+#include <driverlib/dl_mcan.h>
 
 #ifdef __MSPM0_HAS_MCAN__
 

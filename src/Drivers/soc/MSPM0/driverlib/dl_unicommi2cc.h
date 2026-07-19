@@ -56,9 +56,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <ti/devices/msp/msp.h>
-#include <ti/driverlib/dl_common.h>
-#include <ti/driverlib/dl_unicomm.h>
+#include <inc/msp.h>
+#include <driverlib/dl_common.h>
+#include <driverlib/dl_unicomm.h>
 
 #ifdef __MCU_HAS_UNICOMMI2CC__
 

@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_dma.h>
+#include <driverlib/dl_dma.h>
 
 void DL_DMA_initChannel(
     DMA_Regs *dma, uint8_t channelNum, const DL_DMA_Config *config)

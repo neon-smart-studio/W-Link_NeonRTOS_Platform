@@ -32,7 +32,7 @@
 
 #include <stdint.h>
 
-#include <ti/driverlib/m0p/dl_factoryregion.h>
+#include <driverlib/m0p/dl_factoryregion.h>
 
 #if ((DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0GX51X) || \
      (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0G352X))

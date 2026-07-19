@@ -30,8 +30,8 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_uart_extend.h>
-#include <ti/driverlib/dl_uart_main.h>
+#include <driverlib/dl_uart_extend.h>
+#include <driverlib/dl_uart_main.h>
 
 #if defined(__MSPM0_HAS_UART_MAIN__) || defined(__MSPM0_HAS_UART_EXTD__)
 

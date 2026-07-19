@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_mathacl.h>
+#include <driverlib/dl_mathacl.h>
 
 #ifdef __MSPM0_HAS_MATHACL__
 

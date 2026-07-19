@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_comp.h>
+#include <driverlib/dl_comp.h>
 
 #ifdef __MSPM0_HAS_IWDT__
 #endif /* __MSPM0_HAS_IWDT__ */

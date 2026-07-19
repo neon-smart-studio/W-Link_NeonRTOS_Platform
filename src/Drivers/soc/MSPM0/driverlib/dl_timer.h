@@ -51,13 +51,13 @@
  *  To access TimerG functionality:
  *  @code
  *  // Import TIMG definitions
- *  #include <ti/driverlib/dl_timerg.h>
+ *  #include <driverlib/dl_timerg.h>
  *  @endcode
  *
  *  To access TimerA functionality:
  *  @code
  *  // Import TIMA definitions
- *  #include <ti/driverlib/dl_timera.h>
+ *  #include <driverlib/dl_timera.h>
  *  @endcode
  *
  *  <hr>
@@ -75,8 +75,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <ti/devices/msp/msp.h>
-#include <ti/driverlib/dl_common.h>
+#include <inc/msp.h>
+#include <driverlib/dl_common.h>
 
 #if defined(__MSPM0_HAS_TIMER_A__) || defined(__MSPM0_HAS_TIMER_G__)
 

@@ -160,28 +160,28 @@ typedef enum IRQn
   @{
 */
 
-#include <ti/devices/msp/peripherals/hw_adc12.h>
-#include <ti/devices/msp/peripherals/hw_aesadv.h>
-#include <ti/devices/msp/peripherals/hw_crcp.h>
-#include <ti/devices/msp/peripherals/hw_dma.h>
-#include <ti/devices/msp/peripherals/hw_flashctl.h>
-#include <ti/devices/msp/peripherals/hw_gpio.h>
-#include <ti/devices/msp/peripherals/hw_gptimer.h>
-#include <ti/devices/msp/peripherals/hw_i2c.h>
-#include <ti/devices/msp/peripherals/hw_iomux.h>
-#include <ti/devices/msp/peripherals/hw_keystorectl.h>
-#include <ti/devices/msp/peripherals/hw_lfss.h>
-#include <ti/devices/msp/peripherals/hw_rtc.h>
-#include <ti/devices/msp/peripherals/hw_spi.h>
-#include <ti/devices/msp/peripherals/hw_trng.h>
-#include <ti/devices/msp/peripherals/hw_uart.h>
-#include <ti/devices/msp/peripherals/hw_vref.h>
-#include <ti/devices/msp/peripherals/hw_wuc.h>
-#include <ti/devices/msp/peripherals/hw_wwdt.h>
-#include <ti/devices/msp/peripherals/m0p/hw_factoryregion.h>
-#include <ti/devices/msp/peripherals/m0p/hw_cpuss.h>
-#include <ti/devices/msp/peripherals/m0p/hw_debugss.h>
-#include <ti/devices/msp/peripherals/m0p/hw_sysctl.h>
+#include <inc/hw_adc12.h>
+#include <inc/hw_aesadv.h>
+#include <inc/hw_crcp.h>
+#include <inc/hw_dma.h>
+#include <inc/hw_flashctl.h>
+#include <inc/hw_gpio.h>
+#include <inc/hw_gptimer.h>
+#include <inc/hw_i2c.h>
+#include <inc/hw_iomux.h>
+#include <inc/hw_keystorectl.h>
+#include <inc/hw_lfss.h>
+#include <inc/hw_rtc.h>
+#include <inc/hw_spi.h>
+#include <inc/hw_trng.h>
+#include <inc/hw_uart.h>
+#include <inc/hw_vref.h>
+#include <inc/hw_wuc.h>
+#include <inc/hw_wwdt.h>
+#include <inc/m0p/hw_factoryregion.h>
+#include <inc/m0p/hw_cpuss.h>
+#include <inc/m0p/hw_debugss.h>
+#include <inc/m0p/hw_sysctl.h>
 
 #define __MSPM0_HAS_ADC12__
 #define __MSPM0_HAS_GPIO__

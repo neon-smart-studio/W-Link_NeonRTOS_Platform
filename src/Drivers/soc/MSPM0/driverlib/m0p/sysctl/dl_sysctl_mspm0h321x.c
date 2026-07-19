@@ -31,11 +31,11 @@
  */
 
 #include <stdint.h>
-#include <ti/devices/DeviceFamily.h>
+#include <inc/DeviceFamily.h>
 
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0H321X)
 
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0h321x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0h321x.h>
 
 void DL_SYSCTL_setLFCLKSourceLFXT(const DL_SYSCTL_LFCLKConfig *config)
 {

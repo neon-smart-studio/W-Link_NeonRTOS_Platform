@@ -62,8 +62,8 @@
 
 #include <stdint.h>
 
-#include <ti/devices/msp/msp.h>
-#include <ti/devices/msp/peripherals/m0p/hw_cpuss.h>
+#include <inc/msp.h>
+#include <inc/m0p/hw_cpuss.h>
 
 #ifdef __cplusplus
 extern "C" {

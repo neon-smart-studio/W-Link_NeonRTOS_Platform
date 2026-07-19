@@ -59,7 +59,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <ti/driverlib/dl_lfss.h>
+#include <driverlib/dl_lfss.h>
 
 #ifdef __MSPM0_HAS_SCRATCHPAD__
 

@@ -53,7 +53,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <ti/driverlib/dl_timer.h>
+#include <driverlib/dl_timer.h>
 
 #ifdef __MSPM0_HAS_TIMER_A__
 

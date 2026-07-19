@@ -52,8 +52,8 @@
 #ifndef ti_dl_dl_gpio__include
 #define ti_dl_dl_gpio__include
 
-#include <ti/devices/msp/msp.h>
-#include <ti/driverlib/dl_common.h>
+#include <inc/msp.h>
+#include <driverlib/dl_common.h>
 
 #ifdef __MSPM0_HAS_GPIO__
 

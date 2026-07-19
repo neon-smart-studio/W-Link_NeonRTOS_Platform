@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_timerb.h>
+#include <driverlib/dl_timerb.h>
 
 #ifdef __MSPM0_HAS_TIMER_B__
 

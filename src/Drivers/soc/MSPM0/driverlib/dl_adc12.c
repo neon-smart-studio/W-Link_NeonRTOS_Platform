@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_adc12.h>
+#include <driverlib/dl_adc12.h>
 
 #ifdef __MSPM0_HAS_ADC12__
 

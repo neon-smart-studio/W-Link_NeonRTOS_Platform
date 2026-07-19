@@ -51,7 +51,7 @@
 
 #include <stdint.h>
 
-#include <ti/devices/msp/msp.h>
+#include <inc/msp.h>
 
 #ifdef __cplusplus
 extern "C" {

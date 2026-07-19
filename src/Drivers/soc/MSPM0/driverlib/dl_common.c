@@ -32,7 +32,7 @@
 
 #include <stdint.h>
 
-#include <ti/driverlib/dl_common.h>
+#include <driverlib/dl_common.h>
 
 void DL_Common_delayCycles(uint32_t cycles)
 {

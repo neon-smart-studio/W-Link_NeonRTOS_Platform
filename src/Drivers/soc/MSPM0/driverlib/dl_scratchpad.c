@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_scratchpad.h>
+#include <driverlib/dl_scratchpad.h>
 
 #ifdef __MSPM0_HAS_SCRATCHPAD__
 #endif /* __MSPM0_HAS_SCRATCHPAD__ */

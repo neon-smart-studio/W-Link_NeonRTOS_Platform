@@ -30,4 +30,4 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_gpio.h>
+#include <driverlib/dl_gpio.h>

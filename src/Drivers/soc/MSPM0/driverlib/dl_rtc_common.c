@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_rtc_common.h>
+#include <driverlib/dl_rtc_common.h>
 
 #if defined __MSPM0_HAS_RTC_A__ || defined __MSPM0_HAS_RTC_B__ || \
     defined __MSPM0_HAS_RTC__

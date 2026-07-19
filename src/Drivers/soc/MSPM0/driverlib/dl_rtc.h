@@ -50,7 +50,7 @@
 #ifndef ti_dl_dl_rtc__include
 #define ti_dl_dl_rtc__include
 
-#include <ti/driverlib/dl_rtc_common.h>
+#include <driverlib/dl_rtc_common.h>
 
 #ifdef __MSPM0_HAS_RTC__
 

@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <ti/devices/DeviceFamily.h>
 
-#include <ti/driverlib/dl_flashctl.h>
+#include <driverlib/dl_flashctl.h>
 
 static void DL_FlashCTL_programMemoryConfig(
     FLASHCTL_Regs *flashctl, uint32_t address, uint32_t cmd);

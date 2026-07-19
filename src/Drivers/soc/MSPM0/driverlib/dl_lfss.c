@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_lfss.h>
+#include <driverlib/dl_lfss.h>
 
 #ifdef __MSPM0_HAS_LFSS__
 #endif /* __MSPM0_HAS_LFSS__ */

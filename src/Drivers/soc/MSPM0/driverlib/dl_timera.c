@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_timera.h>
+#include <driverlib/dl_timera.h>
 
 #ifdef __MSPM0_HAS_TIMER_A__
 #endif /* __MSPM0_HAS_TIMER_A__ */

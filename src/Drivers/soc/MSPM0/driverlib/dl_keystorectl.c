@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_keystorectl.h>
+#include <driverlib/dl_keystorectl.h>
 
 #ifdef __MSPM0_HAS_KEYSTORE_CTL__
 

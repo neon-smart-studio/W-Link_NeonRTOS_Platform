@@ -46,37 +46,37 @@
 /******************************************************************************
 * MSP devices
 ******************************************************************************/
-#include <ti/devices/DeviceFamily.h>
+#include <inc/DeviceFamily.h>
 
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0G1X0X_G3X0X)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0g1x0x_g3x0x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0g1x0x_g3x0x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0L11XX_L13XX)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0l11xx_l13xx.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0l11xx_l13xx.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0C110X) || \
     (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPS003FX)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0c110x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0c110x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0L122X_L222X)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0l122x_l222x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0l122x_l222x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0GX51X)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0gx51x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0gx51x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0G352X)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0g352x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0g352x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0L111X)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0l111x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0l111x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0H321X)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0h321x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0h321x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0C1105_C1106) || \
     (DeviceFamily_PARENT == DeviceFamily_PARENT_MSP32G031CX) ||        \
     (DeviceFamily_PARENT == DeviceFamily_PARENT_MSP32C031CX)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0c1105_c1106.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0c1105_c1106.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0G511X)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0g511x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0g511x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0G518X)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0g518x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0g518x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0L211X_L112X)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0l211x_l112x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0l211x_l112x.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0GX218_GX207)
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0gx218_gx207.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0gx218_gx207.h>
 
 /********************************************************************
  *

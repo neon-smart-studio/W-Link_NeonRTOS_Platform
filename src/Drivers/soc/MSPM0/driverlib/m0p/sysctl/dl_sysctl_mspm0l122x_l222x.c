@@ -31,11 +31,11 @@
  */
 
 #include <stdint.h>
-#include <ti/devices/DeviceFamily.h>
+#include <inc/DeviceFamily.h>
 
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0L122X_L222X)
 
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0l122x_l222x.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0l122x_l222x.h>
 
 bool DL_SYSCTL_initReadExecuteProtectFirewall(
     uint32_t startAddr, uint32_t endAddr)

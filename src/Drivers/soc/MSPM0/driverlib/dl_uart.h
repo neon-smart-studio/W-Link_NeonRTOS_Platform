@@ -58,8 +58,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <ti/devices/msp/msp.h>
-#include <ti/driverlib/dl_common.h>
+#include <inc/msp.h>
+#include <driverlib/dl_common.h>
 
 #if defined(__MSPM0_HAS_UART_MAIN__) || defined(__MSPM0_HAS_UART_EXTD__)
 

@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_i2c.h>
+#include <driverlib/dl_i2c.h>
 
 #ifdef __MSPM0_HAS_I2C__
 

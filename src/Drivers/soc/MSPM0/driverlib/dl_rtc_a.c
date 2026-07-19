@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_rtc_a.h>
+#include <driverlib/dl_rtc_a.h>
 
 #ifdef __MSPM0_HAS_RTC_A__
 #endif /* __MSPM0_HAS_RTC_A__ */

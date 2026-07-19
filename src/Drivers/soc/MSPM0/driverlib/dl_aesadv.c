@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_aesadv.h>
+#include <driverlib/dl_aesadv.h>
 
 #ifdef __MSPM0_HAS_AESADV__
 

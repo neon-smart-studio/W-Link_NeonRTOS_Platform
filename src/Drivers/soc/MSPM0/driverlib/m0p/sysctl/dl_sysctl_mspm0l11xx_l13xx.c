@@ -31,11 +31,11 @@
  */
 
 #include <stdint.h>
-#include <ti/devices/DeviceFamily.h>
+#include <inc/DeviceFamily.h>
 
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_MSPM0L11XX_L13XX)
 
-#include <ti/driverlib/m0p/sysctl/dl_sysctl_mspm0l11xx_l13xx.h>
+#include <driverlib/m0p/sysctl/dl_sysctl_mspm0l11xx_l13xx.h>
 
 void DL_SYSCTL_switchMCLKfromSYSOSCtoLFCLK(bool disableSYSOSC)
 {

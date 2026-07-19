@@ -30,8 +30,8 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_timera.h>
-#include <ti/driverlib/dl_timerg.h>
+#include <driverlib/dl_timera.h>
+#include <driverlib/dl_timerg.h>
 
 #if defined(__MSPM0_HAS_TIMER_A__) || defined(__MSPM0_HAS_TIMER_G__)
 

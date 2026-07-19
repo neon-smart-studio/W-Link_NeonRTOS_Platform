@@ -54,10 +54,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <ti/devices/msp/msp.h>
-#include <ti/driverlib/dl_common.h>
-#include <ti/driverlib/m0p/dl_factoryregion.h>
-#include <ti/driverlib/m0p/dl_sysctl.h>
+#include <inc/msp.h>
+#include <driverlib/dl_common.h>
+#include <driverlib/m0p/dl_factoryregion.h>
+#include <driverlib/m0p/dl_sysctl.h>
 
 #ifdef __cplusplus
 extern "C" {

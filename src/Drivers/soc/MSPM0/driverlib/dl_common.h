@@ -47,7 +47,7 @@
 #ifndef ti_dl_dl_common__include
 #define ti_dl_dl_common__include
 
-#include <ti/devices/msp/msp.h>
+#include <inc/msp.h>
 
 #ifdef __cplusplus
 extern "C" {

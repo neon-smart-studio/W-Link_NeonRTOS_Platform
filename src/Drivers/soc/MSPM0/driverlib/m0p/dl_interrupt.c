@@ -32,7 +32,7 @@
 
 #include <stdint.h>
 
-#include <ti/driverlib/m0p/dl_interrupt.h>
+#include <driverlib/m0p/dl_interrupt.h>
 
 /* 32 Device Peripheral Exceptions + 16 reserved M0+ Exceptions */
 #define NUM_RES_M0_EXC ((uint32_t) 16)

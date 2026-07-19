@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_gpamp.h>
+#include <driverlib/dl_gpamp.h>
 
 #ifdef __MSPM0_HAS_GPAMP__
 #endif /* __MSPM0_HAS_GPAMP__ */

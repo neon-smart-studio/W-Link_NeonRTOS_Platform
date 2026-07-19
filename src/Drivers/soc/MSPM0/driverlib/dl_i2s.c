@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_i2s.h>
+#include <driverlib/dl_i2s.h>
 
 #ifdef __MSPM0_HAS_I2S__
 

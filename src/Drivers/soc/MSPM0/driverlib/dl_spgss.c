@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_spgss.h>
+#include <driverlib/dl_spgss.h>
 
 #ifdef __MCU_HAS_SPGSS__
 #endif /* __MCU_HAS_SPGSS__ */

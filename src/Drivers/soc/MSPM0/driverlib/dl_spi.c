@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_spi.h>
+#include <driverlib/dl_spi.h>
 
 #ifdef __MSPM0_HAS_SPI__
 

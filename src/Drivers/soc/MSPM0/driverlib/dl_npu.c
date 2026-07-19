@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_npu.h>
+#include <driverlib/dl_npu.h>
 
 #ifdef __MSPM0_HAS_NPU__
 

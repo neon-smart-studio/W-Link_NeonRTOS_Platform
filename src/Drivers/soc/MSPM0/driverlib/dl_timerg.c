@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_timerg.h>
+#include <driverlib/dl_timerg.h>
 
 #ifdef __MSPM0_HAS_TIMER_G__
 #endif /* __MSPM0_HAS_TIMER_G__ */

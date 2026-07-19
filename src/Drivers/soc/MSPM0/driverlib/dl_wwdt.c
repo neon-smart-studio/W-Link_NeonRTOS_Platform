@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_wwdt.h>
+#include <driverlib/dl_wwdt.h>
 
 #ifdef __MSPM0_HAS_WWDT__
 #endif /* __MSPM0_HAS_WWDT__ */

@@ -32,6 +32,8 @@
 
 *****************************************************************************/
 
+#if defined(MSPM0C110x)
+
 #include <stdint.h>
 
 /* Entry point for the application. */
@@ -205,3 +207,5 @@ void Default_Handler(void)
     {
     }
 }
+
+#endif //MSPM0C110x

@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_crcp.h>
+#include <driverlib/dl_crcp.h>
 
 #ifdef __MSPM0_HAS_CRCP__
 

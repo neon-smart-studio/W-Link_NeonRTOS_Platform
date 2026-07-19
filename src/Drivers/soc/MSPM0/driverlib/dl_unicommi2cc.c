@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ti/driverlib/dl_unicommi2cc.h>
+#include <driverlib/dl_unicommi2cc.h>
 
 #ifdef __MCU_HAS_UNICOMMI2CC__
 

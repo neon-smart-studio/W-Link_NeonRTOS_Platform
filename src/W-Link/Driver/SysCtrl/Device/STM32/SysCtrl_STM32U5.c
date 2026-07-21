@@ -3,6 +3,8 @@
 
 #include "soc.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef STM32U5
 
 #ifndef CONFIG_STM32_USE_HSE

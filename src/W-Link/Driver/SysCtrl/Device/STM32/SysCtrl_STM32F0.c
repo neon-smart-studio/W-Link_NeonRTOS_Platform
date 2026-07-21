@@ -3,6 +3,8 @@
 
 #include "soc.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef STM32F0
 
 void SysCtrl_Init()

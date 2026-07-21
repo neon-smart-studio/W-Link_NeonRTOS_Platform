@@ -4,6 +4,8 @@
 
 #include "soc.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef STM32F1
 
 #ifndef CONFIG_STM32_USE_HSE

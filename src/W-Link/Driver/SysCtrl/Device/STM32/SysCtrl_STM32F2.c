@@ -4,6 +4,8 @@
 
 #include "soc.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef STM32F2
 
 void SysCtrl_Init()

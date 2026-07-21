@@ -2,6 +2,8 @@
   "build": {
     "core": "mspm0",
     "cpu": "cortex-m0plus",
+    "ldscript": "mspm0l1117.ld",
+    "extra_flags": "-D__MSPM0L1117__ -DMSPM0L1117 -DMSPM0L111x",
     "f_cpu": "32000000L",
     "mcu": "MSPM0L1117",
     "variant": "MSPM0L1117"

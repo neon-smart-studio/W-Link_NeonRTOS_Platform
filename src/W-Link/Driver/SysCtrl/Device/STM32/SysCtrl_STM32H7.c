@@ -17,6 +17,10 @@
 
 void SysCtrl_Init(void)
 {
+    // ICache & DCache enable 
+    SCB_EnableICache();
+    SCB_EnableDCache();
+    
     HAL_Init();
 
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};

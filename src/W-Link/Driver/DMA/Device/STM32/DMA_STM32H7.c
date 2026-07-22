@@ -1453,6 +1453,8 @@ hwDMA_OpResult DMA_Xfer_I2C(hwI2C_Index index, hwDMA_Peripheral_Direction dir, u
         switch (dir)
         {
                 case hwDMA_Peripheral_Direction_TX:
+                        SCB_CleanDCache_by_Addr((uint32_t *)buf, len);
+
                         if (HAL_I2C_Master_Transmit_DMA(&g_i2c[index], dev_addr, buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
@@ -1462,6 +1464,8 @@ hwDMA_OpResult DMA_Xfer_I2C(hwI2C_Index index, hwDMA_Peripheral_Direction dir, u
                         break;
 
                 case hwDMA_Peripheral_Direction_RX:
+                        SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
+
                         if (HAL_I2C_Master_Receive_DMA(&g_i2c[index], dev_addr, buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
@@ -1533,14 +1537,16 @@ hwDMA_OpResult DMA_Xfer_SPI(hwSPI_Index index, hwDMA_Peripheral_Direction dir, u
                         }
                         break;
                 case hwDMA_Peripheral_Direction_RX:
-                        SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
-
+                        SCB_CleanInvalidateDCache_by_Addr((uint32_t *)buf, len);
+                        
                         if (HAL_SPI_Receive_DMA(&g_spi[index], buf, len) != HAL_OK)
                         {
                                 DMA_DeConfig(stream_index);
                                 DMA_STREAM_UNLOCK(stream_index);
                                 return hwDMA_HwError;
                         }
+
+                        SCB_InvalidateDCache_by_Addr((uint32_t *)buf, len);
                         break;
         }
 

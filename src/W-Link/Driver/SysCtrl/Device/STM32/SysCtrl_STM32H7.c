@@ -21,6 +21,10 @@ void SysCtrl_Init(void)
     SCB_EnableICache();
     SCB_EnableDCache();
     
+    SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk
+                |  SCB_SHCSR_BUSFAULTENA_Msk
+                |  SCB_SHCSR_USGFAULTENA_Msk;
+                
     HAL_Init();
 
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};

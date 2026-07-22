@@ -1,11 +1,8 @@
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 
 #include "soc.h"
-
-#include <string.h>
 
 #include "NeonRTOS.h"
 
@@ -20,6 +17,8 @@
 #ifdef CONFIG_ETHERNET_DM9051
 
 #include "GPIO/Device/STM32/GPIO_STM32.h"
+
+#define LAN8742A_PHY_ADDRESS            0x00U
 
 /* Definition of the Ethernet driver buffers size and count */
 #define ETH_RX_BUF_SIZE     ETH_MAX_PACKET_SIZE /* buffer size for receive               */
@@ -266,12 +265,48 @@
 #define DM9051_CS_LOW()     GPIO_Pin_Write(DM9051_CS_Pin, 0)
 #define DM9051_CS_HIGH()    GPIO_Pin_Write(DM9051_CS_Pin, 1)
 
-static bool ETH_Init = false;
+/* The Ethernet stack can call RX and TX from different tasks.  Keep every
+ * complete DM9051 SPI transaction serialized; otherwise CS can be toggled by
+ * another task in the middle of a register/FIFO access. */
+static NeonRTOS_LockObj_t dm9051_spi_mutex;
+static bool dm9051_spi_mutex_ready = false;
 
+static bool ETH_Init = false;
 static onLinkUpCallback onLinkUpCB = NULL;
 static onLinkDownCallback onLinkDownCB = NULL;
 
-void DM9051_Hardware_Reset()
+static uint8_t saved_mac[6] = {0, 0, 0, 0, 0, 0};
+static uint32_t saved_ETH_HashTableLow = 0;
+static uint32_t saved_ETH_HashTableHigh = 0;
+
+static uint16_t tx_calc_MWR = 0;
+static uint16_t rx_calc_MRR = 0;
+static uint16_t rx_pending_len = 0;
+static bool rx_frame_pending = false;
+
+static uint32_t dm9051_rx_err_count = 0;
+static uint32_t dm9051_rx_err_total = 0;
+
+#define DM9051_INIT_RETRY_COUNT       5U
+#define DM9051_INIT_RETRY_DELAY_MS  200U
+#define DM9051_PHY_TIMEOUT_MS       1000U
+#define DM9051_RX_STATUS_ERROR_MASK 0x3900U
+
+static inline void DM9051_SPI_Lock(void)
+{
+    if (dm9051_spi_mutex_ready) {
+        NeonRTOS_LockObjLock(&dm9051_spi_mutex, NEONRT_WAIT_FOREVER);
+    }
+}
+
+static inline void DM9051_SPI_Unlock(void)
+{
+    if (dm9051_spi_mutex_ready) {
+        NeonRTOS_LockObjUnlock(&dm9051_spi_mutex);
+    }
+}
+
+static void DM9051_Hardware_Reset_NoLock(void)
 {
     GPIO_Pin_Write(DM9051_RST_Pin, 0);
     NeonRTOS_Sleep(2);
@@ -279,7 +314,16 @@ void DM9051_Hardware_Reset()
     NeonRTOS_Sleep(2);
 }
 
-static uint8_t DM9051_Read_Reg(uint8_t reg)
+void DM9051_Hardware_Reset(void)
+{
+    DM9051_SPI_Lock();
+    DM9051_Hardware_Reset_NoLock();
+    rx_frame_pending = false;
+    rx_pending_len = 0;
+    DM9051_SPI_Unlock();
+}
+
+static uint8_t DM9051_Read_Reg_NoLock(uint8_t reg)
 {
     uint8_t rx = 0;
     uint8_t dummy = 0xFF;
@@ -292,7 +336,7 @@ static uint8_t DM9051_Read_Reg(uint8_t reg)
     return rx;
 }
 
-static void DM9051_Write_Reg(uint8_t reg, uint8_t val)
+static void DM9051_Write_Reg_NoLock(uint8_t reg, uint8_t val)
 {
     DM9051_CS_LOW();
     reg |= DM_SPI_WR;
@@ -302,19 +346,16 @@ static void DM9051_Write_Reg(uint8_t reg, uint8_t val)
 }
 
 /*------------------------- Read FIFO -------------------------*/
-static void DM9051_Read_Mem(uint8_t *buf, uint16_t len)
+static void DM9051_Read_Mem_NoLock(uint8_t *buf, uint16_t len)
 {
-    const uint8_t cmd = DM_SPI_MRCMD;            /* 0x72 */
+    const uint8_t cmd = DM_SPI_MRCMD;
 
     DM9051_CS_LOW();
-
     SPI_Master_WriteByte(DM9051_SPI_INDEX, cmd);
 
-    if (len <= 4) {
-        /* ─────≤ FIFO 深度：改走 blocking───── */
-        static uint8_t dummy = 0xFF;
-        for (uint16_t i = 0; i < len; i++)          /* clock out len 個 0xFF */
-        {
+    if (len <= 4U) {
+        uint8_t dummy = 0xFF;
+        for (uint16_t i = 0; i < len; i++) {
             SPI_Master_TransferByte(DM9051_SPI_INDEX, dummy, &buf[i]);
         }
     } else {
@@ -324,18 +365,15 @@ static void DM9051_Read_Mem(uint8_t *buf, uint16_t len)
     DM9051_CS_HIGH();
 }
 
-static void DM9051_Write_Mem(const uint8_t *buf, uint16_t len)
+static void DM9051_Write_Mem_NoLock(const uint8_t *buf, uint16_t len)
 {
-    const uint8_t cmd = DM_SPI_MWCMD | DM_SPI_WR;/* 0x7A */
+    const uint8_t cmd = DM_SPI_MWCMD | DM_SPI_WR;
 
     DM9051_CS_LOW();
-    
     SPI_Master_WriteByte(DM9051_SPI_INDEX, cmd);
 
-    if (len <= 4) {
-        /* ─────≤ FIFO 深度：改走 blocking───── */
-        for (uint16_t i = 0; i < len; i++)          /* clock out len 個 0xFF */
-        {
+    if (len <= 4U) {
+        for (uint16_t i = 0; i < len; i++) {
             SPI_Master_WriteByte(DM9051_SPI_INDEX, buf[i]);
         }
     } else {
@@ -345,96 +383,101 @@ static void DM9051_Write_Mem(const uint8_t *buf, uint16_t len)
     DM9051_CS_HIGH();
 }
 
-static void DM9051_Soft_Reset(uint8_t mac[6])
+static void DM9051_Soft_Reset_NoLock(const uint8_t mac[6])
 {
-    NeonRTOS_Sleep(2); // delay 2 ms any need before NCR_RST (20170510)
-    DM9051_Write_Reg(DM9051_NCR, DM9051_NCR_REG_RESET);
     NeonRTOS_Sleep(2);
-    DM9051_Write_Reg(DM9051_NCR, 0);
+    DM9051_Write_Reg_NoLock(DM9051_NCR, DM9051_NCR_REG_RESET);
+    NeonRTOS_Sleep(2);
+    DM9051_Write_Reg_NoLock(DM9051_NCR, 0);
 
-    /* Setup DM9051 Registers */
-    DM9051_Write_Reg(DM9051_NCR, NCR_DEFAULT);
-    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_OFF);
-    DM9051_Write_Reg(DM9051_TCR, TCR_DEFAULT);
-    DM9051_Write_Reg(DM9051_BPTR, BPTR_DEFAULT);
-    DM9051_Write_Reg(DM9051_FCTR, FCTR_DEAFULT);
-    DM9051_Write_Reg(DM9051_FCR, FCR_DEFAULT);
+    DM9051_Write_Reg_NoLock(DM9051_NCR, NCR_DEFAULT);
+    DM9051_Write_Reg_NoLock(DM9051_IMR, DM9051_IMR_OFF);
+    DM9051_Write_Reg_NoLock(DM9051_TCR, TCR_DEFAULT);
+    DM9051_Write_Reg_NoLock(DM9051_BPTR, BPTR_DEFAULT);
+    DM9051_Write_Reg_NoLock(DM9051_FCTR, FCTR_DEAFULT);
+    DM9051_Write_Reg_NoLock(DM9051_FCR, FCR_DEFAULT);
+    DM9051_Write_Reg_NoLock(DM9051_INTCR, 0x00);
+    DM9051_Write_Reg_NoLock(DM9051_INTCKCR, 0x81);
 
-    //DM9051_Write_Reg(DM9051_INTCR, (0<<1) | (1<<0)); /* [1] 0:push-pull. [0] 0:active high, 1:active low. */
-    DM9051_Write_Reg(DM9051_INTCR, 0x00);
-    DM9051_Write_Reg(DM9051_INTCKCR, 0x81);
+    DM9051_Write_Reg_NoLock(DM9051_NSR, NSR_CLR_STATUS);
+    DM9051_Write_Reg_NoLock(DM9051_ISR, ISR_CLR_STATUS | ISR_PRS);
 
-    /* Clear status */
-    DM9051_Write_Reg(DM9051_NSR, NSR_CLR_STATUS);
-    DM9051_Write_Reg(DM9051_ISR, ISR_CLR_STATUS);
-
-    /* edit */
 #ifdef DM9051_FLOWCONTROL_EN
-    DM9051_Write_Reg(DM9051_FCR, FCR_FLOW_ENABLE); /* Flow Control */
+    DM9051_Write_Reg_NoLock(DM9051_FCR, FCR_FLOW_ENABLE);
 #else
-    DM9051_Write_Reg(DM9051_FCR, 0x00); /* Flow Control */
+    DM9051_Write_Reg_NoLock(DM9051_FCR, 0x00);
 #endif
-    DM9051_Write_Reg(DM9051_PPCR, PPCR_SETTING); /* Fully Pause Packet Count */
-    DM9051_Write_Reg(DM9051_NLEDCR, 0x81);       //set led model
-    DM9051_Write_Reg(DM9051_ATCR, 0x80);         //set TX auto_send
-    DM9051_Write_Reg(DM9051_BCASTCR, 0xC0);      //set rec broadcast packet
+    DM9051_Write_Reg_NoLock(DM9051_PPCR, PPCR_SETTING);
+    DM9051_Write_Reg_NoLock(DM9051_NLEDCR, 0x81);
+    DM9051_Write_Reg_NoLock(DM9051_ATCR, 0x80);
+    DM9051_Write_Reg_NoLock(DM9051_BCASTCR, 0xC0);
 
     for (int i = 0; i < 6; i++) {
-        DM9051_Write_Reg(DM9051_PAR + i, mac[i]);
+        DM9051_Write_Reg_NoLock((uint8_t)(DM9051_PAR + i), mac[i]);
     }
-    
-    DM9051_Write_Reg(DM9051_RCR, RCR_DEFAULT);
+
+    DM9051_Write_Reg_NoLock(DM9051_RCR, RCR_DEFAULT);
+    rx_frame_pending = false;
+    rx_pending_len = 0;
 }
 
-static void DM9051_PHY_Write(uint16_t reg, uint16_t value)
+static bool DM9051_PHY_Write_NoLock(uint16_t reg, uint16_t value)
 {
-    /* Fill the phyxcer register into REG_0C */
-    DM9051_Write_Reg(DM9051_EPAR, DM9051_PHY | reg);
+    uint32_t timeout = DM9051_PHY_TIMEOUT_MS;
 
-    /* Fill the written data into REG_0D & REG_0E */
-    DM9051_Write_Reg(DM9051_EPDRL, (value & 0xff));
-    DM9051_Write_Reg(DM9051_EPDRH, ((value >> 8) & 0xff));
-    DM9051_Write_Reg(DM9051_EPCR, 0xa); /* Issue phyxcer write command */
+    DM9051_Write_Reg_NoLock(DM9051_EPAR, (uint8_t)(DM9051_PHY | reg));
+    DM9051_Write_Reg_NoLock(DM9051_EPDRL, value & 0xffU);
+    DM9051_Write_Reg_NoLock(DM9051_EPDRH, (value >> 8) & 0xffU);
+    DM9051_Write_Reg_NoLock(DM9051_EPCR, 0x0a);
 
-    while (DM9051_Read_Reg(DM9051_EPCR) & 0x1)
-    {
+    while ((DM9051_Read_Reg_NoLock(DM9051_EPCR) & 0x01U) != 0U) {
+        if (timeout-- == 0U) {
+            DM9051_Write_Reg_NoLock(DM9051_EPCR, 0x00);
+            UART_Printf("[DM9051] PHY write timeout, reg=%u\n", reg);
+            return false;
+        }
         NeonRTOS_Sleep(1);
-    }; //Wait complete
+    }
 
-    DM9051_Write_Reg(DM9051_EPCR, 0x0); /* Clear phyxcer write command */
+    DM9051_Write_Reg_NoLock(DM9051_EPCR, 0x00);
+    return true;
 }
 
-static uint16_t DM9051_PHY_Read(uint32_t reg)
+static bool DM9051_PHY_Mode_Set_NoLock(void)
 {
-    uint16_t value;
+    bool ok = true;
+    uint16_t phy_reg4 = 0x01e1;
+    uint16_t phy_reg0 = 0x1200;
 
-    /* Fill the phyxcer register into REG_0C */
-    DM9051_Write_Reg(DM9051_EPAR, DM9051_PHY | reg);
-    DM9051_Write_Reg(DM9051_EPCR, 0xc); /* Issue phyxcer read command */
-
-    while (DM9051_Read_Reg(DM9051_EPCR) & 0x1)
-    {
-        NeonRTOS_Sleep(1);
-    }; //Wait complete
-
-    DM9051_Write_Reg(DM9051_EPCR, 0x0); /* Clear phyxcer read command */
-    value = (DM9051_Read_Reg(DM9051_EPDRH) << 8) | DM9051_Read_Reg(DM9051_EPDRL);
-
-    return value;
-}
-
-static void DM9051_PHY_Mode_Set()
-{
-    uint16_t phy_reg4 = 0x01e1, phy_reg0 = 0x1200;
-
-    DM9051_PHY_Write(20, 0x0200); /* Disable NWAY powersaver */
-
+    ok = DM9051_PHY_Write_NoLock(20, 0x0200) && ok;
 #ifdef DM9051_FLOWCONTROL_EN
-    DM9051_PHY_Write(4, phy_reg4 | 0x0400); /* Set PHY media mode */
+    ok = DM9051_PHY_Write_NoLock(4, phy_reg4 | 0x0400) && ok;
 #else
-    DM9051_PHY_Write(4, phy_reg4); /* Set PHY media mode */
-#endif /* DM9051_FLOWCONTROL_EN */
-    DM9051_PHY_Write(0, phy_reg0); /* RE_START NWAY */
+    ok = DM9051_PHY_Write_NoLock(4, phy_reg4) && ok;
+#endif
+    ok = DM9051_PHY_Write_NoLock(0, phy_reg0) && ok;
+    return ok;
+}
+
+static void DM9051_Record_RX_Error(void)
+{
+    dm9051_rx_err_count++;
+    dm9051_rx_err_total++;
+}
+
+/* Reset only the RX path.  A full chip reset on a single bad ready byte can
+ * restart auto-negotiation and turn a recoverable FIFO error into a long or
+ * permanent link outage. */
+static void DM9051_RX_Soft_Recover_NoLock(void)
+{
+    DM9051_Write_Reg_NoLock(DM9051_RCR, 0x00);
+    DM9051_Write_Reg_NoLock(DM9051_MPCR, MPCR_RSTRX);
+    NeonRTOS_Sleep(2);
+    DM9051_Write_Reg_NoLock(DM9051_ISR, ISR_CLR_STATUS | ISR_PRS);
+    DM9051_Write_Reg_NoLock(DM9051_RCR, RCR_DEFAULT);
+    DM9051_Write_Reg_NoLock(DM9051_IMR, DM9051_IMR_SET);
+    rx_frame_pending = false;
+    rx_pending_len = 0;
 }
 
 /* polynomial: 0xEDB88320L */
@@ -454,77 +497,103 @@ static uint32_t DM9051_CRC32_LE(const uint8_t *data, size_t length)
     return crc;
 }
 
-static void DM9051_Chip_Reset(uint8_t mac[6])
-{
-    DM9051_Soft_Reset(mac);
-
-    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET);
-}
-
 hwEthernet_OpResult Ethernet_Init(const uint8_t mac[6], onLinkUpCallback link_up_cb, onLinkDownCallback link_down_cb)
 {
     int i, oft;
-    uint32_t device_id;
+    uint32_t device_id = 0;
+
+    if (mac == NULL) {
+        return hwEthernet_InvalidParameter;
+    }
 
     GPIO_Pin_Init(DM9051_RST_Pin, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
     GPIO_Pin_Init(DM9051_CS_Pin, hwGPIO_Direction_Output, hwGPIO_Pull_Mode_Up);
-
     SPI_Master_Init(DM9051_SPI_INDEX, 20000000, hwSPI_OpMode_Polarity0_Phase0, false);
 
-    DM9051_Hardware_Reset();
+    if (!dm9051_spi_mutex_ready) {
+        if (NeonRTOS_LockObjCreate(&dm9051_spi_mutex) != NeonRTOS_OK) {
+            UART_Printf("[DM9051] Failed to create SPI mutex\n");
+            return hwEthernet_HwError;
+        }
+        dm9051_spi_mutex_ready = true;
+    }
 
-    NeonRTOS_Sleep(100);
+    ETH_Init = false;
+    DM9051_SPI_Lock();
 
-    /* RESET device */
-    DM9051_Write_Reg(DM9051_NCR, DM9051_NCR_REG_RESET);
-    NeonRTOS_Sleep(2);
-    DM9051_Write_Reg(DM9051_NCR, 0);
+    for (uint32_t retry = 0; retry < DM9051_INIT_RETRY_COUNT; retry++) {
+        if (retry != 0U) {
+            UART_Printf("[DM9051] Init retry %u/%u\n",
+                        (unsigned)(retry + 1U),
+                        (unsigned)DM9051_INIT_RETRY_COUNT);
+            NeonRTOS_Sleep(DM9051_INIT_RETRY_DELAY_MS);
+        }
 
-    DM9051_Write_Reg(DM9051_GPCR, GPCR_GEP_CNTL);
-    DM9051_Write_Reg(DM9051_GPR, 0x00); //Power on PHY
+        DM9051_Hardware_Reset_NoLock();
+        NeonRTOS_Sleep(100);
 
-    NeonRTOS_Sleep(100);
+        DM9051_Write_Reg_NoLock(DM9051_NCR, DM9051_NCR_REG_RESET);
+        NeonRTOS_Sleep(2);
+        DM9051_Write_Reg_NoLock(DM9051_NCR, 0);
+        DM9051_Write_Reg_NoLock(DM9051_GPCR, GPCR_GEP_CNTL);
+        DM9051_Write_Reg_NoLock(DM9051_GPR, 0x00);
+        NeonRTOS_Sleep(100);
 
-    device_id  = DM9051_Read_Reg(DM9051_VIDL);
-    device_id |= DM9051_Read_Reg(DM9051_VIDH) << 8;
-    device_id |= DM9051_Read_Reg(DM9051_PIDL) << 16;
-    device_id |= DM9051_Read_Reg(DM9051_PIDH) << 24;
-    UART_Printf("[%s L%d] device_id: %08X\n", __FUNCTION__, __LINE__, device_id);
+        device_id  = DM9051_Read_Reg_NoLock(DM9051_VIDL);
+        device_id |= (uint32_t)DM9051_Read_Reg_NoLock(DM9051_VIDH) << 8;
+        device_id |= (uint32_t)DM9051_Read_Reg_NoLock(DM9051_PIDL) << 16;
+        device_id |= (uint32_t)DM9051_Read_Reg_NoLock(DM9051_PIDH) << 24;
+        UART_Printf("[%s L%d] device_id: %08X\n", __FUNCTION__, __LINE__, device_id);
 
-    if(device_id != DM9051_ID)
-    {
+        if (device_id == DM9051_ID) {
+            break;
+        }
+    }
+
+    if (device_id != DM9051_ID) {
+        UART_Printf("[DM9051] Init failed after %u retries\n",
+                    (unsigned)DM9051_INIT_RETRY_COUNT);
+        DM9051_SPI_Unlock();
         return hwEthernet_HwError;
     }
 
-    device_id  = DM9051_Read_Reg(DM9051_CHIPR);
+    device_id = DM9051_Read_Reg_NoLock(DM9051_CHIPR);
     UART_Printf("[%s L%d] CHIP Revision: %02X\n", __FUNCTION__, __LINE__, device_id);
 
-    /* Set PHY */
-    DM9051_PHY_Mode_Set();
+    memcpy(saved_mac, mac, 6);
+    saved_ETH_HashTableLow = 0;
+    saved_ETH_HashTableHigh = 0;
 
-    /* set mac address */
+    if (!DM9051_PHY_Mode_Set_NoLock()) {
+        UART_Printf("[DM9051] PHY configuration did not complete cleanly\n");
+    }
+
     for (i = 0, oft = DM9051_PAR; i < 6; i++, oft++)
     {
-        DM9051_Write_Reg(oft, mac[i]);
+        DM9051_Write_Reg_NoLock((uint8_t)oft, mac[i]);
     }
 
     for (i = 0, oft = DM9051_MAR; i < 8; i++, oft++)
     {
-        DM9051_Write_Reg(oft, 0x00);
+        DM9051_Write_Reg_NoLock((uint8_t)oft, 0x00);
     }
+
     UART_Printf("Clean Multicast Address Hash Table\n");
 
-    /* Activate DM9051 */
-    DM9051_Soft_Reset(mac);
+    DM9051_Soft_Reset_NoLock(mac);
+    DM9051_Write_Reg_NoLock(DM9051_IMR, DM9051_IMR_SET);
 
-    //DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
-    DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_OFF); // Disable all interrupts
-    
     onLinkUpCB = link_up_cb;
     onLinkDownCB = link_down_cb;
-    
+    tx_calc_MWR = 0;
+    rx_calc_MRR = 0;
+    rx_pending_len = 0;
+    rx_frame_pending = false;
+    dm9051_rx_err_count = 0;
+    dm9051_rx_err_total = 0;
     ETH_Init = true;
 
+    DM9051_SPI_Unlock();
     return hwEthernet_OK;
 }
 
@@ -538,13 +607,17 @@ hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
         return hwEthernet_BufferError;
     }
 
+    if (!ETH_Init) {
+        return hwEthernet_HwError;
+    }
+
     uint32_t retry = 0;
     uint8_t nsr_reg = 0;
 
-    // wait for sending complete
-    while (1)
-    {
-        nsr_reg = DM9051_Read_Reg(DM9051_NSR) & (NSR_TX1END | NSR_TX2END);
+    DM9051_SPI_Lock();
+
+    while (1) {
+        nsr_reg = DM9051_Read_Reg_NoLock(DM9051_NSR) & (NSR_TX1END | NSR_TX2END);
         if(nsr_reg != 0)
         {
             break;
@@ -553,7 +626,7 @@ hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
         retry++;
         if (retry > 10)
         {
-            //UART_Printf("wait for send complete timeout, retry=%d, abort!\n", retry);
+            DM9051_SPI_Unlock();
             return hwEthernet_Busy;
         }
 
@@ -567,18 +640,32 @@ hwEthernet_OpResult Ethernet_Output(const uint8_t *out_data, uint16_t out_len)
 
     if ((NSR_TX1END | NSR_TX2END) == nsr_reg)
     {
-        DM9051_Write_Reg(DM9051_MPCR, 0x02); //reset tx point
+        DM9051_Write_Reg_NoLock(DM9051_MPCR, MPCR_RSTTX);
     }
 
-    //Write data to FIFO
-    DM9051_Write_Reg(DM9051_TXPLL, out_len & 0xff);
-    DM9051_Write_Reg(DM9051_TXPLH, (out_len >> 8) & 0xff);
+    tx_calc_MWR = ((uint16_t)DM9051_Read_Reg_NoLock(DM9051_MWRH) << 8) |
+                  DM9051_Read_Reg_NoLock(DM9051_MWRL);
 
-    DM9051_Write_Mem(out_data, out_len);
+    DM9051_Write_Reg_NoLock(DM9051_TXPLL, out_len & 0xffU);
+    DM9051_Write_Reg_NoLock(DM9051_TXPLH, (out_len >> 8) & 0xffU);
+    DM9051_Write_Mem_NoLock(out_data, out_len);
 
-    // start send cmd
-    DM9051_Write_Reg(DM9051_TCR, TCR_TXREQ);
+    tx_calc_MWR += out_len;
+    if (tx_calc_MWR > 0x0bff) {
+        tx_calc_MWR -= 0x0c00;
+    }
+    {
+        uint16_t actual_MWR = ((uint16_t)DM9051_Read_Reg_NoLock(DM9051_MWRH) << 8) |
+                              DM9051_Read_Reg_NoLock(DM9051_MWRL);
+        if (tx_calc_MWR != actual_MWR) {
+            DM9051_Write_Reg_NoLock(DM9051_MWRH, (tx_calc_MWR >> 8) & 0xffU);
+            DM9051_Write_Reg_NoLock(DM9051_MWRL, tx_calc_MWR & 0xffU);
+        }
+    }
 
+    DM9051_Write_Reg_NoLock(DM9051_TCR, TCR_TXREQ);
+
+    DM9051_SPI_Unlock();
     return hwEthernet_OK;
 }
 
@@ -586,94 +673,164 @@ hwEthernet_OpResult Ethernet_Get_Input_Frame_Length(uint32_t *frame_len)
 {
     uint8_t isr_reg;
     uint8_t nsr_reg;
-
-    isr_reg = DM9051_Read_Reg(DM9051_ISR);
-    DM9051_Write_Reg(DM9051_ISR, (isr_reg & ISR_CLR_STATUS));  // Clear ISR status
-    //UART_Printf("isr_reg=0x%x", isr_reg);
-
-    // Receive Overflow Counter Overflow
-    if (isr_reg & ISR_ROOS)
-    {
-        UART_Printf("dm9051_chip_reset Receive Overflow Counter Overflow\n");
-        return hwEthernet_BufferError;
-    }
-
-    // Receive Overflow
-    if (isr_reg & ISR_ROS)
-    {
-        UART_Printf("Receive_FIFO Overflow\n");
-        DM9051_Write_Reg(DM9051_MPCR, MPCR_RSTRX);
-        DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
-        return hwEthernet_BufferError;
-    }
-
-    // transmit
-    if (isr_reg & ISR_PTS)
-    {
-        //UART_Printf("ISR_PTS\n");
-    }
-
-    uint16_t rx_status, rx_len;
-    uint8_t ReceiveData[4];
+    uint16_t rx_status;
+    uint16_t rx_len;
+    uint8_t receive_data[4];
     uint8_t rx_bytes[2];
 
-    /* Check packet ready or not                                                                              */
-    nsr_reg = DM9051_Read_Reg(DM9051_NSR) & NSR_RXRDY;
+    if (frame_len == NULL) {
+        return hwEthernet_InvalidParameter;
+    }
+
+    if (!ETH_Init) {
+        return hwEthernet_HwError;
+    }
+
+    DM9051_SPI_Lock();
+
+    /* The API separates header and payload reads.  If the caller asks again
+     * before consuming the payload, return the same length instead of moving
+     * the FIFO pointer into the middle of the frame. */
+    if (rx_frame_pending) {
+        *frame_len = rx_pending_len;
+        DM9051_SPI_Unlock();
+        return hwEthernet_OK;
+    }
+
+    DM9051_Write_Reg_NoLock(DM9051_IMR, DM9051_IMR_OFF);
+    isr_reg = DM9051_Read_Reg_NoLock(DM9051_ISR);
+    DM9051_Write_Reg_NoLock(DM9051_ISR, isr_reg); /* W1C every latched bit */
+
+    if (isr_reg & ISR_ROOS)
+    {
+        UART_Printf("dm9051 ROOS, soft recover\n");
+        DM9051_Record_RX_Error();
+        DM9051_RX_Soft_Recover_NoLock();
+        DM9051_SPI_Unlock();
+        return hwEthernet_BufferError;
+    }
+
+    if (isr_reg & ISR_ROS)
+    {
+        DM9051_Record_RX_Error();
+        UART_Printf("Receive_FIFO Overflow #%lu (total=%lu)\n",
+                    (unsigned long)dm9051_rx_err_count,
+                    (unsigned long)dm9051_rx_err_total);
+        DM9051_RX_Soft_Recover_NoLock();
+        DM9051_SPI_Unlock();
+        return hwEthernet_BufferError;
+    }
+
+    nsr_reg = DM9051_Read_Reg_NoLock(DM9051_NSR) & NSR_RXRDY;
     if (nsr_reg)
     {
-        rx_bytes[0] = DM9051_Read_Reg(DM9051_MRCMDX);
-        rx_bytes[1] = DM9051_Read_Reg(DM9051_MRCMDX1);
+        rx_bytes[0] = DM9051_Read_Reg_NoLock(DM9051_MRCMDX);  /* dummy */
+        rx_bytes[1] = DM9051_Read_Reg_NoLock(DM9051_MRCMDX1); /* ready */
 
         if (rx_bytes[1] != DM9051_PKT_RDY)
         {
-            UART_Printf("NSR %02X, RCMDX %02X: rx not ready\n", nsr_reg, rx_bytes[1]);
-            DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
+            DM9051_Record_RX_Error();
+            UART_Printf("NSR %02X, RCMDX %02X: rx err #%lu (total=%lu), soft recover\n",
+                        nsr_reg, rx_bytes[1],
+                        (unsigned long)dm9051_rx_err_count,
+                        (unsigned long)dm9051_rx_err_total);
+            DM9051_RX_Soft_Recover_NoLock();
+            DM9051_SPI_Unlock();
             return hwEthernet_BufferError;
         }
     }
     else
     {
-        DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
+        DM9051_Write_Reg_NoLock(DM9051_ISR, ISR_CLR_RX_STATUS);
+        DM9051_Write_Reg_NoLock(DM9051_IMR, DM9051_IMR_SET);
+        DM9051_SPI_Unlock();
         return hwEthernet_BufferError;
     }
 
-    DM9051_Read_Mem(ReceiveData, 4);
+    rx_calc_MRR = ((uint16_t)DM9051_Read_Reg_NoLock(DM9051_MRRH) << 8) |
+                  DM9051_Read_Reg_NoLock(DM9051_MRRL);
+    DM9051_Read_Mem_NoLock(receive_data, sizeof(receive_data));
 
-    rx_status = ReceiveData[0] + (ReceiveData[1] << 8);
-    rx_len = ReceiveData[2] + (ReceiveData[3] << 8);
+    rx_status = (uint16_t)receive_data[0] | ((uint16_t)receive_data[1] << 8);
+    rx_len = (uint16_t)receive_data[2] | ((uint16_t)receive_data[3] << 8);
 
-    if ((rx_len < 14) || (rx_len > DM9051_PKT_MAX)) {
-        UART_Printf("bad rx len=%u status=%04X, reset rx fifo\n", rx_len, rx_status);
-        DM9051_Write_Reg(DM9051_MPCR, MPCR_RSTRX);
-        DM9051_Write_Reg(DM9051_ISR, ISR_CLR_RX_STATUS);
+    if (((rx_status & DM9051_RX_STATUS_ERROR_MASK) != 0U) ||
+        (rx_len < 14U) || (rx_len > DM9051_PKT_MAX) ||
+        (rx_len > ETH_RX_BUF_SIZE)) {
+        DM9051_Record_RX_Error();
+        UART_Printf("DM9051 bad rx: status=%04X len=%u #%lu (total=%lu), soft recover\n",
+                    rx_status, rx_len,
+                    (unsigned long)dm9051_rx_err_count,
+                    (unsigned long)dm9051_rx_err_total);
+        DM9051_RX_Soft_Recover_NoLock();
+        DM9051_SPI_Unlock();
         return hwEthernet_BufferError;
     }
 
-    //UART_Printf("RX header status=%04X len=%u\n", rx_status, rx_len);
-
+    rx_pending_len = rx_len;
+    rx_frame_pending = true;
     *frame_len = rx_len;
 
+    /* Keep IMR masked until Ethernet_Input() consumes this payload. */
+    DM9051_SPI_Unlock();
     return hwEthernet_OK;
 }
 
 hwEthernet_OpResult Ethernet_Input(uint8_t *in_data, uint32_t in_len)
 {
+    hwEthernet_OpResult result = hwEthernet_OK;
+
+    if (!ETH_Init) {
+        return hwEthernet_HwError;
+    }
+
+    DM9051_SPI_Lock();
+
     if (in_data == NULL || in_len == 0U) {
+        if (rx_frame_pending) {
+            DM9051_RX_Soft_Recover_NoLock();
+        }
+        DM9051_SPI_Unlock();
         return hwEthernet_InvalidParameter;
     }
 
-    DM9051_Read_Mem(in_data, in_len);
+    if (!rx_frame_pending || (in_len != rx_pending_len) ||
+        (in_len > DM9051_PKT_MAX) || (in_len > ETH_RX_BUF_SIZE)) {
+        UART_Printf("[DM9051] RX payload length mismatch: expected=%u actual=%lu\n",
+                    rx_pending_len, (unsigned long)in_len);
+        if (rx_frame_pending) {
+            DM9051_Record_RX_Error();
+            DM9051_RX_Soft_Recover_NoLock();
+        }
+        DM9051_SPI_Unlock();
+        return hwEthernet_BufferError;
+    }
 
-    //DM9051_Write_Reg(DM9051_IMR, DM9051_IMR_SET); // Re-enable interrupt mask
-    /*
-    UART_Printf("RX frame len=%lu %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
-            in_len,
-            in_data[0], in_data[1], in_data[2], in_data[3],
-            in_data[4], in_data[5], in_data[6], in_data[7],
-            in_data[8], in_data[9], in_data[10], in_data[11],
-            in_data[12], in_data[13]);*/
+    DM9051_Read_Mem_NoLock(in_data, (uint16_t)in_len);
 
-    return hwEthernet_OK;
+    rx_calc_MRR += (uint16_t)(in_len + 4U);
+    if (rx_calc_MRR > 0x3fff) {
+        rx_calc_MRR -= 0x3400;
+    }
+    {
+        uint16_t actual_MRR = ((uint16_t)DM9051_Read_Reg_NoLock(DM9051_MRRH) << 8) |
+                              DM9051_Read_Reg_NoLock(DM9051_MRRL);
+        if (rx_calc_MRR != actual_MRR) {
+            DM9051_Write_Reg_NoLock(DM9051_MRRH, (rx_calc_MRR >> 8) & 0xffU);
+            DM9051_Write_Reg_NoLock(DM9051_MRRL, rx_calc_MRR & 0xffU);
+        }
+    }
+
+    rx_frame_pending = false;
+    rx_pending_len = 0;
+    dm9051_rx_err_count = 0;
+    if (dm9051_rx_err_total > 0U) {
+        dm9051_rx_err_total--;
+    }
+    DM9051_Write_Reg_NoLock(DM9051_IMR, DM9051_IMR_SET);
+
+    DM9051_SPI_Unlock();
+    return result;
 }
 
 bool Ethernet_isInit(void)
@@ -684,14 +841,19 @@ bool Ethernet_isInit(void)
 void Ethernet_Set_Link(void)
 {
     uint8_t nsr_reg;
-    nsr_reg = DM9051_Read_Reg(DM9051_NSR);
-    if (nsr_reg & NSR_LINKST)
+    bool link_up;
+
+    if (!ETH_Init) {
+        return;
+    }
+
+    DM9051_SPI_Lock();
+    nsr_reg = DM9051_Read_Reg_NoLock(DM9051_NSR);
+    link_up = (nsr_reg & NSR_LINKST) != 0U;
+    DM9051_SPI_Unlock();
+
+    if (link_up)
     {
-        uint8_t ncr_reg;
-
-        ncr_reg = DM9051_Read_Reg(DM9051_NCR) & NCR_FDX;
-        nsr_reg = DM9051_Read_Reg(DM9051_NSR) & (NSR_SPEED | NSR_LINKST);
-
         if (onLinkUpCB != NULL) {
             onLinkUpCB();
         }
@@ -706,10 +868,7 @@ void Ethernet_Set_Link(void)
 
 void Ethernet_Update_Config(bool isLinkUp)
 {
-  if (isLinkUp) {
-  } else {
-  }
-
+    (void)isLinkUp;
 }
 
 uint32_t Ethernet_Get_Tick(void)
@@ -719,6 +878,10 @@ uint32_t Ethernet_Get_Tick(void)
 
 void Ethernet_Get_Hardware_Mac(uint8_t mac[6])
 {
+    if (mac == NULL) {
+        return;
+    }
+
     // 使用 STM32 的唯一 ID 生成 MAC 地址
     uint32_t baseUID = *(uint32_t *)UID_BASE;
     mac[0] = 0x00;
@@ -735,25 +898,40 @@ hwEthernet_OpResult Ethernet_Register_Multicast_Address(const uint8_t *mac, uint
     uint8_t hash;
     uint8_t hash_group;
 
-    /* calculate crc32 value of mac address */
+    if ((mac == NULL) || (eth_HashTableHigh == NULL) ||
+        (eth_HashTableLow == NULL)) {
+        return hwEthernet_InvalidParameter;
+    }
+
+    if (!ETH_Init) {
+        return hwEthernet_HwError;
+    }
+
     crc = DM9051_CRC32_LE(mac, 6);
 
     hash = crc & 0x3F;
 
     hash_group = hash / 8;
 
+    DM9051_SPI_Lock();
+
     if (hash > 31)
     {
-        *eth_HashTableHigh |= 1 << (hash - 32);
-        DM9051_Write_Reg(DM9051_MAR + hash_group, (*eth_HashTableHigh >> (hash_group - 4) * 8) & 0xff);
+        saved_ETH_HashTableHigh |= UINT32_C(1) << (hash - 32);
+        DM9051_Write_Reg_NoLock(DM9051_MAR + hash_group,
+                                (saved_ETH_HashTableHigh >> ((hash_group - 4) * 8)) & 0xffU);
+        *eth_HashTableHigh = saved_ETH_HashTableHigh;
     }
     else
     {
-        *eth_HashTableLow |= 1 << hash;
-        DM9051_Write_Reg(DM9051_MAR + hash_group, (*eth_HashTableLow >> (hash_group * 8)) & 0xff);
+        saved_ETH_HashTableLow |= UINT32_C(1) << hash;
+        DM9051_Write_Reg_NoLock(DM9051_MAR + hash_group,
+                                (saved_ETH_HashTableLow >> (hash_group * 8)) & 0xffU);
+        *eth_HashTableLow = saved_ETH_HashTableLow;
     }
 
+    DM9051_SPI_Unlock();
     return hwEthernet_OK;
 }
 
-#endif //CONFIG_ETHERNET_ONBOARD
+#endif /* CONFIG_ETHERNET_DM9051 */

@@ -18,4 +18,12 @@
 #include "TITivaC/CAN_Pin_TITivaC.h"
 #endif
 
+#ifdef DEVICE_TIMSP432E
+#include "TIMSP432E/CAN_Pin_TIMSP432E.h"
+#endif
+
+#ifdef DEVICE_TIMSPM0
+#include "TIMSPM0/CAN_Pin_TIMSPM0.h"
+#endif
+
 #endif //CAN_PIN_H

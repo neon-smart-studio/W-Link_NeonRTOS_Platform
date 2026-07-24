@@ -63,4 +63,14 @@ typedef enum hwDAC_Channel_Index_t
 }hwDAC_Channel_Index;
 #endif // DEVICE_TIMSP432E
 
+#ifdef DEVICE_TIMSPM0
+typedef enum hwDAC_Channel_Index_t
+{
+#if defined(DAC0_BASE)
+  hwDAC_Channel_Index_MAX = 0,
+#endif
+  hwDAC_Channel_Index_MAX,
+}hwDAC_Channel_Index;
+#endif // DEVICE_TIMSPM0
+
 #endif //DAC_CHANNEL_H

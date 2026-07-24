@@ -412,11 +412,11 @@
 
 #if defined (MSPM0C031Cx) || defined (MSPM0G031Cx) || \
     defined (MSPM0C110x) || defined (MSPM0C1105) || defined (MSPM0C1106) || \
-    defined (MSPM0G110x) || defined (MSPM0G120x) || defined (MSPM0G121x) || defined (MSPM0G150x) || defined (MSPM0G151x) \
-    defined (MSPM0G310x) || defined (MSPM0G320x) || defined (MSPM0G321x) || defined (MSPM0G350x) || defined (MSPM0G351x) || defined (MSPM0G352x) \
+    defined (MSPM0G110x) || defined (MSPM0G120x) || defined (MSPM0G121x) || defined (MSPM0G150x) || defined (MSPM0G151x) || \
+    defined (MSPM0G310x) || defined (MSPM0G320x) || defined (MSPM0G321x) || defined (MSPM0G350x) || defined (MSPM0G351x) || defined (MSPM0G352x) || \
     defined (MSPM0G511x) || defined (MSPM0G518x) || \
     defined (MSPM0H321x) || \
-    defined (MSPM0L110x) || defined (MSPM0L111x) || defined (MSPM0L112x) || defined (MSPM0L122x) || defined (MSPM0L130x) || defined (MSPM0L134x) \
+    defined (MSPM0L110x) || defined (MSPM0L111x) || defined (MSPM0L112x) || defined (MSPM0L122x) || defined (MSPM0L130x) || defined (MSPM0L134x) || \
     defined (MSPM0L211x) || defined (MSPM0L222x) || \
     defined (MSPM0S003Fx)
 #include "inc/msp.h"

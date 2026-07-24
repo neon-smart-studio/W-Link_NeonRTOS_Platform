@@ -15,9 +15,9 @@ bool gpio_pin_init_status[hwGPIO_Pin_MAX] = {false};
 
 static hwGPIO_Direction gpio_current_dir[hwGPIO_Pin_MAX] = {hwGPIO_Direction_Input};
 static hwGPIO_Pull_Mode gpio_current_mode[hwGPIO_Pin_MAX] = {hwGPIO_Pull_Mode_None};
+static GPIO_Interrupt_Event_Handler gpio_irq_handlers[hwGPIO_Int_Pin_MAX] = {NULL};
 
 static GPIO_EXTI_Desc gpio_exti_desc[GPIO_EXTI_Line_MAX] = {0};
-static GPIO_Interrupt_Event_Handler gpio_irq_handlers[hwGPIO_Int_Pin_MAX] = {NULL};
 
 bool GPIO_Pin_is_Init(hwGPIO_Pin pin)
 {

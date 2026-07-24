@@ -30,4 +30,8 @@
 #include "TIMSP432/GPIO_Pin_TIMSP432E.h"
 #endif // DEVICE_TIMSP432E
 
+#ifdef DEVICE_TIMSPM0
+#include "TIMSPM0/GPIO_Pin_TIMSPM0.h"
+#endif // DEVICE_TIMSPM0
+
 #endif //GPIO_PIN_H

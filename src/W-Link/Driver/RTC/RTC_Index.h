@@ -50,4 +50,13 @@ typedef enum {
 } hwRTC_Index;
 #endif // DEVICE_TIMSP432E
 
+#ifdef DEVICE_TIMSPM0
+typedef enum {
+#if defined(RTC_BASE) || defined(RTC_A_BASE) || defined(RTC_B_BASE)
+    hwRTC_Index_0 = 0,
+#endif
+    hwRTC_Index_MAX
+} hwRTC_Index;
+#endif // DEVICE_TIMSPM0
+
 #endif //RTC_INDEX_H

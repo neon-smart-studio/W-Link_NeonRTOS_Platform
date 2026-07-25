@@ -1,6 +1,6 @@
 
-#ifndef TIMER_TIMSPM0_H
-#define TIMER_TIMSPM0_H
+#ifndef TIMER_TIMSP432_H
+#define TIMER_TIMSP432_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -16,4 +16,4 @@ extern "C" {
 }
 #endif // __cplusplus
 
-#endif //TIMER_TIMSPM0_H
+#endif //TIMER_TIMSP432_H

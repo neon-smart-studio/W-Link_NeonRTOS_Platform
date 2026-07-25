@@ -1,5 +1,5 @@
-#ifndef SPI_TIMSP432_H
-#define SPI_TIMSP432_H
+#ifndef SPI_TIMSPM0_H
+#define SPI_TIMSPM0_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -18,4 +18,4 @@ extern bool Spi_Master_Init_Status[];
 }
 #endif // __cplusplus
 
-#endif // SPI_TIMSP432_H
+#endif // SPI_TIMSPM0_H

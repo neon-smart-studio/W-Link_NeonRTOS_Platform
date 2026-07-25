@@ -248,4 +248,132 @@ typedef enum {
 } hwPWM_Channel;
 #endif // DEVICE_TIMSP432E
 
+#ifdef DEVICE_TIMSPM0
+
+#if defined(MSPM0L110x) || defined(MSPM0L130x) || defined(MSPM0L134x)
+typedef enum {
+    hwPWM_Channel_1 = 0,
+    hwPWM_Channel_2,
+    hwPWM_Channel_3,
+    hwPWM_Channel_4,
+    hwPWM_Channel_5,
+    hwPWM_Channel_6,
+    hwPWM_Channel_7,
+    hwPWM_Channel_8,
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif
+
+#if defined(MSPM0C110x) || defined(MSPM0G511x) || \
+      defined(MSPM0G518x) || defined(MSPM0L111x)
+typedef enum {
+    hwPWM_Channel_1 = 0,
+    hwPWM_Channel_2,
+    hwPWM_Channel_3,
+    hwPWM_Channel_4,
+    hwPWM_Channel_5,
+    hwPWM_Channel_6,
+    hwPWM_Channel_7,
+    hwPWM_Channel_8,
+    hwPWM_Channel_9,
+    hwPWM_Channel_10,
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif
+
+#if defined(MSPM0G120x) || defined(MSPM0G121x) || \
+    defined(MSPM0G320x) || defined(MSPM0G321x) || \
+    defined(MSPM0L112x) || defined(MSPM0L211x)
+typedef enum {
+    hwPWM_Channel_1 = 0,
+    hwPWM_Channel_2,
+    hwPWM_Channel_3,
+    hwPWM_Channel_4,
+    hwPWM_Channel_5,
+    hwPWM_Channel_6,
+    hwPWM_Channel_7,
+    hwPWM_Channel_8,
+    hwPWM_Channel_9,
+    hwPWM_Channel_10,
+    hwPWM_Channel_11,
+    hwPWM_Channel_12,
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif
+
+#if defined(MSPM0C1105) || defined(MSPM0C1106) || \
+    defined(MSPM0H321x) || defined(MSPM0L122x) || \
+    defined(MSPM0L222x)
+typedef enum {
+    hwPWM_Channel_1 = 0,
+    hwPWM_Channel_2,
+    hwPWM_Channel_3,
+    hwPWM_Channel_4,
+    hwPWM_Channel_5,
+    hwPWM_Channel_6,
+    hwPWM_Channel_7,
+    hwPWM_Channel_8,
+    hwPWM_Channel_9,
+    hwPWM_Channel_10,
+    hwPWM_Channel_11,
+    hwPWM_Channel_12,
+    hwPWM_Channel_13,
+    hwPWM_Channel_14,
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif
+
+#if defined(MSPM0G110x) || defined(MSPM0G150x) || \
+    defined(MSPM0G310x) || defined(MSPM0G350x)
+typedef enum {
+    hwPWM_Channel_1 = 0,
+    hwPWM_Channel_2,
+    hwPWM_Channel_3,
+    hwPWM_Channel_4,
+    hwPWM_Channel_5,
+    hwPWM_Channel_6,
+    hwPWM_Channel_7,
+    hwPWM_Channel_8,
+    hwPWM_Channel_9,
+    hwPWM_Channel_10,
+    hwPWM_Channel_11,
+    hwPWM_Channel_12,
+    hwPWM_Channel_13,
+    hwPWM_Channel_14,
+    hwPWM_Channel_15,
+    hwPWM_Channel_16,
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif
+
+#if defined(MSPM0G151x) || defined(MSPM0G351x) || defined(MSPM0G352x)
+typedef enum {
+    hwPWM_Channel_1 = 0,
+    hwPWM_Channel_2,
+    hwPWM_Channel_3,
+    hwPWM_Channel_4,
+    hwPWM_Channel_5,
+    hwPWM_Channel_6,
+    hwPWM_Channel_7,
+    hwPWM_Channel_8,
+    hwPWM_Channel_9,
+    hwPWM_Channel_10,
+    hwPWM_Channel_11,
+    hwPWM_Channel_12,
+    hwPWM_Channel_13,
+    hwPWM_Channel_14,
+    hwPWM_Channel_15,
+    hwPWM_Channel_16,
+    hwPWM_Channel_17,
+    hwPWM_Channel_18,
+    hwPWM_Channel_19,
+    hwPWM_Channel_20,
+    hwPWM_Channel_21,
+    hwPWM_Channel_22,
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif
+
+#endif /* DEVICE_TIMSPM0 */
+
 #endif //PWM_INDEX_H

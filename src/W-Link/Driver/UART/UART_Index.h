@@ -4,6 +4,8 @@
 
 #include "Driver_Config.h"
 
+#include "soc.h"
+
 #ifndef CONFIG_LOG_UART_INDEX
 #define LOG_UART_INDEX hwUART_Index_0
 #else
@@ -135,5 +137,35 @@ typedef enum {
     hwUART_Index_MAX
 } hwUART_Index;
 #endif // DEVICE_TIMSP432E
+
+#ifdef DEVICE_TIMSPM0
+typedef enum {
+#if defined(UART0_BASE)
+    hwUART_Index_0 = 0,   // UART0
+#endif
+#if defined(UART1_BASE)
+    hwUART_Index_1,       // UART1
+#endif
+#if defined(UART2_BASE)
+    hwUART_Index_2,       // UART2
+#endif
+#if defined(UART3_BASE)
+    hwUART_Index_3,       // UART3
+#endif
+#if defined(UART4_BASE)
+    hwUART_Index_4,       // UART4
+#endif
+#if defined(UART5_BASE)
+    hwUART_Index_5,       // UART5
+#endif
+#if defined(UART6_BASE)
+    hwUART_Index_6,       // UART6
+#endif
+#if defined(UART7_BASE)
+    hwUART_Index_7,       // UART7
+#endif
+    hwUART_Index_MAX
+} hwUART_Index;
+#endif // DEVICE_TIMSPM0
 
 #endif //UART_INDEX_H

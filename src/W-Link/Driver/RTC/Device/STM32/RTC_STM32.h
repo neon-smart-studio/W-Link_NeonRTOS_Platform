@@ -31,4 +31,4 @@ hwRTC_OpResult RTC_Device_ClearAlarm(hwRTC_Index index, hwRTC_Alarm_Channel_Inde
 }
 #endif // __cplusplus
 
-#endif
+#endif // RTC_STM32_H

@@ -1,6 +1,6 @@
 
-#ifndef PWM_PIN_TITIVAC_DEF_H
-#define PWM_PIN_TITIVAC_DEF_H
+#ifndef PWM_PIN_TIMSPM432_DEF_H
+#define PWM_PIN_TIMSPM432_DEF_H
 
 #include "GPIO/GPIO.h"
 
@@ -14,4 +14,4 @@ typedef struct {
     hwGPIO_Pin    pin;
 } PWM_Pin_Def;
 
-#endif //PWM_PIN_TITIVAC_DEF_H
+#endif //PWM_PIN_TIMSPM432_DEF_H

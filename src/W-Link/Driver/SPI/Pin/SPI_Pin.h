@@ -30,4 +30,8 @@
 #include "TIMSP432/SPI_Pin_TIMSP432E.h"
 #endif
 
+#ifdef DEVICE_TIMSPM0
+#include "TIMSPM0/SPI_Pin_TIMSPM0.h"
+#endif
+
 #endif //SPI_MASTER_PIN_H

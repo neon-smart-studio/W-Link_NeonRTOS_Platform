@@ -90,4 +90,20 @@ typedef enum hwSPI_Index_t
 }hwSPI_Index;
 #endif // DEVICE_TIMSP432E
 
+#ifdef DEVICE_TIMSPM0
+typedef enum hwSPI_Index_t
+{
+#if defined(SPI0_BASE)
+  hwSPI_Index_0 = 0,
+#endif
+#if defined(SPI1_BASE)
+  hwSPI_Index_1,
+#endif
+#if defined(SPI2_BASE)
+  hwSPI_Index_2,
+#endif
+  hwSPI_Index_MAX,
+}hwSPI_Index;
+#endif // DEVICE_TIMSPM0
+
 #endif //SPI_MASTER_INDEX_H

@@ -15,4 +15,4 @@ extern "C" {
 }
 #endif // __cplusplus
 
-#endif
+#endif // RTC_RP2_H

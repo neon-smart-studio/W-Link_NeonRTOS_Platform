@@ -2,6 +2,8 @@
 #ifndef RTC_ALARM_CHANNEL_H
 #define RTC_ALARM_CHANNEL_H
 
+#include "soc.h"
+
 #ifdef DEVICE_NUVOTON
 typedef enum {
     hwRTC_Alarm_Channel_Index_0 = 0,
@@ -50,5 +52,15 @@ typedef enum {
     hwRTC_Alarm_Channel_Index_MAX
 } hwRTC_Alarm_Channel_Index;
 #endif // DEVICE_TIMSP432E
+
+#ifdef DEVICE_TIMSPM0
+typedef enum {
+#if defined(RTC_BASE) || defined(RTC_A_BASE) || defined(RTC_B_BASE)
+    hwRTC_Alarm_Channel_Index_0 = 0,
+    hwRTC_Alarm_Channel_Index_1,
+#endif
+    hwRTC_Alarm_Channel_Index_MAX
+} hwRTC_Alarm_Channel_Index;
+#endif // DEVICE_TIMSPM0
 
 #endif //RTC_ALARM_CHANNEL_H

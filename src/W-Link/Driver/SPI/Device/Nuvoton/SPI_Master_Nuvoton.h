@@ -1,5 +1,5 @@
-#ifndef SPI_STM32_H
-#define SPI_STM32_H
+#ifndef SPI_NUVOTON_H
+#define SPI_NUVOTON_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -43,4 +43,4 @@ void SPI_NVIC_DeInit(hwSPI_Index index);
 }
 #endif // __cplusplus
 
-#endif
+#endif // SPI_NUVOTON_H

@@ -1,5 +1,5 @@
-#ifndef RTC_STM32_H
-#define RTC_STM32_H
+#ifndef RTC_NUVOTON_H
+#define RTC_NUVOTON_H
 
 #include <time.h>
 #include "soc.h"
@@ -31,4 +31,4 @@ hwRTC_OpResult RTC_Device_ClearAlarm(hwRTC_Index index, hwRTC_Alarm_Channel_Inde
 }
 #endif // __cplusplus
 
-#endif
+#endif // RTC_NUVOTON_H

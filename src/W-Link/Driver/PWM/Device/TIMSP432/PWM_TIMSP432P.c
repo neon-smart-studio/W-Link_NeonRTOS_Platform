@@ -14,7 +14,13 @@
 
 #ifdef DEVICE_TIMSP432P
 
-#include "PWM/Pin/PWM_Pin.h"
+#include "GPIO/Device/TIMSP432/GPIO_TIMSP432P.h"
+
+#include "PWM/Pin/TIMSP432/PWM_Pin_TIMSP432P.h"
+
+#include "PWM_TIMSP432_Base.h"
+
+#include "PWM_Pin_TIMSP432P.h"
 
 #define PWM_HZ           1000
 
@@ -146,6 +152,7 @@ hwPWM_OpResult PWM_Channel_Init(hwPWM_Channel channel_index, bool inverse_PWM)
 
     PWM_Base_Init_Status[PWM_Pin_Def_Table[channel_index].base] = true;
 
+    gpio_pin_init_status[pwm_pin] = true;
     PWM_Channel_Init_Status[channel_index] = true;
     PWM_Channel_OnOff_Status[channel_index] = false;
     PWM_Channel_Inverse_Status[channel_index] = inverse_PWM;
@@ -187,6 +194,7 @@ hwPWM_OpResult PWM_Channel_DeInit(hwPWM_Channel channel_index)
 
     MAP_GPIO_setAsInputPin(pwm_port, pwm_mask);
 
+    gpio_pin_init_status[pwm_pin] = false;
     PWM_Channel_Init_Status[channel_index] = false;
     PWM_Channel_OnOff_Status[channel_index] = false;
     PWM_Channel_Inverse_Status[channel_index] = false;

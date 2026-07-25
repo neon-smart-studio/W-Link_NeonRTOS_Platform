@@ -98,6 +98,7 @@ hwPWM_OpResult PWM_Channel_Init(hwPWM_Channel channel_index, bool inverse_PWM)
 
         MAP_PWMGenEnable(PWM0_BASE, pwmGen);
 
+        gpio_pin_init_status[pwm_pin] = true;
         PWM_Channel_Init_Status[channel_index] = true;
         PWM_Channel_OnOff_Status[channel_index] = false;
 	PWM_Channel_Inverse_Status[channel_index] = inverse_PWM;
@@ -145,6 +146,7 @@ hwPWM_OpResult PWM_Channel_DeInit(hwPWM_Channel channel_index)
 
         MAP_GPIOPinTypeGPIOInput(pwmPortBase, pwmPinMask);
 
+        gpio_pin_init_status[pwm_pin] = false;
         PWM_Channel_Init_Status[channel_index] = false;
         PWM_Channel_OnOff_Status[channel_index] = false;
 	PWM_Channel_Inverse_Status[channel_index] = false;

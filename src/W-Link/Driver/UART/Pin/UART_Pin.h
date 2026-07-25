@@ -30,4 +30,8 @@
 #include "TIMSP432/UART_Pin_TIMSP432E.h"
 #endif
 
+#ifdef DEVICE_TIMSPM0
+#include "TIMSPM0/UART_Pin_TIMSPM0.h"
+#endif
+
 #endif //UART_PIN_H

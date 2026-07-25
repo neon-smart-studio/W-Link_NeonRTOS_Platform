@@ -1,5 +1,5 @@
-#ifndef RTC_TITIVAC_H
-#define RTC_TITIVAC_H
+#ifndef RTC_TIMSPM0_H
+#define RTC_TIMSPM0_H
 
 #include <time.h>
 #include "soc.h"
@@ -15,4 +15,4 @@ extern "C" {
 }
 #endif // __cplusplus
 
-#endif // RTC_TITIVAC_H
+#endif // RTC_TIMSPM0_H

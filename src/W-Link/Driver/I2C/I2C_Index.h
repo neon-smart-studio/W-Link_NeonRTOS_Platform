@@ -122,4 +122,20 @@ typedef enum hwI2C_Index_t
 }hwI2C_Index;
 #endif // DEVICE_TIMSP432E
 
+#ifdef DEVICE_TIMSPM0
+typedef enum hwI2C_Index_t
+{
+#if defined(I2C0_BASE)
+  hwI2C_Index_0 = 0,
+#endif
+#if defined(I2C1_BASE)
+  hwI2C_Index_1,
+#endif
+#if defined(I2C2_BASE)
+  hwI2C_Index_2,
+#endif
+  hwI2C_Index_MAX,
+}hwI2C_Index;
+#endif // DEVICE_TIMSPM0
+
 #endif //I2C_INDEX_H

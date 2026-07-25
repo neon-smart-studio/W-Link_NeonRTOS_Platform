@@ -67,7 +67,7 @@ typedef enum hwDAC_Channel_Index_t
 typedef enum hwDAC_Channel_Index_t
 {
 #if defined(DAC0_BASE)
-  hwDAC_Channel_Index_MAX = 0,
+  hwDAC_Channel_Index_0 = 0,
 #endif
   hwDAC_Channel_Index_MAX,
 }hwDAC_Channel_Index;

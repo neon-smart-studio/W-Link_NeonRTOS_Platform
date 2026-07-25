@@ -35,7 +35,7 @@ static bool DAC_IsInstanceUsed(hwDAC_Instance inst)
     return false;
 }
 
-hwDAC_OpResult hwDAC_Channel_Init(hwDAC_Channel_Index ch)
+hwDAC_OpResult DAC_Channel_Init(hwDAC_Channel_Index ch)
 {
     if (ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;
@@ -99,7 +99,7 @@ hwDAC_OpResult hwDAC_Channel_Init(hwDAC_Channel_Index ch)
     return hwDAC_OK;
 }
 
-hwDAC_OpResult hwDAC_Channel_DeInit(hwDAC_Channel_Index ch)
+hwDAC_OpResult DAC_Channel_DeInit(hwDAC_Channel_Index ch)
 {
     if (ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;
@@ -137,7 +137,7 @@ hwDAC_OpResult hwDAC_Channel_DeInit(hwDAC_Channel_Index ch)
     return hwDAC_OK;
 }
 
-hwDAC_OpResult hwDAC_Write_MiniVolt(hwDAC_Channel_Index ch, float mv)
+hwDAC_OpResult DAC_Write_MiniVolt(hwDAC_Channel_Index ch, float mv)
 {
     if (ch >= hwDAC_Channel_Index_MAX)
         return hwDAC_InvalidParameter;

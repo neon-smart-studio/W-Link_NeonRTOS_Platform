@@ -11,6 +11,7 @@
 typedef struct {
     hwGPIO_Pin adc_pin;
     hwADC_Instance inst;
+    uint8_t hw_Idx;
 } ADC_Channel_Def;
 
 #endif //ADC_PIN_TIMSPM0_DEF_H

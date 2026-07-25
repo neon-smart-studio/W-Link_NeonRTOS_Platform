@@ -48,4 +48,10 @@ typedef enum {
 } hwQSPI_Index;
 #endif // DEVICE_TIMSP432E
 
+#ifdef DEVICE_TIMSPM0
+typedef enum {
+    hwQSPI_Index_MAX
+} hwQSPI_Index;
+#endif // DEVICE_TIMSPM0
+
 #endif //QSPI_MASTER_INDEX_H

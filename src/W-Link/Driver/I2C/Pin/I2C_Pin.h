@@ -28,4 +28,8 @@
 #include "TIMSP432/I2C_Pin_TIMSP432E.h"
 #endif
 
+#ifdef DEVICE_TIMSPM0
+#include "TIMSPM0/I2C_Pin_TIMSPM0.h"
+#endif
+
 #endif //I2C_PIN_H

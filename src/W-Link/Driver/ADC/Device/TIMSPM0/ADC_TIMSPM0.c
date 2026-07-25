@@ -91,16 +91,19 @@ static ADC12_Regs *ADC_Map_Soc_Base(hwADC_Instance inst)
 
 static uint32_t ADC_Channel_Index_To_Input(hwADC_Channel_Index ch)
 {
-    uint32_t channel = (uint32_t) ch;
-
-    if ((channel >= ADC_MSPM0_INPUT_COUNT) ||
-        (channel >
-         (ADC12_MEMCTL_CHANSEL_MASK >> ADC12_MEMCTL_CHANSEL_OFS)))
+    if (ch >= hwADC_Channel_Index_MAX)
     {
         return ADC_MSPM0_INVALID_INPUT;
     }
 
-    return (channel << ADC12_MEMCTL_CHANSEL_OFS) & ADC12_MEMCTL_CHANSEL_MASK;
+    const ADC_Channel_Def *def = &ADC_Channel_Def_Table[ch];
+
+    if ((def->adc_pin == hwGPIO_Pin_NC))
+    {
+        return ADC_MSPM0_INVALID_INPUT;
+    }
+
+    return (def->hw_Idx << ADC12_MEMCTL_CHANSEL_OFS) & ADC12_MEMCTL_CHANSEL_MASK;
 }
 
 static bool ADC_IsValidInstanceChannel(hwADC_Instance inst, hwADC_Channel_Index ch)

@@ -14,347 +14,222 @@
 
 #include "Timer_TIMSPM0.h"
 
-#define TIMER_TIMSPM0_POWER_STARTUP_DELAY    (16U)
-#define TIMER_TIMSPM0_16BIT_MAX_COUNTS       (65536ULL)
-#define TIMER_TIMSPM0_32BIT_MAX_COUNTS       (4294967296ULL)
-#define TIMER_TIMSPM0_MAX_CLOCK_DIVIDE       (8U)
-#define TIMER_TIMSPM0_MAX_PRESCALE_DIVIDE    (256U)
-
 static bool Timer_Init_Status[hwTimer_Index_MAX] = {false};
 static bool Timer_IsPeriodic[hwTimer_Index_MAX] = {false};
-static uint32_t Timer_Period_Us[hwTimer_Index_MAX] = {0U};
-static uint32_t Timer_Tick_Divisor[hwTimer_Index_MAX] = {0U};
-static onTimerEventHandler
-    Timer_Expired_Handler[hwTimer_Index_MAX] = {NULL};
+static uint32_t Timer_Period_Us[hwTimer_Index_MAX] = {0};
 
-static bool Timer_IsValidIndex(hwTimer_Index index)
-{
-    return ((int32_t) index >= 0) &&
-           (index < hwTimer_Index_MAX) &&
-           ((size_t) index <
-            TIMSPM0_TimerResource_GetCount()) &&
-           (TIMSPM0_TimerResource_GetTimer(
-                (size_t) index) != NULL);
-}
+static onTimerEventHandler Timer_Expired_Handler[hwTimer_Index_MAX] = {NULL};
 
 static GPTIMER_Regs *Timer_Map_Base(hwTimer_Index index)
 {
-    if (!Timer_IsValidIndex(index))
+    switch (index)
     {
-        return NULL;
-    }
-
-    return TIMSPM0_TimerResource_GetTimer(
-        (size_t) index);
-}
-
-static hwTimer_Index Timer_Map_Index(
-    GPTIMER_Regs *timer)
-{
-    for (hwTimer_Index index = (hwTimer_Index) 0;
-         index < hwTimer_Index_MAX;
-         index = (hwTimer_Index) (index + 1))
-    {
-        if (Timer_Map_Base(index) == timer)
-        {
-            return index;
-        }
-    }
-
-    return hwTimer_Index_MAX;
-}
-
-static DL_TIMER_CLOCK_DIVIDE Timer_Map_ClockDivide(
-    uint32_t divide)
-{
-    switch (divide)
-    {
-        case 1U:
-            return DL_TIMER_CLOCK_DIVIDE_1;
-
-        case 2U:
-            return DL_TIMER_CLOCK_DIVIDE_2;
-
-        case 3U:
-            return DL_TIMER_CLOCK_DIVIDE_3;
-
-        case 4U:
-            return DL_TIMER_CLOCK_DIVIDE_4;
-
-        case 5U:
-            return DL_TIMER_CLOCK_DIVIDE_5;
-
-        case 6U:
-            return DL_TIMER_CLOCK_DIVIDE_6;
-
-        case 7U:
-            return DL_TIMER_CLOCK_DIVIDE_7;
-
-        case 8U:
-        default:
-            return DL_TIMER_CLOCK_DIVIDE_8;
-    }
-}
-
-static bool Timer_Is32Bit(GPTIMER_Regs *timer)
-{
-#if defined(TIMG12_BASE)
-    return (timer == TIMG12);
-#else
-    (void) timer;
-    return false;
+#if defined(TIMA0_BASE)
+        case hwTimer_Index_0:
+            return TIMA0_BASE;
 #endif
+
+#if defined(TIMA1_BASE)
+        case hwTimer_Index_1:
+            return TIMA1_BASE;
+#endif
+
+#if defined(TIMG0_BASE)
+        case hwTimer_Index_2:
+            return TIMG0_BASE;
+#endif
+
+#if defined(TIMG1_BASE)
+        case hwTimer_Index_3:
+            return TIMG1_BASE;
+#endif
+
+#if defined(TIMG2_BASE)
+        case hwTimer_Index_4:
+            return TIMG2_BASE;
+#endif
+
+#if defined(TIMG4_BASE)
+        case hwTimer_Index_5:
+            return TIMG4_BASE;
+#endif
+
+#if defined(TIMG5_BASE)
+        case hwTimer_Index_6:
+            return TIMG5_BASE;
+#endif
+
+#if defined(TIMG6_BASE)
+        case hwTimer_Index_7:
+            return TIMG6_BASE;
+#endif
+
+#if defined(TIMG7_BASE)
+        case hwTimer_Index_8:
+            return TIMG7_BASE;
+#endif
+
+#if defined(TIMG8_BASE)
+        case hwTimer_Index_9:
+            return TIMG8_BASE;
+#endif
+
+#if defined(TIMG9_BASE)
+        case hwTimer_Index_10:
+            return TIMG9_BASE;
+#endif
+
+#if defined(TIMG12_BASE)
+        case hwTimer_Index_11:
+            return TIMG12_BASE;
+#endif
+
+#if defined(TIMG14_BASE)
+        case hwTimer_Index_12:
+            return TIMG14_BASE;
+#endif
+
+        default:
+            return NULL;
+    }
 }
 
-static bool Timer_CalculateConfig(
-    GPTIMER_Regs *timer,
-    uint32_t duration_us,
-    DL_TIMER_CLOCK_DIVIDE *clock_divide,
-    uint8_t *prescale,
-    uint32_t *load_value,
-    uint32_t *tick_divisor)
+static int32_t Timer_Map_IRQ(hwTimer_Index index)
 {
-    if ((timer == NULL) ||
-        (duration_us == 0U) ||
-        (clock_divide == NULL) ||
-        (prescale == NULL) ||
-        (load_value == NULL) ||
-        (tick_divisor == NULL) ||
-        (g_sys_clock_hz == 0U))
+    switch (index)
     {
-        return false;
-    }
+#if defined(TIMA0_BASE)
+        case hwTimer_Index_0:
+            return TIMA0_INT_IRQn;
+#endif
 
-    uint64_t source_ticks =
-        (((uint64_t) g_sys_clock_hz * duration_us) +
-         999999ULL) /
+#if defined(TIMA1_BASE)
+        case hwTimer_Index_1:
+            return TIMA1_INT_IRQn;
+#endif
+
+#if defined(TIMG0_BASE)
+        case hwTimer_Index_2:
+            return TIMG0_INT_IRQn;
+#endif
+
+#if defined(TIMG1_BASE)
+        case hwTimer_Index_3:
+            return TIMG1_INT_IRQn;
+#endif
+
+#if defined(TIMG2_BASE)
+        case hwTimer_Index_4:
+            return TIMG2_INT_IRQn;
+#endif
+
+#if defined(TIMG4_BASE)
+        case hwTimer_Index_5:
+            return TIMG4_INT_IRQn;
+#endif
+
+#if defined(TIMG5_BASE)
+        case hwTimer_Index_6:
+            return TIMG5_INT_IRQn;
+#endif
+
+#if defined(TIMG6_BASE)
+        case hwTimer_Index_7:
+            return TIMG6_INT_IRQn;
+#endif
+
+#if defined(TIMG7_BASE)
+        case hwTimer_Index_8:
+            return TIMG7_INT_IRQn;
+#endif
+
+#if defined(TIMG8_BASE)
+        case hwTimer_Index_9:
+            return TIMG8_INT_IRQn;
+#endif
+
+#if defined(TIMG9_BASE)
+        case hwTimer_Index_10:
+            return TIMG9_INT_IRQn;
+#endif
+
+#if defined(TIMG12_BASE)
+        case hwTimer_Index_11:
+            return TIMG12_INT_IRQn;
+#endif
+
+#if defined(TIMG14_BASE)
+        case hwTimer_Index_12:
+            return TIMG14_INT_IRQn;
+#endif
+
+        default:
+            return -1;
+    }
+}
+
+static uint32_t Timer_Us_To_LoadValue(uint32_t us)
+{
+    uint64_t ticks;
+
+    ticks =
+        ((uint64_t)g_sys_clock_hz * (uint64_t)us) /
         1000000ULL;
 
-    if (source_ticks == 0U)
+    if (ticks == 0ULL)
     {
-        source_ticks = 1U;
+        ticks = 1ULL;
     }
 
-    bool is_32_bit = Timer_Is32Bit(timer);
-    uint64_t max_counts =
-        is_32_bit ?
-            TIMER_TIMSPM0_32BIT_MAX_COUNTS :
-            TIMER_TIMSPM0_16BIT_MAX_COUNTS;
-    uint32_t max_prescale_divide =
-        is_32_bit ?
-            1U :
-            TIMER_TIMSPM0_MAX_PRESCALE_DIVIDE;
-    uint32_t best_total_divide = UINT32_MAX;
-    uint32_t best_clock_divide = 0U;
-    uint32_t best_prescale_divide = 0U;
-    uint64_t best_counts = 0U;
-
-    for (uint32_t divide = 1U;
-         divide <= TIMER_TIMSPM0_MAX_CLOCK_DIVIDE;
-         divide++)
+    /*
+     * MSPM0 period:
+     *
+     * actual ticks = period + 1
+     */
+    if (ticks > 0x100000000ULL)
     {
-        for (uint32_t prescale_divide = 1U;
-             prescale_divide <= max_prescale_divide;
-             prescale_divide++)
-        {
-            uint32_t total_divide =
-                divide * prescale_divide;
-
-            if (total_divide >= best_total_divide)
-            {
-                continue;
-            }
-
-            uint64_t counts =
-                (source_ticks + total_divide - 1U) /
-                total_divide;
-
-            if ((counts > 0U) &&
-                (counts <= max_counts))
-            {
-                best_total_divide = total_divide;
-                best_clock_divide = divide;
-                best_prescale_divide =
-                    prescale_divide;
-                best_counts = counts;
-            }
-        }
+        ticks = 0x100000000ULL;
     }
 
-    if ((best_clock_divide == 0U) ||
-        (best_prescale_divide == 0U) ||
-        (best_counts == 0U))
-    {
-        return false;
-    }
-
-    *clock_divide =
-        Timer_Map_ClockDivide(best_clock_divide);
-    *prescale =
-        (uint8_t) (best_prescale_divide - 1U);
-    *load_value = (uint32_t) (best_counts - 1U);
-    *tick_divisor = best_total_divide;
-
-    return true;
+    return (uint32_t)(ticks - 1ULL);
 }
 
-static void Timer_StopHardware(GPTIMER_Regs *timer)
+static void TIMSPM0_Timer_IRQ_Process(hwTimer_Index index)
 {
-    if (timer == NULL)
+    GPTIMER_Regs *base;
+    DL_TIMER_IIDX interrupt_index;
+    onTimerEventHandler callback;
+
+    if (index >= hwTimer_Index_MAX)
     {
         return;
     }
 
-    DL_Timer_stopCounter(timer);
-    DL_Timer_disableInterrupt(
-        timer,
-        DL_TIMER_INTERRUPT_ZERO_EVENT);
-    DL_Timer_clearInterruptStatus(
-        timer,
-        DL_TIMER_INTERRUPT_ZERO_EVENT);
-}
+    base = Timer_Map_Base(index);
 
-static void Timer_Register_IRQ(GPTIMER_Regs *timer)
-{
-    IRQn_Type irq =
-        TIMSPM0_TimerResource_GetIRQ(timer);
-
-    if ((int32_t) irq < 0)
+    if (base == NULL)
     {
         return;
     }
 
-    NVIC_ClearPendingIRQ(irq);
-    NVIC_EnableIRQ(irq);
-}
+    /*
+     * 讀取 IIDX 取得並 acknowledge 最高優先權中斷。
+     */
+    interrupt_index = DL_Timer_getPendingInterrupt(base);
 
-static void Timer_Unregister_IRQ(GPTIMER_Regs *timer)
-{
-    IRQn_Type irq =
-        TIMSPM0_TimerResource_GetIRQ(timer);
-
-    if ((int32_t) irq < 0)
+    if (interrupt_index != DL_TIMER_IIDX_ZERO)
     {
         return;
     }
-
-    NVIC_DisableIRQ(irq);
-    NVIC_ClearPendingIRQ(irq);
-}
-
-static hwTimer_OpResult Timer_Start(
-    hwTimer_Index index,
-    uint32_t duration_us,
-    onTimerEventHandler timer_exp_cb,
-    bool periodic)
-{
-    if (!Timer_IsValidIndex(index) ||
-        (duration_us == 0U))
-    {
-        return hwTimer_InvalidParameter;
-    }
-
-    if (!Timer_Init_Status[index])
-    {
-        return hwTimer_NotInit;
-    }
-
-    GPTIMER_Regs *timer = Timer_Map_Base(index);
-    DL_TIMER_CLOCK_DIVIDE clock_divide;
-    uint8_t prescale;
-    uint32_t load_value;
-    uint32_t tick_divisor;
-
-    if (!Timer_CalculateConfig(
-            timer,
-            duration_us,
-            &clock_divide,
-            &prescale,
-            &load_value,
-            &tick_divisor))
-    {
-        return hwTimer_InvalidParameter;
-    }
-
-    Timer_StopHardware(timer);
-
-    const DL_Timer_ClockConfig clock_config = {
-        .clockSel = DL_TIMER_CLOCK_BUSCLK,
-        .divideRatio = clock_divide,
-        .prescale = prescale,
-    };
-
-    const DL_Timer_TimerConfig timer_config = {
-        .timerMode =
-            periodic ?
-                DL_TIMER_TIMER_MODE_PERIODIC :
-                DL_TIMER_TIMER_MODE_ONE_SHOT,
-        .period = load_value,
-        .startTimer = DL_TIMER_STOP,
-        .genIntermInt =
-            DL_TIMER_INTERM_INT_DISABLED,
-        .counterVal = 0U,
-    };
-
-    DL_Timer_setClockConfig(timer, &clock_config);
-    DL_Timer_initTimerMode(timer, &timer_config);
-    DL_Timer_clearInterruptStatus(
-        timer,
-        DL_TIMER_INTERRUPT_ZERO_EVENT);
-
-    IRQn_Type irq =
-        TIMSPM0_TimerResource_GetIRQ(timer);
-    if ((int32_t) irq >= 0)
-    {
-        NVIC_ClearPendingIRQ(irq);
-    }
-
-    Timer_Expired_Handler[index] = timer_exp_cb;
-    Timer_IsPeriodic[index] = periodic;
-    Timer_Period_Us[index] = duration_us;
-    Timer_Tick_Divisor[index] = tick_divisor;
-
-    DL_Timer_enableInterrupt(
-        timer,
-        DL_TIMER_INTERRUPT_ZERO_EVENT);
-    DL_Timer_enableClock(timer);
-    DL_Timer_startCounter(timer);
-
-    return hwTimer_OK;
-}
-
-static void TIMSPM0_Timer_IRQ_Process(
-    GPTIMER_Regs *timer)
-{
-    hwTimer_Index index = Timer_Map_Index(timer);
-
-    if (!Timer_IsValidIndex(index) ||
-        !Timer_Init_Status[index])
-    {
-        if (timer != NULL)
-        {
-            DL_Timer_clearInterruptStatus(
-                timer,
-                DL_TIMER_INTERRUPT_ZERO_EVENT);
-        }
-        return;
-    }
-
-    if (DL_Timer_getPendingInterrupt(timer) !=
-        DL_TIMER_IIDX_ZERO)
-    {
-        return;
-    }
-
-    onTimerEventHandler callback =
-        Timer_Expired_Handler[index];
 
     if (!Timer_IsPeriodic[index])
     {
-        Timer_StopHardware(timer);
-        Timer_Period_Us[index] = 0U;
-        Timer_Tick_Divisor[index] = 0U;
+        DL_Timer_stopCounter(base);
+
+        Timer_Period_Us[index] = 0;
     }
+
+    callback = Timer_Expired_Handler[index];
 
     if (callback != NULL)
     {
@@ -365,97 +240,235 @@ static void TIMSPM0_Timer_IRQ_Process(
 #if defined(TIMA0_BASE)
 void TIMA0_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMA0);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_0);
 }
 #endif
 
 #if defined(TIMA1_BASE)
 void TIMA1_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMA1);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_1);
 }
 #endif
 
 #if defined(TIMG0_BASE)
 void TIMG0_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG0);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_2);
 }
 #endif
 
 #if defined(TIMG1_BASE)
 void TIMG1_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG1);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_3);
 }
 #endif
 
 #if defined(TIMG2_BASE)
 void TIMG2_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG2);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_4);
 }
 #endif
 
 #if defined(TIMG4_BASE)
 void TIMG4_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG4);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_5);
 }
 #endif
 
 #if defined(TIMG5_BASE)
 void TIMG5_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG5);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_6);
 }
 #endif
 
 #if defined(TIMG6_BASE)
 void TIMG6_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG6);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_7);
 }
 #endif
 
 #if defined(TIMG7_BASE)
 void TIMG7_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG7);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_8);
 }
 #endif
 
 #if defined(TIMG8_BASE)
 void TIMG8_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG8);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_9);
 }
 #endif
 
 #if defined(TIMG9_BASE)
 void TIMG9_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG9);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_10);
 }
 #endif
 
 #if defined(TIMG12_BASE)
 void TIMG12_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG12);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_11);
 }
 #endif
 
 #if defined(TIMG14_BASE)
 void TIMG14_IRQHandler(void)
 {
-    TIMSPM0_Timer_IRQ_Process(TIMG14);
+    TIMSPM0_Timer_IRQ_Process(hwTimer_Index_12);
 }
 #endif
 
+
+/* ============================================================
+ * IRQ control
+ * ============================================================ */
+
+static void Timer_Register_IRQ(hwTimer_Index index)
+{
+    int32_t irq;
+
+    irq = Timer_Map_IRQ(index);
+
+    if (irq < 0)
+    {
+        return;
+    }
+
+    NVIC_ClearPendingIRQ((IRQn_Type)irq);
+    NVIC_EnableIRQ((IRQn_Type)irq);
+}
+
+static void Timer_Unregister_IRQ(hwTimer_Index index)
+{
+    GPTIMER_Regs *base;
+    int32_t irq;
+
+    base = Timer_Map_Base(index);
+    irq  = Timer_Map_IRQ(index);
+
+    if (base != NULL)
+    {
+        DL_Timer_stopCounter(base);
+
+        DL_Timer_disableInterrupt(
+            base,
+            DL_TIMER_INTERRUPT_ZERO_EVENT
+        );
+
+        DL_Timer_clearInterruptStatus(
+            base,
+            DL_TIMER_INTERRUPT_ZERO_EVENT
+        );
+    }
+
+    if (irq >= 0)
+    {
+        NVIC_DisableIRQ((IRQn_Type)irq);
+        NVIC_ClearPendingIRQ((IRQn_Type)irq);
+    }
+}
+
+static hwTimer_OpResult Timer_Start_Internal(
+    hwTimer_Index index,
+    uint32_t duration_us,
+    onTimerEventHandler timer_exp_cb,
+    bool periodic
+)
+{
+    GPTIMER_Regs *base;
+    DL_Timer_TimerConfig timer_config;
+    uint32_t load_value;
+    int32_t irq;
+
+    if (index >= hwTimer_Index_MAX || duration_us == 0)
+    {
+        return hwTimer_InvalidParameter;
+    }
+
+    if (!Timer_Init_Status[index])
+    {
+        return hwTimer_NotInit;
+    }
+
+    base = Timer_Map_Base(index);
+
+    if (base == NULL)
+    {
+        return hwTimer_InvalidParameter;
+    }
+
+    load_value = Timer_Us_To_LoadValue(duration_us);
+
+    DL_Timer_stopCounter(base);
+
+    DL_Timer_disableInterrupt(
+        base,
+        DL_TIMER_INTERRUPT_ZERO_EVENT
+    );
+
+    DL_Timer_clearInterruptStatus(
+        base,
+        DL_TIMER_INTERRUPT_ZERO_EVENT
+    );
+
+    timer_config.timerMode =
+        periodic
+            ? DL_TIMER_TIMER_MODE_PERIODIC
+            : DL_TIMER_TIMER_MODE_ONE_SHOT;
+
+    timer_config.period       = load_value;
+    timer_config.startTimer   = DL_TIMER_STOP;
+    timer_config.genIntermInt = DL_TIMER_INTERM_INT_DISABLED;
+    timer_config.counterVal   = 0;
+
+    DL_Timer_initTimerMode(
+        base,
+        &timer_config
+    );
+
+    Timer_Expired_Handler[index] = timer_exp_cb;
+    Timer_IsPeriodic[index]      = periodic;
+    Timer_Period_Us[index]       = duration_us;
+
+    DL_Timer_clearInterruptStatus(
+        base,
+        DL_TIMER_INTERRUPT_ZERO_EVENT
+    );
+
+    DL_Timer_enableInterrupt(
+        base,
+        DL_TIMER_INTERRUPT_ZERO_EVENT
+    );
+
+    irq = Timer_Map_IRQ(index);
+
+    if (irq >= 0)
+    {
+        NVIC_ClearPendingIRQ((IRQn_Type)irq);
+    }
+
+    DL_Timer_startCounter(base);
+
+    return hwTimer_OK;
+}
+
 hwTimer_OpResult Timer_Init(hwTimer_Index index)
 {
-    if (!Timer_IsValidIndex(index))
+    GPTIMER_Regs *base;
+    DL_Timer_ClockConfig clock_config;
+    DL_Timer_TimerConfig timer_config;
+
+    if (index >= hwTimer_Index_MAX)
     {
         return hwTimer_InvalidParameter;
     }
@@ -465,39 +478,59 @@ hwTimer_OpResult Timer_Init(hwTimer_Index index)
         return hwTimer_OK;
     }
 
-    GPTIMER_Regs *timer = Timer_Map_Base(index);
+    base = Timer_Map_Base(index);
 
-    /*
-     * A GPTIMER instance cannot be reconfigured while PWM owns it.
-     */
-    if (!TIMSPM0_TimerResource_Claim(
-            timer,
-            TIMSPM0_TimerOwner_Timer))
+    if (base == NULL)
     {
         return hwTimer_InvalidParameter;
     }
 
-    IRQn_Type irq =
-        TIMSPM0_TimerResource_GetIRQ(timer);
-    if ((int32_t) irq < 0)
+    DL_Timer_enablePower(base);
+
+    while (!DL_Timer_isPowerEnabled(base))
     {
-        TIMSPM0_TimerResource_Release(
-            timer,
-            TIMSPM0_TimerOwner_Timer);
-        return hwTimer_InvalidParameter;
     }
 
-    DL_Timer_reset(timer);
-    DL_Timer_enablePower(timer);
-    DL_Common_delayCycles(
-        TIMER_TIMSPM0_POWER_STARTUP_DELAY);
+    DL_Timer_reset(base);
 
-    Timer_Register_IRQ(timer);
+    clock_config.clockSel     = DL_TIMER_CLOCK_BUSCLK;
+    clock_config.divideRatio  = DL_TIMER_CLOCK_DIVIDE_1;
+    clock_config.prescale     = 0;
 
-    Timer_Init_Status[index] = true;
-    Timer_IsPeriodic[index] = false;
-    Timer_Period_Us[index] = 0U;
-    Timer_Tick_Divisor[index] = 0U;
+    DL_Timer_setClockConfig(
+        base,
+        &clock_config
+    );
+
+    timer_config.timerMode    = DL_TIMER_TIMER_MODE_PERIODIC;
+    timer_config.period       = 0;
+    timer_config.startTimer   = DL_TIMER_STOP;
+    timer_config.genIntermInt = DL_TIMER_INTERM_INT_DISABLED;
+    timer_config.counterVal   = 0;
+
+    DL_Timer_initTimerMode(
+        base,
+        &timer_config
+    );
+
+    DL_Timer_disableInterrupt(
+        base,
+        DL_TIMER_INTERRUPT_ZERO_EVENT
+    );
+
+    DL_Timer_clearInterruptStatus(
+        base,
+        DL_TIMER_INTERRUPT_ZERO_EVENT
+    );
+
+    DL_Timer_enableClock(base);
+    DL_Timer_stopCounter(base);
+
+    Timer_Register_IRQ(index);
+
+    Timer_Init_Status[index]     = true;
+    Timer_IsPeriodic[index]      = false;
+    Timer_Period_Us[index]       = 0;
     Timer_Expired_Handler[index] = NULL;
 
     return hwTimer_OK;
@@ -505,7 +538,9 @@ hwTimer_OpResult Timer_Init(hwTimer_Index index)
 
 hwTimer_OpResult Timer_DeInit(hwTimer_Index index)
 {
-    if (!Timer_IsValidIndex(index))
+    GPTIMER_Regs *base;
+
+    if (index >= hwTimer_Index_MAX)
     {
         return hwTimer_InvalidParameter;
     }
@@ -515,23 +550,25 @@ hwTimer_OpResult Timer_DeInit(hwTimer_Index index)
         return hwTimer_OK;
     }
 
-    GPTIMER_Regs *timer = Timer_Map_Base(index);
+    base = Timer_Map_Base(index);
 
-    Timer_StopHardware(timer);
-    Timer_Unregister_IRQ(timer);
-    DL_Timer_disableClock(timer);
-    DL_Timer_reset(timer);
-    DL_Timer_disablePower(timer);
+    if (base == NULL)
+    {
+        return hwTimer_InvalidParameter;
+    }
 
-    Timer_Init_Status[index] = false;
-    Timer_IsPeriodic[index] = false;
-    Timer_Period_Us[index] = 0U;
-    Timer_Tick_Divisor[index] = 0U;
+    Timer_Unregister_IRQ(index);
+
+    DL_Timer_stopCounter(base);
+    DL_Timer_disableClock(base);
+
+    DL_Timer_reset(base);
+    DL_Timer_disablePower(base);
+
+    Timer_Init_Status[index]     = false;
+    Timer_IsPeriodic[index]      = false;
+    Timer_Period_Us[index]       = 0;
     Timer_Expired_Handler[index] = NULL;
-
-    TIMSPM0_TimerResource_Release(
-        timer,
-        TIMSPM0_TimerOwner_Timer);
 
     return hwTimer_OK;
 }
@@ -539,33 +576,40 @@ hwTimer_OpResult Timer_DeInit(hwTimer_Index index)
 hwTimer_OpResult Timer_Start_OneShout(
     hwTimer_Index index,
     uint32_t duration_us,
-    onTimerEventHandler timer_exp_cb)
+    onTimerEventHandler timer_exp_cb
+)
 {
-    return Timer_Start(
+    return Timer_Start_Internal(
         index,
         duration_us,
         timer_exp_cb,
-        false);
+        false
+    );
 }
 
 hwTimer_OpResult Timer_Start_Period(
     hwTimer_Index index,
     uint32_t duration_us,
-    onTimerEventHandler timer_exp_cb)
+    onTimerEventHandler timer_exp_cb
+)
 {
-    return Timer_Start(
+    return Timer_Start_Internal(
         index,
         duration_us,
         timer_exp_cb,
-        true);
+        true
+    );
 }
 
 hwTimer_OpResult Timer_Reload(
     hwTimer_Index index,
-    uint32_t duration_us)
+    uint32_t duration_us
+)
 {
-    if (!Timer_IsValidIndex(index) ||
-        (duration_us == 0U))
+    bool periodic;
+    onTimerEventHandler callback;
+
+    if (index >= hwTimer_Index_MAX || duration_us == 0)
     {
         return hwTimer_InvalidParameter;
     }
@@ -575,16 +619,22 @@ hwTimer_OpResult Timer_Reload(
         return hwTimer_NotInit;
     }
 
-    return Timer_Start(
+    periodic = Timer_IsPeriodic[index];
+    callback = Timer_Expired_Handler[index];
+
+    return Timer_Start_Internal(
         index,
         duration_us,
-        Timer_Expired_Handler[index],
-        Timer_IsPeriodic[index]);
+        callback,
+        periodic
+    );
 }
 
 hwTimer_OpResult Timer_Stop(hwTimer_Index index)
 {
-    if (!Timer_IsValidIndex(index))
+    GPTIMER_Regs *base;
+
+    if (index >= hwTimer_Index_MAX)
     {
         return hwTimer_InvalidParameter;
     }
@@ -594,20 +644,39 @@ hwTimer_OpResult Timer_Stop(hwTimer_Index index)
         return hwTimer_NotInit;
     }
 
-    Timer_StopHardware(Timer_Map_Base(index));
+    base = Timer_Map_Base(index);
+
+    if (base == NULL)
+    {
+        return hwTimer_InvalidParameter;
+    }
+
+    DL_Timer_stopCounter(base);
+
+    DL_Timer_disableInterrupt(
+        base,
+        DL_TIMER_INTERRUPT_ZERO_EVENT
+    );
+
+    DL_Timer_clearInterruptStatus(
+        base,
+        DL_TIMER_INTERRUPT_ZERO_EVENT
+    );
+
     Timer_IsPeriodic[index] = false;
-    Timer_Period_Us[index] = 0U;
-    Timer_Tick_Divisor[index] = 0U;
+    Timer_Period_Us[index]  = 0;
 
     return hwTimer_OK;
 }
 
 hwTimer_OpResult Timer_Read_Ticks(
     hwTimer_Index index,
-    uint32_t *ticks)
+    uint32_t *ticks
+)
 {
-    if (!Timer_IsValidIndex(index) ||
-        (ticks == NULL))
+    GPTIMER_Regs *base;
+
+    if (index >= hwTimer_Index_MAX || ticks == NULL)
     {
         return hwTimer_InvalidParameter;
     }
@@ -617,22 +686,28 @@ hwTimer_OpResult Timer_Read_Ticks(
         return hwTimer_NotInit;
     }
 
-    GPTIMER_Regs *timer = Timer_Map_Base(index);
-    if (timer == NULL)
+    base = Timer_Map_Base(index);
+
+    if (base == NULL)
     {
         return hwTimer_InvalidParameter;
     }
 
-    *ticks = DL_Timer_getTimerCount(timer);
+    *ticks = DL_Timer_getTimerCount(base);
+
     return hwTimer_OK;
 }
 
 hwTimer_OpResult Timer_Read_uSec(
     hwTimer_Index index,
-    uint32_t *uSec)
+    uint32_t *uSec
+)
 {
-    if (!Timer_IsValidIndex(index) ||
-        (uSec == NULL))
+    uint32_t ticks;
+    uint64_t us;
+    hwTimer_OpResult result;
+
+    if (index >= hwTimer_Index_MAX || uSec == NULL)
     {
         return hwTimer_InvalidParameter;
     }
@@ -642,45 +717,47 @@ hwTimer_OpResult Timer_Read_uSec(
         return hwTimer_NotInit;
     }
 
-    if (g_sys_clock_hz == 0U)
-    {
-        return hwTimer_InvalidParameter;
-    }
-
-    if (Timer_Tick_Divisor[index] == 0U)
-    {
-        *uSec = 0U;
-        return hwTimer_OK;
-    }
-
-    uint32_t ticks;
-    hwTimer_OpResult result =
-        Timer_Read_Ticks(index, &ticks);
+    result = Timer_Read_Ticks(index, &ticks);
 
     if (result != hwTimer_OK)
     {
         return result;
     }
 
-    uint64_t remaining_us =
-        ((uint64_t) ticks *
-         Timer_Tick_Divisor[index] *
-         1000000ULL) /
-        g_sys_clock_hz;
-
-    if (remaining_us > UINT32_MAX)
+    if (g_sys_clock_hz == 0)
     {
-        remaining_us = UINT32_MAX;
+        return hwTimer_InvalidParameter;
     }
 
-    *uSec = (uint32_t) remaining_us;
+    if (Timer_Period_Us[index] == 0)
+    {
+        *uSec = 0;
+
+        return hwTimer_OK;
+    }
+
+    us =
+        (((uint64_t)ticks + 1ULL) * 1000000ULL) /
+        (uint64_t)g_sys_clock_hz;
+
+    if (us > 0xFFFFFFFFULL)
+    {
+        us = 0xFFFFFFFFULL;
+    }
+
+    *uSec = (uint32_t)us;
+
     return hwTimer_OK;
 }
 
 bool Timer_is_Init(hwTimer_Index index)
 {
-    return Timer_IsValidIndex(index) &&
-           Timer_Init_Status[index];
+    if (index >= hwTimer_Index_MAX)
+    {
+        return false;
+    }
+
+    return Timer_Init_Status[index];
 }
 
-#endif // DEVICE_TIMSPM0
+#endif /* DEVICE_TIMSPM0 */

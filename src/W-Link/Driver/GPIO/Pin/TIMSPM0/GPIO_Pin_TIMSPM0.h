@@ -4,6 +4,10 @@
 
 #include <stdint.h>
 
+#include "soc.h"
+
+#ifdef DEVICE_TIMSPM0
+
 #define GPIO_SOC_IOMUX_INVALID UINT32_MAX
 
 typedef enum hwGPIO_Pin_t
@@ -221,5 +225,7 @@ uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin);
 hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(GPIO_Regs* portBase, uint32_t intMask);
 uint32_t GPIO_Map_Soc_Pin_IOMUX(hwGPIO_Pin pin);
 uint32_t GPIO_Map_Soc_Int_Pin_IOMUX(hwGPIO_Int_Pin pin);
+
+#endif // DEVICE_TIMSPM0
 
 #endif //GPIO_PIN_TIMSPM0_H

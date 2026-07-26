@@ -7,6 +7,8 @@
 
 #include "soc.h"
 
+#ifdef DEVICE_STM32
+
 typedef enum hwGPIO_Pin_t
 {
   hwGPIO_Pin_NC = -1,
@@ -378,4 +380,6 @@ extern uint16_t GPIO_Int_Map_Soc_Pin(hwGPIO_Int_Pin pin);
 extern uint32_t GPIO_Int_Map_Exti_Port(hwGPIO_Int_Pin pin);
 extern uint32_t GPIO_Int_Map_Exti_Line(hwGPIO_Int_Pin pin);
 
-#endif //GPIO_Pin_STM32
+#endif // DEVICE_STM32
+
+#endif // GPIO_Pin_STM32

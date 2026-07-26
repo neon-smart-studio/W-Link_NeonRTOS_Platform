@@ -158,129 +158,49 @@ typedef enum {
 
 #ifdef DEVICE_TIMSPM0
 
-#if defined(MSPM0L110x) || defined(MSPM0L130x) || defined(MSPM0L134x)
 typedef enum {
-    hwTimer_Index_1 = 0,
-    hwTimer_Index_2,
-    hwTimer_Index_3,
-    hwTimer_Index_4,
-    hwTimer_Index_5,
-    hwTimer_Index_6,
-    hwTimer_Index_7,
-    hwTimer_Index_8,
-    hwTimer_Index_MAX
-} hwTimer_Index;
+#if defined(TIMA0_BASE)
+    hwTimer_Index_0 = 0,
 #endif
-
-#if defined(MSPM0C110x) || defined(MSPM0G511x) || \
-      defined(MSPM0G518x) || defined(MSPM0L111x)
-typedef enum {
-    hwTimer_Index_1 = 0,
-    hwTimer_Index_2,
-    hwTimer_Index_3,
-    hwTimer_Index_4,
-    hwTimer_Index_5,
-    hwTimer_Index_6,
-    hwTimer_Index_7,
-    hwTimer_Index_8,
-    hwTimer_Index_9,
-    hwTimer_Index_10,
-    hwTimer_Index_MAX
-} hwTimer_Index;
+#if defined(TIMA1_BASE)
+    hwTimer_Index_1,
 #endif
-
-#if defined(MSPM0G120x) || defined(MSPM0G121x) || \
-    defined(MSPM0G320x) || defined(MSPM0G321x) || \
-    defined(MSPM0L112x) || defined(MSPM0L211x)
-typedef enum {
-    hwTimer_Index_1 = 0,
+#if defined(TIMG0_BASE)
     hwTimer_Index_2,
+#endif
+#if defined(TIMG1_BASE)
     hwTimer_Index_3,
+#endif
+#if defined(TIMG2_BASE)
     hwTimer_Index_4,
+#endif
+#if defined(TIMG4_BASE)
     hwTimer_Index_5,
+#endif
+#if defined(TIMG5_BASE)
     hwTimer_Index_6,
+#endif
+#if defined(TIMG6_BASE)
     hwTimer_Index_7,
+#endif
+#if defined(TIMG7_BASE)
     hwTimer_Index_8,
+#endif
+#if defined(TIMG8_BASE)
     hwTimer_Index_9,
+#endif
+#if defined(TIMG9_BASE)
     hwTimer_Index_10,
+#endif
+#if defined(TIMG12_BASE)
     hwTimer_Index_11,
+#endif
+#if defined(TIMG14_BASE)
     hwTimer_Index_12,
-    hwTimer_Index_MAX
-} hwTimer_Index;
 #endif
 
-#if defined(MSPM0C1105) || defined(MSPM0C1106) || \
-    defined(MSPM0H321x) || defined(MSPM0L122x) || \
-    defined(MSPM0L222x)
-typedef enum {
-    hwTimer_Index_1 = 0,
-    hwTimer_Index_2,
-    hwTimer_Index_3,
-    hwTimer_Index_4,
-    hwTimer_Index_5,
-    hwTimer_Index_6,
-    hwTimer_Index_7,
-    hwTimer_Index_8,
-    hwTimer_Index_9,
-    hwTimer_Index_10,
-    hwTimer_Index_11,
-    hwTimer_Index_12,
-    hwTimer_Index_13,
-    hwTimer_Index_14,
     hwTimer_Index_MAX
 } hwTimer_Index;
-#endif
-
-#if defined(MSPM0G110x) || defined(MSPM0G150x) || \
-    defined(MSPM0G310x) || defined(MSPM0G350x)
-typedef enum {
-    hwTimer_Index_1 = 0,
-    hwTimer_Index_2,
-    hwTimer_Index_3,
-    hwTimer_Index_4,
-    hwTimer_Index_5,
-    hwTimer_Index_6,
-    hwTimer_Index_7,
-    hwTimer_Index_8,
-    hwTimer_Index_9,
-    hwTimer_Index_10,
-    hwTimer_Index_11,
-    hwTimer_Index_12,
-    hwTimer_Index_13,
-    hwTimer_Index_14,
-    hwTimer_Index_15,
-    hwTimer_Index_16,
-    hwTimer_Index_MAX
-} hwTimer_Index;
-#endif
-
-#if defined(MSPM0G151x) || defined(MSPM0G351x) || defined(MSPM0G352x)
-typedef enum {
-    hwTimer_Index_1 = 0,
-    hwTimer_Index_2,
-    hwTimer_Index_3,
-    hwTimer_Index_4,
-    hwTimer_Index_5,
-    hwTimer_Index_6,
-    hwTimer_Index_7,
-    hwTimer_Index_8,
-    hwTimer_Index_9,
-    hwTimer_Index_10,
-    hwTimer_Index_11,
-    hwTimer_Index_12,
-    hwTimer_Index_13,
-    hwTimer_Index_14,
-    hwTimer_Index_15,
-    hwTimer_Index_16,
-    hwTimer_Index_17,
-    hwTimer_Index_18,
-    hwTimer_Index_19,
-    hwTimer_Index_20,
-    hwTimer_Index_21,
-    hwTimer_Index_22,
-    hwTimer_Index_MAX
-} hwTimer_Index;
-#endif
 
 #endif /* DEVICE_TIMSPM0 */
 

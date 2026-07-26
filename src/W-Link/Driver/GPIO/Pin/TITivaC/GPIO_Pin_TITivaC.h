@@ -4,6 +4,10 @@
 
 #include <stdint.h>
 
+#include "soc.h"
+
+#ifdef DEVICE_TITIVAC
+
 typedef enum hwGPIO_Pin_t
 {
   hwGPIO_Pin_NC = -1,
@@ -115,7 +119,6 @@ typedef enum hwGPIO_Pin_t
 
   hwGPIO_Pin_MAX
 } hwGPIO_Pin;
-
 
 typedef enum hwGPIO_Int_Pin_t
 {
@@ -229,7 +232,6 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_MAX
 } hwGPIO_Int_Pin;
 
-
 uint32_t GPIO_Map_Soc_Port_Base(hwGPIO_Pin pin);
 uint32_t GPIO_Map_Soc_Port_HighSpeed_Base(hwGPIO_Pin pin);
 uint32_t GPIO_Map_Soc_Int_Port_Base(hwGPIO_Int_Pin pin);
@@ -239,4 +241,6 @@ uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin);
 uint32_t GPIO_Map_Pin_Int_Mask(uint32_t pinMask);
 hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(uint32_t portBase, uint32_t intMask);
 
-#endif //GPIO_PIN_TITIVAC_H
+#endif // DEVICE_TITIVAC
+
+#endif // GPIO_PIN_TITIVAC_H

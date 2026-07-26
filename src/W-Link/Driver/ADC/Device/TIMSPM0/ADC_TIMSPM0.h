@@ -16,11 +16,7 @@
 #define ADC_MAX_COUNT              4095.0f
 #define ADC_CONV_TIMEOUT_MS        100
 
-typedef struct {
-    uint32_t raw;
-} ADC_QueueItem;
-
-extern bool ADC_Instance_Init_Status[hwADC_Instance_MAX];
-extern bool ADC_Channel_Init_Status[hwADC_Channel_Index_MAX];
+#define ADC_SAMPLE_TIME               (64U)
+#define ADC_POWER_STARTUP_DELAY       (16U)
 
 #endif // ADC_TIMSPM0

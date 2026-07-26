@@ -74,10 +74,10 @@ static TIMSPM0_SPI_Regs *SPI_Map_Soc_Base(hwSPI_Index index)
     switch (index)
     {
         case hwSPI_Index_0:
-            return UC2;
+            return UC2_BASE;
 
         case hwSPI_Index_1:
-            return UC4;
+            return UC4_BASE;
 
         default:
             return NULL;
@@ -86,10 +86,10 @@ static TIMSPM0_SPI_Regs *SPI_Map_Soc_Base(hwSPI_Index index)
     switch (index)
     {
         case hwSPI_Index_0:
-            return UC2;
+            return UC2_BASE;
 
         case hwSPI_Index_1:
-            return UC3;
+            return UC3_BASE;
 
         default:
             return NULL;
@@ -98,10 +98,10 @@ static TIMSPM0_SPI_Regs *SPI_Map_Soc_Base(hwSPI_Index index)
     switch (index)
     {
         case hwSPI_Index_0:
-            return UC4;
+            return UC4_BASE;
 
         case hwSPI_Index_1:
-            return UC8;
+            return UC8_BASE;
 
         default:
             return NULL;
@@ -111,17 +111,17 @@ static TIMSPM0_SPI_Regs *SPI_Map_Soc_Base(hwSPI_Index index)
     {
 #if defined(SPI0_BASE)
         case hwSPI_Index_0:
-            return SPI0;
+            return SPI0_BASE;
 #endif
 
 #if defined(SPI1_BASE)
         case hwSPI_Index_1:
-            return SPI1;
+            return SPI1_BASE;
 #endif
 
 #if defined(SPI2_BASE)
         case hwSPI_Index_2:
-            return SPI2;
+            return SPI2_BASE;
 #endif
 
         default:

@@ -4,6 +4,10 @@
 
 #include <stdint.h>
 
+#include "soc.h"
+
+#ifdef DEVICE_TIMSP432E
+
 typedef enum hwGPIO_Pin_t
 {
   hwGPIO_Pin_NC = -1,
@@ -235,4 +239,6 @@ uint32_t GPIO_Map_Soc_Int_Pin_Mask(hwGPIO_Int_Pin pin);
 uint32_t GPIO_Map_Pin_Int_Mask(uint32_t pinMask);
 hwGPIO_Int_Pin GPIO_Map_Int_Pin_By_Mask(uint32_t portBase, uint32_t intMask);
 
-#endif //GPIO_PIN_TIMSP432E_H
+#endif // DEVICE_TIMSP432E
+
+#endif // GPIO_PIN_TIMSP432E_H

@@ -20,8 +20,6 @@
 
 #include "PWM_TIMSP432_Base.h"
 
-#include "PWM_Pin_TIMSP432P.h"
-
 #define PWM_HZ           1000
 
 static bool PWM_Channel_Init_Status[hwPWM_Channel_MAX] = {false};

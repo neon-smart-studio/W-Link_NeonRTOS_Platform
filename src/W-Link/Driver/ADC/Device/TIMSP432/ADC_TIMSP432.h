@@ -16,11 +16,4 @@
 #define ADC_MAX_COUNT              4095.0f
 #define ADC_CONV_TIMEOUT_MS        100
 
-typedef struct {
-    uint32_t raw;
-} ADC_QueueItem;
-
-extern bool ADC_Instance_Init_Status[hwADC_Instance_MAX];
-extern bool ADC_Channel_Init_Status[hwADC_Channel_Index_MAX];
-
 #endif // ADC_TIMSP432_H

@@ -4,6 +4,10 @@
 
 #include <stdint.h>
 
+#include "soc.h"
+
+#ifdef DEVICE_NUVOTON
+
 typedef enum hwGPIO_Pin_t
 {
     hwGPIO_Pin_NC = -1,
@@ -310,4 +314,6 @@ extern GPIO_T * GPIO_Int_Map_Soc_Base(hwGPIO_Int_Pin pin);
 extern uint16_t GPIO_Int_Map_Soc_Pin(hwGPIO_Int_Pin pin);
 extern uint8_t GPIO_Int_Pin_To_Index(hwGPIO_Int_Pin pin);
 
-#endif //GPIO_PIN_NUVOTON_H
+#endif // DEVICE_NUVOTON
+
+#endif // GPIO_PIN_NUVOTON_H

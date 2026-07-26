@@ -17,9 +17,13 @@
 
 #include "ADC/Pin/TIMSP432/ADC_Pin_TIMSP432E.h"
 
-bool ADC_NVIC_Init_Status = false;
-bool ADC_Instance_Init_Status[hwADC_Instance_MAX] = {false};
-bool ADC_Channel_Init_Status[hwADC_Channel_Index_MAX] = {false};
+typedef struct {
+    uint32_t raw;
+} ADC_QueueItem;
+
+static bool ADC_NVIC_Init_Status = false;
+static bool ADC_Instance_Init_Status[hwADC_Instance_MAX] = {false};
+static bool ADC_Channel_Init_Status[hwADC_Channel_Index_MAX] = {false};
 
 NeonRTOS_MsgQ_t ADC_Channel_SyncQueue[hwADC_Instance_MAX] = {NULL};
 

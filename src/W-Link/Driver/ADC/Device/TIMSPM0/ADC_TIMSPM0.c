@@ -17,30 +17,9 @@
 
 #include "ADC/Pin/TIMSPM0/ADC_Pin_TIMSPM0.h"
 
-#ifndef ADC_MSPM0_SAMPLE_TIME
-#define ADC_MSPM0_SAMPLE_TIME               (64U)
-#endif
-
-#ifndef ADC_MSPM0_POWER_STARTUP_DELAY
-#define ADC_MSPM0_POWER_STARTUP_DELAY       (16U)
-#endif
-
-#ifndef ADC_MSPM0_VREF_MV
-#ifdef ADC_VREF_MV
-#define ADC_MSPM0_VREF_MV                   ((float) ADC_VREF_MV)
-#else
-#define ADC_MSPM0_VREF_MV                   (3300.0f)
-#endif
-#endif
-
-#define ADC_MSPM0_MAX_COUNT                 (4095.0f)
-#define ADC_MSPM0_INVALID_INPUT             (0xFFFFFFFFUL)
-
-#if defined(DL_ADC12_INPUT_CHAN_16)
-#define ADC_MSPM0_INPUT_COUNT               (32U)
-#else
-#define ADC_MSPM0_INPUT_COUNT               (16U)
-#endif
+typedef struct {
+    uint32_t raw;
+} ADC_QueueItem;
 
 static bool ADC_NVIC_Init_Status[hwADC_Instance_MAX] = {false};
 static bool ADC_Instance_Init_Status[hwADC_Instance_MAX] = {false};
@@ -89,41 +68,6 @@ static ADC12_Regs *ADC_Map_Soc_Base(hwADC_Instance inst)
     }
 }
 
-static uint32_t ADC_Channel_Index_To_Input(hwADC_Channel_Index ch)
-{
-    if (ch >= hwADC_Channel_Index_MAX)
-    {
-        return ADC_MSPM0_INVALID_INPUT;
-    }
-
-    const ADC_Channel_Def *def = &ADC_Channel_Def_Table[ch];
-
-    if ((def->adc_pin == hwGPIO_Pin_NC))
-    {
-        return ADC_MSPM0_INVALID_INPUT;
-    }
-
-    return (def->hw_Idx << ADC12_MEMCTL_CHANSEL_OFS) & ADC12_MEMCTL_CHANSEL_MASK;
-}
-
-static bool ADC_IsValidInstanceChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
-{
-    if ((inst >= hwADC_Instance_MAX) ||
-        (ch >= hwADC_Channel_Index_MAX))
-    {
-        return false;
-    }
-
-    const ADC_Channel_Def *def = &ADC_Channel_Def_Table[ch];
-
-    if ((def->inst != inst) || (def->adc_pin == hwGPIO_Pin_NC))
-    {
-        return false;
-    }
-
-    return ADC_Channel_Index_To_Input(ch) != ADC_MSPM0_INVALID_INPUT;
-}
-
 static void ADC_NVIC_Init(hwADC_Instance inst)
 {
     switch (inst)
@@ -170,7 +114,7 @@ static void ADC_NVIC_DeInit(hwADC_Instance inst)
     }
 }
 
-hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
+static hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
 {
     ADC12_Regs *adc = ADC_Map_Soc_Base(inst);
 
@@ -186,7 +130,7 @@ hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
 
     DL_ADC12_reset(adc);
     DL_ADC12_enablePower(adc);
-    delay_cycles(ADC_MSPM0_POWER_STARTUP_DELAY);
+    delay_cycles(ADC_POWER_STARTUP_DELAY);
 
     DL_ADC12_setClockConfig(adc, &ADC_Clock_Config);
 
@@ -199,7 +143,7 @@ hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
         DL_ADC12_SAMP_CONV_DATA_FORMAT_UNSIGNED);
 
     DL_ADC12_setPowerDownMode(adc, DL_ADC12_POWER_DOWN_MODE_MANUAL);
-    DL_ADC12_setSampleTime0(adc, ADC_MSPM0_SAMPLE_TIME);
+    DL_ADC12_setSampleTime0(adc, ADC_SAMPLE_TIME);
 
     DL_ADC12_clearInterruptStatus(adc, DL_ADC12_INTERRUPT_MEM0_RESULT_LOADED);
     DL_ADC12_enableInterrupt(adc, DL_ADC12_INTERRUPT_MEM0_RESULT_LOADED);
@@ -209,7 +153,7 @@ hwADC_OpResult ADC_Instance_Init(hwADC_Instance inst)
     return hwADC_OK;
 }
 
-hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
+static hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
 {
     ADC12_Regs *adc = ADC_Map_Soc_Base(inst);
 
@@ -228,17 +172,23 @@ hwADC_OpResult ADC_Instance_DeInit(hwADC_Instance inst)
     return hwADC_OK;
 }
 
-hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
+static hwADC_OpResult ADC_ConfigChannel(hwADC_Instance inst, hwADC_Channel_Index ch)
 {
-    if (!ADC_IsValidInstanceChannel(inst, ch))
+    if (inst >= hwADC_Instance_MAX)
+    {
+        return hwADC_InvalidParameter;
+    }
+
+    if (ch >= hwADC_Channel_Index_MAX)
     {
         return hwADC_InvalidParameter;
     }
 
     ADC12_Regs *adc = ADC_Map_Soc_Base(inst);
-    uint32_t adc_input = ADC_Channel_Index_To_Input(ch);
+    
+    uint32_t adc_input = (ADC_Channel_Def_Table[ch].hw_Idx << ADC12_MEMCTL_CHANSEL_OFS) & ADC12_MEMCTL_CHANSEL_MASK;
 
-    if ((adc == NULL) || (adc_input == ADC_MSPM0_INVALID_INPUT))
+    if (adc == NULL)
     {
         return hwADC_InvalidParameter;
     }
@@ -270,9 +220,7 @@ bool ADC_IsInstanceChannelUsed(hwADC_Instance inst)
         return false;
     }
 
-    for (hwADC_Channel_Index ch = 0;
-         ch < hwADC_Channel_Index_MAX;
-         ch++)
+    for (hwADC_Channel_Index ch = 0; ch < hwADC_Channel_Index_MAX; ch++)
     {
         if (ADC_Channel_Init_Status[ch])
         {
@@ -283,25 +231,9 @@ bool ADC_IsInstanceChannelUsed(hwADC_Instance inst)
     return false;
 }
 
-bool ADC_IsAnyInstanceUsed(void)
-{
-    for (hwADC_Instance inst = 0;
-         inst < hwADC_Instance_MAX;
-         inst++)
-    {
-        if (ADC_Instance_Init_Status[inst])
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 static void ADC_ConvCpltCallback(hwADC_Instance inst, uint16_t raw)
 {
-    if ((inst >= hwADC_Instance_MAX) ||
-        (ADC_Channel_SyncQueue[inst] == NULL))
+    if ((inst >= hwADC_Instance_MAX) || (ADC_Channel_SyncQueue[inst] == NULL))
     {
         return;
     }
@@ -310,19 +242,14 @@ static void ADC_ConvCpltCallback(hwADC_Instance inst, uint16_t raw)
         .raw = raw,
     };
 
-    (void) NeonRTOS_MsgQWrite(
-        &ADC_Channel_SyncQueue[inst],
-        &item,
-        NEONRT_NO_WAIT);
+    (void) NeonRTOS_MsgQWrite(&ADC_Channel_SyncQueue[inst], &item, NEONRT_NO_WAIT);
 }
 
 static void ADC_IRQHandler_Process(hwADC_Instance inst, ADC12_Regs *adc)
 {
-    if (DL_ADC12_getPendingInterrupt(adc) ==
-        DL_ADC12_IIDX_MEM0_RESULT_LOADED)
+    if (DL_ADC12_getPendingInterrupt(adc) == DL_ADC12_IIDX_MEM0_RESULT_LOADED)
     {
-        uint16_t raw =
-            DL_ADC12_getMemResult(adc, DL_ADC12_MEM_IDX_0);
+        uint16_t raw = DL_ADC12_getMemResult(adc, DL_ADC12_MEM_IDX_0);
 
         ADC_ConvCpltCallback(inst, raw);
     }
@@ -342,20 +269,31 @@ void ADC1_IRQHandler(void)
 }
 #endif
 
-hwADC_OpResult ADC_Channel_Init(hwADC_Instance inst, hwADC_Channel_Index ch)
+hwADC_OpResult ADC_Channel_Init(hwADC_Channel_Index ch)
 {
-    if (!ADC_IsValidInstanceChannel(inst, ch))
+    if(ch >= hwADC_Channel_Index_MAX)
     {
         return hwADC_InvalidParameter;
     }
 
+    hwGPIO_Pin adc_pin = ADC_Channel_Def_Table[ch].adc_pin;
+    hwADC_Instance inst = ADC_Channel_Def_Table[ch].inst;
+
+    if (adc_pin == hwGPIO_Pin_NC)
+    {
+        return hwADC_InvalidParameter;
+    }
+
+    uint32_t pin_cm = GPIO_Map_Soc_Pin_IOMUX(adc_pin);
+    if(pin_cm==GPIO_SOC_IOMUX_INVALID)
+    {
+        return hwADC_InvalidParameter;
+    }
+    
     if (ADC_Channel_Init_Status[ch])
     {
         return hwADC_OK;
     }
-
-    const ADC_Channel_Def *def = &ADC_Channel_Def_Table[ch];
-    uint32_t pin_cm = GPIO_Map_Soc_Pin_IOMUX(def->adc_pin);
 
     /*
      * ADC pins are non-IOMUX analog functions.  They are analog by default
@@ -368,11 +306,7 @@ hwADC_OpResult ADC_Channel_Init(hwADC_Instance inst, hwADC_Channel_Index ch)
     {
         if (ADC_Channel_SyncQueue[inst] == NULL)
         {
-            if (NeonRTOS_MsgQCreate(
-                    &ADC_Channel_SyncQueue[inst],
-                    ADC_GetQueueName(inst),
-                    sizeof(ADC_QueueItem),
-                    1) != NeonRTOS_OK)
+            if (NeonRTOS_MsgQCreate(&ADC_Channel_SyncQueue[inst], ADC_GetQueueName(inst), sizeof(ADC_QueueItem), 1) != NeonRTOS_OK)
             {
                 DL_GPIO_initDigitalInput(pin_cm);
                 return hwADC_MemoryError;
@@ -394,15 +328,29 @@ hwADC_OpResult ADC_Channel_Init(hwADC_Instance inst, hwADC_Channel_Index ch)
         ADC_Instance_Init_Status[inst] = true;
     }
 
-    gpio_pin_init_status[def->adc_pin] = true;
+    gpio_pin_init_status[adc_pin] = true;
     ADC_Channel_Init_Status[ch] = true;
 
     return hwADC_OK;
 }
 
-hwADC_OpResult ADC_Channel_DeInit(hwADC_Instance inst, hwADC_Channel_Index ch)
+hwADC_OpResult ADC_Channel_DeInit(hwADC_Channel_Index ch)
 {
-    if (!ADC_IsValidInstanceChannel(inst, ch))
+    if(ch >= hwADC_Channel_Index_MAX)
+    {
+        return hwADC_InvalidParameter;
+    }
+
+    hwGPIO_Pin adc_pin = ADC_Channel_Def_Table[ch].adc_pin;
+    hwADC_Instance inst = ADC_Channel_Def_Table[ch].inst;
+
+    if (adc_pin == hwGPIO_Pin_NC)
+    {
+        return hwADC_InvalidParameter;
+    }
+
+    uint32_t pin_cm = GPIO_Map_Soc_Pin_IOMUX(adc_pin);
+    if(pin_cm==GPIO_SOC_IOMUX_INVALID)
     {
         return hwADC_InvalidParameter;
     }
@@ -412,11 +360,8 @@ hwADC_OpResult ADC_Channel_DeInit(hwADC_Instance inst, hwADC_Channel_Index ch)
         return hwADC_OK;
     }
 
-    const ADC_Channel_Def *def = &ADC_Channel_Def_Table[ch];
-    uint32_t pin_cm = GPIO_Map_Soc_Pin_IOMUX(def->adc_pin);
-
     ADC_Channel_Init_Status[ch] = false;
-    gpio_pin_init_status[def->adc_pin] = false;
+    gpio_pin_init_status[adc_pin] = false;
 
     DL_GPIO_initDigitalInput(pin_cm);
 
@@ -442,22 +387,32 @@ hwADC_OpResult ADC_Channel_DeInit(hwADC_Instance inst, hwADC_Channel_Index ch)
     return hwADC_OK;
 }
 
-hwADC_OpResult ADC_Read_MiniVolt(hwADC_Instance inst, hwADC_Channel_Index ch, float *readMv)
+hwADC_OpResult ADC_Read_MiniVolt(hwADC_Channel_Index ch, float *readMv)
 {
-    if ((readMv == NULL) || !ADC_IsValidInstanceChannel(inst, ch))
+    if(ch >= hwADC_Channel_Index_MAX)
     {
         return hwADC_InvalidParameter;
     }
 
-    if (!ADC_Channel_Init_Status[ch] ||
-        !ADC_Instance_Init_Status[inst] ||
-        (ADC_Channel_SyncQueue[inst] == NULL))
+    hwGPIO_Pin adc_pin = ADC_Channel_Def_Table[ch].adc_pin;
+    hwADC_Instance inst = ADC_Channel_Def_Table[ch].inst;
+
+    if (adc_pin == hwGPIO_Pin_NC)
+    {
+        return hwADC_InvalidParameter;
+    }
+
+    if ((readMv == NULL))
+    {
+        return hwADC_InvalidParameter;
+    }
+
+    if (!ADC_Channel_Init_Status[ch] || !ADC_Instance_Init_Status[inst] || (ADC_Channel_SyncQueue[inst] == NULL))
     {
         return hwADC_NotInit;
     }
 
     ADC12_Regs *adc = ADC_Map_Soc_Base(inst);
-
     if (adc == NULL)
     {
         return hwADC_InvalidParameter;
@@ -467,12 +422,8 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Instance inst, hwADC_Channel_Index ch, fl
      * Remove a late result left by a previous timed-out conversion.
      */
     ADC_QueueItem item;
-    while (NeonRTOS_MsgQRead(
-               &ADC_Channel_SyncQueue[inst],
-               &item,
-               NEONRT_NO_WAIT) == NeonRTOS_OK)
-    {
-    }
+
+    NeonRTOS_MsgQRead(&ADC_Channel_SyncQueue[inst], &item, NEONRT_NO_WAIT);
 
     if (ADC_ConfigChannel(inst, ch) != hwADC_OK)
     {
@@ -481,18 +432,13 @@ hwADC_OpResult ADC_Read_MiniVolt(hwADC_Instance inst, hwADC_Channel_Index ch, fl
 
     DL_ADC12_startConversion(adc);
 
-    if (NeonRTOS_MsgQRead(
-            &ADC_Channel_SyncQueue[inst],
-            &item,
-            ADC_CONV_TIMEOUT_MS) != NeonRTOS_OK)
+    if (NeonRTOS_MsgQRead(&ADC_Channel_SyncQueue[inst], &item, ADC_CONV_TIMEOUT_MS) != NeonRTOS_OK)
     {
         DL_ADC12_stopConversion(adc);
         return hwADC_HwError;
     }
 
-    *readMv =
-        ((float) item.raw * ADC_MSPM0_VREF_MV) /
-        ADC_MSPM0_MAX_COUNT;
+    *readMv = ((float) item.raw * ADC_VREF_MV) / ADC_MAX_COUNT;
 
     return hwADC_OK;
 }

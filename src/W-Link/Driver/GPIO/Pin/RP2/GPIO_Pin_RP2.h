@@ -4,6 +4,10 @@
 
 #include <stdint.h>
 
+#include "soc.h"
+
+#ifdef DEVICE_RP2
+
 typedef enum hwGPIO_Pin_t
 {
   hwGPIO_Pin_NC = -1,
@@ -75,5 +79,7 @@ typedef enum hwGPIO_Int_Pin_t
   hwGPIO_Int_Pin_29,
   hwGPIO_Int_Pin_MAX
 } hwGPIO_Int_Pin;
+
+#endif // DEVICE_RP2
 
 #endif //GPIO_PIN_RP2_H

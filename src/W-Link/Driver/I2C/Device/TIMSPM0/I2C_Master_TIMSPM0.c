@@ -38,6 +38,11 @@
      DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST)
 
 typedef enum {
+    TIMSPM0_I2C_PIN_SCL = 0,
+    TIMSPM0_I2C_PIN_SDA,
+} TIMSPM0_I2C_PinSignal;
+
+typedef enum {
     TIMSPM0_I2C_IDLE = 0,
     TIMSPM0_I2C_TX,
     TIMSPM0_I2C_TX_WAIT_STOP,
@@ -137,45 +142,69 @@ static bool I2C_Map_Soc_IRQ(
 
 static uint32_t I2C_Map_Soc_Pin_Function(
     hwI2C_Index index,
-    bool scl)
+    TIMSPM0_I2C_PinSignal signal)
 {
     switch (index)
     {
 #if defined(I2C0_BASE)
         case hwI2C_Index_0:
-            return scl ?
-                IOMUX_PINCM2_PF_I2C0_SCL :
-                IOMUX_PINCM1_PF_I2C0_SDA;
+            switch(signal)
+            {
+                case TIMSPM0_I2C_PIN_SCL:
+                    return IOMUX_PINCM2_PF_I2C0_SCL;
+                case TIMSPM0_I2C_PIN_SDA:
+                    return IOMUX_PINCM1_PF_I2C0_SDA;
+            }
 #endif
 
 #if defined(I2C1_BASE)
         case hwI2C_Index_1:
 #if defined(MSPM0L130x) || defined(MSPM0L134x)
-            return scl ?
-                IOMUX_PINCM5_PF_I2C1_SCL :
-                IOMUX_PINCM4_PF_I2C1_SDA;
+            switch(signal)
+            {
+                case TIMSPM0_I2C_PIN_SCL:
+                    return IOMUX_PINCM5_PF_I2C1_SCL;
+                case TIMSPM0_I2C_PIN_SDA:
+                    return IOMUX_PINCM4_PF_I2C1_SDA;
+            }
 #elif defined(MSPM0C1105) || defined(MSPM0C1106) || \
       defined(MSPM0H321x)
-            return scl ?
-                IOMUX_PINCM11_PF_I2C1_SCL :
-                IOMUX_PINCM12_PF_I2C1_SDA;
+            switch(signal)
+            {
+                case TIMSPM0_I2C_PIN_SCL:
+                    return IOMUX_PINCM11_PF_I2C1_SCL;
+                case TIMSPM0_I2C_PIN_SDA:
+                    return IOMUX_PINCM12_PF_I2C1_SDA;
+            }
 #else
-            return scl ?
-                IOMUX_PINCM15_PF_I2C1_SCL :
-                IOMUX_PINCM16_PF_I2C1_SDA;
+            switch(signal)
+            {
+                case TIMSPM0_I2C_PIN_SCL:
+                    return IOMUX_PINCM15_PF_I2C1_SCL;
+                case TIMSPM0_I2C_PIN_SDA:
+                    return IOMUX_PINCM16_PF_I2C1_SDA;
+            }
 #endif
 #endif
 
 #if defined(I2C2_BASE)
         case hwI2C_Index_2:
 #if defined(MSPM0L122x) || defined(MSPM0L222x)
-            return scl ?
-                IOMUX_PINCM27_PF_I2C2_SCL :
-                IOMUX_PINCM28_PF_I2C2_SDA;
+            switch(signal)
+            {
+                case TIMSPM0_I2C_PIN_SCL:
+                    return IOMUX_PINCM27_PF_I2C2_SCL;
+                case TIMSPM0_I2C_PIN_SDA:
+                    return IOMUX_PINCM28_PF_I2C2_SDA;
+            }
 #else
-            return scl ?
-                IOMUX_PINCM23_PF_I2C2_SCL :
-                IOMUX_PINCM24_PF_I2C2_SDA;
+            switch(signal)
+            {
+                case TIMSPM0_I2C_PIN_SCL:
+                    return IOMUX_PINCM23_PF_I2C2_SCL;
+                case TIMSPM0_I2C_PIN_SDA:
+                    return IOMUX_PINCM24_PF_I2C2_SDA;
+            }
 #endif
 #endif
 
@@ -286,10 +315,8 @@ static hwI2C_OpResult I2C_ConfigPins(
 
     uint32_t scl_cm = GPIO_Map_Soc_Pin_IOMUX(scl_pin);
     uint32_t sda_cm = GPIO_Map_Soc_Pin_IOMUX(sda_pin);
-    uint32_t scl_function =
-        I2C_Map_Soc_Pin_Function(index, true);
-    uint32_t sda_function =
-        I2C_Map_Soc_Pin_Function(index, false);
+    uint32_t scl_function = I2C_Map_Soc_Pin_Function(index, TIMSPM0_I2C_PIN_SCL);
+    uint32_t sda_function = I2C_Map_Soc_Pin_Function(index, TIMSPM0_I2C_PIN_SDA);
 
     if ((scl_pin == hwGPIO_Pin_NC) ||
         (sda_pin == hwGPIO_Pin_NC) ||

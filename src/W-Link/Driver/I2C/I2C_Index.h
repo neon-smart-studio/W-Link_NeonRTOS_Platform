@@ -125,17 +125,49 @@ typedef enum hwI2C_Index_t
 #ifdef DEVICE_TIMSPM0
 typedef enum hwI2C_Index_t
 {
-#if defined(I2C0_BASE)
-  hwI2C_Index_0 = 0,
+#if defined(I2C0_BASE) || defined(UC0_I2CC_BASE)
+    hwI2C_Index_0 = 0,       // I2C0 / UC0 I2C Controller
 #endif
-#if defined(I2C1_BASE)
-  hwI2C_Index_1,
+
+#if defined(I2C1_BASE) || defined(UC1_I2CC_BASE)
+    hwI2C_Index_1,           // I2C1 / UC1 I2C Controller
 #endif
-#if defined(I2C2_BASE)
-  hwI2C_Index_2,
+
+#if defined(I2C2_BASE) || defined(UC2_I2CC_BASE)
+    hwI2C_Index_2,           // I2C2 / UC2 I2C Controller
 #endif
-  hwI2C_Index_MAX,
-}hwI2C_Index;
+
+#if defined(I2C3_BASE) || defined(UC3_I2CC_BASE)
+    hwI2C_Index_3,           // I2C3 / UC3 I2C Controller
+#endif
+
+#if defined(I2C4_BASE) || defined(UC4_I2CC_BASE)
+    hwI2C_Index_4,           // I2C4 / UC4 I2C Controller
+#endif
+
+#if defined(I2C5_BASE) || defined(UC5_I2CC_BASE)
+    hwI2C_Index_5,           // I2C5 / UC5 I2C Controller
+#endif
+
+#if defined(I2C6_BASE) || defined(UC6_I2CC_BASE)
+    hwI2C_Index_6,           // I2C6 / UC6 I2C Controller
+#endif
+
+#if defined(I2C7_BASE) || defined(UC7_I2CC_BASE)
+    hwI2C_Index_7,           // I2C7 / UC7 I2C Controller
+#endif
+
+#if defined(I2C8_BASE) || defined(UC8_I2CC_BASE)
+    hwI2C_Index_8,           // I2C8 / UC8 I2C Controller
+#endif
+
+#if defined(I2C9_BASE) || defined(UC9_I2CC_BASE)
+    hwI2C_Index_9,           // I2C9 / UC9 I2C Controller
+#endif
+
+    hwI2C_Index_MAX
+
+} hwI2C_Index;
 #endif // DEVICE_TIMSPM0
 
 #endif //I2C_INDEX_H

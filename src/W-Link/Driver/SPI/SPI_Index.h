@@ -93,17 +93,49 @@ typedef enum hwSPI_Index_t
 #ifdef DEVICE_TIMSPM0
 typedef enum hwSPI_Index_t
 {
-#if defined(SPI0_BASE)
-  hwSPI_Index_0 = 0,
+#if defined(SPI0_BASE) || defined(UC0_SPI_BASE)
+    hwSPI_Index_0 = 0,       // SPI0 / UC0 SPI
 #endif
-#if defined(SPI1_BASE)
-  hwSPI_Index_1,
+
+#if defined(SPI1_BASE) || defined(UC1_SPI_BASE)
+    hwSPI_Index_1,           // SPI1 / UC1 SPI
 #endif
-#if defined(SPI2_BASE)
-  hwSPI_Index_2,
+
+#if defined(SPI2_BASE) || defined(UC2_SPI_BASE)
+    hwSPI_Index_2,           // SPI2 / UC2 SPI
 #endif
-  hwSPI_Index_MAX,
-}hwSPI_Index;
+
+#if defined(SPI3_BASE) || defined(UC3_SPI_BASE)
+    hwSPI_Index_3,           // SPI3 / UC3 SPI
+#endif
+
+#if defined(SPI4_BASE) || defined(UC4_SPI_BASE)
+    hwSPI_Index_4,           // SPI4 / UC4 SPI
+#endif
+
+#if defined(SPI5_BASE) || defined(UC5_SPI_BASE)
+    hwSPI_Index_5,           // SPI5 / UC5 SPI
+#endif
+
+#if defined(SPI6_BASE) || defined(UC6_SPI_BASE)
+    hwSPI_Index_6,           // SPI6 / UC6 SPI
+#endif
+
+#if defined(SPI7_BASE) || defined(UC7_SPI_BASE)
+    hwSPI_Index_7,           // SPI7 / UC7 SPI
+#endif
+
+#if defined(SPI8_BASE) || defined(UC8_SPI_BASE)
+    hwSPI_Index_8,           // SPI8 / UC8 SPI
+#endif
+
+#if defined(SPI9_BASE) || defined(UC9_SPI_BASE)
+    hwSPI_Index_9,           // SPI9 / UC9 SPI
+#endif
+
+    hwSPI_Index_MAX
+
+} hwSPI_Index;
 #endif // DEVICE_TIMSPM0
 
 #endif //SPI_MASTER_INDEX_H

@@ -10,6 +10,8 @@
 
 #include "I2C/I2C_Master.h"
 
+#include "SysCtrl/SysCtrl.h"
+
 #ifdef DEVICE_TIMSPM0
 
 #include "GPIO/Device/TIMSPM0/GPIO_TIMSPM0.h"
@@ -216,7 +218,7 @@ static bool I2C_GetTimerPeriod(
     }
 
     uint32_t denominator = speed_hz * I2C_TIMSPM0_TIMER_CLOCKS_PER_BIT;
-    uint32_t bus_clock_hz = (uint32_t) F_CPU;
+    uint32_t bus_clock_hz = (uint32_t) g_sys_clock_hz;
 
     if ((bus_clock_hz < denominator) || (bus_clock_hz == 0U))
     {

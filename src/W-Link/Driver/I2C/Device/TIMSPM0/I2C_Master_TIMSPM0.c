@@ -71,16 +71,9 @@ typedef struct {
 
 bool I2C_Master_Init_Status[hwI2C_Index_MAX] = {false};
 
-static hwI2C_Speed_Mode
-I2C_Clock_Speed_Mode[hwI2C_Index_MAX] = {
-    hwI2C_Standard_Mode
-};
-
-static NeonRTOS_SyncObj_t
-I2C_Master_Done_SyncHandle[hwI2C_Index_MAX];
-
-static TIMSPM0_I2C_Transfer
-i2c_xfer[hwI2C_Index_MAX];
+static hwI2C_Speed_Mode I2C_Clock_Speed_Mode[hwI2C_Index_MAX] = { hwI2C_Standard_Mode };
+static NeonRTOS_SyncObj_t I2C_Master_Done_SyncHandle[hwI2C_Index_MAX];
+static TIMSPM0_I2C_Transfer i2c_xfer[hwI2C_Index_MAX];
 
 static I2C_Regs *I2C_Map_Soc_Base(hwI2C_Index index)
 {
@@ -88,17 +81,30 @@ static I2C_Regs *I2C_Map_Soc_Base(hwI2C_Index index)
     {
 #if defined(I2C0_BASE)
         case hwI2C_Index_0:
-            return I2C0;
+            return I2C0_BASE;
+#endif
+#if defined(UC0_I2CC_BASE)
+        case hwI2C_Index_0:
+            return UC0_I2CC_BASE;
 #endif
 
 #if defined(I2C1_BASE)
         case hwI2C_Index_1:
-            return I2C1;
+            return I2C1_BASE;
+#endif
+#if defined(UC1_I2CC_BASE)
+        case hwI2C_Index_1:
+            return UC1_I2CC_BASE;
 #endif
 
-#if defined(I2C2_BASE)
-        case hwI2C_Index_2:
-            return I2C2;
+#if defined(UC5_I2CC_BASE)
+        case hwI2C_Index_5:
+            return UC5_I2CC_BASE;
+#endif
+
+#if defined(UC6_I2CC_BASE)
+        case hwI2C_Index_6:
+            return UC6_I2CC_BASE;
 #endif
 
         default:
@@ -106,43 +112,7 @@ static I2C_Regs *I2C_Map_Soc_Base(hwI2C_Index index)
     }
 }
 
-static bool I2C_Map_Soc_IRQ(
-    hwI2C_Index index,
-    IRQn_Type *irq)
-{
-    if (irq == NULL)
-    {
-        return false;
-    }
-
-    switch (index)
-    {
-#if defined(I2C0_BASE)
-        case hwI2C_Index_0:
-            *irq = I2C0_INT_IRQn;
-            return true;
-#endif
-
-#if defined(I2C1_BASE)
-        case hwI2C_Index_1:
-            *irq = I2C1_INT_IRQn;
-            return true;
-#endif
-
-#if defined(I2C2_BASE)
-        case hwI2C_Index_2:
-            *irq = I2C2_INT_IRQn;
-            return true;
-#endif
-
-        default:
-            return false;
-    }
-}
-
-static uint32_t I2C_Map_Soc_Pin_Function(
-    hwI2C_Index index,
-    TIMSPM0_I2C_PinSignal signal)
+static uint32_t I2C_Map_Soc_Pin_Function(hwI2C_Index index, TIMSPM0_I2C_PinSignal signal)
 {
     switch (index)
     {
@@ -272,32 +242,110 @@ static bool I2C_GetTimerPeriod(
     return true;
 }
 
-static hwI2C_OpResult I2C_NVIC_Init(hwI2C_Index index)
+static void I2C_NVIC_Init(hwI2C_Index index)
 {
-    IRQn_Type irq;
-
-    if (!I2C_Map_Soc_IRQ(index, &irq))
+    switch (index)
     {
-        return hwI2C_InvalidParameter;
+#if defined(I2C0_BASE)
+        case hwI2C_Index_0:
+            NVIC_ClearPendingIRQ(I2C0_INT_IRQn);
+            NVIC_EnableIRQ(I2C0_INT_IRQn);
+            break;
+#endif
+#if defined(UC0_I2CC_BASE)
+        case hwI2C_Index_0:
+            NVIC_ClearPendingIRQ(UC0_INT_IRQn);
+            NVIC_EnableIRQ(UC0_INT_IRQn);
+            break;
+#endif
+
+#if defined(I2C1_BASE)
+        case hwI2C_Index_1:
+            NVIC_ClearPendingIRQ(I2C1_INT_IRQn);
+            NVIC_EnableIRQ(I2C1_INT_IRQn);
+            break;
+#endif
+#if defined(UC1_I2CC_BASE)
+        case hwI2C_Index_1:
+            NVIC_ClearPendingIRQ(UC1_INT_IRQn);
+            NVIC_EnableIRQ(UC1_INT_IRQn);
+            break;
+#endif
+
+#if defined(I2C2_BASE)
+        case hwI2C_Index_2:
+            NVIC_ClearPendingIRQ(I2C2_INT_IRQn);
+            NVIC_EnableIRQ(I2C2_INT_IRQn);
+            break;
+#endif
+
+#if defined(UC5_I2CC_BASE)
+        case hwI2C_Index_5:
+            NVIC_ClearPendingIRQ(UC5_INT_IRQn);
+            NVIC_EnableIRQ(UC5_INT_IRQn);
+            break;
+#endif
+
+#if defined(UC6_I2CC_BASE)
+        case hwI2C_Index_6:
+            NVIC_ClearPendingIRQ(UC6_INT_IRQn);
+            NVIC_EnableIRQ(UC6_INT_IRQn);
+            break;
+#endif
     }
-
-    NVIC_ClearPendingIRQ(irq);
-    NVIC_EnableIRQ(irq);
-
-    return hwI2C_OK;
 }
 
 static void I2C_NVIC_DeInit(hwI2C_Index index)
 {
-    IRQn_Type irq;
-
-    if (!I2C_Map_Soc_IRQ(index, &irq))
+    switch (index)
     {
-        return;
-    }
+#if defined(I2C0_BASE)
+        case hwI2C_Index_0:
+            NVIC_DisableIRQ(I2C0_INT_IRQn);
+            NVIC_ClearPendingIRQ(I2C0_INT_IRQn);
+            break;
+#endif
+#if defined(UC0_I2CC_BASE)
+        case hwI2C_Index_0:
+            NVIC_DisableIRQ(UC0_INT_IRQn);
+            NVIC_ClearPendingIRQ(UC0_INT_IRQn);
+            break;
+#endif
 
-    NVIC_DisableIRQ(irq);
-    NVIC_ClearPendingIRQ(irq);
+#if defined(I2C1_BASE)
+        case hwI2C_Index_1:
+            NVIC_DisableIRQ(I2C1_INT_IRQn);
+            NVIC_ClearPendingIRQ(I2C1_INT_IRQn);
+            break;
+#endif
+#if defined(UC1_I2CC_BASE)
+        case hwI2C_Index_1:
+            NVIC_DisableIRQ(UC1_INT_IRQn);
+            NVIC_ClearPendingIRQ(UC1_INT_IRQn);
+            break;
+#endif
+
+#if defined(I2C2_BASE)
+        case hwI2C_Index_2:
+            NVIC_DisableIRQ(I2C2_INT_IRQn);
+            NVIC_ClearPendingIRQ(I2C2_INT_IRQn);
+            break;
+#endif
+
+#if defined(UC5_I2CC_BASE)
+        case hwI2C_Index_5:
+            NVIC_DisableIRQ(UC5_INT_IRQn);
+            NVIC_ClearPendingIRQ(UC5_INT_IRQn);
+            break;
+#endif
+
+#if defined(UC6_I2CC_BASE)
+        case hwI2C_Index_6:
+            NVIC_DisableIRQ(UC6_INT_IRQn);
+            NVIC_ClearPendingIRQ(UC6_INT_IRQn);
+            break;
+#endif
+    }
 }
 
 static hwI2C_OpResult I2C_ConfigPins(
@@ -697,7 +745,6 @@ hwI2C_OpResult I2C_Master_Init(
     uint8_t timer_period;
 
     if ((i2c == NULL) ||
-        !I2C_Map_Soc_IRQ(index, &irq) ||
         !I2C_GetTimerPeriod(speed_mode, &timer_period))
     {
         return hwI2C_InvalidParameter;
@@ -761,33 +808,16 @@ hwI2C_OpResult I2C_Master_Init(
 
     DL_I2C_enableController(i2c);
 
-    result = I2C_NVIC_Init(index);
+    I2C_NVIC_Init(index);
 
-    if (result != hwI2C_OK)
-    {
-        DL_I2C_disableController(i2c);
-        DL_I2C_reset(i2c);
-        DL_I2C_disablePower(i2c);
-        I2C_DeConfigPins(index);
-        NeonRTOS_SyncObjDelete(
-            &I2C_Master_Done_SyncHandle[index]);
-        return result;
-    }
-
-    hwGPIO_Pin scl_pin =
-        I2C_Pin_Def_Table[index].scl_pin;
-    hwGPIO_Pin sda_pin =
-        I2C_Pin_Def_Table[index].sda_pin;
+    hwGPIO_Pin scl_pin = I2C_Pin_Def_Table[index].scl_pin;
+    hwGPIO_Pin sda_pin = I2C_Pin_Def_Table[index].sda_pin;
 
     gpio_pin_init_status[scl_pin] = true;
     gpio_pin_init_status[sda_pin] = true;
 
     I2C_Clock_Speed_Mode[index] = speed_mode;
     I2C_Master_Init_Status[index] = true;
-
-    (void) scl_iomux;
-    (void) sda_iomux;
-    (void) irq;
 
     return hwI2C_OK;
 }
@@ -811,10 +841,8 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index)
         return hwI2C_InvalidParameter;
     }
 
-    hwGPIO_Pin scl_pin =
-        I2C_Pin_Def_Table[index].scl_pin;
-    hwGPIO_Pin sda_pin =
-        I2C_Pin_Def_Table[index].sda_pin;
+    hwGPIO_Pin scl_pin = I2C_Pin_Def_Table[index].scl_pin;
+    hwGPIO_Pin sda_pin = I2C_Pin_Def_Table[index].sda_pin;
 
     I2C_Master_Init_Status[index] = false;
 

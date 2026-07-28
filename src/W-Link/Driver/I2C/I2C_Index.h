@@ -133,36 +133,16 @@ typedef enum hwI2C_Index_t
     hwI2C_Index_1,           // I2C1 / UC1 I2C Controller
 #endif
 
-#if defined(I2C2_BASE) || defined(UC2_I2CC_BASE)
+#if defined(I2C2_BASE)
     hwI2C_Index_2,           // I2C2 / UC2 I2C Controller
 #endif
 
-#if defined(I2C3_BASE) || defined(UC3_I2CC_BASE)
-    hwI2C_Index_3,           // I2C3 / UC3 I2C Controller
-#endif
-
-#if defined(I2C4_BASE) || defined(UC4_I2CC_BASE)
-    hwI2C_Index_4,           // I2C4 / UC4 I2C Controller
-#endif
-
-#if defined(I2C5_BASE) || defined(UC5_I2CC_BASE)
+#if defined(UC5_I2CC_BASE)
     hwI2C_Index_5,           // I2C5 / UC5 I2C Controller
 #endif
 
-#if defined(I2C6_BASE) || defined(UC6_I2CC_BASE)
+#if defined(UC6_I2CC_BASE)
     hwI2C_Index_6,           // I2C6 / UC6 I2C Controller
-#endif
-
-#if defined(I2C7_BASE) || defined(UC7_I2CC_BASE)
-    hwI2C_Index_7,           // I2C7 / UC7 I2C Controller
-#endif
-
-#if defined(I2C8_BASE) || defined(UC8_I2CC_BASE)
-    hwI2C_Index_8,           // I2C8 / UC8 I2C Controller
-#endif
-
-#if defined(I2C9_BASE) || defined(UC9_I2CC_BASE)
-    hwI2C_Index_9,           // I2C9 / UC9 I2C Controller
 #endif
 
     hwI2C_Index_MAX

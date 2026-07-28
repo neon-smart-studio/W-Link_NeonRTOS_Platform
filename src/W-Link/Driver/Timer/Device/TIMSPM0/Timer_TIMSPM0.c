@@ -333,19 +333,77 @@ void TIMG14_IRQHandler(void)
  * IRQ control
  * ============================================================ */
 
-static void Timer_Register_IRQ(hwTimer_Index index)
+static void Timer_NVIC_Init(hwTimer_Index index)
 {
-    int32_t irq;
-
-    irq = Timer_Map_IRQ(index);
-
-    if (irq < 0)
+    switch (index)
     {
-        return;
-    }
+#if defined(TIMA0_BASE)
+        case hwTimer_Index_0:
+            NVIC_ClearPendingIRQ(TIMA0_INT_IRQn);
+            NVIC_EnableIRQ(TIMA0_INT_IRQn);
+            break;
+#endif
 
-    NVIC_ClearPendingIRQ((IRQn_Type)irq);
-    NVIC_EnableIRQ((IRQn_Type)irq);
+#if defined(TIMA1_BASE)
+        case hwTimer_Index_1:
+            return TIMA1_INT_IRQn;
+#endif
+
+#if defined(TIMG0_BASE)
+        case hwTimer_Index_2:
+            return TIMG0_INT_IRQn;
+#endif
+
+#if defined(TIMG1_BASE)
+        case hwTimer_Index_3:
+            return TIMG1_INT_IRQn;
+#endif
+
+#if defined(TIMG2_BASE)
+        case hwTimer_Index_4:
+            return TIMG2_INT_IRQn;
+#endif
+
+#if defined(TIMG4_BASE)
+        case hwTimer_Index_5:
+            return TIMG4_INT_IRQn;
+#endif
+
+#if defined(TIMG5_BASE)
+        case hwTimer_Index_6:
+            return TIMG5_INT_IRQn;
+#endif
+
+#if defined(TIMG6_BASE)
+        case hwTimer_Index_7:
+            return TIMG6_INT_IRQn;
+#endif
+
+#if defined(TIMG7_BASE)
+        case hwTimer_Index_8:
+            return TIMG7_INT_IRQn;
+#endif
+
+#if defined(TIMG8_BASE)
+        case hwTimer_Index_9:
+            return TIMG8_INT_IRQn;
+#endif
+
+#if defined(TIMG9_BASE)
+        case hwTimer_Index_10:
+            return TIMG9_INT_IRQn;
+#endif
+
+#if defined(TIMG12_BASE)
+        case hwTimer_Index_11:
+            return TIMG12_INT_IRQn;
+#endif
+
+#if defined(TIMG14_BASE)
+        case hwTimer_Index_12:
+            return TIMG14_INT_IRQn;
+#endif
+    }
 }
 
 static void Timer_Unregister_IRQ(hwTimer_Index index)

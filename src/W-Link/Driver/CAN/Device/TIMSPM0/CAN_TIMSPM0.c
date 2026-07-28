@@ -170,29 +170,6 @@ static MCAN_Regs *CAN_Map_Soc_Base(hwCAN_Index index)
     }
 }
 
-static int32_t CAN_Map_Soc_Int(hwCAN_Index index)
-{
-    switch (index)
-    {
-        case hwCAN_Index_0:
-#if defined(CANFD0_BASE)
-            return (int32_t) CANFD0_INT_IRQn;
-#else
-            return -1;
-#endif
-
-        case hwCAN_Index_1:
-#if defined(CANFD1_BASE)
-            return (int32_t) CANFD1_INT_IRQn;
-#else
-            return -1;
-#endif
-
-        default:
-            return -1;
-    }
-}
-
 /*
  * Resolve every CAN-capable pin exposed by the current MSPM0 device header.
  * A pin route not present on the selected MCU is removed by its #if guard.
@@ -456,8 +433,7 @@ static bool CAN_HardwareInit(MCAN_Regs *base)
     }
 
     DL_MCAN_enableIntr(base, CAN_MCAN_CORE_INTERRUPTS, true);
-    DL_MCAN_selectIntrLine(
-        base, CAN_MCAN_CORE_INTERRUPTS, DL_MCAN_INTR_LINE_NUM_1);
+    DL_MCAN_selectIntrLine(base, CAN_MCAN_CORE_INTERRUPTS, DL_MCAN_INTR_LINE_NUM_1);
     DL_MCAN_enableIntrLine(base, DL_MCAN_INTR_LINE_NUM_1, true);
 
     DL_MCAN_clearInterruptStatus(base, DL_MCAN_MSP_INTERRUPT_LINE1);
@@ -476,10 +452,9 @@ static void CAN_HardwareDeInit(MCAN_Regs *base)
     DL_MCAN_disableInterrupt(base, DL_MCAN_MSP_INTERRUPT_LINE1);
     DL_MCAN_enableIntrLine(base, DL_MCAN_INTR_LINE_NUM_1, false);
     DL_MCAN_enableIntr(base, CAN_MCAN_CORE_INTERRUPTS, false);
-    (void) DL_MCAN_TXBufTransIntrEnable(
-        base, CAN_TX_BUFFER_INDEX, false);
+    DL_MCAN_TXBufTransIntrEnable(base, CAN_TX_BUFFER_INDEX, false);
 
-    (void) CAN_SetOpMode(base, DL_MCAN_OPERATION_MODE_SW_INIT);
+    CAN_SetOpMode(base, DL_MCAN_OPERATION_MODE_SW_INIT);
 
     DL_MCAN_reset(base);
     DL_MCAN_disableModuleClock(base);
@@ -488,28 +463,42 @@ static void CAN_HardwareDeInit(MCAN_Regs *base)
 
 static void CAN_NVIC_Init(hwCAN_Index index)
 {
-    int32_t irq = CAN_Map_Soc_Int(index);
-
-    if (irq < 0)
+    switch (index)
     {
-        return;
-    }
+#if defined(CANFD0_BASE)
+        case hwCAN_Index_0:
+            NVIC_ClearPendingIRQ(CANFD0_INT_IRQn);
+            NVIC_EnableIRQ(CANFD0_INT_IRQn);
+            break;
+#endif
 
-    NVIC_ClearPendingIRQ((IRQn_Type) irq);
-    NVIC_EnableIRQ((IRQn_Type) irq);
+#if defined(CANFD1_BASE)
+        case hwCAN_Index_1:
+            NVIC_ClearPendingIRQ(CANFD1_INT_IRQn);
+            NVIC_EnableIRQ(CANFD1_INT_IRQn);
+            break;
+#endif
+    }
 }
 
 static void CAN_NVIC_DeInit(hwCAN_Index index)
 {
-    int32_t irq = CAN_Map_Soc_Int(index);
-
-    if (irq < 0)
+    switch (index)
     {
-        return;
-    }
+#if defined(CANFD0_BASE)
+        case hwCAN_Index_0:
+            NVIC_DisableIRQ(CANFD0_INT_IRQn);
+            NVIC_ClearPendingIRQ(CANFD0_INT_IRQn);
+            break;
+#endif
 
-    NVIC_DisableIRQ((IRQn_Type) irq);
-    NVIC_ClearPendingIRQ((IRQn_Type) irq);
+#if defined(CANFD1_BASE)
+        case hwCAN_Index_1:
+            NVIC_DisableIRQ(CANFD1_INT_IRQn);
+            NVIC_ClearPendingIRQ(CANFD1_INT_IRQn);
+            break;
+#endif
+    }
 }
 
 #if defined(CANFD0_BASE)

@@ -42,7 +42,7 @@ hwTimer_OpResult Timer_Init(hwTimer_Index index)
         return result;
     }
 
-    Timer_NVIC_Enable(index);
+    Timer_NVIC_Init(index);
 
     Timer_Init_Status[index] = true;
 
@@ -63,7 +63,7 @@ hwTimer_OpResult Timer_DeInit(hwTimer_Index index)
 
     Timer_Init_Status[index] = false;
 
-    Timer_NVIC_Disable(index);
+    Timer_NVIC_DeInit(index);
 
     Timer_Instance_DeInit(index);
 

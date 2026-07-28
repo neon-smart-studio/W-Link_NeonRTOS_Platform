@@ -25,8 +25,8 @@ extern TIM_HandleTypeDef g_timer[hwTimer_Index_MAX];
 hwTimer_OpResult Timer_Instance_Init(hwTimer_Index index);
 hwTimer_OpResult Timer_Instance_DeInit(hwTimer_Index index);
 
-void Timer_NVIC_Enable(hwTimer_Index index);
-void Timer_NVIC_Disable(hwTimer_Index index);
+void Timer_NVIC_Init(hwTimer_Index index);
+void Timer_NVIC_DeInit(hwTimer_Index index);
 
 #ifdef  __cplusplus
 }

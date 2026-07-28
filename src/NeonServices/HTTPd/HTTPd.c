@@ -2237,7 +2237,9 @@ void HTTP_Server_Task(void *pvParameters)
                                                 uint16_t cgi_recv_len = already_body_len;
                                                 bool cgi_client_close = false;
                                                 bool cgi_client_skip = false;
-                                                do{
+
+                                                while(cgi_recv_len<HTTPd_WebSocketd_Client_List[i]->data_len)
+                                                {
 #ifdef HTTPD_USE_SSL
                                                         ret = ssl_read(&ssl, &HTTPd_WebSocketd_Client_List[i]->data_buff[cgi_recv_len], 1);
 #else
@@ -2289,7 +2291,6 @@ void HTTP_Server_Task(void *pvParameters)
                                                         
                                                         cgi_recv_len+=ret;
                                                 }
-                                                while(cgi_recv_len<HTTPd_WebSocketd_Client_List[i]->data_len);
 
                                                 if(cgi_client_skip)
                                                 {

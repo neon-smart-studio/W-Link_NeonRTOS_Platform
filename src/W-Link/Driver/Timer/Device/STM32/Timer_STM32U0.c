@@ -319,7 +319,7 @@ hwTimer_OpResult Timer_Instance_DeInit(hwTimer_Index index)
 
 /* ================= NVIC ================= */
 
-void Timer_NVIC_Enable(hwTimer_Index index)
+void Timer_NVIC_Init(hwTimer_Index index)
 {
     switch (index)
     {
@@ -382,7 +382,7 @@ void Timer_NVIC_Enable(hwTimer_Index index)
     }
 }
 
-void Timer_NVIC_Disable(hwTimer_Index index)
+void Timer_NVIC_DeInit(hwTimer_Index index)
 {
     switch (index)
     {

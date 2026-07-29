@@ -579,7 +579,7 @@ void Neon_App_Init(void)
 #if INIT_THREAD_DEBUG==1
         printf("[Init Thread] Creating Threaf: Init_Thread()\n");
 #endif
-	if(NeonRTOS_TaskCreate(Init_Thread, (signed char *)"Init Thread", 128, NULL, INIT_THREAD_PRIORITY, NULL)!=NeonRTOS_OK)
+	if(NeonRTOS_TaskCreate(Init_Thread, (signed char *)"Init Thread", 64, NULL, INIT_THREAD_PRIORITY, NULL)!=NeonRTOS_OK)
         {
 #if INIT_THREAD_DEBUG==1
                 printf("[main] Panic: Cannot Create Initialize Thread!\n");

@@ -1,7 +1,7 @@
 
 #ifndef SENSOR_CONFIG_H
 #define SENSOR_CONFIG_H
-
+/*temp mspm0
 #define CONFIG_HTS221_I2C_INDEX hwI2C_Index_1
 
 #define CONFIG_VL53L0X_I2C_INDEX hwI2C_Index_1
@@ -9,5 +9,5 @@
 #define CONFIG_VL53L4CD_I2C_INDEX hwI2C_Index_1
 #define CONFIG_VL53L5CX_I2C_INDEX hwI2C_Index_1
 #define CONFIG_VL53L8CX_I2C_INDEX hwI2C_Index_1
-
+*/
 #endif //SENSOR_CONFIG_H

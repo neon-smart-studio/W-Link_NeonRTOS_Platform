@@ -8,77 +8,85 @@ platform = env.PioPlatform()
 board = env.BoardConfig()
 
 env.Replace(
-    AR="arm-none-eabi-ar",
+    AR="arm-none-eabi-gcc-ar",
     AS="arm-none-eabi-as",
     CC="arm-none-eabi-gcc",
     CXX="arm-none-eabi-g++",
     GDB="arm-none-eabi-gdb",
     OBJCOPY="arm-none-eabi-objcopy",
-    RANLIB="arm-none-eabi-ranlib",
+    RANLIB="arm-none-eabi-gcc-ranlib",
     SIZETOOL="arm-none-eabi-size",
 
     ARFLAGS=["rc"],
 
-    PIODEBUGFLAGS=["-O0", "-g3", "-ggdb", "-gdwarf-2"],
+    PIODEBUGFLAGS=[
+        "-Og",
+        "-g2",
+        "-ggdb2",
+        "-gdwarf-2"
+    ],
 
     SIZEPROGREGEXP=r"^(?:\.text|\.data|\.rodata|\.text.align|\.ARM.exidx)\s+(\d+).*",
     SIZEDATAREGEXP=r"^(?:\.data|\.bss|\.noinit)\s+(\d+).*",
     SIZECHECKCMD="$SIZETOOL -A -d $SOURCES",
-    SIZEPRINTCMD='$SIZETOOL -B -d $SOURCES',
+    SIZEPRINTCMD="$SIZETOOL -B -d $SOURCES",
 
     PROGSUFFIX=".elf"
 )
 
-env.Append(
-    ASFLAGS=["-x", "assembler-with-cpp"],
+env.AppendUnique(
+    ASFLAGS=[
+        "-x",
+        "assembler-with-cpp"
+    ],
 
     CCFLAGS=[
-        "-Os",
         "-ffunction-sections",
         "-fdata-sections",
         "-fno-common",
         "-mthumb",
         "-mabi=aapcs",
-        "-march=armv6-m",
-        "-MMD",
-        "-MP"
+        "-MMD"
     ],
 
     CXXFLAGS=[
         "-fno-exceptions",
         "-fno-threadsafe-statics",
         "-fno-rtti",
+        "-fno-use-cxa-atexit"
     ],
 
     CPPDEFINES=[
         ("F_CPU", "$BOARD_F_CPU"),
-        "gcc",
+        "gcc"
     ],
 
     LINKFLAGS=[
-        "-Os",
-        "-ffunction-sections",
-        "-fdata-sections",
-        "-Wl,--gc-sections",
-        "-Wl,--print-memory-usage",
         "-mthumb",
-        "-mabi=aapcs",
-        "-march=armv6-m"
+        "-Wl,--gc-sections",
+        "-Wl,--relax",
+        "-Wl,--sort-section=alignment",
+        "-Wl,-Map=$BUILD_DIR/${PROGNAME}.map",
+        "--specs=nano.specs",
+        "--specs=nosys.specs"
     ],
 
-    LIBS=["m", "stdc++", "gcc", "nosys", "c"],
+    LIBS=["m", "gcc", "c"],
 
     BUILDERS=dict(
         ElfToHex=Builder(
-            action=env.VerboseAction(" ".join([
-                "$OBJCOPY",
-                "-O",
-                "ihex",
-                "-R",
-                ".eeprom",
-                "$SOURCES",
-                "$TARGET"
-            ]), "Building $TARGET"),
+            action=env.VerboseAction(
+                " ".join([
+                    "$OBJCOPY",
+                    "-O",
+                    "ihex",
+                    "-R",
+                    ".eeprom",
+                    "$SOURCES",
+                    "$TARGET"
+                ]),
+                "Building $TARGET"
+            ),
             suffix=".hex"
         )
     )
@@ -88,7 +96,7 @@ if "BOARD" in env:
 
     board_cfg = env.BoardConfig()
 
-    cpu = board_cfg.get("build.cpu", "cortex-m0plus")
+    cpu = board_cfg.get("build.cpu", "cortex-m4")
     fpu = board_cfg.get("build.fpu", None)
     float_abi = board_cfg.get("build.float-abi", None)
 
@@ -103,6 +111,22 @@ if "BOARD" in env:
     linkflags = [
         "-mcpu=%s" % cpu
     ]
+
+    if fpu and float_abi:
+        asflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        ccflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
+
+        linkflags.extend([
+            "-mfpu=%s" % fpu,
+            "-mfloat-abi=%s" % float_abi
+        ])
 
     env.Append(
         ASFLAGS=asflags,

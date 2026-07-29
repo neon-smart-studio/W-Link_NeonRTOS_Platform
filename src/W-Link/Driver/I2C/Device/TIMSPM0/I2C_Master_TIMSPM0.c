@@ -75,6 +75,7 @@ static hwI2C_Speed_Mode I2C_Clock_Speed_Mode[hwI2C_Index_MAX] = { hwI2C_Standard
 static NeonRTOS_SyncObj_t I2C_Master_Done_SyncHandle[hwI2C_Index_MAX];
 static TIMSPM0_I2C_Transfer i2c_xfer[hwI2C_Index_MAX];
 
+//UNICOMMI2CC_Regs
 static I2C_Regs *I2C_Map_Soc_Base(hwI2C_Index index)
 {
     switch (index)
@@ -229,11 +230,9 @@ static bool I2C_GetTimerPeriod(
      *
      * Round the divisor upward so SCL never exceeds the requested speed.
      */
-    uint32_t divisor =
-        (bus_clock_hz + denominator - 1U) / denominator;
+    uint32_t divisor = (bus_clock_hz + denominator - 1U) / denominator;
 
-    if ((divisor == 0U) ||
-        (divisor > I2C_TIMSPM0_TIMER_DIVISOR_MAX))
+    if ((divisor == 0U) || (divisor > I2C_TIMSPM0_TIMER_DIVISOR_MAX))
     {
         return false;
     }
@@ -362,13 +361,11 @@ static void I2C_IRQ_Process(hwI2C_Index index)
         return;
     }
 
-    TIMSPM0_I2C_Transfer *transfer =
-        &i2c_xfer[index];
+    TIMSPM0_I2C_Transfer *transfer = &i2c_xfer[index];
 
     for (;;)
     {
-        DL_I2C_IIDX interrupt =
-            DL_I2C_getPendingInterrupt(i2c);
+        DL_I2C_IIDX interrupt = DL_I2C_getPendingInterrupt(i2c);
 
         switch (interrupt)
         {
@@ -437,8 +434,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
 
                     if (transfer->stop)
                     {
-                        transfer->state =
-                            TIMSPM0_I2C_RX_WAIT_STOP;
+                        transfer->state = TIMSPM0_I2C_RX_WAIT_STOP;
                     }
                     else
                     {
@@ -477,8 +473,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
 
                     if (transfer->stop)
                     {
-                        transfer->state =
-                            TIMSPM0_I2C_TX_WAIT_STOP;
+                        transfer->state = TIMSPM0_I2C_TX_WAIT_STOP;
                     }
                     else
                     {
@@ -745,7 +740,7 @@ hwI2C_OpResult I2C_Master_Reset(hwI2C_Index index)
     return I2C_Master_Init(index, speed);
 }
 
-hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read_dat, uint8_t read_len, bool stop, NeonRTOS_Time_t timeout_ms)
+hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read_dat, uint8_t read_len, bool stop, NeonRTOS_Time_t timeoutMs)
 {
     if ((index >= hwI2C_Index_MAX) ||
         (address > I2C_TIMSPM0_MAX_7BIT_ADDRESS) ||
@@ -808,12 +803,10 @@ hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read
         DL_I2C_CONTROLLER_DIRECTION_RX,
         read_len,
         DL_I2C_CONTROLLER_START_ENABLE,
-        stop ?
-            DL_I2C_CONTROLLER_STOP_ENABLE :
-            DL_I2C_CONTROLLER_STOP_DISABLE,
+        stop ? DL_I2C_CONTROLLER_STOP_ENABLE : DL_I2C_CONTROLLER_STOP_DISABLE,
         DL_I2C_CONTROLLER_ACK_DISABLE);
 
-    if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeout_ms) != NeonRTOS_OK)
+    if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeoutMs) != NeonRTOS_OK)
     {
         TIMSPM0_I2C_State state = i2c_xfer[index].state;
 
@@ -848,7 +841,7 @@ hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read
     return (i2c_xfer[index].state == TIMSPM0_I2C_DONE) ?hwI2C_OK : hwI2C_BusError;
 }
 
-hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *write_dat, uint8_t write_len, bool stop, NeonRTOS_Time_t timeout_ms)
+hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *write_dat, uint8_t write_len, bool stop, NeonRTOS_Time_t timeoutMs)
 {
     if ((index >= hwI2C_Index_MAX) ||
         (address > I2C_TIMSPM0_MAX_7BIT_ADDRESS) ||
@@ -917,12 +910,10 @@ hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *wri
         DL_I2C_CONTROLLER_DIRECTION_TX,
         write_len,
         DL_I2C_CONTROLLER_START_ENABLE,
-        stop ?
-            DL_I2C_CONTROLLER_STOP_ENABLE :
-            DL_I2C_CONTROLLER_STOP_DISABLE,
+        stop ? DL_I2C_CONTROLLER_STOP_ENABLE : DL_I2C_CONTROLLER_STOP_DISABLE,
         DL_I2C_CONTROLLER_ACK_DISABLE);
 
-    if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeout_ms) != NeonRTOS_OK)
+    if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeoutMs) != NeonRTOS_OK)
     {
         TIMSPM0_I2C_State state = i2c_xfer[index].state;
 

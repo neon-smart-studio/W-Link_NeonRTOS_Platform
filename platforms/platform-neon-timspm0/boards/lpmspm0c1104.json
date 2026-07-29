@@ -19,14 +19,57 @@
       "dslite"
     ]
   },
+
   "debug": {
     "default_tools": [
-      "xds110"
+      "mspdebug"
     ],
+
     "onboard_tools": [
-      "xds110"
-    ]
+      "mspdebug"
+    ],
+
+    "tools": {
+      "mspdebug": {
+        "onboard": true,
+        "default": true,
+
+        "server": {
+          "package": "tool-openocd",
+          "executable": "bin/openocd",
+
+          "arguments": [
+            "-s",
+            "$PACKAGE_DIR/scripts",
+
+            "-f",
+            "interface/xds110.cfg",
+
+            "-c",
+            "adapter speed 1000",
+
+            "-f",
+            "target/ti_mspm0.cfg"
+          ]
+        },
+
+        "load_cmds": [
+          "load"
+        ],
+
+        "init_break": "tbreak main",
+
+        "init_cmds": [
+          "target extended-remote $DEBUG_PORT",
+          "monitor reset halt",
+          "$LOAD_CMDS",
+          "monitor reset halt",
+          "$INIT_BREAK"
+        ]
+      }
+    }
   },
+
   "name": "TI LaunchPad MSPM0C1104",
   "vendor": "TI",
   "url": "https://www.ti.com/tool/LP-MSPM0C1104"

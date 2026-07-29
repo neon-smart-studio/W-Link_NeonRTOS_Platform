@@ -76,21 +76,25 @@ SECTIONS
         KEEP (*(.vtable))
     } > REGION_DATA
 
-   .text : {
+   .text :
+    {
         CREATE_OBJECT_SYMBOLS
-        KEEP (*(.text))
-        . = ALIGN(0x8);
+
+        *(.text)
         *(.text.*)
-        . = ALIGN(0x8);
-        KEEP (*(.ctors))
-        . = ALIGN(0x8);
-        KEEP (*(.dtors))
-        . = ALIGN(0x8);
-        KEEP (*(.init))
-        . = ALIGN(0x8);
-        KEEP (*(.fini*))
-        . = ALIGN(0x8);
-    } > REGION_TEXT AT> REGION_TEXT
+        *(.gnu.linkonce.t.*)
+
+        . = ALIGN(8);
+
+        KEEP(*(.init))
+        KEEP(*(.fini))
+        KEEP(*(.ctors))
+        KEEP(*(SORT(.ctors.*)))
+        KEEP(*(.dtors))
+        KEEP(*(SORT(.dtors.*)))
+
+        . = ALIGN(8);
+    } > REGION_TEXT
 
     .ramfunc : {
         __ramfunct_load__ = LOADADDR (.ramfunc);
@@ -104,6 +108,7 @@ SECTIONS
         *(.rodata)
         . = ALIGN(0x8);
         *(.rodata.*)
+        *(.gnu.linkonce.r.*)
         . = ALIGN(0x8);
     } > REGION_TEXT AT> REGION_TEXT
 
@@ -138,7 +143,7 @@ SECTIONS
 
     .ARM.extab : {
         . = ALIGN(0x8);
-        KEEP (*(.ARM.extab* .gnu.linkonce.armextab.*))
+        *(.ARM.extab* .gnu.linkonce.armextab.*)
          . = ALIGN(0x8);
     } > REGION_ARM_EXTAB AT> REGION_ARM_EXTAB
 
@@ -147,8 +152,9 @@ SECTIONS
     .data : {
         __data_load__ = LOADADDR (.data);
         __data_start__ = .;
-        KEEP (*(.data))
-        KEEP (*(.data*))
+        *(.data)
+        *(.data*)
+        *(.gnu.linkonce.d.*)
         . = ALIGN (8);
         __data_end__ = .;
     } > REGION_DATA AT> REGION_TEXT
@@ -156,8 +162,9 @@ SECTIONS
     .bss : {
         __bss_start__ = .;
         *(.shbss)
-        KEEP (*(.bss))
+        *(.bss)
         *(.bss.*)
+        *(.gnu.linkonce.b.*)
         *(COMMON)
         . = ALIGN (8);
         __bss_end__ = .;

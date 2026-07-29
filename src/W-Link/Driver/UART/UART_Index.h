@@ -138,6 +138,7 @@ typedef enum {
 } hwUART_Index;
 #endif // DEVICE_TIMSP432E
 
+#ifdef DEVICE_TIMSPM0
 typedef enum
 {
 #if defined(UART0_BASE) || defined(UC0_UART_BASE)
@@ -183,5 +184,6 @@ typedef enum
     hwUART_Index_MAX
 
 } hwUART_Index;
+#endif // DEVICE_TIMSPM0
 
 #endif //UART_INDEX_H

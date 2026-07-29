@@ -564,13 +564,13 @@ void Init_Thread(void* p)
 #endif //CONFIG_SUPPORT_INTERNET
 
         size_t freeHeapSize = NeonRTOS_GetFreeHeapSize();
-        UART_Printf("Remain Heap Size %d bytes\n", freeHeapSize);
+        //UART_Printf("Remain Heap Size %d bytes\n", freeHeapSize);
     }
 }
 
 void Neon_App_Init(void)
 {
-        UART_Open(LOG_UART_INDEX, 115200, false);
+        //UART_Open(LOG_UART_INDEX, 115200, false);
 
 #ifdef CONFIG_SUPPORT_INTERNET
         WebsocketServer_RegisterMsgCallback(Process_Websocket_Incomming_Message);
@@ -579,7 +579,7 @@ void Neon_App_Init(void)
 #if INIT_THREAD_DEBUG==1
         printf("[Init Thread] Creating Threaf: Init_Thread()\n");
 #endif
-	if(NeonRTOS_TaskCreate(Init_Thread, (signed char *)"Init Thread", INIT_THREAD_STACK_SIZE, NULL, INIT_THREAD_PRIORITY, NULL)!=NeonRTOS_OK)
+	if(NeonRTOS_TaskCreate(Init_Thread, (signed char *)"Init Thread", 128, NULL, INIT_THREAD_PRIORITY, NULL)!=NeonRTOS_OK)
         {
 #if INIT_THREAD_DEBUG==1
                 printf("[main] Panic: Cannot Create Initialize Thread!\n");

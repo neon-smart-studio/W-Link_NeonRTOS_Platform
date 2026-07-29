@@ -77,9 +77,10 @@ SECTIONS
 
    .text : {
         CREATE_OBJECT_SYMBOLS
-        KEEP (*(.text))
+        *(.text)
         . = ALIGN(0x8);
         *(.text.*)
+        *(.gnu.linkonce.t.*)
         . = ALIGN(0x8);
         KEEP (*(.ctors))
         . = ALIGN(0x8);
@@ -91,7 +92,7 @@ SECTIONS
         __init_array_end = .;
         KEEP (*(.init))
         . = ALIGN(0x8);
-        KEEP (*(.fini*))
+        KEEP (*(.fini))
         . = ALIGN(0x8);
     } > REGION_TEXT AT> REGION_TEXT
 
@@ -107,6 +108,7 @@ SECTIONS
         *(.rodata)
         . = ALIGN(0x8);
         *(.rodata.*)
+        *(.gnu.linkonce.r.*)
         . = ALIGN(0x8);
     } > REGION_TEXT AT> REGION_TEXT
 
@@ -118,7 +120,7 @@ SECTIONS
     } > REGION_ARM_EXIDX AT> REGION_ARM_EXIDX
 
     .ARM.extab : {
-        KEEP (*(.ARM.extab* .gnu.linkonce.armextab.*))
+        *(.ARM.extab* .gnu.linkonce.armextab.*)
          . = ALIGN(0x8);
     } > REGION_ARM_EXTAB AT> REGION_ARM_EXTAB
 
@@ -127,8 +129,9 @@ SECTIONS
     .data : {
         __data_load__ = LOADADDR (.data);
         __data_start__ = .;
-        KEEP (*(.data))
-        KEEP (*(.data*))
+        *(.data)
+        *(.data*)
+        *(.gnu.linkonce.d.*)
         . = ALIGN (8);
         __data_end__ = .;
     } > REGION_DATA AT> REGION_TEXT
@@ -136,8 +139,9 @@ SECTIONS
     .bss : {
         __bss_start__ = .;
         *(.shbss)
-        KEEP (*(.bss))
+        *(.bss)
         *(.bss.*)
+        *(.gnu.linkonce.b.*)
         *(COMMON)
         . = ALIGN (4);
         __bss_end__ = .;

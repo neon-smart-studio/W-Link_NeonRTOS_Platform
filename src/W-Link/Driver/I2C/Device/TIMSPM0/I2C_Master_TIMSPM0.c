@@ -654,9 +654,6 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
 
     I2C_NVIC_Init(index);
 
-    hwGPIO_Pin scl_pin = I2C_Pin_Def_Table[index].scl_pin;
-    hwGPIO_Pin sda_pin = I2C_Pin_Def_Table[index].sda_pin;
-
     gpio_pin_init_status[scl_pin] = true;
     gpio_pin_init_status[sda_pin] = true;
 

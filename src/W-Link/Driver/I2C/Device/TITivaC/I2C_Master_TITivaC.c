@@ -305,14 +305,7 @@ hwI2C_OpResult I2C_Master_Reset(hwI2C_Index index)
     return I2C_Master_Init(index, speed);
 }
 
-hwI2C_OpResult I2C_Master_Read(
-    hwI2C_Index index,
-    uint8_t address,
-    uint8_t *read_dat,
-    uint8_t read_len,
-    bool stop,
-    NeonRTOS_Time_t timeoutMs
-)
+hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read_dat, uint8_t read_len, bool stop, NeonRTOS_Time_t timeout_ms)
 {
     if (index >= hwI2C_Index_MAX) {
         return hwI2C_InvalidParameter;
@@ -361,14 +354,7 @@ hwI2C_OpResult I2C_Master_Read(
     return (t->state == TITivaC_I2C_DONE) ? hwI2C_OK : hwI2C_BusError;
 }
 
-hwI2C_OpResult I2C_Master_Write(
-    hwI2C_Index index,
-    uint8_t address,
-    uint8_t *write_dat,
-    uint8_t write_len,
-    bool stop,
-    NeonRTOS_Time_t timeoutMs
-)
+hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *write_dat, uint8_t write_len, bool stop, NeonRTOS_Time_t timeout_ms)
 {
     if (index >= hwI2C_Index_MAX) {
         return hwI2C_InvalidParameter;

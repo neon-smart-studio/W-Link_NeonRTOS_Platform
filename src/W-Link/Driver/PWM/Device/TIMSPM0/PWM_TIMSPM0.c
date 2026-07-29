@@ -19,15 +19,12 @@
 #include "GPIO/Device/TIMSPM0/GPIO_TIMSPM0.h"
 
 #include "PWM/Pin/TIMSPM0/PWM_Pin_TIMSPM0.h"
+
 #define PWM_HZ           1000
 
 #define PWM_TIMSPM0_POWER_STARTUP_DELAY (16U)
 
 #define PWM_TIMSPM0_16BIT_PERIOD_MAX   (65536UL)
-
-#ifndef GPIO_SOC_IOMUX_INVALID
-#define GPIO_SOC_IOMUX_INVALID         (UINT32_MAX)
-#endif
 
 static bool PWM_Channel_Init_Status[hwPWM_Channel_MAX] = {false};
 static bool PWM_Channel_OnOff_Status[hwPWM_Channel_MAX] = {false};

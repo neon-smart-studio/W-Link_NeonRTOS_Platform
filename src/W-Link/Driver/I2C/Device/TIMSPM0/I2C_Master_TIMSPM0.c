@@ -348,119 +348,6 @@ static void I2C_NVIC_DeInit(hwI2C_Index index)
     }
 }
 
-static hwI2C_OpResult I2C_ConfigPins(
-    hwI2C_Index index,
-    uint32_t *scl_iomux,
-    uint32_t *sda_iomux)
-{
-    if ((scl_iomux == NULL) || (sda_iomux == NULL))
-    {
-        return hwI2C_InvalidParameter;
-    }
-
-    hwGPIO_Pin scl_pin = I2C_Pin_Def_Table[index].scl_pin;
-    hwGPIO_Pin sda_pin = I2C_Pin_Def_Table[index].sda_pin;
-
-    uint32_t scl_cm = GPIO_Map_Soc_Pin_IOMUX(scl_pin);
-    uint32_t sda_cm = GPIO_Map_Soc_Pin_IOMUX(sda_pin);
-    uint32_t scl_function = I2C_Map_Soc_Pin_Function(index, TIMSPM0_I2C_PIN_SCL);
-    uint32_t sda_function = I2C_Map_Soc_Pin_Function(index, TIMSPM0_I2C_PIN_SDA);
-
-    if ((scl_pin == hwGPIO_Pin_NC) ||
-        (sda_pin == hwGPIO_Pin_NC) ||
-        (scl_cm == GPIO_SOC_IOMUX_INVALID) ||
-        (sda_cm == GPIO_SOC_IOMUX_INVALID) ||
-        (scl_function == 0U) ||
-        (sda_function == 0U))
-    {
-        return hwI2C_InvalidParameter;
-    }
-
-    DL_GPIO_initPeripheralInputFunctionFeatures(
-        scl_cm,
-        scl_function,
-        DL_GPIO_INVERSION_DISABLE,
-        DL_GPIO_RESISTOR_NONE,
-        DL_GPIO_HYSTERESIS_DISABLE,
-        DL_GPIO_WAKEUP_DISABLE);
-
-    DL_GPIO_initPeripheralInputFunctionFeatures(
-        sda_cm,
-        sda_function,
-        DL_GPIO_INVERSION_DISABLE,
-        DL_GPIO_RESISTOR_NONE,
-        DL_GPIO_HYSTERESIS_DISABLE,
-        DL_GPIO_WAKEUP_DISABLE);
-
-    /*
-     * MSPM0 I2C uses the peripheral open-drain output. External pull-up
-     * resistors are still required on SCL and SDA.
-     */
-    DL_GPIO_enableHiZ(scl_cm);
-    DL_GPIO_enableHiZ(sda_cm);
-
-    *scl_iomux = scl_cm;
-    *sda_iomux = sda_cm;
-
-    return hwI2C_OK;
-}
-
-static void I2C_DeConfigPins(hwI2C_Index index)
-{
-    hwGPIO_Pin scl_pin = I2C_Pin_Def_Table[index].scl_pin;
-    hwGPIO_Pin sda_pin = I2C_Pin_Def_Table[index].sda_pin;
-    uint32_t scl_cm = GPIO_Map_Soc_Pin_IOMUX(scl_pin);
-    uint32_t sda_cm = GPIO_Map_Soc_Pin_IOMUX(sda_pin);
-
-    if (scl_cm != GPIO_SOC_IOMUX_INVALID)
-    {
-        DL_GPIO_initDigitalInput(scl_cm);
-    }
-
-    if (sda_cm != GPIO_SOC_IOMUX_INVALID)
-    {
-        DL_GPIO_initDigitalInput(sda_cm);
-    }
-}
-
-static void I2C_DrainRXFIFO(
-    I2C_Regs *i2c,
-    TIMSPM0_I2C_Transfer *transfer)
-{
-    while (!DL_I2C_isControllerRXFIFOEmpty(i2c))
-    {
-        uint8_t value = DL_I2C_receiveControllerData(i2c);
-
-        if ((transfer->rx_buf != NULL) &&
-            (transfer->rx_pos < transfer->rx_len))
-        {
-            transfer->rx_buf[transfer->rx_pos++] = value;
-        }
-    }
-}
-
-static void I2C_CompleteFromISR(
-    hwI2C_Index index,
-    TIMSPM0_I2C_State state,
-    uint32_t error)
-{
-    I2C_Regs *i2c = I2C_Map_Soc_Base(index);
-
-    if (i2c == NULL)
-    {
-        return;
-    }
-
-    DL_I2C_disableInterrupt(
-        i2c, I2C_TIMSPM0_INTERRUPT_MASK);
-
-    i2c_xfer[index].error = error;
-    i2c_xfer[index].state = state;
-
-    NeonRTOS_SyncObjSignalFromISR(
-        &I2C_Master_Done_SyncHandle[index]);
-}
-
 static void I2C_IRQ_Process(hwI2C_Index index)
 {
     if (index >= hwI2C_Index_MAX)
@@ -490,10 +377,18 @@ static void I2C_IRQ_Process(hwI2C_Index index)
 
             case DL_I2C_IIDX_CONTROLLER_RXFIFO_TRIGGER:
             case DL_I2C_IIDX_CONTROLLER_RXFIFO_FULL:
-                if ((transfer->state == TIMSPM0_I2C_RX) ||
-                    (transfer->state == TIMSPM0_I2C_RX_WAIT_STOP))
+                if ((transfer->state == TIMSPM0_I2C_RX) || (transfer->state == TIMSPM0_I2C_RX_WAIT_STOP))
                 {
-                    I2C_DrainRXFIFO(i2c, transfer);
+                    while (!DL_I2C_isControllerRXFIFOEmpty(i2c))
+                    {
+                        uint8_t value = DL_I2C_receiveControllerData(i2c);
+
+                        if ((transfer->rx_buf != NULL) &&
+                            (transfer->rx_pos < transfer->rx_len))
+                        {
+                            transfer->rx_buf[transfer->rx_pos++] = value;
+                        }
+                    }
                 }
                 break;
 
@@ -502,20 +397,12 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                 {
                     if (transfer->tx_pos < transfer->tx_len)
                     {
-                        transfer->tx_pos +=
-                            DL_I2C_fillControllerTXFIFO(
-                                i2c,
-                                &transfer->tx_buf[transfer->tx_pos],
-                                (uint16_t)
-                                    (transfer->tx_len -
-                                     transfer->tx_pos));
+                        transfer->tx_pos += DL_I2C_fillControllerTXFIFO(i2c, &transfer->tx_buf[transfer->tx_pos], (uint16_t)(transfer->tx_len - transfer->tx_pos));
                     }
 
                     if (transfer->tx_pos >= transfer->tx_len)
                     {
-                        DL_I2C_disableInterrupt(
-                            i2c,
-                            DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER);
+                        DL_I2C_disableInterrupt(i2c, DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER);
                     }
                 }
                 break;
@@ -523,16 +410,28 @@ static void I2C_IRQ_Process(hwI2C_Index index)
             case DL_I2C_IIDX_CONTROLLER_RX_DONE:
                 if (transfer->state == TIMSPM0_I2C_RX)
                 {
-                    I2C_DrainRXFIFO(i2c, transfer);
+                    while (!DL_I2C_isControllerRXFIFOEmpty(i2c))
+                    {
+                        uint8_t value = DL_I2C_receiveControllerData(i2c);
+
+                        if ((transfer->rx_buf != NULL) &&
+                            (transfer->rx_pos < transfer->rx_len))
+                        {
+                            transfer->rx_buf[transfer->rx_pos++] = value;
+                        }
+                    }
 
                     if (transfer->rx_pos != transfer->rx_len)
                     {
                         DL_I2C_resetControllerTransfer(i2c);
-                        I2C_CompleteFromISR(
-                            index,
-                            TIMSPM0_I2C_ERROR,
-                            (uint32_t)
-                                DL_I2C_IIDX_CONTROLLER_RX_DONE);
+                        
+                        DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+
+                        i2c_xfer[index].error = TIMSPM0_I2C_ERROR;
+                        i2c_xfer[index].state = DL_I2C_IIDX_CONTROLLER_RX_DONE;
+
+                        NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
+
                         return;
                     }
 
@@ -543,10 +442,13 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     }
                     else
                     {
-                        I2C_CompleteFromISR(
-                            index,
-                            TIMSPM0_I2C_DONE,
-                            0U);
+                        DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+
+                        i2c_xfer[index].error = TIMSPM0_I2C_DONE;
+                        i2c_xfer[index].state = 0U;
+
+                        NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
+                        
                         return;
                     }
                 }
@@ -562,11 +464,14 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     if (transfer->tx_pos != transfer->tx_len)
                     {
                         DL_I2C_resetControllerTransfer(i2c);
-                        I2C_CompleteFromISR(
-                            index,
-                            TIMSPM0_I2C_ERROR,
-                            (uint32_t)
-                                DL_I2C_IIDX_CONTROLLER_TX_DONE);
+                        
+                        DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+
+                        i2c_xfer[index].error = TIMSPM0_I2C_ERROR;
+                        i2c_xfer[index].state = DL_I2C_IIDX_CONTROLLER_TX_DONE;
+
+                        NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
+                        
                         return;
                     }
 
@@ -577,25 +482,28 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     }
                     else
                     {
-                        I2C_CompleteFromISR(
-                            index,
-                            TIMSPM0_I2C_DONE,
-                            0U);
+                        DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+
+                        i2c_xfer[index].error = TIMSPM0_I2C_DONE;
+                        i2c_xfer[index].state = 0U;
+
+                        NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
+                        
                         return;
                     }
                 }
                 break;
 
             case DL_I2C_IIDX_CONTROLLER_STOP:
-                if ((transfer->state ==
-                        TIMSPM0_I2C_TX_WAIT_STOP) ||
-                    (transfer->state ==
-                        TIMSPM0_I2C_RX_WAIT_STOP))
+                if ((transfer->state == TIMSPM0_I2C_TX_WAIT_STOP) || (transfer->state == TIMSPM0_I2C_RX_WAIT_STOP))
                 {
-                    I2C_CompleteFromISR(
-                        index,
-                        TIMSPM0_I2C_DONE,
-                        0U);
+                    DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+
+                    i2c_xfer[index].error = TIMSPM0_I2C_DONE;
+                    i2c_xfer[index].state = 0U;
+
+                    NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
+
                     return;
                 }
                 break;
@@ -605,10 +513,14 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                 if (I2C_IsTransferActive(transfer->state))
                 {
                     DL_I2C_resetControllerTransfer(i2c);
-                    I2C_CompleteFromISR(
-                        index,
-                        TIMSPM0_I2C_ERROR,
-                        (uint32_t) interrupt);
+
+                    DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+
+                    i2c_xfer[index].error = TIMSPM0_I2C_ERROR;
+                    i2c_xfer[index].state = (uint32_t) interrupt;
+
+                    NeonRTOS_SyncObjSignalFromISR(&I2C_Master_Done_SyncHandle[index]);
+                    
                     return;
                 }
                 break;
@@ -640,92 +552,9 @@ void I2C2_IRQHandler(void)
 }
 #endif
 
-static void I2C_PrepareTransfer(
-    hwI2C_Index index,
-    I2C_Regs *i2c)
+hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
 {
-    /*
-     * Consume a possible stale completion token before starting a new
-     * transaction.
-     */
-    (void) NeonRTOS_SyncObjWait(
-        &I2C_Master_Done_SyncHandle[index],
-        NEONRT_NO_WAIT);
-
-    DL_I2C_disableInterrupt(
-        i2c, I2C_TIMSPM0_INTERRUPT_MASK);
-    DL_I2C_clearInterruptStatus(
-        i2c, I2C_TIMSPM0_INTERRUPT_MASK);
-    DL_I2C_flushControllerTXFIFO(i2c);
-    DL_I2C_flushControllerRXFIFO(i2c);
-}
-
-static hwI2C_OpResult I2C_WaitTransfer(
-    hwI2C_Index index,
-    NeonRTOS_Time_t timeout_ms)
-{
-    if (NeonRTOS_SyncObjWait(
-            &I2C_Master_Done_SyncHandle[index],
-            timeout_ms) == NeonRTOS_OK)
-    {
-        return (i2c_xfer[index].state == TIMSPM0_I2C_DONE) ?
-            hwI2C_OK :
-            hwI2C_BusError;
-    }
-
-    /*
-     * Close the IRQ race around a timeout. If the IRQ completed just after
-     * the RTOS wait expired, consume its token and return its actual result.
-     */
-    I2C_NVIC_DeInit(index);
-
-    (void) NeonRTOS_SyncObjWait(
-        &I2C_Master_Done_SyncHandle[index],
-        NEONRT_NO_WAIT);
-
-    TIMSPM0_I2C_State state =
-        i2c_xfer[index].state;
-
-    if (I2C_IsTransferActive(state))
-    {
-        I2C_Regs *i2c = I2C_Map_Soc_Base(index);
-
-        if (i2c != NULL)
-        {
-            DL_I2C_disableInterrupt(
-                i2c, I2C_TIMSPM0_INTERRUPT_MASK);
-            DL_I2C_resetControllerTransfer(i2c);
-            DL_I2C_flushControllerTXFIFO(i2c);
-            DL_I2C_flushControllerRXFIFO(i2c);
-            DL_I2C_clearInterruptStatus(
-                i2c, I2C_TIMSPM0_INTERRUPT_MASK);
-        }
-
-        i2c_xfer[index].state = TIMSPM0_I2C_ERROR;
-        i2c_xfer[index].error = UINT32_MAX;
-    }
-
-    (void) I2C_NVIC_Init(index);
-
-    if (state == TIMSPM0_I2C_DONE)
-    {
-        return hwI2C_OK;
-    }
-
-    if (state == TIMSPM0_I2C_ERROR)
-    {
-        return hwI2C_BusError;
-    }
-
-    return hwI2C_SlaveTimeout;
-}
-
-hwI2C_OpResult I2C_Master_Init(
-    hwI2C_Index index,
-    hwI2C_Speed_Mode speed_mode)
-{
-    if ((index >= hwI2C_Index_MAX) ||
-        (speed_mode >= hwI2C_Speed_Mode_MAX))
+    if ((index >= hwI2C_Index_MAX) || speed_mode >= hwI2C_Speed_Mode_MAX)
     {
         return hwI2C_InvalidParameter;
     }
@@ -740,39 +569,64 @@ hwI2C_OpResult I2C_Master_Init(
         return hwI2C_Unsupport;
     }
 
-    I2C_Regs *i2c = I2C_Map_Soc_Base(index);
-    IRQn_Type irq;
-    uint8_t timer_period;
+    hwGPIO_Pin scl_pin = I2C_Pin_Def_Table[index].scl_pin;
+    hwGPIO_Pin sda_pin = I2C_Pin_Def_Table[index].sda_pin;
 
-    if ((i2c == NULL) ||
-        !I2C_GetTimerPeriod(speed_mode, &timer_period))
+    uint32_t scl_iomux = GPIO_Map_Soc_Pin_IOMUX(scl_pin);
+    uint32_t sda_iomux = GPIO_Map_Soc_Pin_IOMUX(sda_pin);
+    uint32_t scl_function = I2C_Map_Soc_Pin_Function(index, TIMSPM0_I2C_PIN_SCL);
+    uint32_t sda_function = I2C_Map_Soc_Pin_Function(index, TIMSPM0_I2C_PIN_SDA);
+
+    if ((scl_pin == hwGPIO_Pin_NC) ||
+        (sda_pin == hwGPIO_Pin_NC) ||
+        (scl_iomux == GPIO_SOC_IOMUX_INVALID) ||
+        (sda_iomux == GPIO_SOC_IOMUX_INVALID) ||
+        (scl_function == 0U) ||
+        (sda_function == 0U))
     {
         return hwI2C_InvalidParameter;
     }
 
-    if (NeonRTOS_SyncObjCreate(
-            &I2C_Master_Done_SyncHandle[index]) !=
-        NeonRTOS_OK)
+    DL_GPIO_initPeripheralInputFunctionFeatures(
+        scl_iomux,
+        scl_function,
+        DL_GPIO_INVERSION_DISABLE,
+        DL_GPIO_RESISTOR_NONE,
+        DL_GPIO_HYSTERESIS_DISABLE,
+        DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initPeripheralInputFunctionFeatures(
+        sda_iomux,
+        sda_function,
+        DL_GPIO_INVERSION_DISABLE,
+        DL_GPIO_RESISTOR_NONE,
+        DL_GPIO_HYSTERESIS_DISABLE,
+        DL_GPIO_WAKEUP_DISABLE);
+
+    /*
+     * MSPM0 I2C uses the peripheral open-drain output. External pull-up
+     * resistors are still required on SCL and SDA.
+     */
+    DL_GPIO_enableHiZ(scl_iomux);
+    DL_GPIO_enableHiZ(sda_iomux);
+
+    I2C_Regs *i2c = I2C_Map_Soc_Base(index);
+    IRQn_Type irq;
+    uint8_t timer_period;
+
+    if ((i2c == NULL) || !I2C_GetTimerPeriod(speed_mode, &timer_period))
+    {
+        return hwI2C_InvalidParameter;
+    }
+
+    if (NeonRTOS_SyncObjCreate(&I2C_Master_Done_SyncHandle[index]) != NeonRTOS_OK)
     {
         return hwI2C_MemoryError;
     }
 
-    uint32_t scl_iomux;
-    uint32_t sda_iomux;
-    hwI2C_OpResult result =
-        I2C_ConfigPins(index, &scl_iomux, &sda_iomux);
-
-    if (result != hwI2C_OK)
-    {
-        NeonRTOS_SyncObjDelete(
-            &I2C_Master_Done_SyncHandle[index]);
-        return result;
-    }
-
     DL_I2C_reset(i2c);
     DL_I2C_enablePower(i2c);
-    DL_Common_delayCycles(
-        I2C_TIMSPM0_POWER_STARTUP_DELAY);
+    DL_Common_delayCycles(I2C_TIMSPM0_POWER_STARTUP_DELAY);
 
     const DL_I2C_ClockConfig clock_config = {
         .clockSel = DL_I2C_CLOCK_BUSCLK,
@@ -783,27 +637,17 @@ hwI2C_OpResult I2C_Master_Init(
     DL_I2C_disableAnalogGlitchFilter(i2c);
 
     DL_I2C_resetControllerTransfer(i2c);
-    DL_I2C_setControllerAddressingMode(
-        i2c,
-        DL_I2C_CONTROLLER_ADDRESSING_MODE_7_BIT);
+    DL_I2C_setControllerAddressingMode(i2c, DL_I2C_CONTROLLER_ADDRESSING_MODE_7_BIT);
     DL_I2C_setTimerPeriod(i2c, timer_period);
-    DL_I2C_setControllerTXFIFOThreshold(
-        i2c,
-        DL_I2C_TX_FIFO_LEVEL_BYTES_1);
-    DL_I2C_setControllerRXFIFOThreshold(
-        i2c,
-        DL_I2C_RX_FIFO_LEVEL_BYTES_1);
+    DL_I2C_setControllerTXFIFOThreshold(i2c, DL_I2C_TX_FIFO_LEVEL_BYTES_1);
+    DL_I2C_setControllerRXFIFOThreshold(i2c, DL_I2C_RX_FIFO_LEVEL_BYTES_1);
     DL_I2C_enableControllerClockStretching(i2c);
 
-    DL_I2C_disableInterrupt(
-        i2c, I2C_TIMSPM0_INTERRUPT_MASK);
-    DL_I2C_clearInterruptStatus(
-        i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+    DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+    DL_I2C_clearInterruptStatus(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
 
-    memset(
-        &i2c_xfer[index],
-        0,
-        sizeof(i2c_xfer[index]));
+    memset(&i2c_xfer[index], 0, sizeof(i2c_xfer[index]));
+
     i2c_xfer[index].state = TIMSPM0_I2C_IDLE;
 
     DL_I2C_enableController(i2c);
@@ -844,33 +688,37 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index)
     hwGPIO_Pin scl_pin = I2C_Pin_Def_Table[index].scl_pin;
     hwGPIO_Pin sda_pin = I2C_Pin_Def_Table[index].sda_pin;
 
+    uint32_t scl_iomux = GPIO_Map_Soc_Pin_IOMUX(scl_pin);
+    uint32_t sda_iomux = GPIO_Map_Soc_Pin_IOMUX(sda_pin);
+
+    if (scl_iomux == GPIO_SOC_IOMUX_INVALID || sda_iomux == GPIO_SOC_IOMUX_INVALID)
+    {
+        return hwI2C_InvalidParameter;
+    }
+
     I2C_Master_Init_Status[index] = false;
 
     I2C_NVIC_DeInit(index);
 
-    DL_I2C_disableInterrupt(
-        i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+    DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
     DL_I2C_resetControllerTransfer(i2c);
     DL_I2C_flushControllerTXFIFO(i2c);
     DL_I2C_flushControllerRXFIFO(i2c);
-    DL_I2C_clearInterruptStatus(
-        i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+    DL_I2C_clearInterruptStatus(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
     DL_I2C_disableController(i2c);
     DL_I2C_reset(i2c);
     DL_I2C_disablePower(i2c);
 
-    NeonRTOS_SyncObjDelete(
-        &I2C_Master_Done_SyncHandle[index]);
+    NeonRTOS_SyncObjDelete(&I2C_Master_Done_SyncHandle[index]);
 
-    I2C_DeConfigPins(index);
+    DL_GPIO_initDigitalInput(scl_iomux);
+    DL_GPIO_initDigitalInput(sda_iomux);
 
     gpio_pin_init_status[scl_pin] = false;
     gpio_pin_init_status[sda_pin] = false;
 
-    memset(
-        &i2c_xfer[index],
-        0,
-        sizeof(i2c_xfer[index]));
+    memset(&i2c_xfer[index], 0, sizeof(i2c_xfer[index]));
+
     i2c_xfer[index].state = TIMSPM0_I2C_IDLE;
 
     return hwI2C_OK;
@@ -888,11 +736,9 @@ hwI2C_OpResult I2C_Master_Reset(hwI2C_Index index)
         return hwI2C_NotInit;
     }
 
-    hwI2C_Speed_Mode speed =
-        I2C_Clock_Speed_Mode[index];
+    hwI2C_Speed_Mode speed = I2C_Clock_Speed_Mode[index];
 
-    hwI2C_OpResult result =
-        I2C_Master_DeInit(index);
+    hwI2C_OpResult result = I2C_Master_DeInit(index);
 
     if (result != hwI2C_OK)
     {
@@ -902,13 +748,7 @@ hwI2C_OpResult I2C_Master_Reset(hwI2C_Index index)
     return I2C_Master_Init(index, speed);
 }
 
-hwI2C_OpResult I2C_Master_Read(
-    hwI2C_Index index,
-    uint8_t address,
-    uint8_t *read_dat,
-    uint8_t read_len,
-    bool stop,
-    NeonRTOS_Time_t timeout_ms)
+hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read_dat, uint8_t read_len, bool stop, NeonRTOS_Time_t timeout_ms)
 {
     if ((index >= hwI2C_Index_MAX) ||
         (address > I2C_TIMSPM0_MAX_7BIT_ADDRESS) ||
@@ -938,7 +778,12 @@ hwI2C_OpResult I2C_Master_Read(
         return hwI2C_BusError;
     }
 
-    I2C_PrepareTransfer(index, i2c);
+    NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], NEONRT_NO_WAIT);
+
+    DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+    DL_I2C_clearInterruptStatus(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+    DL_I2C_flushControllerTXFIFO(i2c);
+    DL_I2C_flushControllerRXFIFO(i2c);
 
     memset(transfer, 0, sizeof(*transfer));
     transfer->state = TIMSPM0_I2C_RX;
@@ -955,8 +800,7 @@ hwI2C_OpResult I2C_Master_Read(
 
     if (stop)
     {
-        interrupt_mask |=
-            DL_I2C_INTERRUPT_CONTROLLER_STOP;
+        interrupt_mask |= DL_I2C_INTERRUPT_CONTROLLER_STOP;
     }
 
     DL_I2C_enableInterrupt(i2c, interrupt_mask);
@@ -972,16 +816,42 @@ hwI2C_OpResult I2C_Master_Read(
             DL_I2C_CONTROLLER_STOP_DISABLE,
         DL_I2C_CONTROLLER_ACK_DISABLE);
 
-    return I2C_WaitTransfer(index, timeout_ms);
+    if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeout_ms) != NeonRTOS_OK)
+    {
+        TIMSPM0_I2C_State state = i2c_xfer[index].state;
+
+        if ((state == TIMSPM0_I2C_TX) ||
+           (state == TIMSPM0_I2C_TX_WAIT_STOP) ||
+           (state == TIMSPM0_I2C_RX) ||
+           (state == TIMSPM0_I2C_RX_WAIT_STOP))
+        {
+            DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+            DL_I2C_resetControllerTransfer(i2c);
+            DL_I2C_flushControllerTXFIFO(i2c);
+            DL_I2C_flushControllerRXFIFO(i2c);
+            DL_I2C_clearInterruptStatus(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+
+            i2c_xfer[index].state = TIMSPM0_I2C_ERROR;
+            i2c_xfer[index].error = UINT32_MAX;
+        }
+
+        if (state == TIMSPM0_I2C_DONE)
+        {
+            return hwI2C_OK;
+        }
+
+        if (state == TIMSPM0_I2C_ERROR)
+        {
+            return hwI2C_BusError;
+        }
+
+        return hwI2C_SlaveTimeout;
+    }
+
+    return (i2c_xfer[index].state == TIMSPM0_I2C_DONE) ?hwI2C_OK : hwI2C_BusError;
 }
 
-hwI2C_OpResult I2C_Master_Write(
-    hwI2C_Index index,
-    uint8_t address,
-    uint8_t *write_dat,
-    uint8_t write_len,
-    bool stop,
-    NeonRTOS_Time_t timeout_ms)
+hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *write_dat, uint8_t write_len, bool stop, NeonRTOS_Time_t timeout_ms)
 {
     if ((index >= hwI2C_Index_MAX) ||
         (address > I2C_TIMSPM0_MAX_7BIT_ADDRESS) ||
@@ -1011,7 +881,12 @@ hwI2C_OpResult I2C_Master_Write(
         return hwI2C_BusError;
     }
 
-    I2C_PrepareTransfer(index, i2c);
+    NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], NEONRT_NO_WAIT);
+
+    DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+    DL_I2C_clearInterruptStatus(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+    DL_I2C_flushControllerTXFIFO(i2c);
+    DL_I2C_flushControllerRXFIFO(i2c);
 
     memset(transfer, 0, sizeof(*transfer));
     transfer->state = TIMSPM0_I2C_TX;
@@ -1020,11 +895,7 @@ hwI2C_OpResult I2C_Master_Write(
     transfer->tx_len = write_len;
     transfer->stop = stop;
 
-    transfer->tx_pos =
-        DL_I2C_fillControllerTXFIFO(
-            i2c,
-            write_dat,
-            write_len);
+    transfer->tx_pos = DL_I2C_fillControllerTXFIFO(i2c, write_dat, write_len);
 
     uint32_t interrupt_mask =
         DL_I2C_INTERRUPT_CONTROLLER_TX_DONE |
@@ -1033,14 +904,12 @@ hwI2C_OpResult I2C_Master_Write(
 
     if (transfer->tx_pos < transfer->tx_len)
     {
-        interrupt_mask |=
-            DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER;
+        interrupt_mask |= DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER;
     }
 
     if (stop)
     {
-        interrupt_mask |=
-            DL_I2C_INTERRUPT_CONTROLLER_STOP;
+        interrupt_mask |= DL_I2C_INTERRUPT_CONTROLLER_STOP;
     }
 
     DL_I2C_enableInterrupt(i2c, interrupt_mask);
@@ -1056,7 +925,39 @@ hwI2C_OpResult I2C_Master_Write(
             DL_I2C_CONTROLLER_STOP_DISABLE,
         DL_I2C_CONTROLLER_ACK_DISABLE);
 
-    return I2C_WaitTransfer(index, timeout_ms);
+    if (NeonRTOS_SyncObjWait(&I2C_Master_Done_SyncHandle[index], timeout_ms) != NeonRTOS_OK)
+    {
+        TIMSPM0_I2C_State state = i2c_xfer[index].state;
+
+        if ((state == TIMSPM0_I2C_TX) ||
+           (state == TIMSPM0_I2C_TX_WAIT_STOP) ||
+           (state == TIMSPM0_I2C_RX) ||
+           (state == TIMSPM0_I2C_RX_WAIT_STOP))
+        {
+            DL_I2C_disableInterrupt(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+            DL_I2C_resetControllerTransfer(i2c);
+            DL_I2C_flushControllerTXFIFO(i2c);
+            DL_I2C_flushControllerRXFIFO(i2c);
+            DL_I2C_clearInterruptStatus(i2c, I2C_TIMSPM0_INTERRUPT_MASK);
+
+            i2c_xfer[index].state = TIMSPM0_I2C_ERROR;
+            i2c_xfer[index].error = UINT32_MAX;
+        }
+
+        if (state == TIMSPM0_I2C_DONE)
+        {
+            return hwI2C_OK;
+        }
+
+        if (state == TIMSPM0_I2C_ERROR)
+        {
+            return hwI2C_BusError;
+        }
+
+        return hwI2C_SlaveTimeout;
+    }
+
+    return (i2c_xfer[index].state == TIMSPM0_I2C_DONE) ?hwI2C_OK : hwI2C_BusError;
 }
 
 bool I2C_Master_isInit(hwI2C_Index index)

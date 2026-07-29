@@ -61,18 +61,26 @@
 #define configCPU_CLOCK_HZ                F_CPU
 #define configTICK_RATE_HZ                ((TickType_t)1000)
 #if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
-#define configMINIMAL_STACK_SIZE          ((uint16_t)32)
+#define configMINIMAL_STACK_SIZE          ((uint16_t)16)
 #else
 #define configMINIMAL_STACK_SIZE          ((uint16_t)128)
 #endif
 #define configMINIMAL_SECURE_STACK_SIZE   configMINIMAL_STACK_SIZE
 #define configTOTAL_HEAP_SIZE             ((size_t)CONFIG_RTOS_HEAP_SIZE)
+#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
+#define configMAX_TASK_NAME_LEN           (4)
+#else
 #define configMAX_TASK_NAME_LEN           (16)
+#endif
 #define configUSE_TRACE_FACILITY          1
 #define configUSE_16_BIT_TICKS            0
 #define configIDLE_SHOULD_YIELD           1
 #define configUSE_MUTEXES                 1
+#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
+#define configQUEUE_REGISTRY_SIZE         0
+#else
 #define configQUEUE_REGISTRY_SIZE         8
+#endif
 #define configCHECK_FOR_STACK_OVERFLOW    0
 #if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
 #define configUSE_RECURSIVE_MUTEXES       0

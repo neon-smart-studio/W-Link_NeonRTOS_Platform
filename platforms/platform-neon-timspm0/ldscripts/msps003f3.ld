@@ -69,13 +69,6 @@ SECTIONS
         KEEP (*(.intvecs))
     } > REGION_TEXT
 
-    PROVIDE (_vtable_base_address =
-        DEFINED(_vtable_base_address) ? _vtable_base_address : 0x20000000);
-
-    .vtable (_vtable_base_address) (NOLOAD) : AT (_vtable_base_address) {
-        KEEP (*(.vtable))
-    } > REGION_DATA
-
    .text : {
         CREATE_OBJECT_SYMBOLS
         *(.text)

@@ -187,7 +187,9 @@ typedef enum {
     hwTimer_Index_8,
 #endif
 #if defined(TIMG8_BASE)
+#if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
     hwTimer_Index_9,
+#endif
 #endif
 #if defined(TIMG9_BASE)
     hwTimer_Index_10,

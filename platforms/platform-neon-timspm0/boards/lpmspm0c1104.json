@@ -3,7 +3,7 @@
     "core": "mspm0",
     "cpu": "cortex-m0plus",
     "ldscript": "mspm0c1104.ld",
-    "extra_flags": "-D__MSPM0C1104__ -DMSPM0C1104 -DMSPM0C110x",
+    "extra_flags": "-DMSPM0 -D__MSPM0C1104__ -DMSPM0C1104 -DMSPM0C110x",
     "f_cpu": "24000000L",
     "mcu": "MSPM0C1104",
     "variant": "MSPM0C1104"

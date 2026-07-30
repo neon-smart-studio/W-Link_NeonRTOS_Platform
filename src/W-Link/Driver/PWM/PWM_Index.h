@@ -264,8 +264,39 @@ typedef enum {
 } hwPWM_Channel;
 #endif
 
-#if defined(MSPM0C110x) || defined(MSPM0G511x) || \
-      defined(MSPM0G518x) || defined(MSPM0L111x)
+#if defined(MSPM0C110x)
+typedef enum {
+    hwPWM_Channel_1 = 0,
+    hwPWM_Channel_2,
+    hwPWM_Channel_3,
+    hwPWM_Channel_4,
+    hwPWM_Channel_5,
+    hwPWM_Channel_6,
+    hwPWM_Channel_7,
+    hwPWM_Channel_8,
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif
+
+#if defined(MSPM0C1105) || defined(MSPM0C1106)
+typedef enum {
+    hwPWM_Channel_1 = 0,
+    hwPWM_Channel_2,
+    hwPWM_Channel_3,
+    hwPWM_Channel_4,
+    hwPWM_Channel_5,
+    hwPWM_Channel_6,
+    hwPWM_Channel_7,
+    hwPWM_Channel_8,
+    hwPWM_Channel_9,
+    hwPWM_Channel_10,
+    hwPWM_Channel_11,
+    hwPWM_Channel_12,
+    hwPWM_Channel_MAX
+} hwPWM_Channel;
+#endif
+
+#if defined(MSPM0G511x) || defined(MSPM0G518x) || defined(MSPM0L111x)
 typedef enum {
     hwPWM_Channel_1 = 0,
     hwPWM_Channel_2,
@@ -301,9 +332,7 @@ typedef enum {
 } hwPWM_Channel;
 #endif
 
-#if defined(MSPM0C1105) || defined(MSPM0C1106) || \
-    defined(MSPM0H321x) || defined(MSPM0L122x) || \
-    defined(MSPM0L222x)
+#if defined(MSPM0H321x) || defined(MSPM0L122x) || defined(MSPM0L222x)
 typedef enum {
     hwPWM_Channel_1 = 0,
     hwPWM_Channel_2,

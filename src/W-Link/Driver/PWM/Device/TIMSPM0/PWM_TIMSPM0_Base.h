@@ -43,7 +43,9 @@ typedef enum {
     hwPWM_Base_TIMG7,
 #endif
 #if defined(TIMG8_BASE)
+#if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
     hwPWM_Base_TIMG8,
+#endif
 #endif
 #if defined(TIMG9_BASE)
     hwPWM_Base_TIMG9,

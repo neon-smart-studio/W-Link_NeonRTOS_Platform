@@ -70,8 +70,10 @@ static GPTIMER_Regs *Timer_Map_Base(hwTimer_Index index)
 #endif
 
 #if defined(TIMG8_BASE)
+#if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
         case hwTimer_Index_9:
             return TIMG8_BASE;
+#endif
 #endif
 
 #if defined(TIMG9_BASE)
@@ -144,8 +146,10 @@ static int32_t Timer_Map_IRQ(hwTimer_Index index)
 #endif
 
 #if defined(TIMG8_BASE)
+#if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
         case hwTimer_Index_9:
             return TIMG8_INT_IRQn;
+#endif
 #endif
 
 #if defined(TIMG9_BASE)
@@ -301,10 +305,12 @@ void TIMG7_IRQHandler(void)
 #endif
 
 #if defined(TIMG8_BASE)
+#if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
 void TIMG8_IRQHandler(void)
 {
     TIMSPM0_Timer_IRQ_Process(hwTimer_Index_9);
 }
+#endif
 #endif
 
 #if defined(TIMG9_BASE)
@@ -385,8 +391,10 @@ static void Timer_NVIC_Init(hwTimer_Index index)
 #endif
 
 #if defined(TIMG8_BASE)
+#if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
         case hwTimer_Index_9:
             return TIMG8_INT_IRQn;
+#endif
 #endif
 
 #if defined(TIMG9_BASE)

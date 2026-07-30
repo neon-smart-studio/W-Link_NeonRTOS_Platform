@@ -75,8 +75,10 @@ static GPTIMER_Regs *PWM_Map_Timer_Base(hwPWM_Base_Index base)
             return TIMG7_BASE;
 #endif
 #if defined(TIMG8_BASE)
+#if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
         case hwPWM_Base_TIMG8:
             return TIMG8_BASE;
+#endif
 #endif
 #if defined(TIMG9_BASE)
         case hwPWM_Base_TIMG9:
@@ -109,12 +111,12 @@ static uint32_t PWM_Map_Soc_Pin_Function(hwPWM_Channel channel)
         case hwPWM_Channel_2:  return IOMUX_PINCM23_PF_TIMA0_CCP1;
         case hwPWM_Channel_3:  return IOMUX_PINCM18_PF_TIMA0_CCP2;
         case hwPWM_Channel_4:  return IOMUX_PINCM19_PF_TIMA0_CCP3;
-        case hwPWM_Channel_5:  return IOMUX_PINCM1_PF_TIMG8_CCP0;
-        case hwPWM_Channel_6:  return IOMUX_PINCM3_PF_TIMG8_CCP1;
-        case hwPWM_Channel_7:  return IOMUX_PINCM17_PF_TIMG14_CCP0;
-        case hwPWM_Channel_8:  return IOMUX_PINCM24_PF_TIMG14_CCP1;
-        case hwPWM_Channel_9:  return IOMUX_PINCM25_PF_TIMG14_CCP2;
-        case hwPWM_Channel_10: return IOMUX_PINCM26_PF_TIMG14_CCP3;
+        case hwPWM_Channel_5:  return IOMUX_PINCM17_PF_TIMG14_CCP0;
+        case hwPWM_Channel_6:  return IOMUX_PINCM24_PF_TIMG14_CCP1;
+        case hwPWM_Channel_7:  return IOMUX_PINCM25_PF_TIMG14_CCP2;
+        case hwPWM_Channel_8: return IOMUX_PINCM26_PF_TIMG14_CCP3;
+        //case hwPWM_Channel_:  return IOMUX_PINCM1_PF_TIMG8_CCP0;
+        //case hwPWM_Channel_:  return IOMUX_PINCM3_PF_TIMG8_CCP1;
         default:               return 0U;
     }
 
@@ -129,12 +131,12 @@ static uint32_t PWM_Map_Soc_Pin_Function(hwPWM_Channel channel)
         case hwPWM_Channel_6:  return IOMUX_PINCM9_PF_TIMG1_CCP1;
         case hwPWM_Channel_7:  return IOMUX_PINCM14_PF_TIMG2_CCP0;
         case hwPWM_Channel_8:  return IOMUX_PINCM7_PF_TIMG2_CCP1;
-        case hwPWM_Channel_9:  return IOMUX_PINCM29_PF_TIMG8_CCP0;
-        case hwPWM_Channel_10: return IOMUX_PINCM1_PF_TIMG8_CCP1;
-        case hwPWM_Channel_11: return IOMUX_PINCM8_PF_TIMG14_CCP0;
-        case hwPWM_Channel_12: return IOMUX_PINCM2_PF_TIMG14_CCP1;
-        case hwPWM_Channel_13: return IOMUX_PINCM28_PF_TIMG14_CCP2;
-        case hwPWM_Channel_14: return IOMUX_PINCM25_PF_TIMG14_CCP3;
+        case hwPWM_Channel_9: return IOMUX_PINCM8_PF_TIMG14_CCP0;
+        case hwPWM_Channel_10: return IOMUX_PINCM2_PF_TIMG14_CCP1;
+        case hwPWM_Channel_11: return IOMUX_PINCM28_PF_TIMG14_CCP2;
+        case hwPWM_Channel_12: return IOMUX_PINCM25_PF_TIMG14_CCP3;
+        //case hwPWM_Channel_:  return IOMUX_PINCM29_PF_TIMG8_CCP0;
+        //case hwPWM_Channel_: return IOMUX_PINCM1_PF_TIMG8_CCP1;
         default:               return 0U;
     }
 

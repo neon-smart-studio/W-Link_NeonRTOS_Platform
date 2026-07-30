@@ -11,12 +11,10 @@ static const PWM_Pin_Def PWM_Pin_Def_Table[hwPWM_Channel_MAX] =
     { hwPWM_Channel_2,  hwPWM_Base_TIMA0,  hwGPIO_Pin_A22, 1 },
     { hwPWM_Channel_3,  hwPWM_Base_TIMA0,  hwGPIO_Pin_A17, 2 },
     { hwPWM_Channel_4,  hwPWM_Base_TIMA0,  hwGPIO_Pin_A18, 3 },
-    { hwPWM_Channel_5,  hwPWM_Base_TIMG8,  hwGPIO_Pin_A0,  0 },
-    { hwPWM_Channel_6,  hwPWM_Base_TIMG8,  hwGPIO_Pin_A2,  1 },
-    { hwPWM_Channel_7,  hwPWM_Base_TIMG14, hwGPIO_Pin_A16, 0 },
-    { hwPWM_Channel_8,  hwPWM_Base_TIMG14, hwGPIO_Pin_A23, 1 },
-    { hwPWM_Channel_9,  hwPWM_Base_TIMG14, hwGPIO_Pin_A24, 2 },
-    { hwPWM_Channel_10, hwPWM_Base_TIMG14, hwGPIO_Pin_A25, 3 },
+    { hwPWM_Channel_5,  hwPWM_Base_TIMG14, hwGPIO_Pin_A16, 0 },
+    { hwPWM_Channel_6,  hwPWM_Base_TIMG14, hwGPIO_Pin_A23, 1 },
+    { hwPWM_Channel_7,  hwPWM_Base_TIMG14, hwGPIO_Pin_A24, 2 },
+    { hwPWM_Channel_8,  hwPWM_Base_TIMG14, hwGPIO_Pin_A25, 3 },
 #endif
 
 #if defined(MSPM0C1105) || defined(MSPM0C1106)
@@ -28,12 +26,10 @@ static const PWM_Pin_Def PWM_Pin_Def_Table[hwPWM_Channel_MAX] =
     { hwPWM_Channel_6,  hwPWM_Base_TIMG1,  hwGPIO_Pin_A6,  1 },
     { hwPWM_Channel_7,  hwPWM_Base_TIMG2,  hwGPIO_Pin_A9,  0 },
     { hwPWM_Channel_8,  hwPWM_Base_TIMG2,  hwGPIO_Pin_A4,  1 },
-    { hwPWM_Channel_9,  hwPWM_Base_TIMG8,  hwGPIO_Pin_A17, 0 },
-    { hwPWM_Channel_10, hwPWM_Base_TIMG8,  hwGPIO_Pin_A0,  1 },
-    { hwPWM_Channel_11, hwPWM_Base_TIMG14, hwGPIO_Pin_A5,  0 },
-    { hwPWM_Channel_12, hwPWM_Base_TIMG14, hwGPIO_Pin_A1,  1 },
-    { hwPWM_Channel_13, hwPWM_Base_TIMG14, hwGPIO_Pin_A16, 2 },
-    { hwPWM_Channel_14, hwPWM_Base_TIMG14, hwGPIO_Pin_A13, 3 },
+    { hwPWM_Channel_9, hwPWM_Base_TIMG14, hwGPIO_Pin_A5,  0 },
+    { hwPWM_Channel_10, hwPWM_Base_TIMG14, hwGPIO_Pin_A1,  1 },
+    { hwPWM_Channel_11, hwPWM_Base_TIMG14, hwGPIO_Pin_A16, 2 },
+    { hwPWM_Channel_12, hwPWM_Base_TIMG14, hwGPIO_Pin_A13, 3 },
 #endif
 
 #if defined(MSPM0H321x)

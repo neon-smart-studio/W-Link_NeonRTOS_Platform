@@ -174,8 +174,7 @@ static MCAN_Regs *CAN_Map_Soc_Base(hwCAN_Index index)
  * Resolve every CAN-capable pin exposed by the current MSPM0 device header.
  * A pin route not present on the selected MCU is removed by its #if guard.
  */
-static bool CAN_Map_PinMux(
-    hwCAN_Index can, hwGPIO_Pin pin, bool is_tx, CAN_PinMux *mux)
+static bool CAN_Map_PinMux(hwCAN_Index can, hwGPIO_Pin pin, bool is_tx, CAN_PinMux *mux)
 {
     if (mux == NULL)
     {

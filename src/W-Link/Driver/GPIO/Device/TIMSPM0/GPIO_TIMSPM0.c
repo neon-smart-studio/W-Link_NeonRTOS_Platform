@@ -511,7 +511,7 @@ static void GPIO_IRQ_HandlePort(GPIO_Regs *port)
 
         int_pin = GPIO_Map_Int_Pin_By_Mask(port, int_mask);
 
-        if (!GPIO_IsValidIntPin(int_pin))
+        if (int_pin >= hwGPIO_Int_Pin_MAX)
             continue;
 
         switch (gpio_current_irq_mode[int_pin])

@@ -47,57 +47,66 @@
  */
 /* #define configUSE_PORT_OPTIMISED_TASK_SELECTION	0*/
 /* #define configMAX_PRIORITIES					( 56 ) */
-#define TINY_HEAP_SIZE 4096
+#define TINY_HEAP_SIZE 4098
 
 #define configUSE_PREEMPTION              1
 #define configUSE_IDLE_HOOK               1
-#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
 #define configUSE_TICK_HOOK               0
+#define configMAX_PRIORITIES              (2)
 #else
 #define configUSE_TICK_HOOK               1
-#endif
 #define configMAX_PRIORITIES              (7)
+#endif
 #define configSUPPORT_STATIC_ALLOCATION   0
 #define configCPU_CLOCK_HZ                F_CPU
 #define configTICK_RATE_HZ                ((TickType_t)1000)
-#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
-#define configMINIMAL_STACK_SIZE          ((uint16_t)16)
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
+#define configMINIMAL_STACK_SIZE          ((uint16_t)32)
 #else
 #define configMINIMAL_STACK_SIZE          ((uint16_t)128)
 #endif
 #define configMINIMAL_SECURE_STACK_SIZE   configMINIMAL_STACK_SIZE
 #define configTOTAL_HEAP_SIZE             ((size_t)CONFIG_RTOS_HEAP_SIZE)
-#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
-#define configMAX_TASK_NAME_LEN           (4)
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
+#define configMAX_TASK_NAME_LEN           (1)
+#define configUSE_TRACE_FACILITY          0
 #else
 #define configMAX_TASK_NAME_LEN           (16)
-#endif
 #define configUSE_TRACE_FACILITY          1
+#endif
 #define configUSE_16_BIT_TICKS            0
 #define configIDLE_SHOULD_YIELD           1
-#define configUSE_MUTEXES                 1
-#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
 #define configQUEUE_REGISTRY_SIZE         0
 #else
 #define configQUEUE_REGISTRY_SIZE         8
 #endif
 #define configCHECK_FOR_STACK_OVERFLOW    0
-#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
+#define configUSE_MUTEXES                 0
 #define configUSE_RECURSIVE_MUTEXES       0
+#define configUSE_COUNTING_SEMAPHORES     0
 #else
+#define configUSE_MUTEXES                 1
 #define configUSE_RECURSIVE_MUTEXES       1
+#define configUSE_COUNTING_SEMAPHORES     1
 #endif
 #define configUSE_MALLOC_FAILED_HOOK      0
 #define configUSE_APPLICATION_TASK_TAG    0
-#define configUSE_COUNTING_SEMAPHORES     1
 #define configGENERATE_RUN_TIME_STATS     0
 
 /* Co-routine definitions. */
-#define configUSE_CO_ROUTINES           1
-#define configMAX_CO_ROUTINE_PRIORITIES (2)
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
+#define configUSE_CO_ROUTINES             0
+#define configMAX_CO_ROUTINE_PRIORITIES   0
+#else
+#define configUSE_CO_ROUTINES             1
+#define configMAX_CO_ROUTINE_PRIORITIES  (2)
+#endif
 
 /* Software timer definitions. */
-#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
 #define configUSE_TIMERS             0
 #else
 #define configUSE_TIMERS             1
@@ -108,23 +117,24 @@
 
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
-#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
 #define INCLUDE_vTaskPrioritySet       0
 #define INCLUDE_uxTaskPriorityGet      0
 #else
 #define INCLUDE_vTaskPrioritySet       1
 #define INCLUDE_uxTaskPriorityGet      1
 #endif
-#define INCLUDE_vTaskDelete            1
 #define INCLUDE_vTaskCleanUpResources  0
-#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
+#define INCLUDE_vTaskDelete            0
 #define INCLUDE_vTaskSuspend           0
 #else
+#define INCLUDE_vTaskDelete            1
 #define INCLUDE_vTaskSuspend           1
 #endif
 #define INCLUDE_vTaskDelayUntil        1
 #define INCLUDE_vTaskDelay             1
-#if CONFIG_RTOS_HEAP_SIZE < TINY_HEAP_SIZE
+#if CONFIG_RTOS_HEAP_SIZE <= TINY_HEAP_SIZE
 #define INCLUDE_xTaskGetSchedulerState 0
 #define INCLUDE_xTimerPendFunctionCall 0
 #else
@@ -163,7 +173,7 @@ routine that makes calls to interrupt safe FreeRTOS API functions.  DO NOT CALL
 INTERRUPT SAFE FREERTOS API FUNCTIONS FROM ANY INTERRUPT THAT HAS A HIGHER
 PRIORITY THAN THIS! (higher priorities are lower numeric values. */
 
-#if defined(RP2350) || defined(TM4C123) || defined(TM4C1294) || defined(MSP432P) || defined(MSP432E)
+#if defined(RP2350) || defined(TM4C123) || defined(TM4C1294) || defined(MSP432P) || defined(MSP432E) || defined(MSPM0)
 #define configPRIO_BITS          3
 #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY 7
 #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 5
@@ -214,7 +224,10 @@ header file. */
 
 #define vPortSVCHandler     SVC_Handler
 #define xPortPendSVHandler  PendSV_Handler
-#define xPortSysTickHandler SysTick_Handler
+
+#if !defined(MSPM0C1104) && !defined(MSPM0C1103)
+#define xPortSysTickHandler    SysTick_Handler
+#endif
 
 #endif
 #endif /* FREERTOS_CONFIG_H */

@@ -315,8 +315,6 @@ uint32_t GPIO_Map_Soc_Pin_IOMUX(hwGPIO_Pin pin)
         case hwGPIO_Pin_C28: return IOMUX_PINCM93;
         case hwGPIO_Pin_C29: return IOMUX_PINCM94;
 
-        case hwGPIO_Pin_C30:
-        case hwGPIO_Pin_C31:
         case hwGPIO_Pin_NC:
         default: return GPIO_SOC_IOMUX_INVALID;
     }

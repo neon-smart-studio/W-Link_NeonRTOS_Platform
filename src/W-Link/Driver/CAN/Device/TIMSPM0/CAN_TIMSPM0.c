@@ -37,21 +37,10 @@
  * CAN_TIMSPM0_CLOCK_HZ must be the actual MCAN_FCLK after the divider.
  * The defaults match TI LaunchPad MCAN examples using a 40 MHz HFXT.
  */
-#ifndef CAN_TIMSPM0_BITRATE
 #define CAN_TIMSPM0_BITRATE       500000UL
-#endif
-
-#ifndef CAN_TIMSPM0_CLOCK_HZ
 #define CAN_TIMSPM0_CLOCK_HZ      40000000UL
-#endif
-
-#ifndef CAN_TIMSPM0_CLOCK_SOURCE
 #define CAN_TIMSPM0_CLOCK_SOURCE  DL_MCAN_FCLK_HFCLK
-#endif
-
-#ifndef CAN_TIMSPM0_CLOCK_DIV
 #define CAN_TIMSPM0_CLOCK_DIV     DL_MCAN_FCLK_DIV_1
-#endif
 
 #define CAN_MCAN_CORE_INTERRUPTS                                      \
     (DL_MCAN_INTERRUPT_RF0N | DL_MCAN_INTERRUPT_TC |                  \
@@ -60,13 +49,8 @@
      DL_MCAN_INTERRUPT_EW   | DL_MCAN_INTERRUPT_MRAF |                \
      DL_MCAN_INTERRUPT_PEA  | DL_MCAN_INTERRUPT_PED)
 
-typedef struct
-{
-    uint32_t pin_cm;
-    uint32_t function;
-} CAN_PinMux;
-
 static bool CAN_Init_Status[hwCAN_Index_MAX] = {false};
+
 static NeonRTOS_SyncObj_t CAN_TxDone_Sync[hwCAN_Index_MAX];
 static NeonRTOS_MsgQ_t CAN_RxQueue[hwCAN_Index_MAX];
 
@@ -174,122 +158,33 @@ static MCAN_Regs *CAN_Map_Soc_Base(hwCAN_Index index)
  * Resolve every CAN-capable pin exposed by the current MSPM0 device header.
  * A pin route not present on the selected MCU is removed by its #if guard.
  */
-static bool CAN_Map_PinMux(hwCAN_Index can, hwGPIO_Pin pin, bool is_tx, CAN_PinMux *mux)
+static uint32_t CAN_Map_Soc_Pin_Function(hwCAN_Index index, hwGPIO_Pin pin)
 {
-    if (mux == NULL)
+    if (index == hwCAN_Index_0)
     {
-        return false;
-    }
+        switch(pin)
+        {
+            case hwGPIO_Pin_A26:
+                return IOMUX_PINCM59_PF_CANFD0_CANTX;
 
-    if (can == hwCAN_Index_0)
-    {
-        if (is_tx)
-        {
-#if defined(IOMUX_PINCM34_PF_CANFD0_CANTX)
-            if (pin == hwGPIO_Pin_A12)
-            {
-                mux->pin_cm   = IOMUX_PINCM34;
-                mux->function = IOMUX_PINCM34_PF_CANFD0_CANTX;
-                return true;
-            }
-#endif
-#if defined(IOMUX_PINCM59_PF_CANFD0_CANTX)
-            if (pin == hwGPIO_Pin_A26)
-            {
-                mux->pin_cm   = IOMUX_PINCM59;
-                mux->function = IOMUX_PINCM59_PF_CANFD0_CANTX;
-                return true;
-            }
-#endif
-        }
-        else
-        {
-#if defined(IOMUX_PINCM35_PF_CANFD0_CANRX)
-            if (pin == hwGPIO_Pin_A13)
-            {
-                mux->pin_cm   = IOMUX_PINCM35;
-                mux->function = IOMUX_PINCM35_PF_CANFD0_CANRX;
-                return true;
-            }
-#endif
-#if defined(IOMUX_PINCM55_PF_CANFD0_CANRX)
-            if (pin == hwGPIO_Pin_A25)
-            {
-                mux->pin_cm   = IOMUX_PINCM55;
-                mux->function = IOMUX_PINCM55_PF_CANFD0_CANRX;
-                return true;
-            }
-#endif
-#if defined(IOMUX_PINCM60_PF_CANFD0_CANRX)
-            if (pin == hwGPIO_Pin_A27)
-            {
-                mux->pin_cm   = IOMUX_PINCM60;
-                mux->function = IOMUX_PINCM60_PF_CANFD0_CANRX;
-                return true;
-            }
-#endif
+            case hwGPIO_Pin_A27:
+                return IOMUX_PINCM60_PF_CANFD0_CANRX;
         }
     }
 
-    if (can == hwCAN_Index_1)
+    if (index == hwCAN_Index_1)
     {
-        if (is_tx)
+        switch(pin)
         {
-#if defined(IOMUX_PINCM49_PF_CANFD1_CANTX)
-            if (pin == hwGPIO_Pin_B21)
-            {
-                mux->pin_cm   = IOMUX_PINCM49;
-                mux->function = IOMUX_PINCM49_PF_CANFD1_CANTX;
-                return true;
-            }
-#endif
-#if defined(IOMUX_PINCM80_PF_CANFD1_CANTX)
-            if (pin == hwGPIO_Pin_C21)
-            {
-                mux->pin_cm   = IOMUX_PINCM80;
-                mux->function = IOMUX_PINCM80_PF_CANFD1_CANTX;
-                return true;
-            }
-#endif
-#if defined(IOMUX_PINCM91_PF_CANFD1_CANTX)
-            if (pin == hwGPIO_Pin_C26)
-            {
-                mux->pin_cm   = IOMUX_PINCM91;
-                mux->function = IOMUX_PINCM91_PF_CANFD1_CANTX;
-                return true;
-            }
-#endif
-        }
-        else
-        {
-#if defined(IOMUX_PINCM50_PF_CANFD1_CANRX)
-            if (pin == hwGPIO_Pin_B22)
-            {
-                mux->pin_cm   = IOMUX_PINCM50;
-                mux->function = IOMUX_PINCM50_PF_CANFD1_CANRX;
-                return true;
-            }
-#endif
-#if defined(IOMUX_PINCM81_PF_CANFD1_CANRX)
-            if (pin == hwGPIO_Pin_C22)
-            {
-                mux->pin_cm   = IOMUX_PINCM81;
-                mux->function = IOMUX_PINCM81_PF_CANFD1_CANRX;
-                return true;
-            }
-#endif
-#if defined(IOMUX_PINCM92_PF_CANFD1_CANRX)
-            if (pin == hwGPIO_Pin_C27)
-            {
-                mux->pin_cm   = IOMUX_PINCM92;
-                mux->function = IOMUX_PINCM92_PF_CANFD1_CANRX;
-                return true;
-            }
-#endif
+            case hwGPIO_Pin_B21:
+                return IOMUX_PINCM49_PF_CANFD1_CANTX;
+
+            case hwGPIO_Pin_B22:
+                return IOMUX_PINCM50_PF_CANFD1_CANRX;
         }
     }
 
-    return false;
+    return 0;
 }
 
 static bool CAN_BuildBitTiming(DL_MCAN_BitTimingParams *timing)
@@ -591,12 +486,6 @@ static void CAN_IRQ_Process(hwCAN_Index index)
 hwCAN_OpResult CAN_Init(hwCAN_Index index)
 {
     MCAN_Regs *base;
-    hwGPIO_Pin tx_pin;
-    hwGPIO_Pin rx_pin;
-    uint32_t tx_port;
-    uint32_t rx_port;
-    CAN_PinMux tx_mux;
-    CAN_PinMux rx_mux;
 
     if (index >= hwCAN_Index_MAX)
     {
@@ -609,20 +498,34 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
     }
 
     base = CAN_Map_Soc_Base(index);
-    if (base == NULL || CAN_Map_Soc_Int(index) < 0)
+    if (base == NULL)
     {
         return hwCAN_InvalidParameter;
     }
 
-    tx_pin = CAN_Pin_Def_Table[index].tx_pin;
-    rx_pin = CAN_Pin_Def_Table[index].rx_pin;
+    hwGPIO_Pin tx_pin = CAN_Pin_Def_Table[index].tx_pin;
+    hwGPIO_Pin rx_pin = CAN_Pin_Def_Table[index].rx_pin;
 
-    tx_port = GPIO_Map_Soc_Port_Base(tx_pin);
-    rx_port = GPIO_Map_Soc_Port_Base(rx_pin);
+    GPIO_Regs *tx_port = GPIO_Map_Soc_Port_Base(tx_pin);
+    GPIO_Regs *rx_port = GPIO_Map_Soc_Port_Base(rx_pin);
 
-    if (tx_port == 0U || rx_port == 0U ||
-        !CAN_Map_PinMux(index, tx_pin, true, &tx_mux) ||
-        !CAN_Map_PinMux(index, rx_pin, false, &rx_mux))
+    if (tx_port == NULL || rx_port == NULL)
+    {
+        return hwCAN_InvalidParameter;
+    }
+
+    uint32_t tx_iomux = GPIO_Map_Soc_Pin_IOMUX(tx_pin);
+    uint32_t rx_iomux = GPIO_Map_Soc_Pin_IOMUX(rx_pin);
+
+    if (tx_iomux==0 || rx_iomux==0)
+    {
+        return hwCAN_InvalidParameter;
+    }
+
+    uint32_t tx_function = I2C_Map_Soc_Pin_Function(index, tx_pin);
+    uint32_t rx_function = I2C_Map_Soc_Pin_Function(index, tx_pin);
+
+    if (tx_function==0 || rx_function==0)
     {
         return hwCAN_InvalidParameter;
     }
@@ -632,24 +535,26 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
         return hwCAN_MemoryError;
     }
 
-    if (NeonRTOS_MsgQCreate(&CAN_RxQueue[index], "can_rx",
-            CAN_RX_QUEUE_LEN, CAN_CLASSIC_MAX_DATA_LEN) != NeonRTOS_OK)
+    if (NeonRTOS_MsgQCreate(&CAN_RxQueue[index], "can_rx", CAN_RX_QUEUE_LEN, CAN_CLASSIC_MAX_DATA_LEN) != NeonRTOS_OK)
     {
         NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
         return hwCAN_MemoryError;
     }
 
-    GPIO_Enable_Port_Clock(tx_port);
-    GPIO_Enable_Port_Clock(rx_port);
+    DL_GPIO_enablePower(tx_port);
+    DL_Common_delayCycles(16U);
 
-    DL_GPIO_initPeripheralOutputFunction(tx_mux.pin_cm, tx_mux.function);
-    DL_GPIO_initPeripheralInputFunction(rx_mux.pin_cm, rx_mux.function);
+    DL_GPIO_enablePower(rx_port);
+    DL_Common_delayCycles(16U);
+
+    DL_GPIO_initPeripheralOutputFunction(tx_iomux, tx_function);
+    DL_GPIO_initPeripheralInputFunction(rx_iomux, rx_function);
 
     if (!CAN_HardwareInit(base))
     {
         CAN_HardwareDeInit(base);
-        DL_GPIO_initDigitalInput(tx_mux.pin_cm);
-        DL_GPIO_initDigitalInput(rx_mux.pin_cm);
+        DL_GPIO_initDigitalInput(tx_iomux);
+        DL_GPIO_initDigitalInput(rx_iomux);
         NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
         NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
         return hwCAN_HwError;
@@ -667,10 +572,6 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
 hwCAN_OpResult CAN_DeInit(hwCAN_Index index)
 {
     MCAN_Regs *base;
-    hwGPIO_Pin tx_pin;
-    hwGPIO_Pin rx_pin;
-    CAN_PinMux tx_mux;
-    CAN_PinMux rx_mux;
 
     if (index >= hwCAN_Index_MAX)
     {
@@ -683,12 +584,18 @@ hwCAN_OpResult CAN_DeInit(hwCAN_Index index)
     }
 
     base = CAN_Map_Soc_Base(index);
-    tx_pin = CAN_Pin_Def_Table[index].tx_pin;
-    rx_pin = CAN_Pin_Def_Table[index].rx_pin;
+    if (base == NULL)
+    {
+        return hwCAN_InvalidParameter;
+    }
 
-    if (base == NULL ||
-        !CAN_Map_PinMux(index, tx_pin, true, &tx_mux) ||
-        !CAN_Map_PinMux(index, rx_pin, false, &rx_mux))
+    hwGPIO_Pin tx_pin = CAN_Pin_Def_Table[index].tx_pin;
+    hwGPIO_Pin rx_pin = CAN_Pin_Def_Table[index].rx_pin;
+
+    uint32_t tx_iomux = GPIO_Map_Soc_Pin_IOMUX(tx_pin);
+    uint32_t rx_iomux = GPIO_Map_Soc_Pin_IOMUX(rx_pin);
+
+    if (tx_iomux==0 || rx_iomux==0)
     {
         return hwCAN_InvalidParameter;
     }
@@ -698,8 +605,8 @@ hwCAN_OpResult CAN_DeInit(hwCAN_Index index)
 
     CAN_HardwareDeInit(base);
 
-    DL_GPIO_initDigitalInput(tx_mux.pin_cm);
-    DL_GPIO_initDigitalInput(rx_mux.pin_cm);
+    DL_GPIO_initDigitalInput(tx_iomux);
+    DL_GPIO_initDigitalInput(rx_iomux);
 
     NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
     NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
@@ -722,8 +629,7 @@ hwCAN_OpResult CAN_Read(hwCAN_Index index, uint8_t *buf, uint32_t timeout)
         return hwCAN_NotInit;
     }
 
-    if (NeonRTOS_QueueReceive(
-            &CAN_RxQueue[index], buf, timeout) != NeonRTOS_OK)
+    if (NeonRTOS_MsgQRead(&CAN_RxQueue[index], buf, timeout) != NeonRTOS_OK)
     {
         return hwCAN_Timeout;
     }
@@ -770,16 +676,14 @@ hwCAN_OpResult CAN_Write(hwCAN_Index index, uint32_t id, uint8_t *data, uint8_t 
     tx_message.efc = 0U;
     memcpy(tx_message.data, data, len);
 
-    DL_MCAN_writeMsgRam(
-        base, DL_MCAN_MEM_TYPE_BUF, CAN_TX_BUFFER_INDEX, &tx_message);
+    DL_MCAN_writeMsgRam(base, DL_MCAN_MEM_TYPE_BUF, CAN_TX_BUFFER_INDEX, &tx_message);
 
     if (DL_MCAN_TXBufAddReq(base, CAN_TX_BUFFER_INDEX) != 0)
     {
         return hwCAN_HwError;
     }
 
-    if (NeonRTOS_SyncObjWait(
-            &CAN_TxDone_Sync[index], timeout) != NeonRTOS_OK)
+    if (NeonRTOS_SyncObjWait(&CAN_TxDone_Sync[index], timeout) != NeonRTOS_OK)
     {
         (void) DL_MCAN_txBufCancellationReq(
             base, CAN_TX_BUFFER_INDEX);

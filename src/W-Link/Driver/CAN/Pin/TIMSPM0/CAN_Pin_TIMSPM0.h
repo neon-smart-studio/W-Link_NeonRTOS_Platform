@@ -3,6 +3,8 @@
 
 #include "CAN_Pin_TIMSPM0_Def.h"
 
+static const CAN_Pin_Def CAN_Pin_Def_Table[hwCAN_Index_MAX] =
+{
 #if defined(CANFD0_BASE)
     /* ================= CAN0 ================= */
     {
@@ -18,5 +20,6 @@
         hwGPIO_Pin_B22    /* RX: PB22 / PINCM50 */
     },
 #endif
+};
 
 #endif // CAN_PIN_TIMSPM0_H

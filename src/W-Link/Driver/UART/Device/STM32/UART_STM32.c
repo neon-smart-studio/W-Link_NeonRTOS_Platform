@@ -54,13 +54,10 @@ hwUART_Index UART_IndexFromHandle(UART_HandleTypeDef *huart)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     hwUART_Index idx = UART_IndexFromHandle(huart);
+
     if (idx >= hwUART_Index_MAX) {
         return;
     }
-
-    __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_RXNE);
-
-    huart->RxState = HAL_UART_STATE_READY;
 
     NeonRTOS_SyncObjSignalFromISR(&UART_Recv_SyncHandle[idx]);
 }
@@ -455,6 +452,7 @@ hwUART_OpResult UART_Read(hwUART_Index index, uint8_t *data_rd, size_t size, uin
         }
 
         if (NeonRTOS_SyncObjWait(&UART_Recv_SyncHandle[index], wait_ms) != NeonRTOS_OK) {
+            (void)HAL_UART_AbortReceive(huart);
             if (recv_bytes > 0) {
                 return (hwUART_OpResult)recv_bytes;
             }

@@ -213,7 +213,7 @@ class Neonstm32Platform(PlatformBase):
                     server_args.extend([
                         "-f", "interface/%s.cfg" % link,
                         "-c", "transport select %s" % (
-                            "hla_swd" if link == "stlink" else "swd"),
+                            "dapdirect_swd" if link == "stlink" else "swd"),
                         "-f", "target/%s.cfg" % debug.get("openocd_target")
                     ])
                     server_args.extend(debug.get("openocd_extra_args", []))

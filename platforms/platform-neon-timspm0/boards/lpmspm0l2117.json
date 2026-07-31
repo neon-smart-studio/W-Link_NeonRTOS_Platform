@@ -1,0 +1,64 @@
+{
+  "build": {
+    "core": "mspm0",
+    "cpu": "cortex-m0plus",
+    "ldscript": "mspm0l2117.ld",
+    "extra_flags": "-DMSPM0 -D__MSPM0L2117__ -DMSPM0L2117 -DMSPM0L211x",
+    "f_cpu": "32000000L",
+    "mcu": "MSPM0L2117",
+    "variant": "MSPM0L2117"
+  },
+  "frameworks": [
+    "cmsis"
+  ],
+  "upload": {
+    "maximum_ram_size": 12288,
+    "maximum_size": 131072,
+    "protocol": "dslite",
+    "protocols": [
+      "dslite"
+    ]
+  },
+  "debug": {
+    "default_tools": [
+      "mspdebug"
+    ],
+    "onboard_tools": [
+      "mspdebug"
+    ],
+    "tools": {
+      "mspdebug": {
+        "onboard": true,
+        "default": true,
+        "server": {
+          "package": "tool-openocd",
+          "executable": "bin/openocd",
+          "arguments": [
+            "-s",
+            "$PACKAGE_DIR/scripts",
+            "-f",
+            "interface/xds110.cfg",
+            "-c",
+            "adapter speed 1000",
+            "-f",
+            "target/ti_mspm0.cfg"
+          ]
+        },
+        "load_cmds": [
+          "load"
+        ],
+        "init_break": "tbreak main",
+        "init_cmds": [
+          "target extended-remote $DEBUG_PORT",
+          "monitor reset halt",
+          "$LOAD_CMDS",
+          "monitor reset halt",
+          "$INIT_BREAK"
+        ]
+      }
+    }
+  },
+  "name": "TI LaunchPad MSPM0L2117",
+  "vendor": "TI",
+  "url": "https://www.ti.com/tool/LP-MSPM0L2117"
+}

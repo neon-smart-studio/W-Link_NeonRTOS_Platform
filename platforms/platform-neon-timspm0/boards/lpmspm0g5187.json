@@ -1,0 +1,64 @@
+{
+  "build": {
+    "core": "mspm0",
+    "cpu": "cortex-m0plus",
+    "ldscript": "mspm0g5187.ld",
+    "extra_flags": "-DMSPM0 -D__MSPM0G5187__ -DMSPM0G5187 -DMSPM0G518x",
+    "f_cpu": "80000000L",
+    "mcu": "MSPM0G5187",
+    "variant": "MSPM0G5187"
+  },
+  "frameworks": [
+    "cmsis"
+  ],
+  "upload": {
+    "maximum_ram_size": 32768,
+    "maximum_size": 131072,
+    "protocol": "dslite",
+    "protocols": [
+      "dslite"
+    ]
+  },
+  "debug": {
+    "default_tools": [
+      "mspdebug"
+    ],
+    "onboard_tools": [
+      "mspdebug"
+    ],
+    "tools": {
+      "mspdebug": {
+        "onboard": true,
+        "default": true,
+        "server": {
+          "package": "tool-openocd",
+          "executable": "bin/openocd",
+          "arguments": [
+            "-s",
+            "$PACKAGE_DIR/scripts",
+            "-f",
+            "interface/xds110.cfg",
+            "-c",
+            "adapter speed 1000",
+            "-f",
+            "target/ti_mspm0.cfg"
+          ]
+        },
+        "load_cmds": [
+          "load"
+        ],
+        "init_break": "tbreak main",
+        "init_cmds": [
+          "target extended-remote $DEBUG_PORT",
+          "monitor reset halt",
+          "$LOAD_CMDS",
+          "monitor reset halt",
+          "$INIT_BREAK"
+        ]
+      }
+    }
+  },
+  "name": "TI LaunchPad MSPM0G5187",
+  "vendor": "TI",
+  "url": "https://www.ti.com/tool/LP-MSPM0G5187"
+}

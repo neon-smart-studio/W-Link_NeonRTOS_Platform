@@ -1,0 +1,64 @@
+{
+  "build": {
+    "core": "mspm0",
+    "cpu": "cortex-m0plus",
+    "ldscript": "mspm0l2228.ld",
+    "extra_flags": "-DMSPM0 -D__MSPM0L2228__ -DMSPM0L2228 -DMSPM0L222x",
+    "f_cpu": "32000000L",
+    "mcu": "MSPM0L2228",
+    "variant": "MSPM0L2228"
+  },
+  "frameworks": [
+    "cmsis"
+  ],
+  "upload": {
+    "maximum_ram_size": 32768,
+    "maximum_size": 262144,
+    "protocol": "dslite",
+    "protocols": [
+      "dslite"
+    ]
+  },
+  "debug": {
+    "default_tools": [
+      "mspdebug"
+    ],
+    "onboard_tools": [
+      "mspdebug"
+    ],
+    "tools": {
+      "mspdebug": {
+        "onboard": true,
+        "default": true,
+        "server": {
+          "package": "tool-openocd",
+          "executable": "bin/openocd",
+          "arguments": [
+            "-s",
+            "$PACKAGE_DIR/scripts",
+            "-f",
+            "interface/xds110.cfg",
+            "-c",
+            "adapter speed 1000",
+            "-f",
+            "target/ti_mspm0.cfg"
+          ]
+        },
+        "load_cmds": [
+          "load"
+        ],
+        "init_break": "tbreak main",
+        "init_cmds": [
+          "target extended-remote $DEBUG_PORT",
+          "monitor reset halt",
+          "$LOAD_CMDS",
+          "monitor reset halt",
+          "$INIT_BREAK"
+        ]
+      }
+    }
+  },
+  "name": "TI LaunchPad MSPM0L2228",
+  "vendor": "TI",
+  "url": "https://www.ti.com/tool/LP-MSPM0L2228"
+}

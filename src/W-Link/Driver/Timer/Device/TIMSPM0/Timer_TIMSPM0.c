@@ -20,7 +20,7 @@ static uint32_t Timer_Period_Us[hwTimer_Index_MAX] = {0};
 
 static onTimerEventHandler Timer_Expired_Handler[hwTimer_Index_MAX] = {NULL};
 
-static GPTIMER_Regs *Timer_Map_Base(hwTimer_Index index)
+static GPTIMER_Regs *Timer_Map_Soc_Base(hwTimer_Index index)
 {
     switch (index)
     {
@@ -96,82 +96,6 @@ static GPTIMER_Regs *Timer_Map_Base(hwTimer_Index index)
     }
 }
 
-static int32_t Timer_Map_IRQ(hwTimer_Index index)
-{
-    switch (index)
-    {
-#if defined(TIMA0_BASE)
-        case hwTimer_Index_0:
-            return TIMA0_INT_IRQn;
-#endif
-
-#if defined(TIMA1_BASE)
-        case hwTimer_Index_1:
-            return TIMA1_INT_IRQn;
-#endif
-
-#if defined(TIMG0_BASE)
-        case hwTimer_Index_2:
-            return TIMG0_INT_IRQn;
-#endif
-
-#if defined(TIMG1_BASE)
-        case hwTimer_Index_3:
-            return TIMG1_INT_IRQn;
-#endif
-
-#if defined(TIMG2_BASE)
-        case hwTimer_Index_4:
-            return TIMG2_INT_IRQn;
-#endif
-
-#if defined(TIMG4_BASE)
-        case hwTimer_Index_5:
-            return TIMG4_INT_IRQn;
-#endif
-
-#if defined(TIMG5_BASE)
-        case hwTimer_Index_6:
-            return TIMG5_INT_IRQn;
-#endif
-
-#if defined(TIMG6_BASE)
-        case hwTimer_Index_7:
-            return TIMG6_INT_IRQn;
-#endif
-
-#if defined(TIMG7_BASE)
-        case hwTimer_Index_8:
-            return TIMG7_INT_IRQn;
-#endif
-
-#if defined(TIMG8_BASE)
-#if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
-        case hwTimer_Index_9:
-            return TIMG8_INT_IRQn;
-#endif
-#endif
-
-#if defined(TIMG9_BASE)
-        case hwTimer_Index_10:
-            return TIMG9_INT_IRQn;
-#endif
-
-#if defined(TIMG12_BASE)
-        case hwTimer_Index_11:
-            return TIMG12_INT_IRQn;
-#endif
-
-#if defined(TIMG14_BASE)
-        case hwTimer_Index_12:
-            return TIMG14_INT_IRQn;
-#endif
-
-        default:
-            return -1;
-    }
-}
-
 static uint32_t Timer_Us_To_LoadValue(uint32_t us)
 {
     uint64_t ticks;
@@ -209,8 +133,7 @@ static void TIMSPM0_Timer_IRQ_Process(hwTimer_Index index)
         return;
     }
 
-    base = Timer_Map_Base(index);
-
+    base = Timer_Map_Soc_Base(index);
     if (base == NULL)
     {
         return;
@@ -334,11 +257,6 @@ void TIMG14_IRQHandler(void)
 }
 #endif
 
-
-/* ============================================================
- * IRQ control
- * ============================================================ */
-
 static void Timer_NVIC_Init(hwTimer_Index index)
 {
     switch (index)
@@ -352,180 +270,189 @@ static void Timer_NVIC_Init(hwTimer_Index index)
 
 #if defined(TIMA1_BASE)
         case hwTimer_Index_1:
-            return TIMA1_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMA1_INT_IRQn);
+            NVIC_EnableIRQ(TIMA1_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG0_BASE)
         case hwTimer_Index_2:
-            return TIMG0_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG0_INT_IRQn);
+            NVIC_EnableIRQ(TIMG0_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG1_BASE)
         case hwTimer_Index_3:
-            return TIMG1_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG1_INT_IRQn);
+            NVIC_EnableIRQ(TIMG1_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG2_BASE)
         case hwTimer_Index_4:
-            return TIMG2_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG2_INT_IRQn);
+            NVIC_EnableIRQ(TIMG2_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG4_BASE)
         case hwTimer_Index_5:
-            return TIMG4_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG4_INT_IRQn);
+            NVIC_EnableIRQ(TIMG4_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG5_BASE)
         case hwTimer_Index_6:
-            return TIMG5_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG5_INT_IRQn);
+            NVIC_EnableIRQ(TIMG5_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG6_BASE)
         case hwTimer_Index_7:
-            return TIMG6_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG6_INT_IRQn);
+            NVIC_EnableIRQ(TIMG6_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG7_BASE)
         case hwTimer_Index_8:
-            return TIMG7_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG7_INT_IRQn);
+            NVIC_EnableIRQ(TIMG7_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG8_BASE)
 #if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
         case hwTimer_Index_9:
-            return TIMG8_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG8_INT_IRQn);
+            NVIC_EnableIRQ(TIMG8_INT_IRQn);
+            break;
 #endif
 #endif
 
 #if defined(TIMG9_BASE)
         case hwTimer_Index_10:
-            return TIMG9_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG9_INT_IRQn);
+            NVIC_EnableIRQ(TIMG9_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG12_BASE)
         case hwTimer_Index_11:
-            return TIMG12_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG12_INT_IRQn);
+            NVIC_EnableIRQ(TIMG12_INT_IRQn);
+            break;
 #endif
 
 #if defined(TIMG14_BASE)
         case hwTimer_Index_12:
-            return TIMG14_INT_IRQn;
+            NVIC_ClearPendingIRQ(TIMG14_INT_IRQn);
+            NVIC_EnableIRQ(TIMG14_INT_IRQn);
+            break;
 #endif
     }
 }
 
-static void Timer_Unregister_IRQ(hwTimer_Index index)
+static void Timer_NVIC_DeInit(hwTimer_Index index)
 {
-    GPTIMER_Regs *base;
-    int32_t irq;
-
-    base = Timer_Map_Base(index);
-    irq  = Timer_Map_IRQ(index);
-
-    if (base != NULL)
+    switch (index)
     {
-        DL_Timer_stopCounter(base);
+#if defined(TIMA0_BASE)
+        case hwTimer_Index_0:
+            NVIC_DisableIRQ(TIMA0_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMA0_INT_IRQn);
+            break;
+#endif
 
-        DL_Timer_disableInterrupt(
-            base,
-            DL_TIMER_INTERRUPT_ZERO_EVENT
-        );
+#if defined(TIMA1_BASE)
+        case hwTimer_Index_1:
+            NVIC_DisableIRQ(TIMA1_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMA1_INT_IRQn);
+            break;
+#endif
 
-        DL_Timer_clearInterruptStatus(
-            base,
-            DL_TIMER_INTERRUPT_ZERO_EVENT
-        );
+#if defined(TIMG0_BASE)
+        case hwTimer_Index_2:
+            NVIC_DisableIRQ(TIMG0_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG0_INT_IRQn);
+            break;
+#endif
+
+#if defined(TIMG1_BASE)
+        case hwTimer_Index_3:
+            NVIC_DisableIRQ(TIMG1_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG1_INT_IRQn);
+            break;
+#endif
+
+#if defined(TIMG2_BASE)
+        case hwTimer_Index_4:
+            NVIC_DisableIRQ(TIMG2_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG2_INT_IRQn);
+            break;
+#endif
+
+#if defined(TIMG4_BASE)
+        case hwTimer_Index_5:
+            NVIC_DisableIRQ(TIMG4_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG4_INT_IRQn);
+            break;
+#endif
+
+#if defined(TIMG5_BASE)
+        case hwTimer_Index_6:
+            NVIC_DisableIRQ(TIMG5_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG5_INT_IRQn);
+            break;
+#endif
+
+#if defined(TIMG6_BASE)
+        case hwTimer_Index_7:
+            NVIC_DisableIRQ(TIMG6_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG6_INT_IRQn);
+            break;
+#endif
+
+#if defined(TIMG7_BASE)
+        case hwTimer_Index_8:
+            NVIC_DisableIRQ(TIMG7_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG7_INT_IRQn);
+            break;
+#endif
+
+#if defined(TIMG8_BASE)
+#if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
+        case hwTimer_Index_9:
+            NVIC_DisableIRQ(TIMG8_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG8_INT_IRQn);
+            break;
+#endif
+#endif
+
+#if defined(TIMG9_BASE)
+        case hwTimer_Index_10:
+            NVIC_DisableIRQ(TIMG9_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG9_INT_IRQn);
+            break;
+#endif
+
+#if defined(TIMG12_BASE)
+        case hwTimer_Index_11:
+            NVIC_DisableIRQ(TIMG12_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG12_INT_IRQn);
+            break;
+#endif
+
+#if defined(TIMG14_BASE)
+        case hwTimer_Index_12:
+            NVIC_DisableIRQ(TIMG14_INT_IRQn);
+            NVIC_ClearPendingIRQ(TIMG14_INT_IRQn);
+            break;
+#endif
     }
-
-    if (irq >= 0)
-    {
-        NVIC_DisableIRQ((IRQn_Type)irq);
-        NVIC_ClearPendingIRQ((IRQn_Type)irq);
-    }
-}
-
-static hwTimer_OpResult Timer_Start_Internal(
-    hwTimer_Index index,
-    uint32_t duration_us,
-    onTimerEventHandler timer_exp_cb,
-    bool periodic
-)
-{
-    GPTIMER_Regs *base;
-    DL_Timer_TimerConfig timer_config;
-    uint32_t load_value;
-    int32_t irq;
-
-    if (index >= hwTimer_Index_MAX || duration_us == 0)
-    {
-        return hwTimer_InvalidParameter;
-    }
-
-    if (!Timer_Init_Status[index])
-    {
-        return hwTimer_NotInit;
-    }
-
-    base = Timer_Map_Base(index);
-
-    if (base == NULL)
-    {
-        return hwTimer_InvalidParameter;
-    }
-
-    load_value = Timer_Us_To_LoadValue(duration_us);
-
-    DL_Timer_stopCounter(base);
-
-    DL_Timer_disableInterrupt(
-        base,
-        DL_TIMER_INTERRUPT_ZERO_EVENT
-    );
-
-    DL_Timer_clearInterruptStatus(
-        base,
-        DL_TIMER_INTERRUPT_ZERO_EVENT
-    );
-
-    timer_config.timerMode =
-        periodic
-            ? DL_TIMER_TIMER_MODE_PERIODIC
-            : DL_TIMER_TIMER_MODE_ONE_SHOT;
-
-    timer_config.period       = load_value;
-    timer_config.startTimer   = DL_TIMER_STOP;
-    timer_config.genIntermInt = DL_TIMER_INTERM_INT_DISABLED;
-    timer_config.counterVal   = 0;
-
-    DL_Timer_initTimerMode(
-        base,
-        &timer_config
-    );
-
-    Timer_Expired_Handler[index] = timer_exp_cb;
-    Timer_IsPeriodic[index]      = periodic;
-    Timer_Period_Us[index]       = duration_us;
-
-    DL_Timer_clearInterruptStatus(
-        base,
-        DL_TIMER_INTERRUPT_ZERO_EVENT
-    );
-
-    DL_Timer_enableInterrupt(
-        base,
-        DL_TIMER_INTERRUPT_ZERO_EVENT
-    );
-
-    irq = Timer_Map_IRQ(index);
-
-    if (irq >= 0)
-    {
-        NVIC_ClearPendingIRQ((IRQn_Type)irq);
-    }
-
-    DL_Timer_startCounter(base);
-
-    return hwTimer_OK;
 }
 
 hwTimer_OpResult Timer_Init(hwTimer_Index index)
@@ -544,8 +471,7 @@ hwTimer_OpResult Timer_Init(hwTimer_Index index)
         return hwTimer_OK;
     }
 
-    base = Timer_Map_Base(index);
-
+    base = Timer_Map_Soc_Base(index);
     if (base == NULL)
     {
         return hwTimer_InvalidParameter;
@@ -563,10 +489,7 @@ hwTimer_OpResult Timer_Init(hwTimer_Index index)
     clock_config.divideRatio  = DL_TIMER_CLOCK_DIVIDE_1;
     clock_config.prescale     = 0;
 
-    DL_Timer_setClockConfig(
-        base,
-        &clock_config
-    );
+    DL_Timer_setClockConfig(base, &clock_config);
 
     timer_config.timerMode    = DL_TIMER_TIMER_MODE_PERIODIC;
     timer_config.period       = 0;
@@ -574,25 +497,16 @@ hwTimer_OpResult Timer_Init(hwTimer_Index index)
     timer_config.genIntermInt = DL_TIMER_INTERM_INT_DISABLED;
     timer_config.counterVal   = 0;
 
-    DL_Timer_initTimerMode(
-        base,
-        &timer_config
-    );
+    DL_Timer_initTimerMode(base, &timer_config);
 
-    DL_Timer_disableInterrupt(
-        base,
-        DL_TIMER_INTERRUPT_ZERO_EVENT
-    );
+    DL_Timer_disableInterrupt(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
 
-    DL_Timer_clearInterruptStatus(
-        base,
-        DL_TIMER_INTERRUPT_ZERO_EVENT
-    );
+    DL_Timer_clearInterruptStatus(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
 
     DL_Timer_enableClock(base);
     DL_Timer_stopCounter(base);
 
-    Timer_Register_IRQ(index);
+    Timer_NVIC_Init(index);
 
     Timer_Init_Status[index]     = true;
     Timer_IsPeriodic[index]      = false;
@@ -616,20 +530,26 @@ hwTimer_OpResult Timer_DeInit(hwTimer_Index index)
         return hwTimer_OK;
     }
 
-    base = Timer_Map_Base(index);
+    base = Timer_Map_Soc_Base(index);
 
     if (base == NULL)
     {
         return hwTimer_InvalidParameter;
     }
 
-    Timer_Unregister_IRQ(index);
-
     DL_Timer_stopCounter(base);
+
+    DL_Timer_disableInterrupt(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_clearInterruptStatus(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
     DL_Timer_disableClock(base);
 
     DL_Timer_reset(base);
+
     DL_Timer_disablePower(base);
+
+    Timer_NVIC_DeInit(index);
 
     Timer_Init_Status[index]     = false;
     Timer_IsPeriodic[index]      = false;
@@ -639,41 +559,12 @@ hwTimer_OpResult Timer_DeInit(hwTimer_Index index)
     return hwTimer_OK;
 }
 
-hwTimer_OpResult Timer_Start_OneShout(
-    hwTimer_Index index,
-    uint32_t duration_us,
-    onTimerEventHandler timer_exp_cb
+hwTimer_OpResult Timer_Start_OneShout(hwTimer_Index index, uint32_t duration_us, onTimerEventHandler timer_exp_cb
 )
 {
-    return Timer_Start_Internal(
-        index,
-        duration_us,
-        timer_exp_cb,
-        false
-    );
-}
-
-hwTimer_OpResult Timer_Start_Period(
-    hwTimer_Index index,
-    uint32_t duration_us,
-    onTimerEventHandler timer_exp_cb
-)
-{
-    return Timer_Start_Internal(
-        index,
-        duration_us,
-        timer_exp_cb,
-        true
-    );
-}
-
-hwTimer_OpResult Timer_Reload(
-    hwTimer_Index index,
-    uint32_t duration_us
-)
-{
-    bool periodic;
-    onTimerEventHandler callback;
+    GPTIMER_Regs *base;
+    DL_Timer_TimerConfig timer_config;
+    uint32_t load_value;
 
     if (index >= hwTimer_Index_MAX || duration_us == 0)
     {
@@ -685,15 +576,150 @@ hwTimer_OpResult Timer_Reload(
         return hwTimer_NotInit;
     }
 
-    periodic = Timer_IsPeriodic[index];
-    callback = Timer_Expired_Handler[index];
+    base = Timer_Map_Soc_Base(index);
+    if (base == NULL)
+    {
+        return hwTimer_InvalidParameter;
+    }
 
-    return Timer_Start_Internal(
-        index,
-        duration_us,
-        callback,
-        periodic
-    );
+    load_value = Timer_Us_To_LoadValue(duration_us);
+
+    DL_Timer_stopCounter(base);
+
+    DL_Timer_disableInterrupt(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_clearInterruptStatus(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    timer_config.timerMode = DL_TIMER_TIMER_MODE_ONE_SHOT;
+
+    timer_config.period       = load_value;
+    timer_config.startTimer   = DL_TIMER_STOP;
+    timer_config.genIntermInt = DL_TIMER_INTERM_INT_DISABLED;
+    timer_config.counterVal   = 0;
+
+    DL_Timer_initTimerMode(base, &timer_config);
+
+    Timer_Expired_Handler[index] = timer_exp_cb;
+    Timer_IsPeriodic[index]      = false;
+    Timer_Period_Us[index]       = duration_us;
+
+    DL_Timer_clearInterruptStatus(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_enableInterrupt(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_startCounter(base);
+
+    return hwTimer_OK;
+}
+
+hwTimer_OpResult Timer_Start_Period(hwTimer_Index index, uint32_t duration_us, onTimerEventHandler timer_exp_cb)
+{
+    GPTIMER_Regs *base;
+    DL_Timer_TimerConfig timer_config;
+    uint32_t load_value;
+
+    if (index >= hwTimer_Index_MAX || duration_us == 0)
+    {
+        return hwTimer_InvalidParameter;
+    }
+
+    if (!Timer_Init_Status[index])
+    {
+        return hwTimer_NotInit;
+    }
+
+    base = Timer_Map_Soc_Base(index);
+    if (base == NULL)
+    {
+        return hwTimer_InvalidParameter;
+    }
+
+    load_value = Timer_Us_To_LoadValue(duration_us);
+
+    DL_Timer_stopCounter(base);
+
+    DL_Timer_disableInterrupt(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_clearInterruptStatus(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    timer_config.timerMode = DL_TIMER_TIMER_MODE_PERIODIC;
+
+    timer_config.period       = load_value;
+    timer_config.startTimer   = DL_TIMER_STOP;
+    timer_config.genIntermInt = DL_TIMER_INTERM_INT_DISABLED;
+    timer_config.counterVal   = 0;
+
+    DL_Timer_initTimerMode(base, &timer_config);
+
+    Timer_Expired_Handler[index] = timer_exp_cb;
+    Timer_IsPeriodic[index]      = true;
+    Timer_Period_Us[index]       = duration_us;
+
+    DL_Timer_clearInterruptStatus(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_enableInterrupt(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_startCounter(base);
+
+    return hwTimer_OK;
+}
+
+hwTimer_OpResult Timer_Reload(hwTimer_Index index, uint32_t duration_us)
+{
+    GPTIMER_Regs *base;
+    DL_Timer_TimerConfig timer_config;
+    uint32_t load_value;
+
+    if (index >= hwTimer_Index_MAX || duration_us == 0)
+    {
+        return hwTimer_InvalidParameter;
+    }
+
+    if (!Timer_Init_Status[index])
+    {
+        return hwTimer_NotInit;
+    }
+
+    if (index >= hwTimer_Index_MAX || duration_us == 0)
+    {
+        return hwTimer_InvalidParameter;
+    }
+
+    if (!Timer_Init_Status[index])
+    {
+        return hwTimer_NotInit;
+    }
+
+    base = Timer_Map_Soc_Base(index);
+    if (base == NULL)
+    {
+        return hwTimer_InvalidParameter;
+    }
+
+    load_value = Timer_Us_To_LoadValue(duration_us);
+
+    DL_Timer_stopCounter(base);
+
+    DL_Timer_disableInterrupt(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_clearInterruptStatus(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    timer_config.timerMode = Timer_IsPeriodic[index] ? DL_TIMER_TIMER_MODE_PERIODIC : DL_TIMER_TIMER_MODE_ONE_SHOT;
+
+    timer_config.period       = load_value;
+    timer_config.startTimer   = DL_TIMER_STOP;
+    timer_config.genIntermInt = DL_TIMER_INTERM_INT_DISABLED;
+    timer_config.counterVal   = 0;
+
+    DL_Timer_initTimerMode(base, &timer_config);
+
+    DL_Timer_clearInterruptStatus(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_enableInterrupt(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
+
+    DL_Timer_startCounter(base);
+
+    return hwTimer_OK;
 }
 
 hwTimer_OpResult Timer_Stop(hwTimer_Index index)
@@ -710,7 +736,7 @@ hwTimer_OpResult Timer_Stop(hwTimer_Index index)
         return hwTimer_NotInit;
     }
 
-    base = Timer_Map_Base(index);
+    base = Timer_Map_Soc_Base(index);
 
     if (base == NULL)
     {
@@ -719,15 +745,9 @@ hwTimer_OpResult Timer_Stop(hwTimer_Index index)
 
     DL_Timer_stopCounter(base);
 
-    DL_Timer_disableInterrupt(
-        base,
-        DL_TIMER_INTERRUPT_ZERO_EVENT
-    );
+    DL_Timer_disableInterrupt(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
 
-    DL_Timer_clearInterruptStatus(
-        base,
-        DL_TIMER_INTERRUPT_ZERO_EVENT
-    );
+    DL_Timer_clearInterruptStatus(base, DL_TIMER_INTERRUPT_ZERO_EVENT);
 
     Timer_IsPeriodic[index] = false;
     Timer_Period_Us[index]  = 0;
@@ -735,10 +755,7 @@ hwTimer_OpResult Timer_Stop(hwTimer_Index index)
     return hwTimer_OK;
 }
 
-hwTimer_OpResult Timer_Read_Ticks(
-    hwTimer_Index index,
-    uint32_t *ticks
-)
+hwTimer_OpResult Timer_Read_Ticks(hwTimer_Index index, uint32_t *ticks)
 {
     GPTIMER_Regs *base;
 
@@ -752,7 +769,7 @@ hwTimer_OpResult Timer_Read_Ticks(
         return hwTimer_NotInit;
     }
 
-    base = Timer_Map_Base(index);
+    base = Timer_Map_Soc_Base(index);
 
     if (base == NULL)
     {
@@ -764,10 +781,7 @@ hwTimer_OpResult Timer_Read_Ticks(
     return hwTimer_OK;
 }
 
-hwTimer_OpResult Timer_Read_uSec(
-    hwTimer_Index index,
-    uint32_t *uSec
-)
+hwTimer_OpResult Timer_Read_uSec(hwTimer_Index index, uint32_t *uSec)
 {
     uint32_t ticks;
     uint64_t us;
@@ -802,9 +816,8 @@ hwTimer_OpResult Timer_Read_uSec(
         return hwTimer_OK;
     }
 
-    us =
-        (((uint64_t)ticks + 1ULL) * 1000000ULL) /
-        (uint64_t)g_sys_clock_hz;
+    us = (((uint64_t)ticks + 1ULL) * 1000000ULL) /
+         (uint64_t)g_sys_clock_hz;
 
     if (us > 0xFFFFFFFFULL)
     {

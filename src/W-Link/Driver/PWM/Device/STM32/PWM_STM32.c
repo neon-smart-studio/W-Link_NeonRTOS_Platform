@@ -202,12 +202,6 @@ hwPWM_OpResult PWM_Turn_On(hwPWM_Channel channel_index)
                 return hwPWM_InvalidParameter;
         }
 
-        /* Timer 必須已初始化 */
-        if (!Timer_is_Init(def->timer))
-        {
-                return hwPWM_NotInit;
-        }
-
         /* duty clamp */
         uint16_t duty = PWM_Channel_Current_Duty[channel_index];
         if (duty > PWM_MAX_DUTY)
@@ -272,12 +266,6 @@ hwPWM_OpResult PWM_Turn_On_And_Set_Duty(hwPWM_Channel channel_index, uint16_t du
                 return hwPWM_InvalidParameter;
         }
 
-        /* Timer 必須已初始化 */
-        if (!Timer_is_Init(def->timer))
-        {
-                return hwPWM_NotInit;
-        }
-
         /* 計算 CCR */
         uint32_t period = g_timer[def->timer].Init.Period;
         uint32_t pulse;
@@ -329,12 +317,6 @@ hwPWM_OpResult PWM_Turn_Off(hwPWM_Channel channel_index)
         if (!def || def->pin == hwGPIO_Pin_NC)
         {
                 return hwPWM_InvalidParameter;
-        }
-
-        /* Timer 必須已初始化 */
-        if (!Timer_is_Init(def->timer))
-        {
-                return hwPWM_NotInit;
         }
 
         /* 計算 CCR */
@@ -396,12 +378,6 @@ hwPWM_OpResult PWM_Set_Duty(hwPWM_Channel channel_index, uint16_t duty)
                 return hwPWM_InvalidParameter;
         }
 
-        /* Timer 必須已初始化 */
-        if (!Timer_is_Init(def->timer))
-        {
-                return hwPWM_NotInit;
-        }
-
         /* 計算 CCR */
         uint32_t period = g_timer[def->timer].Init.Period;
         uint32_t pulse;
@@ -455,12 +431,6 @@ hwPWM_OpResult PWM_Step_Duty(hwPWM_Channel channel_index, uint16_t step_duty, hw
         if (!def || def->pin == hwGPIO_Pin_NC)
         {
                 return hwPWM_InvalidParameter;
-        }
-
-        /* Timer 必須已初始化 */
-        if (!Timer_is_Init(def->timer))
-        {
-                return hwPWM_NotInit;
         }
 
         uint16_t current_duty = PWM_Channel_Current_Duty[channel_index];

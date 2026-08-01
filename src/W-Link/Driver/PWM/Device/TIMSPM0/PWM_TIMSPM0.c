@@ -22,8 +22,6 @@
 
 #define PWM_HZ           1000
 
-#define PWM_TIMSPM0_POWER_STARTUP_DELAY (16U)
-
 #define PWM_TIMSPM0_16BIT_PERIOD_MAX   (65536UL)
 
 static bool PWM_Channel_Init_Status[hwPWM_Channel_MAX] = {false};
@@ -31,65 +29,65 @@ static bool PWM_Channel_OnOff_Status[hwPWM_Channel_MAX] = {false};
 static bool PWM_Channel_Inverse_Status[hwPWM_Channel_MAX] = {false};
 static uint16_t PWM_Channel_Current_Duty[hwPWM_Channel_MAX] = {0};
 
-static bool PWM_Base_Init_Status[hwPWM_Base_MAX] = {false};
-static uint32_t PWM_Base_Period[hwPWM_Base_MAX] = {0};
+static bool PWM_Base_Init_Status[hwTimer_Index_MAX] = {false};
+static uint32_t PWM_Base_Period[hwTimer_Index_MAX] = {0};
 
-static GPTIMER_Regs *PWM_Map_Timer_Base(hwPWM_Base_Index base)
+static GPTIMER_Regs *PWM_Map_Timer_Base(hwTimer_Index base)
 {
     switch (base)
     {
 #if defined(TIMA0_BASE)
-        case hwPWM_Base_TIMA0:
+        case hwTimer_Index_0:
             return TIMA0_BASE;
 #endif
 #if defined(TIMA1_BASE)
-        case hwPWM_Base_TIMA1:
+        case hwTimer_Index_1:
             return TIMA1_BASE;
 #endif
 #if defined(TIMG0_BASE)
-        case hwPWM_Base_TIMG0:
+        case hwTimer_Index_2:
             return TIMG0_BASE;
 #endif
 #if defined(TIMG1_BASE)
-        case hwPWM_Base_TIMG1:
+        case hwTimer_Index_3:
             return TIMG1_BASE;
 #endif
 #if defined(TIMG2_BASE)
-        case hwPWM_Base_TIMG2:
+        case hwTimer_Index_4:
             return TIMG2_BASE;
 #endif
 #if defined(TIMG4_BASE)
-        case hwPWM_Base_TIMG4:
+        case hwTimer_Index_5:
             return TIMG4_BASE;
 #endif
 #if defined(TIMG5_BASE)
-        case hwPWM_Base_TIMG5:
+        case hwTimer_Index_6:
             return TIMG5_BASE;
 #endif
 #if defined(TIMG6_BASE)
-        case hwPWM_Base_TIMG6:
+        case hwTimer_Index_7:
             return TIMG6_BASE;
 #endif
 #if defined(TIMG7_BASE)
-        case hwPWM_Base_TIMG7:
+        case hwTimer_Index_8:
             return TIMG7_BASE;
 #endif
 #if defined(TIMG8_BASE)
 #if !defined(MSPM0C1103) && !defined(MSPM0C1104) && !defined(MSPM0C1105) && !defined(MSPM0C1106)
-        case hwPWM_Base_TIMG8:
+        case hwTimer_Index_9:
             return TIMG8_BASE;
 #endif
 #endif
 #if defined(TIMG9_BASE)
-        case hwPWM_Base_TIMG9:
+        case hwTimer_Index_10:
             return TIMG9_BASE;
 #endif
 #if defined(TIMG12_BASE)
-        case hwPWM_Base_TIMG12:
+        case hwTimer_Index_11:
             return TIMG12_BASE;
 #endif
 #if defined(TIMG14_BASE)
-        case hwPWM_Base_TIMG14:
+        case hwTimer_Index_12:
             return TIMG14_BASE;
 #endif
 
@@ -322,154 +320,22 @@ static uint32_t PWM_Map_Soc_Pin_Function(hwPWM_Channel channel)
 #endif
 }
 
-static bool PWM_Base_HasFourCC(hwPWM_Base_Index base)
+static bool PWM_Base_HasFourCC(hwTimer_Index base)
 {
     switch (base)
     {
 #if defined(TIMA0_BASE)
-        case hwPWM_Base_TIMA0:
+        case hwTimer_Index_0:
             return true;
 #endif
 #if defined(TIMG14_BASE)
-        case hwPWM_Base_TIMG14:
+        case hwTimer_Index_12:
             return true;
 #endif
 
         default:
             return false;
     }
-}
-
-static hwPWM_OpResult PWM_Base_Init(hwPWM_Base_Index base)
-{
-    if (base >= hwPWM_Base_MAX)
-    {
-        return hwPWM_InvalidParameter;
-    }
-
-    if (PWM_Base_Init_Status[base])
-    {
-        return hwPWM_OK;
-    }
-
-    GPTIMER_Regs *timer = PWM_Map_Timer_Base(base);
-    if (timer == NULL)
-    {
-        return hwPWM_InvalidParameter;
-    }
-    
-    DL_TIMER_CLOCK_DIVIDE clock_divide;
-    uint32_t period;
-
-    for (uint32_t divide_value = 1U; divide_value <= 8U; divide_value++)
-    {
-        uint64_t denominator = (uint64_t) PWM_HZ * divide_value;
-        uint32_t calculated_period = (uint32_t) (((uint64_t) g_sys_clock_hz + (denominator / 2U)) / denominator);
-
-        if ((calculated_period > 0U) && (calculated_period <= PWM_TIMSPM0_16BIT_PERIOD_MAX))
-        {
-            switch (divide_value)
-            {
-                case 1:
-                    clock_divide = DL_TIMER_CLOCK_DIVIDE_1;
-                    break;
-
-                case 2:
-                    clock_divide = DL_TIMER_CLOCK_DIVIDE_2;
-                    break;
-
-                case 3:
-                    clock_divide = DL_TIMER_CLOCK_DIVIDE_3;
-                    break;
-
-                case 4:
-                    clock_divide = DL_TIMER_CLOCK_DIVIDE_4;
-                    break;
-
-                case 5:
-                    clock_divide = DL_TIMER_CLOCK_DIVIDE_5;
-                    break;
-
-                case 6:
-                    clock_divide = DL_TIMER_CLOCK_DIVIDE_6;
-                    break;
-
-                case 7:
-                    clock_divide = DL_TIMER_CLOCK_DIVIDE_7;
-                    break;
-
-                case 8:
-                    clock_divide = DL_TIMER_CLOCK_DIVIDE_8;
-                    break;
-            }
-            
-            period = calculated_period;
-        }
-    }
-
-    DL_Timer_reset(timer);
-    DL_Timer_enablePower(timer);
-    DL_Common_delayCycles(PWM_TIMSPM0_POWER_STARTUP_DELAY);
-
-    const DL_Timer_ClockConfig clock_config = {
-        .clockSel = DL_TIMER_CLOCK_BUSCLK,
-        .divideRatio = clock_divide,
-        .prescale = 0U,
-    };
-
-    const DL_Timer_PWMConfig pwm_config = {
-        .period = period,
-        .pwmMode = DL_TIMER_PWM_MODE_EDGE_ALIGN,
-        .isTimerWithFourCC = PWM_Base_HasFourCC(base),
-        .startTimer = DL_TIMER_STOP,
-    };
-
-    DL_Timer_setClockConfig(timer, &clock_config);
-    DL_Timer_initPWMMode(timer, &pwm_config);
-    DL_Timer_enableClock(timer);
-
-    PWM_Base_Period[base] = period;
-    PWM_Base_Init_Status[base] = true;
-
-    return hwPWM_OK;
-}
-
-static void PWM_Base_DeInit(hwPWM_Base_Index base)
-{
-    if (base >= hwPWM_Base_MAX)
-    {
-        return;
-    }
-
-    if (!PWM_Base_Init_Status[base])
-    {
-        return;
-    }
-
-    GPTIMER_Regs *timer = PWM_Map_Timer_Base(base);
-    if (timer != NULL)
-    {
-        DL_Timer_stopCounter(timer);
-        DL_Timer_disableClock(timer);
-        DL_Timer_reset(timer);
-        DL_Timer_disablePower(timer);
-    }
-
-    PWM_Base_Period[base] = 0U;
-    PWM_Base_Init_Status[base] = false;
-}
-
-static bool PWM_IsBaseUsed(hwPWM_Base_Index base)
-{
-    for (hwPWM_Channel channel = hwPWM_Channel_1; channel < hwPWM_Channel_MAX; channel++)
-    {
-        if (PWM_Channel_Init_Status[channel] && (PWM_Pin_Def_Table[channel].base == base))
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 hwPWM_OpResult PWM_Channel_Init(hwPWM_Channel channel_index, bool inverse_PWM)
@@ -484,14 +350,19 @@ hwPWM_OpResult PWM_Channel_Init(hwPWM_Channel channel_index, bool inverse_PWM)
         return hwPWM_OK;
     }
 
-    hwPWM_Base_Index base = PWM_Pin_Def_Table[channel_index].base;
-    if (base >= hwPWM_Base_MAX)
+    hwTimer_Index timer_index = PWM_Pin_Def_Table[channel_index].timer;
+    if (timer_index >= hwTimer_Index_MAX)
     {
         return hwPWM_InvalidParameter;
     }
 
-    GPTIMER_Regs *timer = PWM_Map_Timer_Base(base);
-    if (timer == NULL)
+    if(Timer_is_Init(timer_index))
+    {
+        return hwPWM_HwError;
+    }
+
+    GPTIMER_Regs *base = PWM_Map_Timer_Base(timer_index);
+    if (base == NULL)
     {
         return hwPWM_InvalidParameter;
     }
@@ -527,52 +398,122 @@ hwPWM_OpResult PWM_Channel_Init(hwPWM_Channel channel_index, bool inverse_PWM)
             break;
     }
 
-    if ((ccp_mask == 0U) || ((!PWM_Base_HasFourCC(base)) && (PWM_Pin_Def_Table[channel_index].compare_index > 1U)))
+    if ((ccp_mask == 0U) || ((!PWM_Base_HasFourCC(timer_index)) && (PWM_Pin_Def_Table[channel_index].compare_index > 1U)))
     {
         return hwPWM_InvalidParameter;
     }
 
-    bool new_base = !PWM_Base_Init_Status[base];
+    bool new_base = !PWM_Base_Init_Status[timer_index];
 
-    hwPWM_OpResult result = PWM_Base_Init(base);
-    if (result != hwPWM_OK)
+    if (!PWM_Base_Init_Status[timer_index])
     {
-        return result;
+        DL_TIMER_CLOCK_DIVIDE clock_divide;
+        uint32_t period;
+
+        for (uint32_t divide_value = 1U; divide_value <= 8U; divide_value++)
+        {
+            uint64_t denominator = (uint64_t) PWM_HZ * divide_value;
+            uint32_t calculated_period = (uint32_t) (((uint64_t) g_sys_clock_hz + (denominator / 2U)) / denominator);
+
+            if ((calculated_period > 0U) && (calculated_period <= PWM_TIMSPM0_16BIT_PERIOD_MAX))
+            {
+                switch (divide_value)
+                {
+                    case 1:
+                        clock_divide = DL_TIMER_CLOCK_DIVIDE_1;
+                        break;
+
+                    case 2:
+                        clock_divide = DL_TIMER_CLOCK_DIVIDE_2;
+                        break;
+
+                    case 3:
+                        clock_divide = DL_TIMER_CLOCK_DIVIDE_3;
+                        break;
+
+                    case 4:
+                        clock_divide = DL_TIMER_CLOCK_DIVIDE_4;
+                        break;
+
+                    case 5:
+                        clock_divide = DL_TIMER_CLOCK_DIVIDE_5;
+                        break;
+
+                    case 6:
+                        clock_divide = DL_TIMER_CLOCK_DIVIDE_6;
+                        break;
+
+                    case 7:
+                        clock_divide = DL_TIMER_CLOCK_DIVIDE_7;
+                        break;
+
+                    case 8:
+                        clock_divide = DL_TIMER_CLOCK_DIVIDE_8;
+                        break;
+                }
+                
+                period = calculated_period;
+            }
+        }
+
+        DL_Timer_reset(base);
+        DL_Timer_enablePower(base);
+        DL_Common_delayCycles(16U);
+
+        const DL_Timer_ClockConfig clock_config = {
+            .clockSel = DL_TIMER_CLOCK_BUSCLK,
+            .divideRatio = clock_divide,
+            .prescale = 0U,
+        };
+
+        const DL_Timer_PWMConfig pwm_config = {
+            .period = period,
+            .pwmMode = DL_TIMER_PWM_MODE_EDGE_ALIGN,
+            .isTimerWithFourCC = PWM_Base_HasFourCC(timer_index),
+            .startTimer = DL_TIMER_STOP,
+        };
+
+        DL_Timer_setClockConfig(base, &clock_config);
+        DL_Timer_initPWMMode(base, &pwm_config);
+        DL_Timer_enableClock(base);
+
+        PWM_Base_Period[timer_index] = period;
+        PWM_Base_Init_Status[timer_index] = true;
     }
 
     PWM_Channel_Inverse_Status[channel_index] = inverse_PWM;
     PWM_Channel_Current_Duty[channel_index] = PWM_MIN_DUTY;
 
     DL_Timer_setCaptureCompareOutCtl(
-        timer,
+        base,
         inverse_PWM ? DL_TIMER_CC_OCTL_INIT_VAL_HIGH : DL_TIMER_CC_OCTL_INIT_VAL_LOW,
         inverse_PWM ? DL_TIMER_CC_OCTL_INV_OUT_ENABLED : DL_TIMER_CC_OCTL_INV_OUT_DISABLED,
         DL_TIMER_CC_OCTL_SRC_FUNCVAL,
         (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
-    DL_Timer_setCaptCompUpdateMethod(timer, DL_TIMER_CC_UPDATE_METHOD_IMMEDIATE, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_setCaptCompUpdateMethod(base, DL_TIMER_CC_UPDATE_METHOD_IMMEDIATE, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
-    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[PWM_Pin_Def_Table[channel_index].base] * (PWM_MAX_DUTY - PWM_MIN_DUTY) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
+    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[timer_index] * (PWM_MAX_DUTY - PWM_MIN_DUTY) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
     if (inactive_ticks != 0)
     {
         inactive_ticks -= 1;
     }
 
-    DL_Timer_setCaptureCompareValue(timer, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_setCaptureCompareValue(base, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
     DL_TIMER_FORCE_OUT force = PWM_Channel_Inverse_Status[channel_index] ? DL_TIMER_FORCE_OUT_HIGH : DL_TIMER_FORCE_OUT_LOW;
-    DL_Timer_overrideCCPOut(timer, force, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_overrideCCPOut(base, force, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
-    DL_Timer_setCCPDirection(timer, DL_Timer_getCCPDirection(timer) | ccp_mask);
+    DL_Timer_setCCPDirection(base, DL_Timer_getCCPDirection(base) | ccp_mask);
 
     DL_GPIO_enablePower(pwm_gpio);
-    DL_Common_delayCycles(PWM_TIMSPM0_POWER_STARTUP_DELAY);
+    DL_Common_delayCycles(16U);
     DL_GPIO_initPeripheralOutputFunction(pwm_iomux, pwm_iomux_function);
     DL_GPIO_enableOutput(pwm_gpio, pwm_gpio_pin);
 
     if (new_base)
     {
-        DL_Timer_startCounter(timer);
+        DL_Timer_startCounter(base);
     }
 
     gpio_pin_init_status[PWM_Pin_Def_Table[channel_index].pin] = true;
@@ -595,14 +536,19 @@ hwPWM_OpResult PWM_Channel_DeInit(hwPWM_Channel channel_index)
         return hwPWM_OK;
     }
 
-    hwPWM_Base_Index base = PWM_Pin_Def_Table[channel_index].base;
-    if (base >= hwPWM_Base_MAX)
+    hwTimer_Index timer_index = PWM_Pin_Def_Table[channel_index].timer;
+    if (timer_index >= hwTimer_Index_MAX)
     {
         return hwPWM_InvalidParameter;
     }
 
-    GPTIMER_Regs *timer = PWM_Map_Timer_Base(base);
-    if (timer == NULL)
+    if(Timer_is_Init(timer_index))
+    {
+        return hwPWM_HwError;
+    }
+
+    GPTIMER_Regs *base = PWM_Map_Timer_Base(timer_index);
+    if (base == NULL)
     {
         return hwPWM_InvalidParameter;
     }
@@ -643,9 +589,9 @@ hwPWM_OpResult PWM_Channel_DeInit(hwPWM_Channel channel_index)
     }
 
     DL_TIMER_FORCE_OUT force = PWM_Channel_Inverse_Status[channel_index] ? DL_TIMER_FORCE_OUT_HIGH : DL_TIMER_FORCE_OUT_LOW;
-    DL_Timer_overrideCCPOut(timer, force, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_overrideCCPOut(base, force, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
-    DL_Timer_setCCPDirection(timer, DL_Timer_getCCPDirection(timer) & ~ccp_mask);
+    DL_Timer_setCCPDirection(base, DL_Timer_getCCPDirection(base) & ~ccp_mask);
 
     DL_GPIO_disableOutput(pwm_gpio, pwm_gpio_pin);
     DL_GPIO_initDigitalInput(pwm_iomux);
@@ -657,9 +603,31 @@ hwPWM_OpResult PWM_Channel_DeInit(hwPWM_Channel channel_index)
     PWM_Channel_Inverse_Status[channel_index] = false;
     PWM_Channel_Current_Duty[channel_index] = PWM_MIN_DUTY;
 
-    if (!PWM_IsBaseUsed(base))
+    bool is_base_used = false;
+
+    for (hwPWM_Channel channel = hwPWM_Channel_1; channel < hwPWM_Channel_MAX; channel++)
     {
-        PWM_Base_DeInit(base);
+        if (PWM_Channel_Init_Status[channel] && (PWM_Pin_Def_Table[channel].timer == timer_index))
+        {
+            is_base_used = true;
+            break;
+        }
+    }
+
+    if (!is_base_used)
+    {
+        if (!PWM_Base_Init_Status[timer_index])
+        {
+            return hwPWM_OK;
+        }
+
+        DL_Timer_stopCounter(base);
+        DL_Timer_disableClock(base);
+        DL_Timer_reset(base);
+        DL_Timer_disablePower(base);
+
+        PWM_Base_Period[timer_index] = 0U;
+        PWM_Base_Init_Status[timer_index] = false;
     }
 
     return hwPWM_OK;
@@ -677,21 +645,32 @@ hwPWM_OpResult PWM_Turn_On(hwPWM_Channel channel_index)
         return hwPWM_NotInit;
     }
 
-    GPTIMER_Regs *timer = PWM_Map_Timer_Base(PWM_Pin_Def_Table[channel_index].base);
-    if ((timer == NULL) || (PWM_Pin_Def_Table[channel_index].compare_index > 3U))
+    hwTimer_Index timer_index = PWM_Pin_Def_Table[channel_index].timer;
+    if (timer_index >= hwTimer_Index_MAX)
     {
         return hwPWM_InvalidParameter;
     }
 
-    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[PWM_Pin_Def_Table[channel_index].base] * (PWM_MAX_DUTY - PWM_Channel_Current_Duty[channel_index]) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
+    GPTIMER_Regs *base = PWM_Map_Timer_Base(timer_index);
+    if (base == NULL)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    if (PWM_Pin_Def_Table[channel_index].compare_index > 3U)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[timer_index] * (PWM_MAX_DUTY - PWM_Channel_Current_Duty[channel_index]) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
     if (inactive_ticks != 0)
     {
         inactive_ticks -= 1;
     }
 
-    DL_Timer_setCaptureCompareValue(timer, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_setCaptureCompareValue(base, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
-    DL_Timer_overrideCCPOut(timer, DL_TIMER_FORCE_OUT_DISABLED, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_overrideCCPOut(base, DL_TIMER_FORCE_OUT_DISABLED, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
     PWM_Channel_OnOff_Status[channel_index] = true;
 
@@ -715,21 +694,32 @@ hwPWM_OpResult PWM_Turn_On_And_Set_Duty(hwPWM_Channel channel_index, uint16_t du
         return hwPWM_NotInit;
     }
 
-    GPTIMER_Regs *timer = PWM_Map_Timer_Base(PWM_Pin_Def_Table[channel_index].base);
-    if ((timer == NULL) || (PWM_Pin_Def_Table[channel_index].compare_index > 3U))
+    hwTimer_Index timer_index = PWM_Pin_Def_Table[channel_index].timer;
+    if (timer_index >= hwTimer_Index_MAX)
     {
         return hwPWM_InvalidParameter;
     }
 
-    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[PWM_Pin_Def_Table[channel_index].base] * (PWM_MAX_DUTY - duty) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
+    GPTIMER_Regs *base = PWM_Map_Timer_Base(timer_index);
+    if (base == NULL)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    if (PWM_Pin_Def_Table[channel_index].compare_index > 3U)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[timer_index] * (PWM_MAX_DUTY - duty) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
     if (inactive_ticks != 0)
     {
         inactive_ticks -= 1;
     }
 
-    DL_Timer_setCaptureCompareValue(timer, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_setCaptureCompareValue(base, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
-    DL_Timer_overrideCCPOut(timer, DL_TIMER_FORCE_OUT_DISABLED, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_overrideCCPOut(base, DL_TIMER_FORCE_OUT_DISABLED, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
     PWM_Channel_Current_Duty[channel_index] = duty;
     PWM_Channel_OnOff_Status[channel_index] = true;
@@ -749,14 +739,25 @@ hwPWM_OpResult PWM_Turn_Off(hwPWM_Channel channel_index)
         return hwPWM_NotInit;
     }
 
-    GPTIMER_Regs *timer = PWM_Map_Timer_Base(PWM_Pin_Def_Table[channel_index].base);
-    if ((timer == NULL) || (PWM_Pin_Def_Table[channel_index].compare_index > 3U))
+    hwTimer_Index timer_index = PWM_Pin_Def_Table[channel_index].timer;
+    if (timer_index >= hwTimer_Index_MAX)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    GPTIMER_Regs *base = PWM_Map_Timer_Base(timer_index);
+    if (base == NULL)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    if (PWM_Pin_Def_Table[channel_index].compare_index > 3U)
     {
         return hwPWM_InvalidParameter;
     }
 
     DL_TIMER_FORCE_OUT force = PWM_Channel_Inverse_Status[channel_index] ? DL_TIMER_FORCE_OUT_HIGH : DL_TIMER_FORCE_OUT_LOW;
-    DL_Timer_overrideCCPOut(timer, force, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_overrideCCPOut(base, force, DL_TIMER_FORCE_CMPL_OUT_DISABLED, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
     PWM_Channel_OnOff_Status[channel_index] = false;
 
@@ -785,19 +786,30 @@ hwPWM_OpResult PWM_Set_Duty(hwPWM_Channel channel_index, uint16_t duty)
         return hwPWM_NotTurnOn;
     }
 
-    GPTIMER_Regs *timer = PWM_Map_Timer_Base(PWM_Pin_Def_Table[channel_index].base);
-    if ((timer == NULL) || (PWM_Pin_Def_Table[channel_index].compare_index > 3U))
+    hwTimer_Index timer_index = PWM_Pin_Def_Table[channel_index].timer;
+    if (timer_index >= hwTimer_Index_MAX)
     {
         return hwPWM_InvalidParameter;
     }
 
-    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[PWM_Pin_Def_Table[channel_index].base] * (PWM_MAX_DUTY - duty) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
+    GPTIMER_Regs *base = PWM_Map_Timer_Base(timer_index);
+    if (base == NULL)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    if (PWM_Pin_Def_Table[channel_index].compare_index > 3U)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[timer_index] * (PWM_MAX_DUTY - duty) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
     if (inactive_ticks != 0)
     {
         inactive_ticks -= 1;
     }
 
-    DL_Timer_setCaptureCompareValue(timer, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_setCaptureCompareValue(base, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
     PWM_Channel_Current_Duty[channel_index] = duty;
 
@@ -826,8 +838,19 @@ hwPWM_OpResult PWM_Step_Duty(hwPWM_Channel channel_index, uint16_t step_duty, hw
         return hwPWM_NotTurnOn;
     }
 
-    GPTIMER_Regs *timer = PWM_Map_Timer_Base(PWM_Pin_Def_Table[channel_index].base);
-    if ((timer == NULL) || (PWM_Pin_Def_Table[channel_index].compare_index > 3U))
+    hwTimer_Index timer_index = PWM_Pin_Def_Table[channel_index].timer;
+    if (timer_index >= hwTimer_Index_MAX)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    GPTIMER_Regs *base = PWM_Map_Timer_Base(timer_index);
+    if (base == NULL)
+    {
+        return hwPWM_InvalidParameter;
+    }
+
+    if (PWM_Pin_Def_Table[channel_index].compare_index > 3U)
     {
         return hwPWM_InvalidParameter;
     }
@@ -862,13 +885,13 @@ hwPWM_OpResult PWM_Step_Duty(hwPWM_Channel channel_index, uint16_t step_duty, hw
             return hwPWM_InvalidParameter;
     }
 
-    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[PWM_Pin_Def_Table[channel_index].base] * (PWM_MAX_DUTY - current_duty) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
+    uint64_t inactive_ticks = ((uint64_t) PWM_Base_Period[timer_index] * (PWM_MAX_DUTY - current_duty) + (PWM_MAX_DUTY / 2U)) / PWM_MAX_DUTY;
     if (inactive_ticks != 0)
     {
         inactive_ticks -= 1;
     }
 
-    DL_Timer_setCaptureCompareValue(timer, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
+    DL_Timer_setCaptureCompareValue(base, inactive_ticks, (DL_TIMER_CC_INDEX) PWM_Pin_Def_Table[channel_index].compare_index);
 
     PWM_Channel_Current_Duty[channel_index] = current_duty;
 

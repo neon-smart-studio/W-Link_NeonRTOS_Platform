@@ -4,13 +4,13 @@
 
 #include "GPIO/GPIO.h"
 
-#include "PWM/PWM.h"
+#include "Timer/Timer.h"
 
-#include "PWM/Device/TIMSPM0/PWM_TIMSPM0_Base.h"
+#include "PWM/PWM.h"
 
 typedef struct {
     hwPWM_Channel channel;
-    hwPWM_Base_Index base;
+    hwTimer_Index timer;
     hwGPIO_Pin pin;
     uint8_t compare_index;
 } PWM_Pin_Def;

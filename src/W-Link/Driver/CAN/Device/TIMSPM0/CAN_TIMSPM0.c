@@ -187,174 +187,6 @@ static uint32_t CAN_Map_Soc_Pin_Function(hwCAN_Index index, hwGPIO_Pin pin)
     return 0;
 }
 
-static bool CAN_BuildBitTiming(DL_MCAN_BitTimingParams *timing)
-{
-    uint32_t prescaler;
-
-    if (timing == NULL || CAN_TIMSPM0_BITRATE == 0U ||
-        CAN_TIMSPM0_CLOCK_HZ == 0U)
-    {
-        return false;
-    }
-
-    memset(timing, 0, sizeof(*timing));
-
-    /*
-     * Prefer the lowest prescaler (largest number of time quanta).
-     * The sample point is placed close to 80%.
-     */
-    for (prescaler = 1U; prescaler <= 512U; ++prescaler)
-    {
-        uint64_t denominator =
-            (uint64_t) CAN_TIMSPM0_BITRATE * (uint64_t) prescaler;
-        uint32_t tq;
-        uint32_t seg1;
-        uint32_t seg2;
-
-        if (((uint64_t) CAN_TIMSPM0_CLOCK_HZ % denominator) != 0U)
-        {
-            continue;
-        }
-
-        tq = (uint32_t) ((uint64_t) CAN_TIMSPM0_CLOCK_HZ / denominator);
-        if (tq < 8U || tq > 385U)
-        {
-            continue;
-        }
-
-        seg2 = tq / 5U;
-        if (seg2 < 2U)
-        {
-            seg2 = 2U;
-        }
-        if (seg2 > 128U)
-        {
-            seg2 = 128U;
-        }
-
-        seg1 = tq - 1U - seg2;
-        if (seg1 < 2U || seg1 > 256U)
-        {
-            continue;
-        }
-
-        timing->nomRatePrescalar  = prescaler - 1U;
-        timing->nomTimeSeg1       = seg1 - 1U;
-        timing->nomTimeSeg2       = seg2 - 1U;
-        timing->nomSynchJumpWidth = seg2 - 1U;
-        return true;
-    }
-
-    return false;
-}
-
-static bool CAN_WaitForMemInit(MCAN_Regs *base)
-{
-    uint32_t wait = CAN_HW_WAIT_LIMIT;
-
-    while (!DL_MCAN_isMemInitDone(base))
-    {
-        if (--wait == 0U)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-static bool CAN_SetOpMode(MCAN_Regs *base, uint32_t mode)
-{
-    uint32_t wait = CAN_HW_WAIT_LIMIT;
-
-    DL_MCAN_setOpMode(base, mode);
-    while (DL_MCAN_getOpMode(base) != mode)
-    {
-        if (--wait == 0U)
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-static bool CAN_HardwareInit(MCAN_Regs *base)
-{
-    DL_MCAN_BitTimingParams bit_timing;
-
-    if (!CAN_BuildBitTiming(&bit_timing))
-    {
-        return false;
-    }
-
-    DL_MCAN_reset(base);
-    DL_MCAN_enablePower(base);
-    delay_cycles(16U);
-
-    if (!DL_MCAN_isPowerEnabled(base))
-    {
-        return false;
-    }
-
-    DL_MCAN_enableModuleClock(base);
-    DL_MCAN_setClockConfig(base, &CAN_ClockConfig);
-
-    if (!CAN_WaitForMemInit(base) ||
-        !CAN_SetOpMode(base, DL_MCAN_OPERATION_MODE_SW_INIT))
-    {
-        return false;
-    }
-
-    if (DL_MCAN_init(base, &CAN_InitParams) != 0 ||
-        DL_MCAN_config(base, &CAN_ConfigParams) != 0 ||
-        DL_MCAN_setBitTime(base, &bit_timing) != 0 ||
-        DL_MCAN_msgRAMConfig(base, &CAN_MsgRAMConfig) != 0 ||
-        DL_MCAN_setExtIDAndMask(base, 0x1FFFFFFFU) != 0)
-    {
-        return false;
-    }
-
-    if (!CAN_SetOpMode(base, DL_MCAN_OPERATION_MODE_NORMAL))
-    {
-        return false;
-    }
-
-    if (DL_MCAN_TXBufTransIntrEnable(
-            base, CAN_TX_BUFFER_INDEX, true) != 0)
-    {
-        return false;
-    }
-
-    DL_MCAN_enableIntr(base, CAN_MCAN_CORE_INTERRUPTS, true);
-    DL_MCAN_selectIntrLine(base, CAN_MCAN_CORE_INTERRUPTS, DL_MCAN_INTR_LINE_NUM_1);
-    DL_MCAN_enableIntrLine(base, DL_MCAN_INTR_LINE_NUM_1, true);
-
-    DL_MCAN_clearInterruptStatus(base, DL_MCAN_MSP_INTERRUPT_LINE1);
-    DL_MCAN_enableInterrupt(base, DL_MCAN_MSP_INTERRUPT_LINE1);
-
-    return true;
-}
-
-static void CAN_HardwareDeInit(MCAN_Regs *base)
-{
-    if (base == NULL || !DL_MCAN_isPowerEnabled(base))
-    {
-        return;
-    }
-
-    DL_MCAN_disableInterrupt(base, DL_MCAN_MSP_INTERRUPT_LINE1);
-    DL_MCAN_enableIntrLine(base, DL_MCAN_INTR_LINE_NUM_1, false);
-    DL_MCAN_enableIntr(base, CAN_MCAN_CORE_INTERRUPTS, false);
-    DL_MCAN_TXBufTransIntrEnable(base, CAN_TX_BUFFER_INDEX, false);
-
-    CAN_SetOpMode(base, DL_MCAN_OPERATION_MODE_SW_INIT);
-
-    DL_MCAN_reset(base);
-    DL_MCAN_disableModuleClock(base);
-    DL_MCAN_disablePower(base);
-}
-
 static void CAN_NVIC_Init(hwCAN_Index index)
 {
     switch (index)
@@ -522,8 +354,8 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
         return hwCAN_InvalidParameter;
     }
 
-    uint32_t tx_function = I2C_Map_Soc_Pin_Function(index, tx_pin);
-    uint32_t rx_function = I2C_Map_Soc_Pin_Function(index, tx_pin);
+    uint32_t tx_function = CAN_Map_Soc_Pin_Function(index, tx_pin);
+    uint32_t rx_function = CAN_Map_Soc_Pin_Function(index, rx_pin);
 
     if (tx_function==0 || rx_function==0)
     {
@@ -550,15 +382,146 @@ hwCAN_OpResult CAN_Init(hwCAN_Index index)
     DL_GPIO_initPeripheralOutputFunction(tx_iomux, tx_function);
     DL_GPIO_initPeripheralInputFunction(rx_iomux, rx_function);
 
-    if (!CAN_HardwareInit(base))
+    DL_MCAN_BitTimingParams bit_timing;
+
+    uint32_t prescaler;
+
+    memset(&bit_timing, 0, sizeof(bit_timing));
+
+    /*
+     * Prefer the lowest prescaler (largest number of time quanta).
+     * The sample point is placed close to 80%.
+     */
+    for (prescaler = 1U; prescaler <= 512U; ++prescaler)
     {
-        CAN_HardwareDeInit(base);
+        uint64_t denominator = (uint64_t) CAN_TIMSPM0_BITRATE * (uint64_t) prescaler;
+        uint32_t tq;
+        uint32_t seg1;
+        uint32_t seg2;
+
+        if (((uint64_t) CAN_TIMSPM0_CLOCK_HZ % denominator) != 0U)
+        {
+            continue;
+        }
+
+        tq = (uint32_t) ((uint64_t) CAN_TIMSPM0_CLOCK_HZ / denominator);
+        if (tq < 8U || tq > 385U)
+        {
+            continue;
+        }
+
+        seg2 = tq / 5U;
+        if (seg2 < 2U)
+        {
+            seg2 = 2U;
+        }
+        if (seg2 > 128U)
+        {
+            seg2 = 128U;
+        }
+
+        seg1 = tq - 1U - seg2;
+        if (seg1 < 2U || seg1 > 256U)
+        {
+            continue;
+        }
+
+        bit_timing.nomRatePrescalar  = prescaler - 1U;
+        bit_timing.nomTimeSeg1       = seg1 - 1U;
+        bit_timing.nomTimeSeg2       = seg2 - 1U;
+        bit_timing.nomSynchJumpWidth = seg2 - 1U;
+    }
+
+    DL_MCAN_reset(base);
+    DL_MCAN_enablePower(base);
+    delay_cycles(16U);
+
+    if (!DL_MCAN_isPowerEnabled(base))
+    {
         DL_GPIO_initDigitalInput(tx_iomux);
         DL_GPIO_initDigitalInput(rx_iomux);
         NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
         NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
         return hwCAN_HwError;
     }
+
+    DL_MCAN_enableModuleClock(base);
+    DL_MCAN_setClockConfig(base, &CAN_ClockConfig);
+
+    uint32_t wait;
+    
+    wait = CAN_HW_WAIT_LIMIT;
+
+    while (!DL_MCAN_isMemInitDone(base))
+    {
+        if (--wait == 0U)
+        {
+            DL_GPIO_initDigitalInput(tx_iomux);
+            DL_GPIO_initDigitalInput(rx_iomux);
+            NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
+            NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
+            return hwCAN_HwError;
+        }
+    }
+
+    wait = CAN_HW_WAIT_LIMIT;
+
+    DL_MCAN_setOpMode(base, DL_MCAN_OPERATION_MODE_SW_INIT);
+    while (DL_MCAN_getOpMode(base) != DL_MCAN_OPERATION_MODE_SW_INIT)
+    {
+        if (--wait == 0U)
+        {
+            DL_GPIO_initDigitalInput(tx_iomux);
+            DL_GPIO_initDigitalInput(rx_iomux);
+            NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
+            NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
+            return hwCAN_HwError;
+        }
+    }
+
+    if (DL_MCAN_init(base, &CAN_InitParams) != 0 ||
+        DL_MCAN_config(base, &CAN_ConfigParams) != 0 ||
+        DL_MCAN_setBitTime(base, &bit_timing) != 0 ||
+        DL_MCAN_msgRAMConfig(base, &CAN_MsgRAMConfig) != 0 ||
+        DL_MCAN_setExtIDAndMask(base, 0x1FFFFFFFU) != 0)
+    {
+        DL_GPIO_initDigitalInput(tx_iomux);
+        DL_GPIO_initDigitalInput(rx_iomux);
+        NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
+        NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
+        return hwCAN_HwError;
+    }
+
+    wait = CAN_HW_WAIT_LIMIT;
+
+    DL_MCAN_setOpMode(base, DL_MCAN_OPERATION_MODE_NORMAL);
+    while (DL_MCAN_getOpMode(base) != DL_MCAN_OPERATION_MODE_NORMAL)
+    {
+        if (--wait == 0U)
+        {
+            DL_GPIO_initDigitalInput(tx_iomux);
+            DL_GPIO_initDigitalInput(rx_iomux);
+            NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
+            NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
+            return hwCAN_HwError;
+        }
+    }
+
+    if (DL_MCAN_TXBufTransIntrEnable(base, CAN_TX_BUFFER_INDEX, true) != 0)
+    {
+        DL_GPIO_initDigitalInput(tx_iomux);
+        DL_GPIO_initDigitalInput(rx_iomux);
+        NeonRTOS_SyncObjDelete(&CAN_TxDone_Sync[index]);
+        NeonRTOS_MsgQDelete(&CAN_RxQueue[index]);
+        return hwCAN_HwError;
+    }
+
+    DL_MCAN_enableIntr(base, CAN_MCAN_CORE_INTERRUPTS, true);
+    DL_MCAN_selectIntrLine(base, CAN_MCAN_CORE_INTERRUPTS, DL_MCAN_INTR_LINE_NUM_1);
+    DL_MCAN_enableIntrLine(base, DL_MCAN_INTR_LINE_NUM_1, true);
+
+    DL_MCAN_clearInterruptStatus(base, DL_MCAN_MSP_INTERRUPT_LINE1);
+    DL_MCAN_enableInterrupt(base, DL_MCAN_MSP_INTERRUPT_LINE1);
 
     gpio_pin_init_status[tx_pin] = true;
     gpio_pin_init_status[rx_pin] = true;
@@ -603,7 +566,21 @@ hwCAN_OpResult CAN_DeInit(hwCAN_Index index)
     CAN_NVIC_DeInit(index);
     CAN_Init_Status[index] = false;
 
-    CAN_HardwareDeInit(base);
+    if (!DL_MCAN_isPowerEnabled(base))
+    {
+        return hwCAN_OK;
+    }
+
+    DL_MCAN_disableInterrupt(base, DL_MCAN_MSP_INTERRUPT_LINE1);
+    DL_MCAN_enableIntrLine(base, DL_MCAN_INTR_LINE_NUM_1, false);
+    DL_MCAN_enableIntr(base, CAN_MCAN_CORE_INTERRUPTS, false);
+    DL_MCAN_TXBufTransIntrEnable(base, CAN_TX_BUFFER_INDEX, false);
+
+    CAN_SetOpMode(base, DL_MCAN_OPERATION_MODE_SW_INIT);
+
+    DL_MCAN_reset(base);
+    DL_MCAN_disableModuleClock(base);
+    DL_MCAN_disablePower(base);
 
     DL_GPIO_initDigitalInput(tx_iomux);
     DL_GPIO_initDigitalInput(rx_iomux);
@@ -685,8 +662,7 @@ hwCAN_OpResult CAN_Write(hwCAN_Index index, uint32_t id, uint8_t *data, uint8_t 
 
     if (NeonRTOS_SyncObjWait(&CAN_TxDone_Sync[index], timeout) != NeonRTOS_OK)
     {
-        (void) DL_MCAN_txBufCancellationReq(
-            base, CAN_TX_BUFFER_INDEX);
+        (void) DL_MCAN_txBufCancellationReq(base, CAN_TX_BUFFER_INDEX);
         return hwCAN_Timeout;
     }
 

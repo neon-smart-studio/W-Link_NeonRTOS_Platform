@@ -23,8 +23,12 @@ bool UART_Init_Status[hwUART_Index_MAX] = {false};
 static int UART_BaudRate[hwUART_Index_MAX] = {0};
 static bool UART_FlowControl[hwUART_Index_MAX] = {false};
 
+#define UART_RX_QUEUE_LENGTH 64U
+
 static NeonRTOS_SyncObj_t UART_Send_SyncHandle[hwUART_Index_MAX];
-static NeonRTOS_SyncObj_t UART_Recv_SyncHandle[hwUART_Index_MAX];
+static NeonRTOS_MsgQ_t UART_Recv_QueueHandle[hwUART_Index_MAX];
+static uint8_t UART_Recv_Byte[hwUART_Index_MAX];
+static volatile uint32_t UART_Send_Complete_Generation[hwUART_Index_MAX];
 
 #ifndef STM32F1
 uint32_t STM32_UART_GetAF(hwUART_Index uart, hwGPIO_Pin pin)
@@ -55,11 +59,23 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     hwUART_Index idx = UART_IndexFromHandle(huart);
 
-    if (idx >= hwUART_Index_MAX) {
+    if (idx >= hwUART_Index_MAX || !UART_Init_Status[idx]) {
         return;
     }
 
-    NeonRTOS_SyncObjSignalFromISR(&UART_Recv_SyncHandle[idx]);
+    uint8_t received = UART_Recv_Byte[idx];
+
+    /*
+     * Keep RX armed continuously.  The task reads from the queue, so command
+     * processing cannot leave a gap in which the next USART byte is lost.
+     */
+    (void)HAL_UART_Receive_IT(huart, &UART_Recv_Byte[idx], 1U);
+
+    (void)NeonRTOS_MsgQWrite(
+        &UART_Recv_QueueHandle[idx],
+        &received,
+        NEONRT_NO_WAIT
+    );
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
@@ -69,7 +85,26 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
         return;
     }
 
+    UART_Send_Complete_Generation[idx]++;
     NeonRTOS_SyncObjSignalFromISR(&UART_Send_SyncHandle[idx]);
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    hwUART_Index idx = UART_IndexFromHandle(huart);
+
+    if (idx >= hwUART_Index_MAX) {
+        return;
+    }
+
+    /*
+     * ORE/RTO are blocking RX errors in STM32 HAL.  HAL has already returned
+     * RxState to READY before this callback, so resume the permanent one-byte
+     * receiver here.  Recoverable errors remain BUSY_RX and complete normally.
+     */
+    if (UART_Init_Status[idx] && huart->RxState == HAL_UART_STATE_READY) {
+        (void)HAL_UART_Receive_IT(huart, &UART_Recv_Byte[idx], 1U);
+    }
 }
 
 hwUART_OpResult UART_Open(hwUART_Index index, uint32_t baudrate, bool rts_cts)
@@ -133,7 +168,12 @@ hwUART_OpResult UART_Open_Specific_Format(
         return hwUART_MemoryError;
     }
 
-    if (NeonRTOS_SyncObjCreate(&UART_Recv_SyncHandle[index]) != NeonRTOS_OK) {
+    if (NeonRTOS_MsgQCreate(
+            &UART_Recv_QueueHandle[index],
+            (char *)"UART RX",
+            sizeof(uint8_t),
+            UART_RX_QUEUE_LENGTH
+        ) != NeonRTOS_OK) {
         NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
         return hwUART_MemoryError;
     }
@@ -158,7 +198,7 @@ hwUART_OpResult UART_Open_Specific_Format(
     if (tx_soc_pin == 0 || tx_soc_base == NULL ||
         rx_soc_pin == 0 || rx_soc_base == NULL) {
         NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
-        NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+        NeonRTOS_MsgQDelete(&UART_Recv_QueueHandle[index]);
         return hwGPIO_InvalidParameter;
     }
 
@@ -171,7 +211,7 @@ hwUART_OpResult UART_Open_Specific_Format(
         if (rts_soc_pin == 0 || rts_soc_base == NULL ||
             cts_soc_pin == 0 || cts_soc_base == NULL) {
             NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
-            NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+            NeonRTOS_MsgQDelete(&UART_Recv_QueueHandle[index]);
             return hwGPIO_InvalidParameter;
         }
     }
@@ -184,7 +224,7 @@ hwUART_OpResult UART_Open_Specific_Format(
 
     if (tx_af == 0 || rx_af == 0) {
         NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
-        NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+        NeonRTOS_MsgQDelete(&UART_Recv_QueueHandle[index]);
         return hwGPIO_InvalidParameter;
     }
 
@@ -194,7 +234,7 @@ hwUART_OpResult UART_Open_Specific_Format(
 
         if (rts_af == 0 || cts_af == 0) {
             NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
-            NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+            NeonRTOS_MsgQDelete(&UART_Recv_QueueHandle[index]);
             return hwGPIO_InvalidParameter;
         }
     }
@@ -203,7 +243,7 @@ hwUART_OpResult UART_Open_Specific_Format(
     USART_TypeDef *uart_soc_base = UART_Map_Soc_Base(index);
     if (uart_soc_base == NULL) {
         NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
-        NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+        NeonRTOS_MsgQDelete(&UART_Recv_QueueHandle[index]);
         return hwGPIO_InvalidParameter;
     }
 
@@ -297,7 +337,7 @@ hwUART_OpResult UART_Open_Specific_Format(
 
     if (result != hwUART_OK) {
         NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
-        NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+        NeonRTOS_MsgQDelete(&UART_Recv_QueueHandle[index]);
         return result;
     }
 #endif
@@ -311,7 +351,7 @@ hwUART_OpResult UART_Open_Specific_Format(
     if (result != hwUART_OK)
     {
         NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
-        NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+        NeonRTOS_MsgQDelete(&UART_Recv_QueueHandle[index]);
         return result;
     }
 
@@ -319,6 +359,19 @@ hwUART_OpResult UART_Open_Specific_Format(
 
     UART_FlowControl[index] = rts_cts;
     UART_Init_Status[index] = true;
+
+    UART_Recv_Byte[index] = 0U;
+    UART_Send_Complete_Generation[index] = 0U;
+
+    if (HAL_UART_Receive_IT(&g_uart[index], &UART_Recv_Byte[index], 1U) != HAL_OK) {
+        UART_Init_Status[index] = false;
+        UART_NVIC_DeInit(index);
+        (void)UART_Instance_DeInit(index);
+        NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
+        NeonRTOS_MsgQDelete(&UART_Recv_QueueHandle[index]);
+        UART_BaudRate[index] = 0;
+        return hwUART_HwError;
+    }
 
     gpio_pin_init_status[tx_pin] = true;
     gpio_pin_init_status[rx_pin] = true;
@@ -394,7 +447,7 @@ hwUART_OpResult UART_Close(hwUART_Index index)
     }
 
     NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
-    NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
+    NeonRTOS_MsgQDelete(&UART_Recv_QueueHandle[index]);
 
     gpio_pin_init_status[tx_pin] = false;
     gpio_pin_init_status[rx_pin] = false;
@@ -435,24 +488,14 @@ hwUART_OpResult UART_Read(hwUART_Index index, uint8_t *data_rd, size_t size, uin
         wait_ms = ((int)wait_ms_f) + timeoutMs + 1;
     }
 
-    UART_HandleTypeDef *huart = &g_uart[index];
+    size_t recv_bytes = 0U;
 
-    uint16_t recv_bytes = 0;
-
-    for (recv_bytes = 0; recv_bytes < size; recv_bytes++) {
-        NeonRTOS_SyncObjClear(&UART_Recv_SyncHandle[index]);
-
-        huart->RxState = HAL_UART_STATE_READY;
-
-        if (HAL_UART_Receive_IT(huart, &data_rd[recv_bytes], 1) != HAL_OK) {
-            if (recv_bytes > 0) {
-                return (hwUART_OpResult)recv_bytes;
-            }
-            return hwUART_Busy;
-        }
-
-        if (NeonRTOS_SyncObjWait(&UART_Recv_SyncHandle[index], wait_ms) != NeonRTOS_OK) {
-            (void)HAL_UART_AbortReceive(huart);
+    for (recv_bytes = 0U; recv_bytes < size; recv_bytes++) {
+        if (NeonRTOS_MsgQRead(
+                &UART_Recv_QueueHandle[index],
+                &data_rd[recv_bytes],
+                wait_ms
+            ) != NeonRTOS_OK) {
             if (recv_bytes > 0) {
                 return (hwUART_OpResult)recv_bytes;
             }
@@ -494,6 +537,10 @@ hwUART_OpResult UART_Write(hwUART_Index index, uint8_t *data_wr, size_t size, ui
         return hwUART_NotInit;
     }
 
+    if (size > UINT16_MAX) {
+        return hwUART_InvalidParameter;
+    }
+
     float wait_ms_f = ((float)size) / ((float)UART_BaudRate[index] / 8.0f / 1000.0f);
     NeonRTOS_Time_t wait_ms;
 
@@ -507,27 +554,43 @@ hwUART_OpResult UART_Write(hwUART_Index index, uint8_t *data_wr, size_t size, ui
 
     UART_HandleTypeDef *huart = &g_uart[index];
 
-    uint16_t send_bytes = 0;
-
-    for (send_bytes = 0; send_bytes < size; send_bytes++) {
-        NeonRTOS_SyncObjClear(&UART_Send_SyncHandle[index]);
-
-        if (HAL_UART_Transmit_IT(huart, &data_wr[send_bytes], 1) != HAL_OK) {
-            if (send_bytes > 0) {
-                return (hwUART_OpResult)send_bytes;
-            }
-            return hwUART_Busy;
-        }
-
-        if (NeonRTOS_SyncObjWait(&UART_Send_SyncHandle[index], wait_ms) != NeonRTOS_OK) {
-            if (send_bytes > 0) {
-                return (hwUART_OpResult)send_bytes;
-            }
-            return hwUART_Busy;
-        }
+    if (huart->gState != HAL_UART_STATE_READY) {
+        return hwUART_Busy;
     }
 
-    return (hwUART_OpResult)send_bytes;
+    uint32_t generation = UART_Send_Complete_Generation[index];
+
+    NeonRTOS_SyncObjClear(&UART_Send_SyncHandle[index]);
+
+    if (HAL_UART_Transmit_IT(huart, data_wr, (uint16_t)size) != HAL_OK) {
+        return hwUART_Busy;
+    }
+
+    while (UART_Send_Complete_Generation[index] == generation) {
+        bool wait_failed =
+            (NeonRTOS_SyncObjWait(&UART_Send_SyncHandle[index], wait_ms) != NeonRTOS_OK);
+
+        if (UART_Send_Complete_Generation[index] != generation) {
+            break;
+        }
+
+        if (wait_failed) {
+            uint16_t remaining = huart->TxXferCount;
+            (void)HAL_UART_AbortTransmit(huart);
+
+            size_t send_bytes = size - remaining;
+            if (send_bytes > 0U) {
+                return (hwUART_OpResult)send_bytes;
+            }
+
+            return hwUART_Busy;
+        }
+
+        /* Ignore a stale/manual-reset notification from an older transfer. */
+        NeonRTOS_SyncObjClear(&UART_Send_SyncHandle[index]);
+    }
+
+    return (hwUART_OpResult)size;
 }
 
 hwUART_OpResult UART_PutChar(hwUART_Index index, uint8_t char_wr, uint32_t timeoutMs)

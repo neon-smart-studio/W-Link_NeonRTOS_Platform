@@ -711,7 +711,7 @@ void UART_NVIC_DeInit(hwUART_Index index)
         case hwUART_Index_9:
             HAL_NVIC_DisableIRQ(UART10_IRQn);
             break;
-#elif defined(USART4_BASE)
+#elif defined(USART10_BASE)
         case hwUART_Index_9:
             HAL_NVIC_DisableIRQ(USART10_IRQn);
             break;

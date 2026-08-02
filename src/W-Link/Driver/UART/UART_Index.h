@@ -141,44 +141,52 @@ typedef enum {
 #ifdef DEVICE_TIMSPM0
 typedef enum
 {
-#if defined(UART0_BASE) || defined(UC0_UART_BASE)
-    hwUART_Index_0 = 0,       // UART0 / UC0 UART
+#if defined(UART0_BASE)
+    hwUART_Index_0 = 0,
 #endif
 
-#if defined(UART1_BASE) || defined(UC1_UART_BASE)
-    hwUART_Index_1,           // UART1 / UC1 UART
+#if defined(UART1_BASE)
+    hwUART_Index_1,
 #endif
 
-#if defined(UART2_BASE) || defined(UC2_UART_BASE)
-    hwUART_Index_2,           // UART2 / UC2 UART
+#if defined(UART2_BASE)
+    hwUART_Index_2,
 #endif
 
-#if defined(UART3_BASE) || defined(UC3_UART_BASE)
-    hwUART_Index_3,           // UART3 / UC3 UART
+#if defined(UART3_BASE)
+    hwUART_Index_3,
 #endif
 
-#if defined(UART4_BASE) || defined(UC4_UART_BASE)
-    hwUART_Index_4,           // UART4 / UC4 UART
+#if defined(UART4_BASE)
+    hwUART_Index_4,
 #endif
 
-#if defined(UART5_BASE) || defined(UC5_UART_BASE)
-    hwUART_Index_5,           // UART5 / UC5 UART
+#if defined(UART5_BASE)
+    hwUART_Index_5,
 #endif
 
-#if defined(UART6_BASE) || defined(UC6_UART_BASE)
-    hwUART_Index_6,           // UART6 / UC6 UART
+#if defined(UART6_BASE)
+    hwUART_Index_6,
 #endif
 
-#if defined(UART7_BASE) || defined(UC7_UART_BASE)
-    hwUART_Index_7,           // UART7 / UC7 UART
+#if defined(UART7_BASE)
+    hwUART_Index_7,
 #endif
 
-#if defined(UART8_BASE) || defined(UC8_UART_BASE)
-    hwUART_Index_8,           // UART8 / UC8 UART
+#if defined(UART8_BASE)
+    hwUART_Index_8,
 #endif
 
-#if defined(UART9_BASE) || defined(UC9_UART_BASE)
-    hwUART_Index_9,           // UART9 / UC9 UART
+#if defined(UART9_BASE)
+    hwUART_Index_9,
+#endif
+
+#if defined(UC9_UART_BASE)
+    hwUART_Index_9,
+#endif
+
+#if defined(UC11_UART_BASE)
+    hwUART_Index_11,
 #endif
 
     hwUART_Index_MAX

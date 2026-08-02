@@ -23,12 +23,12 @@
 #define SPI_MASTER_OP_TIMEOUT               3000
 
 typedef enum {
-    TITIVAC_SPI_IDLE = 0,
-    TITIVAC_SPI_TX,
-    TITIVAC_SPI_RX,
-    TITIVAC_SPI_TXRX,
-    TITIVAC_SPI_DONE,
-    TITIVAC_SPI_ERROR
+    MSP432E_SPI_IDLE = 0,
+    MSP432E_SPI_TX,
+    MSP432E_SPI_RX,
+    MSP432E_SPI_TXRX,
+    MSP432E_SPI_DONE,
+    MSP432E_SPI_ERROR
 } MSP432E_SPI_State;
 
 typedef struct {
@@ -211,34 +211,6 @@ static void SPI_NVIC_Disable(hwSPI_Index index)
     }
 }
 
-static uint32_t SPI_Map_Mode(hwSPI_OpMode opMode)
-{
-    switch (opMode)
-    {
-        case hwSPI_OpMode_Polarity0_Phase0:
-            return SSI_FRF_MOTO_MODE_0;
-
-        case hwSPI_OpMode_Polarity0_Phase1:
-            return SSI_FRF_MOTO_MODE_1;
-
-        case hwSPI_OpMode_Polarity1_Phase0:
-            return SSI_FRF_MOTO_MODE_2;
-
-        case hwSPI_OpMode_Polarity1_Phase1:
-            return SSI_FRF_MOTO_MODE_3;
-
-        default:
-            return SSI_FRF_MOTO_MODE_0;
-    }
-}
-
-static void SPI_Flush_RX(uint32_t base)
-{
-    uint32_t dummy;
-
-    while (MAP_SSIDataGetNonBlocking(base, &dummy));
-}
-
 static void SPI_IRQ_Process(hwSPI_Index index)
 {
     uint32_t base = SPI_Map_Soc_Base(index);
@@ -257,9 +229,9 @@ static void SPI_IRQ_Process(hwSPI_Index index)
 
     MSP432E_SPI_Transfer *t = &spi_xfer[index];
 
-    if (t->state == TITIVAC_SPI_IDLE ||
-        t->state == TITIVAC_SPI_DONE ||
-        t->state == TITIVAC_SPI_ERROR)
+    if (t->state == MSP432E_SPI_IDLE ||
+        t->state == MSP432E_SPI_DONE ||
+        t->state == MSP432E_SPI_ERROR)
     {
         MAP_SSIIntDisable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
         return;
@@ -267,7 +239,7 @@ static void SPI_IRQ_Process(hwSPI_Index index)
 
     if (status & SSI_RXOR)
     {
-        t->state = TITIVAC_SPI_ERROR;
+        t->state = MSP432E_SPI_ERROR;
 
         MAP_SSIIntDisable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
 
@@ -282,7 +254,7 @@ static void SPI_IRQ_Process(hwSPI_Index index)
     {
         if (t->rx_pos < t->len)
         {
-            if ((t->state == TITIVAC_SPI_RX || t->state == TITIVAC_SPI_TXRX) &&
+            if ((t->state == MSP432E_SPI_RX || t->state == MSP432E_SPI_TXRX) &&
                 t->rx_buf != NULL)
             {
                 t->rx_buf[t->rx_pos] = (uint8_t)(rx & 0xFF);
@@ -296,7 +268,7 @@ static void SPI_IRQ_Process(hwSPI_Index index)
     {
         uint8_t out = 0xFF;
 
-        if ((t->state == TITIVAC_SPI_TX || t->state == TITIVAC_SPI_TXRX) &&
+        if ((t->state == MSP432E_SPI_TX || t->state == MSP432E_SPI_TXRX) &&
             t->tx_buf != NULL)
         {
             out = t->tx_buf[t->tx_pos];
@@ -312,7 +284,7 @@ static void SPI_IRQ_Process(hwSPI_Index index)
 
     if (t->rx_pos >= t->len && t->tx_pos >= t->len)
     {
-        t->state = TITIVAC_SPI_DONE;
+        t->state = MSP432E_SPI_DONE;
 
         MAP_SSIIntDisable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
 
@@ -405,17 +377,41 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
 
     MAP_SSIDisable(ssi_base);
 
+    uint32_t dl_mode;
+
+    switch (opMode)
+    {
+        case hwSPI_OpMode_Polarity0_Phase0:
+            dl_mode = SSI_FRF_MOTO_MODE_0;
+            break;
+
+        case hwSPI_OpMode_Polarity0_Phase1:
+            dl_mode = SSI_FRF_MOTO_MODE_1;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase0:
+            dl_mode = SSI_FRF_MOTO_MODE_2;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase1:
+            dl_mode = SSI_FRF_MOTO_MODE_3;
+            break;
+    }
+    
     MAP_SSIConfigSetExpClk(
         ssi_base,
         g_sys_clock_hz,
-        SPI_Map_Mode(opMode),
+        dl_mode,
         SSI_MODE_MASTER,
         clock_rate_hz,
         8
     );
 
     MAP_SSIEnable(ssi_base);
-    SPI_Flush_RX(ssi_base);
+
+    uint32_t dummy;
+
+    while (MAP_SSIDataGetNonBlocking(base, &dummy));
 
     if (NeonRTOS_SyncObjCreate(&Spi_Master_Send_SyncHandle[index]) != NeonRTOS_OK)
     {
@@ -561,6 +557,27 @@ hwSPI_OpResult SPI_Change_Frequency(hwSPI_Index index, uint32_t clock_rate_hz)
         return hwSPI_InvalidParameter;
     }
 
+    uint32_t dl_mode;
+
+    switch (Spi_Master_Mode[index])
+    {
+        case hwSPI_OpMode_Polarity0_Phase0:
+            dl_mode = SSI_FRF_MOTO_MODE_0;
+            break;
+
+        case hwSPI_OpMode_Polarity0_Phase1:
+            dl_mode = SSI_FRF_MOTO_MODE_1;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase0:
+            dl_mode = SSI_FRF_MOTO_MODE_2;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase1:
+            dl_mode = SSI_FRF_MOTO_MODE_3;
+            break;
+    }
+    
     SPI_MASTER_MUTEX_LOCK(index, SPI_MASTER_MUTEX_ACCESS_TIMEOUT);
 
     MAP_SSIIntDisable(ssi_base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
@@ -570,14 +587,17 @@ hwSPI_OpResult SPI_Change_Frequency(hwSPI_Index index, uint32_t clock_rate_hz)
     MAP_SSIConfigSetExpClk(
         ssi_base,
         g_sys_clock_hz,
-        SPI_Map_Mode(Spi_Master_Mode[index]),
+        dl_mode,
         SSI_MODE_MASTER,
         clock_rate_hz,
         8
     );
 
     MAP_SSIEnable(ssi_base);
-    SPI_Flush_RX(ssi_base);
+    
+    uint32_t dummy;
+
+    while (MAP_SSIDataGetNonBlocking(base, &dummy));
 
     Spi_Master_Clock_Hz[index] = clock_rate_hz;
 
@@ -605,6 +625,27 @@ hwSPI_OpResult SPI_Change_Mode(hwSPI_Index index, hwSPI_OpMode opMode)
         return hwSPI_InvalidParameter;
     }
 
+    uint32_t dl_mode;
+
+    switch (opMode)
+    {
+        case hwSPI_OpMode_Polarity0_Phase0:
+            dl_mode = SSI_FRF_MOTO_MODE_0;
+            break;
+
+        case hwSPI_OpMode_Polarity0_Phase1:
+            dl_mode = SSI_FRF_MOTO_MODE_1;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase0:
+            dl_mode = SSI_FRF_MOTO_MODE_2;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase1:
+            dl_mode = SSI_FRF_MOTO_MODE_3;
+            break;
+    }
+    
     SPI_MASTER_MUTEX_LOCK(index, SPI_MASTER_MUTEX_ACCESS_TIMEOUT);
 
     MAP_SSIIntDisable(ssi_base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
@@ -614,14 +655,17 @@ hwSPI_OpResult SPI_Change_Mode(hwSPI_Index index, hwSPI_OpMode opMode)
     MAP_SSIConfigSetExpClk(
         ssi_base,
         g_sys_clock_hz,
-        SPI_Map_Mode(opMode),
+        dl_mode,
         SSI_MODE_MASTER,
         Spi_Master_Clock_Hz[index],
         8
     );
 
     MAP_SSIEnable(ssi_base);
-    SPI_Flush_RX(ssi_base);
+    
+    uint32_t dummy;
+
+    while (MAP_SSIDataGetNonBlocking(base, &dummy));
 
     Spi_Master_Mode[index] = opMode;
 
@@ -655,14 +699,16 @@ hwSPI_OpResult SPI_Master_WriteByte(hwSPI_Index index, uint8_t dat)
 
     memset(t, 0, sizeof(*t));
 
-    t->state  = TITIVAC_SPI_TX;
+    t->state  = MSP432E_SPI_TX;
     t->tx_buf = &dat;
     t->rx_buf = NULL;
     t->len    = 1;
     t->tx_pos = 0;
     t->rx_pos = 0;
 
-    SPI_Flush_RX(base);
+    uint32_t dummy;
+
+    while (MAP_SSIDataGetNonBlocking(base, &dummy));
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -676,12 +722,12 @@ hwSPI_OpResult SPI_Master_WriteByte(hwSPI_Index index, uint8_t dat)
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
     {
         MAP_SSIIntDisable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
-        t->state = TITIVAC_SPI_ERROR;
+        t->state = MSP432E_SPI_ERROR;
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_SlaveTimeout;
     }
 
-    if (t->state == TITIVAC_SPI_ERROR)
+    if (t->state == MSP432E_SPI_ERROR)
     {
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_HwError;
@@ -717,14 +763,16 @@ hwSPI_OpResult SPI_Master_ReadByte(hwSPI_Index index, uint8_t *dat)
 
     memset(t, 0, sizeof(*t));
 
-    t->state  = TITIVAC_SPI_RX;
+    t->state  = MSP432E_SPI_RX;
     t->tx_buf = NULL;
     t->rx_buf = dat;
     t->len    = 1;
     t->tx_pos = 0;
     t->rx_pos = 0;
+    
+    uint32_t dummy;
 
-    SPI_Flush_RX(base);
+    while (MAP_SSIDataGetNonBlocking(base, &dummy));
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -735,7 +783,7 @@ hwSPI_OpResult SPI_Master_ReadByte(hwSPI_Index index, uint8_t *dat)
     /*
      * Prime FIFO:
      * SPI read still needs dummy TX clock.
-     * ISR will transmit 0xFF because state == TITIVAC_SPI_RX.
+     * ISR will transmit 0xFF because state == MSP432E_SPI_RX.
      */
     SPI_IRQ_Process(index);
 
@@ -743,12 +791,12 @@ hwSPI_OpResult SPI_Master_ReadByte(hwSPI_Index index, uint8_t *dat)
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
     {
         MAP_SSIIntDisable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
-        t->state = TITIVAC_SPI_ERROR;
+        t->state = MSP432E_SPI_ERROR;
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_SlaveTimeout;
     }
 
-    if (t->state == TITIVAC_SPI_ERROR)
+    if (t->state == MSP432E_SPI_ERROR)
     {
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_HwError;
@@ -784,14 +832,16 @@ hwSPI_OpResult SPI_Master_TransferByte(hwSPI_Index index, uint8_t wr_dat, uint8_
 
     memset(t, 0, sizeof(*t));
 
-    t->state  = TITIVAC_SPI_TXRX;
+    t->state  = MSP432E_SPI_TXRX;
     t->tx_buf = &wr_dat;
     t->rx_buf = rd_dat;
     t->len    = 1;
     t->tx_pos = 0;
     t->rx_pos = 0;
+    
+    uint32_t dummy;
 
-    SPI_Flush_RX(base);
+    while (MAP_SSIDataGetNonBlocking(base, &dummy));
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -805,12 +855,12 @@ hwSPI_OpResult SPI_Master_TransferByte(hwSPI_Index index, uint8_t wr_dat, uint8_
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
     {
         MAP_SSIIntDisable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
-        t->state = TITIVAC_SPI_ERROR;
+        t->state = MSP432E_SPI_ERROR;
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_SlaveTimeout;
     }
 
-    if (t->state == TITIVAC_SPI_ERROR)
+    if (t->state == MSP432E_SPI_ERROR)
     {
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_HwError;
@@ -873,14 +923,16 @@ hwSPI_OpResult SPI_Master_Stream_Write(hwSPI_Index index, const uint8_t *buf, ui
 
     memset(t, 0, sizeof(*t));
 
-    t->state  = TITIVAC_SPI_TX;
+    t->state  = MSP432E_SPI_TX;
     t->tx_buf = buf;
     t->rx_buf = NULL;
     t->len    = len;
     t->tx_pos = 0;
     t->rx_pos = 0;
+    
+    uint32_t dummy;
 
-    SPI_Flush_RX(base);
+    while (MAP_SSIDataGetNonBlocking(base, &dummy));
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -894,12 +946,12 @@ hwSPI_OpResult SPI_Master_Stream_Write(hwSPI_Index index, const uint8_t *buf, ui
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
     {
         MAP_SSIIntDisable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
-        t->state = TITIVAC_SPI_ERROR;
+        t->state = MSP432E_SPI_ERROR;
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_SlaveTimeout;
     }
 
-    if (t->state == TITIVAC_SPI_ERROR)
+    if (t->state == MSP432E_SPI_ERROR)
     {
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_HwError;
@@ -935,14 +987,16 @@ hwSPI_OpResult SPI_Master_Stream_Read(hwSPI_Index index, uint8_t *buf, uint16_t 
 
     memset(t, 0, sizeof(*t));
 
-    t->state  = TITIVAC_SPI_RX;
+    t->state  = MSP432E_SPI_RX;
     t->tx_buf = NULL;
     t->rx_buf = buf;
     t->len    = len;
     t->tx_pos = 0;
     t->rx_pos = 0;
+    
+    uint32_t dummy;
 
-    SPI_Flush_RX(base);
+    while (MAP_SSIDataGetNonBlocking(base, &dummy));
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -956,12 +1010,12 @@ hwSPI_OpResult SPI_Master_Stream_Read(hwSPI_Index index, uint8_t *buf, uint16_t 
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
     {
         MAP_SSIIntDisable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
-        t->state = TITIVAC_SPI_ERROR;
+        t->state = MSP432E_SPI_ERROR;
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_SlaveTimeout;
     }
 
-    if (t->state == TITIVAC_SPI_ERROR)
+    if (t->state == MSP432E_SPI_ERROR)
     {
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_HwError;
@@ -997,14 +1051,16 @@ hwSPI_OpResult SPI_Master_Stream_Transfer(hwSPI_Index index, const uint8_t *tx_b
 
     memset(t, 0, sizeof(*t));
 
-    t->state  = TITIVAC_SPI_TXRX;
+    t->state  = MSP432E_SPI_TXRX;
     t->tx_buf = tx_buf;
     t->rx_buf = rx_buf;
     t->len    = len;
     t->tx_pos = 0;
     t->rx_pos = 0;
+    
+    uint32_t dummy;
 
-    SPI_Flush_RX(base);
+    while (MAP_SSIDataGetNonBlocking(base, &dummy));
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -1018,12 +1074,12 @@ hwSPI_OpResult SPI_Master_Stream_Transfer(hwSPI_Index index, const uint8_t *tx_b
                              SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
     {
         MAP_SSIIntDisable(base, SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR);
-        t->state = TITIVAC_SPI_ERROR;
+        t->state = MSP432E_SPI_ERROR;
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_SlaveTimeout;
     }
 
-    if (t->state == TITIVAC_SPI_ERROR)
+    if (t->state == MSP432E_SPI_ERROR)
     {
         SPI_MASTER_MUTEX_UNLOCK(index);
         return hwSPI_HwError;

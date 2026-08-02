@@ -168,48 +168,6 @@ static void SPI_NVIC_DeInit(hwSPI_Index index)
     }
 }
 
-static void SPI_Map_Mode(hwSPI_OpMode opMode,
-                         uint32_t *polarity,
-                         uint32_t *phase)
-{
-    switch (opMode)
-    {
-        case hwSPI_OpMode_Polarity0_Phase0:
-            *polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
-            *phase    = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
-            break;
-
-        case hwSPI_OpMode_Polarity0_Phase1:
-            *polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
-            *phase    = EUSCI_B_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT;
-            break;
-
-        case hwSPI_OpMode_Polarity1_Phase0:
-            *polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_HIGH;
-            *phase    = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
-            break;
-
-        case hwSPI_OpMode_Polarity1_Phase1:
-            *polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_HIGH;
-            *phase    = EUSCI_B_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT;
-            break;
-
-        default:
-            *polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
-            *phase    = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
-            break;
-    }
-}
-
-static void SPI_Flush_RX(uint32_t base)
-{
-    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
-    {
-        (void)MAP_SPI_receiveData(base);
-        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
-    }
-}
-
 void SPI_IRQ_Process(hwSPI_Index index)
 {
     uint32_t base = SPI_Map_Soc_Base(index);
@@ -280,29 +238,6 @@ void SPI_IRQ_Process(hwSPI_Index index)
     }
 }
 
-static void SPI_Config_Module(uint32_t base, uint32_t clock_rate_hz, hwSPI_OpMode opMode, bool cs)
-{
-    uint_fast8_t phase;
-    uint_fast8_t polarity;
-
-    SPI_Map_Mode(opMode, &phase, &polarity);
-
-    eUSCI_SPI_MasterConfig spi_config =
-    {
-        EUSCI_B_SPI_CLOCKSOURCE_SMCLK,
-        g_sys_clock_hz,
-        clock_rate_hz,
-        EUSCI_B_SPI_MSB_FIRST,
-        phase,
-        polarity,
-        cs ? EUSCI_B_SPI_4PIN_UCxSTE_ACTIVE_LOW : EUSCI_B_SPI_3PIN
-    };
-
-    MAP_SPI_disableModule(base);
-    MAP_SPI_initMaster(base, &spi_config);
-    MAP_SPI_enableModule(base);
-}
-
 hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_OpMode opMode, bool cs)
 {
     if (index >= hwSPI_Index_MAX || opMode >= hwSPI_OpMode_MAX)
@@ -369,8 +304,52 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         MAP_GPIO_setAsPeripheralModuleFunctionInputPin(cs_port, cs_mask, GPIO_PRIMARY_MODULE_FUNCTION);
     }
 
-    SPI_Config_Module(spi_base, clock_rate_hz, opMode, cs);
-    SPI_Flush_RX(spi_base);
+    uint_fast8_t phase;
+    uint_fast8_t polarity;
+
+    switch (opMode)
+    {
+        case hwSPI_OpMode_Polarity0_Phase0:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
+            break;
+
+        case hwSPI_OpMode_Polarity0_Phase1:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase0:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_HIGH;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase1:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_HIGH;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT;
+            break;
+    }
+
+    eUSCI_SPI_MasterConfig spi_config =
+    {
+        EUSCI_B_SPI_CLOCKSOURCE_SMCLK,
+        g_sys_clock_hz,
+        clock_rate_hz,
+        EUSCI_B_SPI_MSB_FIRST,
+        phase,
+        polarity,
+        cs ? EUSCI_B_SPI_4PIN_UCxSTE_ACTIVE_LOW : EUSCI_B_SPI_3PIN
+    };
+
+    MAP_SPI_disableModule(base);
+    MAP_SPI_initMaster(base, &spi_config);
+    MAP_SPI_enableModule(base);
+    
+    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    {
+        (void)MAP_SPI_receiveData(base);
+        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+    }
 
     if (NeonRTOS_SyncObjCreate(&Spi_Master_Send_SyncHandle[index]) != NeonRTOS_OK)
     {
@@ -520,12 +499,54 @@ hwSPI_OpResult SPI_Change_Frequency(hwSPI_Index index, uint32_t clock_rate_hz)
 
     SPI_MASTER_MUTEX_LOCK(index, SPI_MASTER_MUTEX_ACCESS_TIMEOUT);
 
-    MAP_SPI_disableInterrupt(base,
-                             EUSCI_B_SPI_RECEIVE_INTERRUPT |
-                             EUSCI_B_SPI_TRANSMIT_INTERRUPT);
+    MAP_SPI_disableInterrupt(base, EUSCI_B_SPI_RECEIVE_INTERRUPT | EUSCI_B_SPI_TRANSMIT_INTERRUPT);
 
-    SPI_Config_Module(base, clock_rate_hz, Spi_Master_Mode[index], Spi_Master_Use_CS[index]);
-    SPI_Flush_RX(base);
+    uint_fast8_t phase;
+    uint_fast8_t polarity;
+
+    switch (Spi_Master_Mode[index])
+    {
+        case hwSPI_OpMode_Polarity0_Phase0:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
+            break;
+
+        case hwSPI_OpMode_Polarity0_Phase1:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase0:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_HIGH;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase1:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_HIGH;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT;
+            break;
+    }
+
+    eUSCI_SPI_MasterConfig spi_config =
+    {
+        EUSCI_B_SPI_CLOCKSOURCE_SMCLK,
+        g_sys_clock_hz,
+        clock_rate_hz,
+        EUSCI_B_SPI_MSB_FIRST,
+        phase,
+        polarity,
+        Spi_Master_Use_CS[index] ? EUSCI_B_SPI_4PIN_UCxSTE_ACTIVE_LOW : EUSCI_B_SPI_3PIN
+    };
+
+    MAP_SPI_disableModule(base);
+    MAP_SPI_initMaster(base, &spi_config);
+    MAP_SPI_enableModule(base);
+
+    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    {
+        (void)MAP_SPI_receiveData(base);
+        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+    }
 
     Spi_Master_Clock_Hz[index] = clock_rate_hz;
 
@@ -555,12 +576,54 @@ hwSPI_OpResult SPI_Change_Mode(hwSPI_Index index, hwSPI_OpMode opMode)
 
     SPI_MASTER_MUTEX_LOCK(index, SPI_MASTER_MUTEX_ACCESS_TIMEOUT);
 
-    MAP_SPI_disableInterrupt(base,
-                             EUSCI_B_SPI_RECEIVE_INTERRUPT |
-                             EUSCI_B_SPI_TRANSMIT_INTERRUPT);
+    MAP_SPI_disableInterrupt(base, EUSCI_B_SPI_RECEIVE_INTERRUPT | EUSCI_B_SPI_TRANSMIT_INTERRUPT);
 
-    SPI_Config_Module(base, Spi_Master_Clock_Hz[index], opMode, Spi_Master_Use_CS[index]);
-    SPI_Flush_RX(base);
+    uint_fast8_t phase;
+    uint_fast8_t polarity;
+
+    switch (opMode)
+    {
+        case hwSPI_OpMode_Polarity0_Phase0:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
+            break;
+
+        case hwSPI_OpMode_Polarity0_Phase1:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase0:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_HIGH;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
+            break;
+
+        case hwSPI_OpMode_Polarity1_Phase1:
+            polarity = EUSCI_B_SPI_CLOCKPOLARITY_INACTIVITY_HIGH;
+            phase    = EUSCI_B_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT;
+            break;
+    }
+
+    eUSCI_SPI_MasterConfig spi_config =
+    {
+        EUSCI_B_SPI_CLOCKSOURCE_SMCLK,
+        g_sys_clock_hz,
+        Spi_Master_Clock_Hz[index],
+        EUSCI_B_SPI_MSB_FIRST,
+        phase,
+        polarity,
+        Spi_Master_Use_CS[index] ? EUSCI_B_SPI_4PIN_UCxSTE_ACTIVE_LOW : EUSCI_B_SPI_3PIN
+    };
+
+    MAP_SPI_disableModule(base);
+    MAP_SPI_initMaster(base, &spi_config);
+    MAP_SPI_enableModule(base);
+    
+    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    {
+        (void)MAP_SPI_receiveData(base);
+        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+    }
 
     Spi_Master_Mode[index] = opMode;
 
@@ -597,7 +660,11 @@ hwSPI_OpResult SPI_Master_WriteByte(hwSPI_Index index, uint8_t dat)
     t->rx_buf = NULL;
     t->len    = 1;
 
-    SPI_Flush_RX(base);
+    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    {
+        (void)MAP_SPI_receiveData(base);
+        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+    }
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -675,7 +742,11 @@ hwSPI_OpResult SPI_Master_ReadByte(hwSPI_Index index, uint8_t *dat)
     t->rx_buf = dat;
     t->len    = 1;
 
-    SPI_Flush_RX(base);
+    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    {
+        (void)MAP_SPI_receiveData(base);
+        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+    }
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -753,7 +824,11 @@ hwSPI_OpResult SPI_Master_TransferByte(hwSPI_Index index, uint8_t wr_dat, uint8_
     t->rx_buf = rd_dat;
     t->len    = 1;
 
-    SPI_Flush_RX(base);
+    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    {
+        (void)MAP_SPI_receiveData(base);
+        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+    }
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -857,7 +932,11 @@ hwSPI_OpResult SPI_Master_Stream_Write(hwSPI_Index index, const uint8_t *buf, ui
     t->rx_buf = NULL;
     t->len    = len;
 
-    SPI_Flush_RX(base);
+    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    {
+        (void)MAP_SPI_receiveData(base);
+        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+    }
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -935,7 +1014,11 @@ hwSPI_OpResult SPI_Master_Stream_Read(hwSPI_Index index, uint8_t *buf, uint16_t 
     t->rx_buf = buf;
     t->len    = len;
 
-    SPI_Flush_RX(base);
+    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    {
+        (void)MAP_SPI_receiveData(base);
+        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+    }
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);
@@ -1013,7 +1096,11 @@ hwSPI_OpResult SPI_Master_Stream_Transfer(hwSPI_Index index, const uint8_t *tx_b
     t->rx_buf = rx_buf;
     t->len    = len;
 
-    SPI_Flush_RX(base);
+    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    {
+        (void)MAP_SPI_receiveData(base);
+        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+    }
 
     NeonRTOS_SyncObjClear(&Spi_Master_Send_SyncHandle[index]);
     NeonRTOS_SyncObjClear(&Spi_Master_Recv_SyncHandle[index]);

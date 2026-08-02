@@ -98,6 +98,93 @@ static const SPI_Pin_Def SPI_Pin_Def_Table[hwSPI_Index_MAX] =
         hwGPIO_Pin_A4       // CS    PA4   SPI2_CS0
     },
 #endif
+
+    /* ================= UNICOMM UC2 ================= */
+
+#if defined(UC2_SPI_BASE)
+
+#if defined(MSPM0G120x) || defined(MSPM0G121x) || \
+    defined(MSPM0G320x) || defined(MSPM0G321x)
+
+    {
+        hwGPIO_Pin_A5,      // MOSI  PA5  UC2_PICO
+        hwGPIO_Pin_A4,      // MISO  PA4  UC2_POCI
+        hwGPIO_Pin_A6,      // SCLK  PA6  UC2_SCLK
+        hwGPIO_Pin_A2       // CS    PA2  UC2_CS0
+    },
+
+#elif defined(MSPM0G511x) || defined(MSPM0G518x)
+
+    {
+        hwGPIO_Pin_A5,      // MOSI  PA5  UC2_PICO
+        hwGPIO_Pin_A4,      // MISO  PA4  UC2_POCI
+        hwGPIO_Pin_A6,      // SCLK  PA6  UC2_SCLK
+        hwGPIO_Pin_A8       // CS    PA8  UC2_CS0
+    },
+
+#endif
+#endif
+
+
+    /* ================= UNICOMM UC3 ================= */
+
+#if defined(UC3_SPI_BASE)
+
+#if defined(MSPM0G511x) || defined(MSPM0G518x)
+
+    {
+        hwGPIO_Pin_B8,      // MOSI  PB8  UC3_PICO
+        hwGPIO_Pin_B7,      // MISO  PB7  UC3_POCI
+        hwGPIO_Pin_B9,      // SCLK  PB9  UC3_SCLK
+        hwGPIO_Pin_B6       // CS    PB6  UC3_CS0
+    },
+
+#endif
+#endif
+
+
+    /* ================= UNICOMM UC4 ================= */
+
+#if defined(UC4_SPI_BASE)
+
+#if defined(MSPM0G120x) || defined(MSPM0G121x) || \
+    defined(MSPM0G320x) || defined(MSPM0G321x)
+
+    {
+        hwGPIO_Pin_B8,      // MOSI  PB8  UC4_PICO
+        hwGPIO_Pin_B7,      // MISO  PB7  UC4_POCI
+        hwGPIO_Pin_B9,      // SCLK  PB9  UC4_SCLK
+        hwGPIO_Pin_B6       // CS    PB6  UC4_CS0
+    },
+
+#elif defined(MSPM0L112x) || defined(MSPM0L211x)
+
+    {
+        hwGPIO_Pin_A5,      // MOSI  PA5  UC4_PICO
+        hwGPIO_Pin_A4,      // MISO  PA4  UC4_POCI
+        hwGPIO_Pin_A6,      // SCLK  PA6  UC4_SCLK
+        hwGPIO_Pin_A2       // CS    PA2  UC4_CS0
+    },
+
+#endif
+#endif
+
+
+    /* ================= UNICOMM UC8 ================= */
+
+#if defined(UC8_SPI_BASE)
+
+#if defined(MSPM0L112x) || defined(MSPM0L211x)
+
+    {
+        hwGPIO_Pin_B8,      // MOSI  PB8  UC8_PICO
+        hwGPIO_Pin_B7,      // MISO  PB7  UC8_POCI
+        hwGPIO_Pin_B9,      // SCLK  PB9  UC8_SCLK
+        hwGPIO_Pin_B6       // CS    PB6  UC8_CS0
+    },
+
+#endif
+#endif
 };
 
 #endif //SPI_PIN_TIMSPM0_H

@@ -137,15 +137,15 @@ typedef enum {
     hwUART_Index_MAX
 } hwUART_Index;
 #endif // DEVICE_TIMSP432E
-
 #ifdef DEVICE_TIMSPM0
+
 typedef enum
 {
-#if defined(UART0_BASE)
+#if defined(UART0_BASE) || defined(UC0_UART_BASE)
     hwUART_Index_0 = 0,
 #endif
 
-#if defined(UART1_BASE)
+#if defined(UART1_BASE) || defined(UC1_UART_BASE)
     hwUART_Index_1,
 #endif
 
@@ -157,11 +157,11 @@ typedef enum
     hwUART_Index_3,
 #endif
 
-#if defined(UART4_BASE)
+#if defined(UART4_BASE) || defined(UC4_UART_BASE)
     hwUART_Index_4,
 #endif
 
-#if defined(UART5_BASE)
+#if defined(UART5_BASE) || defined(UC5_UART_BASE)
     hwUART_Index_5,
 #endif
 
@@ -173,25 +173,26 @@ typedef enum
     hwUART_Index_7,
 #endif
 
-#if defined(UART8_BASE)
+#if defined(UART8_BASE) || defined(UC8_UART_BASE)
     hwUART_Index_8,
 #endif
 
-#if defined(UART9_BASE)
+#if defined(UART9_BASE) || defined(UC9_UART_BASE)
     hwUART_Index_9,
 #endif
 
-#if defined(UC9_UART_BASE)
-    hwUART_Index_9,
+#if defined(UART10_BASE)
+    hwUART_Index_10,
 #endif
 
-#if defined(UC11_UART_BASE)
+#if defined(UART11_BASE) || defined(UC11_UART_BASE)
     hwUART_Index_11,
 #endif
 
     hwUART_Index_MAX
 
 } hwUART_Index;
+
 #endif // DEVICE_TIMSPM0
 
 #endif //UART_INDEX_H

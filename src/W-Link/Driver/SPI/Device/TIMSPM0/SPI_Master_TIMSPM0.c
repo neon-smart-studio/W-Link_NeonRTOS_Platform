@@ -1513,7 +1513,8 @@ hwSPI_OpResult SPI_Master_ReadByte(
 
         return hwSPI_SlaveTimeout;
     }
-    else if (NeonRTOS_SyncObjWait(&Spi_Master_Recv_SyncHandle[index], SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
+    
+    if (NeonRTOS_SyncObjWait(&Spi_Master_Recv_SyncHandle[index], SPI_MASTER_OP_TIMEOUT) != NeonRTOS_OK)
     {
         DL_SPI_disableInterrupt(base, SPI_TIMSPM0_ALL_INTERRUPTS);
         transfer->state = TIMSPM0_SPI_ERROR;
@@ -1527,6 +1528,7 @@ hwSPI_OpResult SPI_Master_ReadByte(
 
         return hwSPI_SlaveTimeout;
     }
+    
     if (transfer->state != TIMSPM0_SPI_DONE)
     {
         DL_SPI_disableInterrupt(base, SPI_TIMSPM0_ALL_INTERRUPTS);

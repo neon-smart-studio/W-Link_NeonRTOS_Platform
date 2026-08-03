@@ -27,6 +27,28 @@
 #define I2C_TIMSPM0_HAS_UNICOMM_I2CC
 #endif
 
+#ifdef I2C_TIMSPM0_HAS_LEGACY_I2C
+#define I2C_TIMSPM0_ALL_INTERRUPTS                 \
+    (DL_I2C_INTERRUPT_CONTROLLER_RX_DONE |         \
+     DL_I2C_INTERRUPT_CONTROLLER_TX_DONE |         \
+     DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER |  \
+     DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER |  \
+     DL_I2C_INTERRUPT_CONTROLLER_NACK |            \
+     DL_I2C_INTERRUPT_CONTROLLER_STOP |            \
+     DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST)
+#endif //I2C_TIMSPM0_HAS_LEGACY_I2C
+
+#ifdef I2C_TIMSPM0_HAS_UNICOMM_I2CC
+#define I2C_TIMSPM0_ALL_INTERRUPTS        \
+    (DL_I2CC_INTERRUPT_RX_DONE |          \
+     DL_I2CC_INTERRUPT_TX_DONE |          \
+     DL_I2CC_INTERRUPT_RXFIFO_TRIGGER |   \
+     DL_I2CC_INTERRUPT_TXFIFO_TRIGGER |   \
+     DL_I2CC_INTERRUPT_NACK |             \
+     DL_I2CC_INTERRUPT_STOP |             \
+     DL_I2CC_INTERRUPT_ARBITRATION_LOST)
+#endif //I2C_TIMSPM0_HAS_UNICOMM_I2CC
+
 #define I2C_TIMSPM0_STANDARD_SPEED_HZ          (100000UL)
 #define I2C_TIMSPM0_FAST_SPEED_HZ              (400000UL)
 #define I2C_TIMSPM0_MAX_7BIT_ADDRESS           (0x7FU)
@@ -519,14 +541,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     {
                         DL_I2C_resetControllerTransfer(base);
 
-                        DL_I2C_disableInterrupt(base, \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+                        DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -541,14 +556,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     }
                     else
                     {
-                        DL_I2C_disableInterrupt(base, \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+                        DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_DONE;
 
@@ -568,14 +576,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     {
                         DL_I2C_resetControllerTransfer(base);
                         
-                        DL_I2C_disableInterrupt(base, \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+                        DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -591,14 +592,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     }
                     else
                     {
-                        DL_I2C_disableInterrupt(base, \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+                        DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_DONE;
 
@@ -635,14 +629,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     {
                         DL_I2C_resetControllerTransfer(base);
                         
-                        DL_I2C_disableInterrupt(base, \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+                        DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -651,14 +638,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                         return;
                     }
 
-                    DL_I2C_disableInterrupt(base, \
-                                            DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+                    DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                     transfer->state = TIMSPM0_I2C_DONE;
 
@@ -675,14 +655,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     {
                         DL_I2C_resetControllerTransfer(base);
                         
-                        DL_I2C_disableInterrupt(base, \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+                        DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -691,14 +664,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                         return;
                     }
 
-                    DL_I2C_disableInterrupt(base, \
-                                            DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+                    DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                     transfer->state = TIMSPM0_I2C_DONE;
 
@@ -718,14 +684,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                 {
                     DL_I2C_resetControllerTransfer(base);
                     
-                    DL_I2C_disableInterrupt(base, \
-                                            DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                            DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+                    DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                     transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -822,14 +781,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     {
                         DL_I2CC_resetTransfer(base);
 
-                        DL_I2CC_disableInterrupt(base, \
-                                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_NACK | \
-                                                DL_I2CC_INTERRUPT_STOP | \
-                                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+                        DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -845,14 +797,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     }
                     else
                     {
-                        DL_I2CC_disableInterrupt(base, \
-                                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_NACK | \
-                                                DL_I2CC_INTERRUPT_STOP | \
-                                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+                        DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_DONE;
 
@@ -872,14 +817,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     {
                         DL_I2CC_resetTransfer(base);
 
-                        DL_I2CC_disableInterrupt(base, \
-                                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_NACK | \
-                                                DL_I2CC_INTERRUPT_STOP | \
-                                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+                        DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -895,14 +833,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     }
                     else
                     {
-                        DL_I2CC_disableInterrupt(base, \
-                                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_NACK | \
-                                                DL_I2CC_INTERRUPT_STOP | \
-                                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+                        DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_DONE;
 
@@ -938,14 +869,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     {
                         DL_I2CC_resetTransfer(base);
                         
-                        DL_I2CC_disableInterrupt(base, \
-                                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_NACK | \
-                                                DL_I2CC_INTERRUPT_STOP | \
-                                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+                        DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -954,14 +878,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                         return;
                     }
 
-                    DL_I2CC_disableInterrupt(base, \
-                                            DL_I2CC_INTERRUPT_RX_DONE | \
-                                            DL_I2CC_INTERRUPT_TX_DONE | \
-                                            DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                            DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                            DL_I2CC_INTERRUPT_NACK | \
-                                            DL_I2CC_INTERRUPT_STOP | \
-                                            DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+                    DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                     transfer->state = TIMSPM0_I2C_DONE;
 
@@ -978,14 +895,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                     {
                         DL_I2CC_resetTransfer(base);
 
-                        DL_I2CC_disableInterrupt(base, \
-                                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                                DL_I2CC_INTERRUPT_NACK | \
-                                                DL_I2CC_INTERRUPT_STOP | \
-                                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+                        DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                         transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -994,14 +904,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                         return;
                     }
 
-                    DL_I2CC_disableInterrupt(base, \
-                                            DL_I2CC_INTERRUPT_RX_DONE | \
-                                            DL_I2CC_INTERRUPT_TX_DONE | \
-                                            DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                            DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                            DL_I2CC_INTERRUPT_NACK | \
-                                            DL_I2CC_INTERRUPT_STOP | \
-                                            DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+                    DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                     transfer->state = TIMSPM0_I2C_DONE;
 
@@ -1021,14 +924,7 @@ static void I2C_IRQ_Process(hwI2C_Index index)
                 {
                     DL_I2CC_resetTransfer(base);
                     
-                    DL_I2CC_disableInterrupt(base, \
-                                            DL_I2CC_INTERRUPT_RX_DONE | \
-                                            DL_I2CC_INTERRUPT_TX_DONE | \
-                                            DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                            DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                            DL_I2CC_INTERRUPT_NACK | \
-                                            DL_I2CC_INTERRUPT_STOP | \
-                                            DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+                    DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
                     transfer->state = TIMSPM0_I2C_ERROR;
 
@@ -1224,23 +1120,9 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
         DL_I2C_setControllerRXFIFOThreshold(base, DL_I2C_RX_FIFO_LEVEL_BYTES_1);
         DL_I2C_enableControllerClockStretching(base);
 
-        DL_I2C_disableInterrupt(base, \
-                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+        DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
-        DL_I2C_clearInterruptStatus(base, \
-                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+        DL_I2C_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
         DL_I2C_enableController(base);
 #endif
@@ -1269,23 +1151,9 @@ hwI2C_OpResult I2C_Master_Init(hwI2C_Index index, hwI2C_Speed_Mode speed_mode)
         DL_I2CC_setRXFIFOThreshold(base, DL_I2CC_RX_FIFO_LEVEL_ONE_ENTRY);
         DL_I2CC_enableClockStretching(base);
 
-        DL_I2CC_disableInterrupt(base, \
-                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_NACK | \
-                                DL_I2CC_INTERRUPT_STOP | \
-                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+        DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
-        DL_I2CC_clearInterruptStatus(base, \
-                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_NACK | \
-                                DL_I2CC_INTERRUPT_STOP | \
-                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+        DL_I2CC_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
         DL_I2CC_enable(base);
 #endif
@@ -1355,27 +1223,13 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index)
     I2C_NVIC_DeInit(index);
 
 #if defined(I2C_TIMSPM0_HAS_LEGACY_I2C)
-    DL_I2C_disableInterrupt(base, \
-                            DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                            DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                            DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                            DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                            DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                            DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                            DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+    DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
     DL_I2C_resetControllerTransfer(base);
     DL_I2C_flushControllerTXFIFO(base);
     DL_I2C_flushControllerRXFIFO(base);
 
-    DL_I2C_clearInterruptStatus(base, \
-                            DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                            DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                            DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                            DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                            DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                            DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                            DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+    DL_I2C_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
                             
     DL_I2C_disableController(base);
     DL_I2C_reset(base);
@@ -1383,27 +1237,13 @@ hwI2C_OpResult I2C_Master_DeInit(hwI2C_Index index)
 #endif
 
 #if defined(I2C_TIMSPM0_HAS_UNICOMM_I2CC)
-    DL_I2CC_disableInterrupt(base, \
-                            DL_I2CC_INTERRUPT_RX_DONE | \
-                            DL_I2CC_INTERRUPT_TX_DONE | \
-                            DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                            DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                            DL_I2CC_INTERRUPT_NACK | \
-                            DL_I2CC_INTERRUPT_STOP | \
-                            DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+    DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
     DL_I2CC_resetTransfer(base);
     DL_I2CC_flushTXFIFO(base);
     DL_I2CC_flushRXFIFO(base);
 
-    DL_I2CC_clearInterruptStatus(base, \
-                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_NACK | \
-                                DL_I2CC_INTERRUPT_STOP | \
-                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+    DL_I2CC_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
                                 
     DL_I2CC_disable(base);
     DL_I2CC_reset(base);
@@ -1493,47 +1333,19 @@ hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read
     NeonRTOS_SyncObjClear(&I2C_Master_Done_SyncHandle[index]);
 
 #if defined(I2C_TIMSPM0_HAS_LEGACY_I2C)
-        DL_I2C_disableInterrupt(base, \
-                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+        DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
                             
             
-        DL_I2C_clearInterruptStatus(base, \
-                                    DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+        DL_I2C_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
         DL_I2C_flushControllerTXFIFO(base);
         DL_I2C_flushControllerRXFIFO(base);
 #endif
 
 #if defined(I2C_TIMSPM0_HAS_UNICOMM_I2CC)
-        DL_I2CC_disableInterrupt(base, \
-                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_NACK | \
-                                DL_I2CC_INTERRUPT_STOP | \
-                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+        DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
                                 
-        DL_I2CC_clearInterruptStatus(base, \
-                                    DL_I2CC_INTERRUPT_RX_DONE | \
-                                    DL_I2CC_INTERRUPT_TX_DONE | \
-                                    DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                    DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                    DL_I2CC_INTERRUPT_NACK | \
-                                    DL_I2CC_INTERRUPT_STOP | \
-                                    DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+        DL_I2CC_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
         DL_I2CC_flushTXFIFO(base);
         DL_I2CC_flushRXFIFO(base);
@@ -1620,52 +1432,24 @@ hwI2C_OpResult I2C_Master_Read(hwI2C_Index index, uint8_t address, uint8_t *read
         (transfer->state == TIMSPM0_I2C_RX_WAIT_STOP))
     {
 #if defined(I2C_TIMSPM0_HAS_LEGACY_I2C)
-        DL_I2C_disableInterrupt(base, \
-                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+        DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
         DL_I2C_resetControllerTransfer(base);
         DL_I2C_flushControllerTXFIFO(base);
         DL_I2C_flushControllerRXFIFO(base);
                                 
-        DL_I2C_clearInterruptStatus(base, \
-                                    DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+        DL_I2C_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 #endif
 
 #if defined(I2C_TIMSPM0_HAS_UNICOMM_I2CC)
-        DL_I2CC_disableInterrupt(base, \
-                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_NACK | \
-                                DL_I2CC_INTERRUPT_STOP | \
-                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+        DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
         DL_I2CC_resetTransfer(base);
         DL_I2CC_flushTXFIFO(base);
         DL_I2CC_flushRXFIFO(base);
 
                                 
-        DL_I2CC_clearInterruptStatus(base, \
-                                    DL_I2CC_INTERRUPT_RX_DONE | \
-                                    DL_I2CC_INTERRUPT_TX_DONE | \
-                                    DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                    DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                    DL_I2CC_INTERRUPT_NACK | \
-                                    DL_I2CC_INTERRUPT_STOP | \
-                                    DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+        DL_I2CC_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 #endif
 
         transfer->state = TIMSPM0_I2C_ERROR;
@@ -1714,47 +1498,19 @@ hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *wri
     NeonRTOS_SyncObjClear(&I2C_Master_Done_SyncHandle[index]);
 
 #if defined(I2C_TIMSPM0_HAS_LEGACY_I2C)
-    DL_I2C_disableInterrupt(base, \
-                            DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                            DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                            DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                            DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                            DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                            DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                            DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+    DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
                         
         
-    DL_I2C_clearInterruptStatus(base, \
-                                DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+    DL_I2C_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
     DL_I2C_flushControllerTXFIFO(base);
     DL_I2C_flushControllerRXFIFO(base);
 #endif
 
 #if defined(I2C_TIMSPM0_HAS_UNICOMM_I2CC)
-    DL_I2CC_disableInterrupt(base, \
-                            DL_I2CC_INTERRUPT_RX_DONE | \
-                            DL_I2CC_INTERRUPT_TX_DONE | \
-                            DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                            DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                            DL_I2CC_INTERRUPT_NACK | \
-                            DL_I2CC_INTERRUPT_STOP | \
-                            DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+    DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
                             
-    DL_I2CC_clearInterruptStatus(base, \
-                                DL_I2CC_INTERRUPT_RX_DONE | \
-                                DL_I2CC_INTERRUPT_TX_DONE | \
-                                DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                DL_I2CC_INTERRUPT_NACK | \
-                                DL_I2CC_INTERRUPT_STOP | \
-                                DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+    DL_I2CC_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
     DL_I2CC_flushTXFIFO(base);
     DL_I2CC_flushRXFIFO(base);
@@ -1857,52 +1613,24 @@ hwI2C_OpResult I2C_Master_Write(hwI2C_Index index, uint8_t address, uint8_t *wri
         (transfer->state == TIMSPM0_I2C_RX_WAIT_STOP))
     {
 #if defined(I2C_TIMSPM0_HAS_LEGACY_I2C)
-            DL_I2C_disableInterrupt(base, \
-                                    DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                    DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+            DL_I2C_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
             DL_I2C_resetControllerTransfer(base);
             DL_I2C_flushControllerTXFIFO(base);
             DL_I2C_flushControllerRXFIFO(base);
                                     
-            DL_I2C_clearInterruptStatus(base, \
-                                        DL_I2C_INTERRUPT_CONTROLLER_RX_DONE | \
-                                        DL_I2C_INTERRUPT_CONTROLLER_TX_DONE | \
-                                        DL_I2C_INTERRUPT_CONTROLLER_RXFIFO_TRIGGER | \
-                                        DL_I2C_INTERRUPT_CONTROLLER_TXFIFO_TRIGGER | \
-                                        DL_I2C_INTERRUPT_CONTROLLER_NACK | \
-                                        DL_I2C_INTERRUPT_CONTROLLER_STOP | \
-                                        DL_I2C_INTERRUPT_CONTROLLER_ARBITRATION_LOST);
+            DL_I2C_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 #endif
 
 #if defined(I2C_TIMSPM0_HAS_UNICOMM_I2CC)
-            DL_I2CC_disableInterrupt(base, \
-                                    DL_I2CC_INTERRUPT_RX_DONE | \
-                                    DL_I2CC_INTERRUPT_TX_DONE | \
-                                    DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                    DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                    DL_I2CC_INTERRUPT_NACK | \
-                                    DL_I2CC_INTERRUPT_STOP | \
-                                    DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+            DL_I2CC_disableInterrupt(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 
             DL_I2CC_resetTransfer(base);
             DL_I2CC_flushTXFIFO(base);
             DL_I2CC_flushRXFIFO(base);
 
                                     
-            DL_I2CC_clearInterruptStatus(base, \
-                                        DL_I2CC_INTERRUPT_RX_DONE | \
-                                        DL_I2CC_INTERRUPT_TX_DONE | \
-                                        DL_I2CC_INTERRUPT_RXFIFO_TRIGGER | \
-                                        DL_I2CC_INTERRUPT_TXFIFO_TRIGGER | \
-                                        DL_I2CC_INTERRUPT_NACK | \
-                                        DL_I2CC_INTERRUPT_STOP | \
-                                        DL_I2CC_INTERRUPT_ARBITRATION_LOST);
+            DL_I2CC_clearInterruptStatus(base, I2C_TIMSPM0_ALL_INTERRUPTS);
 #endif
 
         transfer->state = TIMSPM0_I2C_ERROR;

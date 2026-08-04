@@ -20,8 +20,6 @@
 
 #include "Timer/Device/STM32/Timer_STM32.h"
 
-#include "PWM_STM32_Base.h"
-
 #include "PWM_STM32.h"
 
 #define PWM_PERIOD_US    1000
@@ -47,7 +45,7 @@ static uint8_t STM32_PWM_GetAF(hwTimer_Index timer, hwGPIO_Pin pin)
 
 const PWM_Pin_Def* PWM_Find_PinDef(hwPWM_Channel channel_index)
 {
-    for (int i = 0; i < hwPWM_Base_MAX; i++) {
+    for (int i = 0; i < hwTimer_Index_MAX; i++) {
         PWM_Pinset_t pinset = PWM_Index_Map_Alt[i];
 
         for (int j = 0; j < 4; j++) {

@@ -1150,7 +1150,6 @@ void UART_IRQ_Process(hwUART_Index index)
     }
 
     void *base = (void *) (uintptr_t) UART_Map_Soc_Base(index);
-
     if (base == NULL) {
         return;
     }
@@ -1159,8 +1158,7 @@ void UART_IRQ_Process(hwUART_Index index)
 
     while (true)
     {
-        uint32_t pending = (uint32_t)
-            DL_UART_Main_getPendingInterrupt(base);
+        uint32_t pending = DL_UART_Main_getPendingInterrupt(base);
 
         switch (pending)
         {
@@ -1168,30 +1166,23 @@ void UART_IRQ_Process(hwUART_Index index)
 
                 if (!state->rx_busy)
                 {
-                    DL_UART_Main_disableInterrupt(
-                        base,
-                        DL_UART_MAIN_INTERRUPT_RX);
+                    DL_UART_Main_disableInterrupt(base, DL_UART_MAIN_INTERRUPT_RX);
 
                     break;
                 }
 
-                while (!DL_UART_Main_isRXFIFOEmpty(base) &&
-                       (state->rx_count < state->rx_size))
+                while (!DL_UART_Main_isRXFIFOEmpty(base) && (state->rx_count < state->rx_size))
                 {
-                    state->rx_buf[state->rx_count++] =
-                        DL_UART_Main_receiveData(base);
+                    state->rx_buf[state->rx_count++] = DL_UART_Main_receiveData(base);
                 }
 
                 if (state->rx_count >= state->rx_size)
                 {
-                    DL_UART_Main_disableInterrupt(
-                        base,
-                        DL_UART_MAIN_INTERRUPT_RX);
+                    DL_UART_Main_disableInterrupt(base, DL_UART_MAIN_INTERRUPT_RX);
 
                     state->rx_busy = false;
 
-                    NeonRTOS_SyncObjSignalFromISR(
-                        &UART_Recv_SyncHandle[index]);
+                    NeonRTOS_SyncObjSignalFromISR(&UART_Recv_SyncHandle[index]);
                 }
 
                 break;
@@ -1200,9 +1191,7 @@ void UART_IRQ_Process(hwUART_Index index)
 
                 if (!state->tx_busy)
                 {
-                    DL_UART_Main_disableInterrupt(
-                        base,
-                        DL_UART_MAIN_INTERRUPT_TX);
+                    DL_UART_Main_disableInterrupt(base, DL_UART_MAIN_INTERRUPT_TX);
 
                     break;
                 }
@@ -1210,21 +1199,16 @@ void UART_IRQ_Process(hwUART_Index index)
                 while (!DL_UART_Main_isTXFIFOFull(base) &&
                        (state->tx_count < state->tx_size))
                 {
-                    DL_UART_Main_transmitData(
-                        base,
-                        state->tx_buf[state->tx_count++]);
+                    DL_UART_Main_transmitData(base, state->tx_buf[state->tx_count++]);
                 }
 
                 if (state->tx_count >= state->tx_size)
                 {
-                    DL_UART_Main_disableInterrupt(
-                        base,
-                        DL_UART_MAIN_INTERRUPT_TX);
+                    DL_UART_Main_disableInterrupt(base, DL_UART_MAIN_INTERRUPT_TX);
 
                     state->tx_busy = false;
 
-                    NeonRTOS_SyncObjSignalFromISR(
-                        &UART_Send_SyncHandle[index]);
+                    NeonRTOS_SyncObjSignalFromISR(&UART_Send_SyncHandle[index]);
                 }
 
                 break;
@@ -1238,92 +1222,16 @@ void UART_IRQ_Process(hwUART_Index index)
     }
 }
 
-
-static NeonRTOS_Time_t UART_Calculate_Wait_Time(
-    hwUART_Index index,
-    size_t size,
-    uint32_t timeoutMs
-)
-{
-    if (timeoutMs == NEONRT_WAIT_FOREVER) {
-        return NEONRT_WAIT_FOREVER;
-    }
-
-    if ((UART_BaudRate[index] == 0U) || (size == 0U)) {
-        return (NeonRTOS_Time_t) timeoutMs;
-    }
-
-    uint64_t transfer_bits =
-        (uint64_t) size * (uint64_t) UART_FrameBits[index];
-
-    uint64_t transfer_ms =
-        ((transfer_bits * 1000ULL) + UART_BaudRate[index] - 1ULL) /
-        UART_BaudRate[index];
-
-    uint64_t wait_ms = transfer_ms + timeoutMs + 1ULL;
-
-    if (wait_ms >= UINT32_MAX) {
-        wait_ms = UINT32_MAX - 1ULL;
-    }
-
-    return (NeonRTOS_Time_t) wait_ms;
-}
-
-
-static bool UART_Wait_TX_Complete(
-    void *base,
-    NeonRTOS_Time_t wait_ms
-)
-{
-    NeonRTOS_Time_t elapsed = 0;
-
-    while (DL_UART_Main_isBusy(base))
-    {
-        if ((wait_ms != NEONRT_WAIT_FOREVER) &&
-            (elapsed >= wait_ms))
-        {
-            return false;
-        }
-
-        NeonRTOS_Sleep(1);
-
-        if (wait_ms != NEONRT_WAIT_FOREVER) {
-            elapsed++;
-        }
-    }
-
-    return true;
-}
-
-
-hwUART_OpResult UART_Open(
-    hwUART_Index index,
-    uint32_t baudrate,
-    bool rts_cts
-)
+hwUART_OpResult UART_Open(hwUART_Index index, uint32_t baudrate, bool rts_cts)
 {
     if (rts_cts) {
         return hwUART_Unsupport;
     }
 
-    return UART_Open_Specific_Format(
-        index,
-        baudrate,
-        false,
-        8U,
-        UART_Parity_None,
-        1U);
+    return UART_Open_Specific_Format(index, baudrate, false, 8U, UART_Parity_None, 1U);
 }
 
-
-hwUART_OpResult UART_Open_Specific_Format(
-    hwUART_Index index,
-    uint32_t baudrate,
-    bool rts_cts,
-    uint8_t data_bits,
-    UART_Parity parity,
-    uint8_t stop_bits
-)
+hwUART_OpResult UART_Open_Specific_Format(hwUART_Index index, uint32_t baudrate, bool rts_cts, uint8_t data_bits, UART_Parity parity, uint8_t stop_bits)
 {
     if ((index >= hwUART_Index_MAX) || (baudrate == 0U)) {
         return hwUART_InvalidParameter;
@@ -1361,40 +1269,40 @@ hwUART_OpResult UART_Open_Specific_Format(
         return hwUART_InvalidParameter;
     }
 
-    uint32_t base_address = UART_Map_Soc_Base(index);
-
-    uint32_t tx_iomux = GPIO_Map_Soc_Pin_IOMUX(tx_pin);
-    uint32_t rx_iomux = GPIO_Map_Soc_Pin_IOMUX(rx_pin);
-
-    uint32_t tx_function =
-        UART_Map_Soc_Pin_Function(index, tx_pin);
-
-    uint32_t rx_function =
-        UART_Map_Soc_Pin_Function(index, rx_pin);
-
-    /* IOMUX_PINCM1 is 0, so a zero IOMUX index is not an error. */
-    if ((base_address == 0U) ||
-        (tx_function == 0U) ||
-        (rx_function == 0U))
+#ifdef UART_TIMSPM0_HAS_LEGACY_UART
+    UART_Regs* base = UART_Map_Soc_Base(index);
+#endif
+#ifdef UART_TIMSPM0_HAS_UNICOMM_UART
+    UNICOMM_Inst_Regs* base = UART_Map_Soc_Base(index);
+#endif
+    if (base == NULL)
     {
         return hwUART_InvalidParameter;
     }
 
-    if (NeonRTOS_SyncObjCreate(
-            &UART_Send_SyncHandle[index]) != NeonRTOS_OK)
+    uint32_t tx_iomux = GPIO_Map_Soc_Pin_IOMUX(tx_pin);
+    uint32_t rx_iomux = GPIO_Map_Soc_Pin_IOMUX(rx_pin);
+
+    uint32_t tx_function = UART_Map_Soc_Pin_Function(index, tx_pin);
+    uint32_t rx_function = UART_Map_Soc_Pin_Function(index, rx_pin);
+
+    /* IOMUX_PINCM1 is 0, so a zero IOMUX index is not an error. */
+    if ((tx_function == 0U) || (rx_function == 0U))
+    {
+        return hwUART_InvalidParameter;
+    }
+
+    if (NeonRTOS_SyncObjCreate(&UART_Send_SyncHandle[index]) != NeonRTOS_OK)
     {
         return hwUART_MemoryError;
     }
 
-    if (NeonRTOS_SyncObjCreate(
-            &UART_Recv_SyncHandle[index]) != NeonRTOS_OK)
+    if (NeonRTOS_SyncObjCreate(&UART_Recv_SyncHandle[index]) != NeonRTOS_OK)
     {
         NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
 
         return hwUART_MemoryError;
     }
-
-    void *base = (void *) (uintptr_t) base_address;
 
     DL_UART_Main_reset(base);
     DL_UART_Main_enablePower(base);
@@ -1450,52 +1358,31 @@ hwUART_OpResult UART_Open_Specific_Format(
         uart_config.stopBits = DL_UART_MAIN_STOP_BITS_TWO;
     }
 
-    DL_UART_Main_setClockConfig(
-        base,
-        (DL_UART_Main_ClockConfig *) &clock_config);
+    DL_UART_Main_setClockConfig(base, (DL_UART_Main_ClockConfig *) &clock_config);
 
-    DL_UART_Main_init(
-        base,
-        &uart_config);
+    DL_UART_Main_init(base, &uart_config);
 
-    DL_UART_Main_configBaudRate(
-        base,
-        g_sys_clock_hz,
-        baudrate);
+    DL_UART_Main_configBaudRate(base, g_sys_clock_hz, baudrate);
 
     DL_UART_Main_enableFIFOs(base);
 
-    DL_UART_Main_setRXFIFOThreshold(
-        base,
-        DL_UART_RX_FIFO_LEVEL_ONE_ENTRY);
+    DL_UART_Main_setRXFIFOThreshold(base, DL_UART_RX_FIFO_LEVEL_ONE_ENTRY);
 
-    DL_UART_Main_setTXFIFOThreshold(
-        base,
-        DL_UART_TX_FIFO_LEVEL_1_2_EMPTY);
+    DL_UART_Main_setTXFIFOThreshold(base, DL_UART_TX_FIFO_LEVEL_1_2_EMPTY);
 
-    DL_UART_Main_disableInterrupt(
-        base,
-        UART_INTERRUPT_MASK);
+    DL_UART_Main_disableInterrupt(base, UART_INTERRUPT_MASK);
 
-    DL_UART_Main_clearInterruptStatus(
-        base,
-        UART_INTERRUPT_MASK);
+    DL_UART_Main_clearInterruptStatus(base, UART_INTERRUPT_MASK);
 
-    while (!DL_UART_Main_isRXFIFOEmpty(base)) {
+    while (!DL_UART_Main_isRXFIFOEmpty(base))
+    {
         (void) DL_UART_Main_receiveData(base);
     }
 
-    memset(
-        &UART_IT_State[index],
-        0,
-        sizeof(UART_IT_State[index]));
+    memset(&UART_IT_State[index], 0, sizeof(UART_IT_State[index]));
 
     UART_BaudRate[index] = baudrate;
-    UART_FrameBits[index] =
-        (uint8_t) (1U +
-                   data_bits +
-                   ((parity == UART_Parity_None) ? 0U : 1U) +
-                   stop_bits);
+    UART_FrameBits[index] = (uint8_t) (1U + data_bits + ((parity == UART_Parity_None) ? 0U : 1U) + stop_bits);
 
     DL_UART_Main_enable(base);
 
@@ -1508,7 +1395,6 @@ hwUART_OpResult UART_Open_Specific_Format(
 
     return hwUART_OK;
 }
-
 
 hwUART_OpResult UART_Close(hwUART_Index index)
 {
@@ -1523,7 +1409,16 @@ hwUART_OpResult UART_Close(hwUART_Index index)
     hwGPIO_Pin tx_pin = UART_Pin_Def_Table[index].tx_pin;
     hwGPIO_Pin rx_pin = UART_Pin_Def_Table[index].rx_pin;
 
-    void *base = (void *) (uintptr_t) UART_Map_Soc_Base(index);
+#ifdef UART_TIMSPM0_HAS_LEGACY_UART
+    UART_Regs* base = UART_Map_Soc_Base(index);
+#endif
+#ifdef UART_TIMSPM0_HAS_UNICOMM_UART
+    UNICOMM_Inst_Regs* base = UART_Map_Soc_Base(index);
+#endif
+    if (base == NULL)
+    {
+        return hwUART_InvalidParameter;
+    }
 
     UART_NVIC_Disable(index);
 
@@ -1531,19 +1426,14 @@ hwUART_OpResult UART_Close(hwUART_Index index)
     DL_UART_Main_reset(base);
     DL_UART_Main_disablePower(base);
 
-    DL_GPIO_initDigitalInput(
-        GPIO_Map_Soc_Pin_IOMUX(tx_pin));
+    DL_GPIO_initDigitalInput(GPIO_Map_Soc_Pin_IOMUX(tx_pin));
 
-    DL_GPIO_initDigitalInput(
-        GPIO_Map_Soc_Pin_IOMUX(rx_pin));
+    DL_GPIO_initDigitalInput(GPIO_Map_Soc_Pin_IOMUX(rx_pin));
 
     NeonRTOS_SyncObjDelete(&UART_Send_SyncHandle[index]);
     NeonRTOS_SyncObjDelete(&UART_Recv_SyncHandle[index]);
 
-    memset(
-        &UART_IT_State[index],
-        0,
-        sizeof(UART_IT_State[index]));
+    memset(&UART_IT_State[index], 0, sizeof(UART_IT_State[index]));
 
     gpio_pin_init_status[tx_pin] = false;
     gpio_pin_init_status[rx_pin] = false;
@@ -1556,12 +1446,7 @@ hwUART_OpResult UART_Close(hwUART_Index index)
 }
 
 
-hwUART_OpResult UART_Read(
-    hwUART_Index index,
-    uint8_t *data_rd,
-    size_t size,
-    uint32_t timeoutMs
-)
+hwUART_OpResult UART_Read(hwUART_Index index, uint8_t *data_rd, size_t size, uint32_t timeoutMs)
 {
     if ((index >= hwUART_Index_MAX) ||
         ((data_rd == NULL) && (size != 0U)))
@@ -1577,15 +1462,41 @@ hwUART_OpResult UART_Read(
         return (hwUART_OpResult) 0;
     }
 
-    void *base = (void *) (uintptr_t) UART_Map_Soc_Base(index);
+#ifdef UART_TIMSPM0_HAS_LEGACY_UART
+    UART_Regs* base = UART_Map_Soc_Base(index);
+#endif
+#ifdef UART_TIMSPM0_HAS_UNICOMM_UART
+    UNICOMM_Inst_Regs* base = UART_Map_Soc_Base(index);
+#endif
+    if (base == NULL)
+    {
+        return hwUART_InvalidParameter;
+    }
+
     TIMSPM0_UART_IT_State *state = &UART_IT_State[index];
 
-    if (state->rx_busy) {
+    if (state->rx_busy)
+    {
         return hwUART_Busy;
     }
 
-    NeonRTOS_Time_t wait_ms =
-        UART_Calculate_Wait_Time(index, size, timeoutMs);
+    if (timeoutMs == NEONRT_WAIT_FOREVER) {
+        return NEONRT_WAIT_FOREVER;
+    }
+
+    if ((UART_BaudRate[index] == 0U) || (size == 0U)) {
+        return (NeonRTOS_Time_t) timeoutMs;
+    }
+
+    uint64_t transfer_bits = (uint64_t) size * (uint64_t) UART_FrameBits[index];
+
+    uint64_t transfer_ms = ((transfer_bits * 1000ULL) + UART_BaudRate[index] - 1ULL) / UART_BaudRate[index];
+
+    uint64_t wait_ms = transfer_ms + timeoutMs + 1ULL;
+
+    if (wait_ms >= UINT32_MAX) {
+        wait_ms = UINT32_MAX - 1ULL;
+    }
 
     NeonRTOS_SyncObjClear(&UART_Recv_SyncHandle[index]);
 
@@ -1594,30 +1505,20 @@ hwUART_OpResult UART_Read(
     state->rx_count = 0U;
     state->rx_busy = true;
 
-    while (!DL_UART_Main_isRXFIFOEmpty(base) &&
-           (state->rx_count < state->rx_size))
+    while (!DL_UART_Main_isRXFIFOEmpty(base) && (state->rx_count < state->rx_size))
     {
-        state->rx_buf[state->rx_count++] =
-            DL_UART_Main_receiveData(base);
+        state->rx_buf[state->rx_count++] = DL_UART_Main_receiveData(base);
     }
 
     if (state->rx_count < state->rx_size)
     {
-        DL_UART_Main_clearInterruptStatus(
-            base,
-            DL_UART_MAIN_INTERRUPT_RX);
+        DL_UART_Main_clearInterruptStatus(base, DL_UART_MAIN_INTERRUPT_RX);
 
-        DL_UART_Main_enableInterrupt(
-            base,
-            DL_UART_MAIN_INTERRUPT_RX);
+        DL_UART_Main_enableInterrupt(base, DL_UART_MAIN_INTERRUPT_RX);
 
-        if (NeonRTOS_SyncObjWait(
-                &UART_Recv_SyncHandle[index],
-                wait_ms) != NeonRTOS_OK)
+        if (NeonRTOS_SyncObjWait(&UART_Recv_SyncHandle[index], wait_ms) != NeonRTOS_OK)
         {
-            DL_UART_Main_disableInterrupt(
-                base,
-                DL_UART_MAIN_INTERRUPT_RX);
+            DL_UART_Main_disableInterrupt(base, DL_UART_MAIN_INTERRUPT_RX);
 
             state->rx_busy = false;
 
@@ -1637,25 +1538,14 @@ hwUART_OpResult UART_Read(
 }
 
 
-hwUART_OpResult UART_GetChar(
-    hwUART_Index index,
-    uint8_t *char_rd,
-    uint32_t timeoutMs
-)
+hwUART_OpResult UART_GetChar(hwUART_Index index, uint8_t *char_rd, uint32_t timeoutMs)
 {
     return UART_Read(index, char_rd, 1U, timeoutMs);
 }
 
-
-hwUART_OpResult UART_Write(
-    hwUART_Index index,
-    uint8_t *data_wr,
-    size_t size,
-    uint32_t timeoutMs
-)
+hwUART_OpResult UART_Write(hwUART_Index index, uint8_t *data_wr, size_t size, uint32_t timeoutMs)
 {
-    if ((index >= hwUART_Index_MAX) ||
-        ((data_wr == NULL) && (size != 0U)))
+    if ((index >= hwUART_Index_MAX) || ((data_wr == NULL) && (size != 0U)))
     {
         return hwUART_InvalidParameter;
     }
@@ -1668,15 +1558,43 @@ hwUART_OpResult UART_Write(
         return (hwUART_OpResult) 0;
     }
 
-    void *base = (void *) (uintptr_t) UART_Map_Soc_Base(index);
+#ifdef UART_TIMSPM0_HAS_LEGACY_UART
+    UART_Regs* base = UART_Map_Soc_Base(index);
+#endif
+#ifdef UART_TIMSPM0_HAS_UNICOMM_UART
+    UNICOMM_Inst_Regs* base = UART_Map_Soc_Base(index);
+#endif
+    if (base == NULL)
+    {
+        return hwUART_InvalidParameter;
+    }
+
     TIMSPM0_UART_IT_State *state = &UART_IT_State[index];
 
-    if (state->tx_busy) {
+    if (state->tx_busy)
+    {
         return hwUART_Busy;
     }
 
-    NeonRTOS_Time_t wait_ms =
-        UART_Calculate_Wait_Time(index, size, timeoutMs);
+    if (timeoutMs == NEONRT_WAIT_FOREVER)
+    {
+        return NEONRT_WAIT_FOREVER;
+    }
+
+    if ((UART_BaudRate[index] == 0U) || (size == 0U))
+    {
+        return (NeonRTOS_Time_t) timeoutMs;
+    }
+
+    uint64_t transfer_bits = (uint64_t) size * (uint64_t) UART_FrameBits[index];
+
+    uint64_t transfer_ms = ((transfer_bits * 1000ULL) + UART_BaudRate[index] - 1ULL) / UART_BaudRate[index];
+
+    uint64_t wait_ms = transfer_ms + timeoutMs + 1ULL;
+
+    if (wait_ms >= UINT32_MAX) {
+        wait_ms = UINT32_MAX - 1ULL;
+    }
 
     NeonRTOS_SyncObjClear(&UART_Send_SyncHandle[index]);
 
@@ -1685,31 +1603,20 @@ hwUART_OpResult UART_Write(
     state->tx_count = 0U;
     state->tx_busy = true;
 
-    while (!DL_UART_Main_isTXFIFOFull(base) &&
-           (state->tx_count < state->tx_size))
+    while (!DL_UART_Main_isTXFIFOFull(base) && (state->tx_count < state->tx_size))
     {
-        DL_UART_Main_transmitData(
-            base,
-            state->tx_buf[state->tx_count++]);
+        DL_UART_Main_transmitData(base, state->tx_buf[state->tx_count++]);
     }
 
     if (state->tx_count < state->tx_size)
     {
-        DL_UART_Main_clearInterruptStatus(
-            base,
-            DL_UART_MAIN_INTERRUPT_TX);
+        DL_UART_Main_clearInterruptStatus(base, DL_UART_MAIN_INTERRUPT_TX);
 
-        DL_UART_Main_enableInterrupt(
-            base,
-            DL_UART_MAIN_INTERRUPT_TX);
+        DL_UART_Main_enableInterrupt(base, DL_UART_MAIN_INTERRUPT_TX);
 
-        if (NeonRTOS_SyncObjWait(
-                &UART_Send_SyncHandle[index],
-                wait_ms) != NeonRTOS_OK)
+        if (NeonRTOS_SyncObjWait(&UART_Send_SyncHandle[index], wait_ms) != NeonRTOS_OK)
         {
-            DL_UART_Main_disableInterrupt(
-                base,
-                DL_UART_MAIN_INTERRUPT_TX);
+            DL_UART_Main_disableInterrupt(base, DL_UART_MAIN_INTERRUPT_TX);
 
             state->tx_busy = false;
 
@@ -1721,11 +1628,23 @@ hwUART_OpResult UART_Write(
         }
     }
 
-    if (!UART_Wait_TX_Complete(base, wait_ms))
-    {
-        state->tx_busy = false;
+    NeonRTOS_Time_t elapsed = 0;
 
-        return hwUART_Busy;
+    while (DL_UART_Main_isBusy(base))
+    {
+        if ((wait_ms != NEONRT_WAIT_FOREVER) &&
+            (elapsed >= wait_ms))
+        {
+            state->tx_busy = false;
+
+            return hwUART_Busy;
+        }
+
+        NeonRTOS_Sleep(1);
+
+        if (wait_ms != NEONRT_WAIT_FOREVER) {
+            elapsed++;
+        }
     }
 
     state->tx_busy = false;
@@ -1733,16 +1652,10 @@ hwUART_OpResult UART_Write(
     return (hwUART_OpResult) state->tx_count;
 }
 
-
-hwUART_OpResult UART_PutChar(
-    hwUART_Index index,
-    uint8_t char_wr,
-    uint32_t timeoutMs
-)
+hwUART_OpResult UART_PutChar(hwUART_Index index, uint8_t char_wr, uint32_t timeoutMs)
 {
     return UART_Write(index, &char_wr, 1U, timeoutMs);
 }
-
 
 void UART_Printf(const char *format, ...)
 {
@@ -1755,11 +1668,7 @@ void UART_Printf(const char *format, ...)
 
     va_start(args, format);
 
-    int len = vsnprintf(
-        buffer,
-        sizeof(buffer),
-        format,
-        args);
+    int len = vsnprintf(buffer, sizeof(buffer), format, args);
 
     va_end(args);
 
@@ -1767,15 +1676,12 @@ void UART_Printf(const char *format, ...)
         return;
     }
 
-    if (len >= (int) sizeof(buffer)) {
+    if (len >= (int) sizeof(buffer))
+    {
         len = (int) sizeof(buffer) - 1;
     }
 
-    (void) UART_Write(
-        LOG_UART_INDEX,
-        (uint8_t *) buffer,
-        (size_t) len,
-        1000U);
+    (void) UART_Write(LOG_UART_INDEX, (uint8_t *) buffer, (size_t) len, 1000U);
 }
 
 

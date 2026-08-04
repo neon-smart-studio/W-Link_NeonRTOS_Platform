@@ -341,14 +341,14 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
         cs ? EUSCI_B_SPI_4PIN_UCxSTE_ACTIVE_LOW : EUSCI_B_SPI_3PIN
     };
 
-    MAP_SPI_disableModule(base);
-    MAP_SPI_initMaster(base, &spi_config);
-    MAP_SPI_enableModule(base);
+    MAP_SPI_disableModule(spi_base);
+    MAP_SPI_initMaster(spi_base, &spi_config);
+    MAP_SPI_enableModule(spi_base);
     
-    while (MAP_SPI_getInterruptStatus(base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
+    while (MAP_SPI_getInterruptStatus(spi_base, EUSCI_B_SPI_RECEIVE_INTERRUPT))
     {
-        (void)MAP_SPI_receiveData(base);
-        MAP_SPI_clearInterruptFlag(base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
+        (void)MAP_SPI_receiveData(spi_base);
+        MAP_SPI_clearInterruptFlag(spi_base, EUSCI_B_SPI_RECEIVE_INTERRUPT);
     }
 
     if (NeonRTOS_SyncObjCreate(&Spi_Master_Send_SyncHandle[index]) != NeonRTOS_OK)

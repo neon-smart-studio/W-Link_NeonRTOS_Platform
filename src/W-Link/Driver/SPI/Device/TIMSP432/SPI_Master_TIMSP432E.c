@@ -152,7 +152,7 @@ static void SPI3_IRQ_Handler(void)
     SPI_IRQ_Process(hwSPI_Index_3);
 }
 
-static void SPI_NVIC_Enable(hwSPI_Index index)
+static void NVIC_Init(hwSPI_Index index)
 {
     uint32_t base = SPI_Map_Soc_Base(index);
     uint32_t irq = SPI_Map_IRQ(index);
@@ -193,7 +193,7 @@ static void SPI_NVIC_Enable(hwSPI_Index index)
     }
 }
 
-static void SPI_NVIC_Disable(hwSPI_Index index)
+static void NVIC_DeInit(hwSPI_Index index)
 {
     uint32_t base = SPI_Map_Soc_Base(index);
     uint32_t irq = SPI_Map_IRQ(index);
@@ -411,7 +411,7 @@ hwSPI_OpResult SPI_Master_Init(hwSPI_Index index, uint32_t clock_rate_hz, hwSPI_
 
     uint32_t dummy;
 
-    while (MAP_SSIDataGetNonBlocking(base, &dummy));
+    while (MAP_SSIDataGetNonBlocking(ssi_base, &dummy));
 
     if (NeonRTOS_SyncObjCreate(&Spi_Master_Send_SyncHandle[index]) != NeonRTOS_OK)
     {
@@ -469,7 +469,6 @@ hwSPI_OpResult SPI_Master_DeInit(hwSPI_Index index)
     }
 
     uint32_t ssi_base = SPI_Map_Soc_Base(index);
-
     if (ssi_base == 0)
     {
         return hwSPI_InvalidParameter;
@@ -597,7 +596,7 @@ hwSPI_OpResult SPI_Change_Frequency(hwSPI_Index index, uint32_t clock_rate_hz)
     
     uint32_t dummy;
 
-    while (MAP_SSIDataGetNonBlocking(base, &dummy));
+    while (MAP_SSIDataGetNonBlocking(ssi_base, &dummy));
 
     Spi_Master_Clock_Hz[index] = clock_rate_hz;
 
@@ -665,7 +664,7 @@ hwSPI_OpResult SPI_Change_Mode(hwSPI_Index index, hwSPI_OpMode opMode)
     
     uint32_t dummy;
 
-    while (MAP_SSIDataGetNonBlocking(base, &dummy));
+    while (MAP_SSIDataGetNonBlocking(ssi_base, &dummy));
 
     Spi_Master_Mode[index] = opMode;
 

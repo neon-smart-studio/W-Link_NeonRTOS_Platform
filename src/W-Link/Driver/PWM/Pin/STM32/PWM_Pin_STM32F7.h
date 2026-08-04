@@ -2,9 +2,9 @@
 #ifndef PWM_Pin_STM32F7
 #define PWM_Pin_STM32F7
 
-#include "PWM_Pin_STM32_Def.h"
+#include "Timer/Timer.h"
 
-#include "PWM/Device/STM32/PWM_STM32_Base.h"
+#include "PWM_Pin_STM32_Def.h"
 
 typedef enum {
     PWM_Pinset_DEFAULT = 0,
@@ -61,7 +61,7 @@ typedef enum {
 #define CONFIG_PWM14_PINSET PWM_Pinset_DEFAULT
 #endif //CONFIG_PWM14_PINSET
 
-static const PWM_Pinset_t PWM_Index_Map_Alt[hwPWM_Base_MAX] = {
+static const PWM_Pinset_t PWM_Index_Map_Alt[hwTimer_Index_MAX] = {
 #if defined(TIM1_BASE)
     CONFIG_PWM1_PINSET,
 #endif
@@ -100,7 +100,7 @@ static const PWM_Pinset_t PWM_Index_Map_Alt[hwPWM_Base_MAX] = {
 #endif
 };
 
-static const PWM_Pin_Def PWM_Pin_Def_Table[hwPWM_Base_MAX][PWM_Pinset_MAX][4] =
+static const PWM_Pin_Def PWM_Pin_Def_Table[hwTimer_Index_MAX][PWM_Pinset_MAX][4] =
 {
 #if defined(TIM1_BASE)
     /* ================= TIM1 ================= */

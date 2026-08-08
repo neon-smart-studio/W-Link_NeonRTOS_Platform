@@ -1,4 +1,3 @@
-
 #ifndef NEONRTFS_H
 #define NEONRTFS_H
 
@@ -28,15 +27,15 @@ typedef struct NeonRtFsFile {
 	NeonRtFsHeader header;
 	char decompressor;
 	int32_t posDecomp;
-	uint32_t posStart;
-	uint32_t posComp;
+	const uint8_t *posStart;
+	const uint8_t *posComp;
 	char* decompData;
 } NeonRtFsFile;
 
-NeonRtFsInitResult NeonRtFsInit();
-NeonRtFsFile *NeonRtFsOpen(char *fileName);
+NeonRtFsInitResult NeonRtFsInit(void);
+NeonRtFsFile *NeonRtFsOpen(const char *fileName);
 int NeonRtFsFlags(NeonRtFsFile *fh);
-int NeonRtFsRead(NeonRtFsFile *fh, char *buff, int len);
+int NeonRtFsRead(NeonRtFsFile *fh, void *buffer, int len);
 void NeonRtFsClose(NeonRtFsFile *fh);
 
 #ifdef  __cplusplus

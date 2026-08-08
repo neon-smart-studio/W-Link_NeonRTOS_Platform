@@ -1,4 +1,3 @@
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -6,6 +5,38 @@
 
 #include "HTTPd_def.h"
 #include "HTTPd_Utils.h"
+
+static bool HTTPd_ASCII_Equals_NoCase(const char *left,
+                                      const char *right,
+                                      size_t len)
+{
+	if (left == NULL || right == NULL)
+	{
+		return false;
+	}
+
+	for (size_t i = 0; i < len; i++)
+	{
+		unsigned char a = (unsigned char)left[i];
+		unsigned char b = (unsigned char)right[i];
+
+		if (a >= 'A' && a <= 'Z')
+		{
+			a = (unsigned char)(a - 'A' + 'a');
+		}
+		if (b >= 'A' && b <= 'Z')
+		{
+			b = (unsigned char)(b - 'A' + 'a');
+		}
+
+		if (a != b)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
 
 uint8_t* HTTPd_Get_Host(uint8_t* buf)
 {
@@ -275,6 +306,11 @@ uint8_t* HTTPd_Parse_Reguest_Method(uint8_t* buf, HTTPd_Method req_method, uint8
 
 uint8_t* HTTPd_Parse_Headers(uint8_t* buf, const char* header_str, const char* header_val)
 {
+	if (buf == NULL || header_str == NULL || header_val == NULL)
+	{
+		return NULL;
+	}
+
 	memcpy(buf, header_str, strlen(header_str));
 	buf += strlen(header_str);
 	uint8_t offset;
@@ -289,86 +325,110 @@ uint8_t* HTTPd_Parse_Headers(uint8_t* buf, const char* header_str, const char* h
 
 uint8_t* HTTPd_Parse_End_Of_Headers(uint8_t* buf)
 {
-	uint8_t offset;
-	if (strncmp((char*)buf - 2, "\r\n", 2) != 0)
+	if (buf == NULL)
 	{
-		offset = sprintf((char*)buf, "\r\n\r\n");
-		buf += offset;
+		return NULL;
 	}
-	else
-	{
-		offset = sprintf((char*)buf, "\r\n");
-		buf += offset;
-	}
-	return buf;
+
+	/*
+	 * Every status/header builder in this module already appends CRLF.  Only
+	 * append the empty line here; looking behind `buf` made a caller-provided
+	 * buffer at offset zero an out-of-bounds read.
+	 */
+	memcpy(buf, "\r\n", 2);
+	return buf + 2;
 }
 
 uint8_t* HTTPd_Get_Header_Value(uint8_t* buf, uint8_t* header_str)
 {
-	uint8_t* buf_ptr = buf;
-	do
+	if (buf == NULL || header_str == NULL || header_str[0] == '\0')
 	{
-		buf_ptr = (uint8_t*)strstr((char*)buf_ptr, (char*)header_str);
-		if (buf_ptr == NULL)
+		return NULL;
+	}
+
+	const char *line = (const char *)buf;
+	const size_t wanted_len = strlen((const char *)header_str);
+
+	while (*line != '\0')
+	{
+		const char *line_end = strstr(line, "\r\n");
+		if (line_end == NULL || line_end == line)
 		{
 			return NULL;
 		}
-                
-                if(strncmp((const char*)(buf_ptr-2), "\r\n", 2)!=0 && *(buf_ptr-1)!=' ' && *(buf_ptr-1)!=':' && *(buf_ptr-1)!='\0')
-                {
-                        buf_ptr = (uint8_t*)strstr((char*)buf_ptr, "\r\n");
-                        if(buf_ptr==NULL){break;}
-                        continue;
-                }
-                
-		buf_ptr += strlen((char*)header_str);
-	
-		while (*buf_ptr ==  ' ') {buf_ptr++;}
-                
-		if (*buf_ptr++ != ':')
+
+		const char *colon = memchr(line, ':', (size_t)(line_end - line));
+		if (colon != NULL)
 		{
-			continue;
+			const char *name_end = colon;
+			while (name_end > line &&
+			       (name_end[-1] == ' ' || name_end[-1] == '\t'))
+			{
+				name_end--;
+			}
+
+			size_t name_len = (size_t)(name_end - line);
+			if (name_len == wanted_len &&
+			    HTTPd_ASCII_Equals_NoCase(line,
+			                              (const char *)header_str,
+			                              name_len))
+			{
+				const char *value = colon + 1;
+				while (value < line_end && (*value == ' ' || *value == '\t'))
+				{
+					value++;
+				}
+				return (uint8_t *)value;
+			}
 		}
-	
-		while (*buf_ptr ==  ' ') {buf_ptr++;}
-		
-		break;
-	} while (1);
-	
-	return buf_ptr;
+
+		line = line_end + 2;
+	}
+
+	return NULL;
 }
 
 HTTPd_Method HTTPd_Get_Header_Method(uint8_t* buf)
 {
-	uint8_t* first_line_end;
-	first_line_end = (uint8_t*)strstr((char*)buf, "\r\n");
-	if (first_line_end == NULL)
+	if (buf == NULL)
 	{
 		return HTTPd_Method_UNKNOWN;
 	}
-	
-	uint8_t* method_str_ptr;
-	
-	method_str_ptr = (uint8_t*)strstr((char*)buf, HTTP_Method_POST);
-	if (method_str_ptr != NULL && method_str_ptr < first_line_end)
+
+	const char *line = (const char *)buf;
+	const char *line_end = strstr(line, "\r\n");
+	if (line_end == NULL)
+	{
+		return HTTPd_Method_UNKNOWN;
+	}
+
+	const char *method_end = memchr(line, ' ', (size_t)(line_end - line));
+	if (method_end == NULL)
+	{
+		return HTTPd_Method_UNKNOWN;
+	}
+
+	size_t method_len = (size_t)(method_end - line);
+	if (method_len == strlen(HTTP_Method_POST) &&
+	    memcmp(line, HTTP_Method_POST, method_len) == 0)
 	{
 		return HTTPd_Method_POST;
 	}
-	
-	method_str_ptr = (uint8_t*)strstr((char*)buf, HTTP_Method_GET);
-	if (method_str_ptr != NULL && method_str_ptr < first_line_end)
+
+	if (method_len == strlen(HTTP_Method_GET) &&
+	    memcmp(line, HTTP_Method_GET, method_len) == 0)
 	{
 		return HTTPd_Method_GET;
 	}
-	
-	method_str_ptr = (uint8_t*)strstr((char*)buf, HTTP_Method_PUT);
-	if (method_str_ptr != NULL && method_str_ptr < first_line_end)
+
+	if (method_len == strlen(HTTP_Method_PUT) &&
+	    memcmp(line, HTTP_Method_PUT, method_len) == 0)
 	{
 		return HTTPd_Method_PUT;
 	}
-	
-	method_str_ptr = (uint8_t*)strstr((char*)buf, HTTP_Method_DELETE);
-	if (method_str_ptr != NULL && method_str_ptr < first_line_end)
+
+	if (method_len == strlen(HTTP_Method_DELETE) &&
+	    memcmp(line, HTTP_Method_DELETE, method_len) == 0)
 	{
 		return HTTPd_Method_DELETE;
 	}
@@ -378,34 +438,54 @@ HTTPd_Method HTTPd_Get_Header_Method(uint8_t* buf)
 
 uint8_t* HTTPd_Get_Header_Path(uint8_t* buf)
 {
-	uint8_t* first_line_end;
-	first_line_end = (uint8_t*)strstr((char*)buf, "\r\n");
-	if (first_line_end == NULL)
+	if (buf == NULL)
 	{
 		return NULL;
 	}
-	
-	uint8_t* path_str_ptr;
-	
-	path_str_ptr = (uint8_t*)strstr((char*)buf, HTTP_Version_1P0);
-	if (path_str_ptr != NULL && path_str_ptr < first_line_end)
+
+	char *line = (char *)buf;
+	char *line_end = strstr(line, "\r\n");
+	if (line_end == NULL)
 	{
-		path_str_ptr--;
-		while (*path_str_ptr ==  ' ') {path_str_ptr--;}
-		while (*path_str_ptr !=  ' ') {path_str_ptr--;}
-		path_str_ptr++;
-		return path_str_ptr;
+		return NULL;
 	}
-	
-	path_str_ptr = (uint8_t*)strstr((char*)buf, HTTP_Version_1P1);
-	if (path_str_ptr != NULL && path_str_ptr < first_line_end)
+
+	char *method_end = memchr(line, ' ', (size_t)(line_end - line));
+	if (method_end == NULL)
 	{
-		path_str_ptr--;
-		while (*path_str_ptr ==  ' ') {path_str_ptr--;}
-		while (*path_str_ptr !=  ' ') {path_str_ptr--;}
-		path_str_ptr++;
-		return path_str_ptr;
+		return NULL;
 	}
-	
-	return NULL;
+
+	char *path = method_end;
+	while (path < line_end && *path == ' ')
+	{
+		path++;
+	}
+	if (path == line_end)
+	{
+		return NULL;
+	}
+
+	char *path_end = memchr(path, ' ', (size_t)(line_end - path));
+	if (path_end == NULL || path_end == path)
+	{
+		return NULL;
+	}
+
+	char *version = path_end;
+	while (version < line_end && *version == ' ')
+	{
+		version++;
+	}
+
+	size_t version_len = (size_t)(line_end - version);
+	if (!((version_len == strlen(HTTP_Version_1P0) &&
+	       memcmp(version, HTTP_Version_1P0, version_len) == 0) ||
+	      (version_len == strlen(HTTP_Version_1P1) &&
+	       memcmp(version, HTTP_Version_1P1, version_len) == 0)))
+	{
+		return NULL;
+	}
+
+	return (uint8_t *)path;
 }

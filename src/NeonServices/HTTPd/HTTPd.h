@@ -38,6 +38,8 @@ extern "C" {
 #define HTTPD_CGI_NOTFOUND 2
 #define HTTPD_CGI_AUTHENTICATED 3
 
+#define HTTPD_AUTH_TOKEN_LEN  32
+
 #define WEBSOCK_FLAG_NONE 0
 #define WEBSOCK_FLAG_CONT (1<<0) //Set if the data is not the final data in the message; more follows
 #define WEBSOCK_FLAG_BIN (1<<1) //Set if the data is binary instead of text
@@ -100,6 +102,7 @@ const char* HTTPd_Get_CGI_Request_URL(HTTPd_WebSocked_Client_Connection *connDat
 const uint8_t* HTTPd_Get_CGI_Request_Data(HTTPd_WebSocked_Client_Connection *connData);
 uint32_t HTTPd_Get_CGI_Request_DataLen(HTTPd_WebSocked_Client_Connection *connData);
 const char* HTTPd_Get_CGI_Request_AuthToken(HTTPd_WebSocked_Client_Connection *connData);
+uint32_t HTTPd_Get_CGI_Client_IP(HTTPd_WebSocked_Client_Connection *connData);
 const char* HTTPd_Get_CGI_Request_Args(HTTPd_WebSocked_Client_Connection *connData);
 int HTTPd_Send_CGI_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_t status_code, const char* rsp_type, uint8_t* rsp_data, uint64_t rsp_len);
 int HTTPd_Send_CGI_JSON_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_t status_code, cJSON* rsp_dat, bool need_delete_json);

@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -8,8 +7,6 @@
 #include "NeonRTOS.h"
 
 #include "NeonRtFs.h"
-
-#define NEONRTFS_HEATSHRINK
 
 #ifdef NEONRTFS_HEATSHRINK
 #include "heatshrink_config_custom.h"
@@ -40,7 +37,13 @@ Accessing the flash through the mem emulation at 0x40200000 is a bit hairy: All 
 *must* be aligned 32-bit accesses. Reading a short, byte or unaligned word will result in
 a memory exception, crashing the program.
 */
-NeonRtFsInitResult NeonRtFsInit() {
+NeonRtFsInitResult NeonRtFsInit(void) {
+	NeonRtFsInitDone = false;
+
+	if (neonrtfs_img_len < sizeof(NeonRtFsHeader))
+	{
+		return NEONRTFS_INIT_RESULT_NO_IMAGE;
+	}
 	/*
 	if (((int)neonrtfs_img & 3) != 0) {
 		return NEONRTFS_INIT_RESULT_BAD_ALIGN;
@@ -63,14 +66,14 @@ NeonRtFsInitResult NeonRtFsInit() {
 //aligned 32-bit reads. Yes, it's no too optimized but it's short and sweet and it works.
 
 //ToDo: perhaps memcpy also does unaligned accesses?
-void readFlashUnaligned(char *dst, uint8_t* src, int len) {
-	if(dst==NULL){
+static void readFlashUnaligned(void *dst, const uint8_t* src, size_t len) {
+	if(dst==NULL || src==NULL){
 #if NEONRTFS_DEBUG==1
 		UART_Printf("[NeonRTFS] Invalid Read Buf Pointer!\n");
 #endif
 		return;
 	}
-	if(len==0){
+	if(len==0U){
 		return;
 	}
   
@@ -90,23 +93,38 @@ int NeonRtFsFlags(NeonRtFsFile *fh) {
 }
 
 //Open a file and return a pointer to the file desc struct.
-NeonRtFsFile *NeonRtFsOpen(char *fileName) {
+NeonRtFsFile *NeonRtFsOpen(const char *fileName) {
 	if (NeonRtFsInitDone == false) {
 #if NEONRTFS_DEBUG==1
 		UART_Printf("[NeonRTFS] Call NeonRtFsInit first!\n");
 #endif
 		return NULL;
 	}
-	uint8_t* s = neonrtfs_img;
-	uint8_t* p = s;
+	if (fileName == NULL)
+	{
+		return NULL;
+	}
+
+	const uint8_t* s = neonrtfs_img;
+	const uint8_t* image_end = neonrtfs_img + neonrtfs_img_len;
+	const uint8_t* p = s;
 	char namebuf[256+1];
 	NeonRtFsHeader h;
 	NeonRtFsFile *r;
 	//Strip initial slashes
 	while(fileName[0]=='/') fileName++;
+	if (fileName[0] == '\0')
+	{
+		return NULL;
+	}
 	//Go find that file!
 	while(1) {
 		//Grab the next file header.
+		if ((size_t)(image_end - p) < sizeof(NeonRtFsHeader))
+		{
+			NeonRtFsInitDone = false;
+			return NULL;
+		}
 		memcpy(&h, p, sizeof(NeonRtFsHeader));
 		//Grab the name of the file.
 		p+=sizeof(NeonRtFsHeader); 
@@ -126,8 +144,23 @@ NeonRtFsFile *NeonRtFsOpen(char *fileName) {
 			return NULL;
 		}
 
-		memcpy(namebuf, p, min(256, h.nameLen));
-		namebuf[min(256, h.nameLen)] = '\0'; // 確保以空字元終止
+		if (h.nameLen <= 0 || h.fileLenComp < 0 || h.fileLenDecomp < 0 ||
+		    (size_t)h.nameLen > (size_t)(image_end - p))
+		{
+			NeonRtFsInitDone = false;
+			return NULL;
+		}
+
+		const uint8_t *content = p + (size_t)h.nameLen;
+		if ((size_t)h.fileLenComp > (size_t)(image_end - content))
+		{
+			NeonRtFsInitDone = false;
+			return NULL;
+		}
+
+		size_t copied_name_len = min(sizeof(namebuf) - 1U, (size_t)h.nameLen);
+		memcpy(namebuf, p, copied_name_len);
+		namebuf[copied_name_len] = '\0'; // 確保以空字元終止
 
 //		info("Found file '%s'. Namelen=%x fileLenComp=%x, compr=%d flags=%d",
 //				namebuf, (unsigned int)h.nameLen, (unsigned int)h.fileLenComp, h.compression, h.flags);
@@ -136,10 +169,10 @@ NeonRtFsFile *NeonRtFsOpen(char *fileName) {
 		UART_Printf("[NeonRTFS] File Length %d Bytes\n", h.fileLenComp);
 		UART_Printf("[NeonRTFS] File Content Start at %x\n", p+h.nameLen);
 #endif
-		if (strncmp(namebuf, fileName, min(strlen(namebuf), strlen(fileName)))==0)
+		if (strcmp(namebuf, fileName)==0)
 		{
 			//Yay, this is the file we need!
-			p += h.nameLen; //Skip to content.
+			p = content; //Skip to content.
 			r = (NeonRtFsFile *)mem_Malloc(sizeof(NeonRtFsFile)); //Alloc file desc mem
 //			UART_Printf("Alloc %p", r);
 			if (r==NULL) return NULL;
@@ -152,9 +185,14 @@ NeonRtFsFile *NeonRtFsOpen(char *fileName) {
 			if (h.compression==COMPRESS_NONE) {
 				r->decompData=NULL;
 #ifdef NEONRTFS_HEATSHRINK
-			} else if (h.compression==COMPRESS_HEATSHRINK) {
-				//File is compressed with Heatshrink.
-				char parm;
+				} else if (h.compression==COMPRESS_HEATSHRINK) {
+					//File is compressed with Heatshrink.
+					if (h.fileLenComp < 1)
+					{
+						mem_Free(r);
+						return NULL;
+					}
+					char parm;
 				heatshrink_decoder *dec;
 				//Decoder params are stored in 1st byte.
 				readFlashUnaligned(&parm, r->posComp, 1);
@@ -162,8 +200,15 @@ NeonRtFsFile *NeonRtFsOpen(char *fileName) {
 #if NEONRTFS_DEBUG==1
 				UART_Printf("[NeonRTFS] Heatshrink compressed file; decode parms = %x\n", parm);
 #endif
-				dec=heatshrink_decoder_alloc(16, (parm>>4)&0xf, parm&0xf);
-				r->decompData=(char*)dec;
+					dec=heatshrink_decoder_alloc(16,
+					                             ((uint8_t)parm >> 4) & 0xf,
+					                             (uint8_t)parm & 0xf);
+					if (dec == NULL)
+					{
+						mem_Free(r);
+						return NULL;
+					}
+					r->decompData=(char*)dec;
 #endif
 			} else {
 #if NEONRTFS_DEBUG==1
@@ -178,21 +223,36 @@ NeonRtFsFile *NeonRtFsOpen(char *fileName) {
 			return r;
 		}
 		//We don't need this file. Skip name and file
-		p += h.nameLen + h.fileLenComp;
-		if ((int)(p-s)&3)
+		p = content + (size_t)h.fileLenComp;
+		size_t offset = (size_t)(p - s);
+		if (offset > SIZE_MAX - 3U)
 		{
-			p+=4-((int)(p-s)&3); //align to next 32bit val
+			NeonRtFsInitDone = false;
+			return NULL;
 		}
+		size_t aligned_offset = (offset + 3U) & ~(size_t)3U;
+		if (aligned_offset > neonrtfs_img_len)
+		{
+			NeonRtFsInitDone = false;
+			return NULL;
+		}
+		p = s + aligned_offset;
 	}
 }
 
 //Read len bytes from the given file into buff. Returns the actual amount of bytes read.
-int NeonRtFsRead(NeonRtFsFile *fh, char *buff, int len) {
-	int flen;
+int NeonRtFsRead(NeonRtFsFile *fh, void *buffer, int len) {
+	int32_t flen;
 #ifdef NEONRTFS_HEATSHRINK
-	int fdlen;
+	int32_t fdlen;
 #endif
-	if (fh==NULL) return 0;
+	if (fh==NULL || buffer == NULL || len <= 0) return 0;
+	uint8_t *buff = (uint8_t *)buffer;
+	if (fh->header.fileLenComp < 0 || fh->header.fileLenDecomp < 0 ||
+	    fh->posStart == NULL || fh->posComp == NULL || fh->posComp < fh->posStart)
+	{
+		return 0;
+	}
 #if NEONRTFS_DEBUG==1
         UART_Printf("[NeonRTFS] Read File\n");
 #endif
@@ -201,9 +261,13 @@ int NeonRtFsRead(NeonRtFsFile *fh, char *buff, int len) {
 	//Cache file length.
 	//Do stuff depending on the way the file is compressed.
 	if (fh->decompressor==COMPRESS_NONE) {
-		int toRead;
-		toRead=flen-(fh->posComp-fh->posStart);
-		if (len>toRead) len=toRead;
+		size_t consumed = (size_t)(fh->posComp - fh->posStart);
+		if (consumed >= (size_t)flen)
+		{
+			return 0;
+		}
+		size_t toRead = (size_t)flen - consumed;
+		if ((size_t)len > toRead) len = (int)toRead;
 #if NEONRTFS_DEBUG==1
   		UART_Printf("[NeonRTFS] Reading %d Bytes From %x\n", len, (unsigned int)fh->posComp);
 #endif
@@ -217,48 +281,82 @@ int NeonRtFsRead(NeonRtFsFile *fh, char *buff, int len) {
                 UART_Printf("[NeonRTFS] Done Reading %d Bytes, Pos=%x\n", len, fh->posComp);
 #endif
 		return len;
-#ifdef NEONRTFS_HEATSHRINK
-	} else if (fh->decompressor==COMPRESS_HEATSHRINK) {
-                fdlen = fh->header.fileLenDecomp;
-		int decoded=0;
-		size_t elen, rlen;
-		char ebuff[16];
-		heatshrink_decoder *dec=(heatshrink_decoder *)fh->decompData;
+	#ifdef NEONRTFS_HEATSHRINK
+		} else if (fh->decompressor==COMPRESS_HEATSHRINK) {
+	                fdlen = fh->header.fileLenDecomp;
+			int decoded=0;
+			char ebuff[16];
+			heatshrink_decoder *dec=(heatshrink_decoder *)fh->decompData;
 //		UART_Printf("Alloc %p", dec);
-		if (fh->posDecomp == fdlen) {
-			return 0;
-		}
-
-		// We must ensure that whole file is decompressed and written to output buffer.
-		// This means even when there is no input data (elen==0) try to poll decoder until
-		// posDecomp equals decompressed file length
-
-		while(decoded<len) {
-			//Feed data into the decompressor
-			//ToDo: Check ret val of heatshrink fns for errors
-			elen=flen-(fh->posComp - fh->posStart);
-			if (elen>0) {
-				readFlashUnaligned(ebuff, fh->posComp, 16);
-				heatshrink_decoder_sink(dec, (uint8_t *)ebuff, (elen>16)?16:elen, &rlen);
-				fh->posComp+=rlen;
+			if (dec == NULL || fh->posDecomp < 0 || fh->posDecomp >= fdlen) {
+				return 0;
 			}
-			//Grab decompressed data and put into buff
-			heatshrink_decoder_poll(dec, (uint8_t *)buff, len-decoded, &rlen);
-			fh->posDecomp+=rlen;
-			buff+=rlen;
-			decoded+=rlen;
 
-//			UART_Printf("Elen %d rlen %d d %d pd %ld fdl %d",elen,rlen,decoded, fh->posDecomp, fdlen);
+			int32_t output_remaining = fdlen - fh->posDecomp;
+			if (len > output_remaining)
+			{
+				len = (int)output_remaining;
+			}
 
-			if (elen == 0) {
-				if (fh->posDecomp == fdlen) {
-//					info("Decoder finish");
-					heatshrink_decoder_finish(dec);
+			while(decoded<len) {
+				bool made_progress = false;
+				size_t consumed = (size_t)(fh->posComp - fh->posStart);
+
+				if (consumed < (size_t)flen)
+				{
+					size_t input_remaining = (size_t)flen - consumed;
+					size_t input_chunk = min(sizeof(ebuff), input_remaining);
+					readFlashUnaligned(ebuff, fh->posComp, input_chunk);
+
+					size_t sunk = 0;
+					HSD_sink_res sink_result = heatshrink_decoder_sink(
+					    dec,
+					    (uint8_t *)ebuff,
+					    input_chunk,
+					    &sunk);
+					if (sink_result < 0)
+					{
+						return decoded;
+					}
+
+					fh->posComp += sunk;
+					made_progress = sunk > 0;
 				}
-				return decoded;
+
+				size_t polled = 0;
+				HSD_poll_res poll_result = heatshrink_decoder_poll(
+				    dec,
+				    (uint8_t *)buff,
+				    (size_t)(len - decoded),
+				    &polled);
+				if (poll_result < 0)
+				{
+					return decoded;
+				}
+
+				fh->posDecomp += (int32_t)polled;
+				buff += polled;
+				decoded += (int)polled;
+				made_progress = made_progress || polled > 0;
+
+				consumed = (size_t)(fh->posComp - fh->posStart);
+				if (consumed >= (size_t)flen)
+				{
+					HSD_finish_res finish_result = heatshrink_decoder_finish(dec);
+					if (finish_result < 0 ||
+					    (finish_result == HSDR_FINISH_DONE && polled == 0))
+					{
+						break;
+					}
+				}
+
+				if (!made_progress)
+				{
+					/* Corrupt/truncated streams must not spin forever. */
+					break;
+				}
 			}
-		}
-		return len;
+			return decoded;
 #endif
 	}
 	return 0;
@@ -273,7 +371,10 @@ void NeonRtFsClose(NeonRtFsFile *fh) {
 #ifdef NEONRTFS_HEATSHRINK
 	if (fh->decompressor==COMPRESS_HEATSHRINK) {
 		heatshrink_decoder *dec=(heatshrink_decoder *)fh->decompData;
-		heatshrink_decoder_free(dec);
+		if (dec != NULL)
+		{
+			heatshrink_decoder_free(dec);
+		}
 //		UART_Printf("Freed %p", dec);
 	}
 #endif

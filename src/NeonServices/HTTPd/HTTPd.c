@@ -1,8 +1,8 @@
-
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 
 #include "NeonRTOS.h"
@@ -33,6 +33,8 @@
 
 #define HTTPDVER "1.1"
 
+#define HTTPD_AUTH_COOKIE_NAME "NEONRT"
+
 #define max(a,b) ((a)>(b)?(a):(b))  /**< Find the maximum of 2 numbers. */
 
 typedef struct HTTPd_WebSocked_Client_Connection
@@ -45,7 +47,7 @@ typedef struct HTTPd_WebSocked_Client_Connection
 	struct sockaddr client_socket_addr;
         HTTPd_Connection_Mode connetion_mode;
 	NeonRTOS_TimerHandle connection_timeout_timer;
-	bool connection_destruct_flag;
+	volatile bool connection_destruct_flag;
 	bool websocket_client;
 	bool websocket_auth;
 	uint8_t* client_key;
@@ -55,7 +57,8 @@ typedef struct HTTPd_WebSocked_Client_Connection
 	uint32_t data_len;
         uint8_t* data_buff;
         char accept_encoding[64];
-        char auth_token[72];
+        char auth_token[72];          /* Authorization header token */
+        char auth_cookie_token[72];   /* NEONRT cookie: browser page / WebSocket only */
 	char *getArgs;
 	const void *cgiArg;
 	cgiSendCallback cgi;
@@ -155,6 +158,84 @@ const HttpdBuiltInUrl builtInUrls[] = {
 
 HttpdDynamicUrlItem* Registered_URL_List = NULL;
 
+static void HTTPd_Parse_Auth_Cookie(const uint8_t *headers, char *token_out, size_t token_out_size)
+{
+    if (headers == NULL || token_out == NULL || token_out_size == 0)
+    {
+        return;
+    }
+
+    const char *line = (const char*)headers;
+
+    while (*line != '\0')
+    {
+        const char *line_end = strstr(line, "\r\n");
+
+        if (line_end == NULL)
+        {
+            break;
+        }
+
+        static const char cookie_header[] = "Cookie: ";
+
+        if ((size_t)(line_end - line) >= sizeof(cookie_header) - 1 && strncmp(line, cookie_header, sizeof(cookie_header) - 1) == 0)
+        {
+            const char *cookie_begin = line + sizeof(cookie_header) - 1;
+
+            static const char cookie_key[] = HTTPD_AUTH_COOKIE_NAME "=";
+
+            const char *p = cookie_begin;
+
+            while (p < line_end)
+            {
+                while (p < line_end && (*p == ' ' || *p == ';'))
+                {
+                    p++;
+                }
+
+                size_t remain = (size_t)(line_end - p);
+
+                if (remain >= sizeof(cookie_key) - 1 && strncmp(p, cookie_key, sizeof(cookie_key) - 1) == 0)
+                {
+                    const char *value_begin = p + sizeof(cookie_key) - 1;
+
+                    const char *value_end = value_begin;
+
+                    while (value_end < line_end && *value_end != ';')
+                    {
+                        value_end++;
+                    }
+
+                    size_t value_len = (size_t)(value_end - value_begin);
+
+                    if (value_len >= token_out_size)
+                    {
+                        value_len = token_out_size - 1;
+                    }
+
+                    memcpy(token_out, value_begin, value_len);
+
+                    token_out[value_len] = '\0';
+                    return;
+                }
+
+                const char *next = memchr(p, ';', (size_t)(line_end - p));
+
+                if (next == NULL)
+                {
+                    break;
+                }
+
+                p = next + 1;
+            }
+
+            return;
+        }
+
+        line = line_end + 2;
+    }
+}
+
 static void unmaskWsPayload(char *maskedPayload, uint64_t payloadLength, uint32_t maskingKey) {
 	//the algorith described in IEEE RFC 6455 Section 5.3
 	//TODO: this should decode the payload 4-byte wise and do the remainder afterwards
@@ -162,8 +243,8 @@ static void unmaskWsPayload(char *maskedPayload, uint64_t payloadLength, uint32_
 	{
 		payloadLength = HTTP_WS_SERVER_DAT_BUF_SIZE;
 	}
-	for (int i = 0; i < payloadLength; i++) {
-		int j = i % 4;
+	for (uint64_t i = 0; i < payloadLength; i++) {
+		uint64_t j = i % 4U;
 		maskedPayload[i] = maskedPayload[i] ^ ((uint8_t *)&maskingKey)[j];
 	}
 }
@@ -212,8 +293,58 @@ static void HTTPd_Restore_Variables(uint8_t client_index)
 
     memset(c->accept_encoding, 0, sizeof(c->accept_encoding));
 
+    memset(c->auth_token, 0, sizeof(c->auth_token));
+    memset(c->auth_cookie_token, 0, sizeof(c->auth_cookie_token));
+
     c->cgiArg = NULL;
     c->cgi = NULL;
+}
+
+static void HTTPd_Release_Client(uint8_t client_index)
+{
+        if (client_index >= HTTPD_MAX_CLIENTS)
+        {
+                return;
+        }
+
+        HTTPd_WebSocked_Client_Connection *client =
+            HTTPd_WebSocketd_Client_List[client_index];
+        if (client == NULL)
+        {
+                return;
+        }
+
+        if (client->url != NULL)
+        {
+                mem_Free(client->url);
+                client->url = NULL;
+        }
+
+        if (client->connection_timeout_timer != NULL)
+        {
+                NeonRTOS_TimerStop(&client->connection_timeout_timer);
+                NeonRTOS_TimerDelete(&client->connection_timeout_timer);
+                client->connection_timeout_timer = NULL;
+        }
+
+        if (client->data_buff != NULL)
+        {
+                mem_Free(client->data_buff);
+                client->data_buff = NULL;
+        }
+
+        int client_socket = client->socket_id;
+        client->socket_id = -1;
+        if (client_socket >= 0)
+        {
+                /* Default linger behavior flushes queued data and terminates
+                 * with FIN. shutdown(SHUT_RDWR) plus linger=0 caused RST. */
+                close(client_socket);
+        }
+
+        /* Keep the slot object stable. Broadcast and timer code can retain its
+         * address briefly on another RTOS task, so freeing it here is unsafe. */
+        HTTPd_Restore_Variables(client_index);
 }
 
 static uint8_t GetNumOfHttpdClient()
@@ -248,6 +379,129 @@ static int FindHttpdClient(int http_client_sockID)
 		}
 	}
 	return -1;
+}
+
+static bool HTTPd_Is_Same_IP(const HTTPd_WebSocked_Client_Connection *left,
+                             const HTTPd_WebSocked_Client_Connection *right)
+{
+        if (left == NULL || right == NULL ||
+            left->client_socket_addr.sa_family != AF_INET ||
+            right->client_socket_addr.sa_family != AF_INET)
+        {
+                return false;
+        }
+
+        const struct sockaddr_in *left_addr =
+            (const struct sockaddr_in *)&left->client_socket_addr;
+        const struct sockaddr_in *right_addr =
+            (const struct sockaddr_in *)&right->client_socket_addr;
+
+        return left_addr->sin_addr.s_addr == right_addr->sin_addr.s_addr;
+}
+
+static bool HTTPd_WebSocket_Send_Control_Frame(
+    HTTPd_WebSocked_Client_Connection *client,
+    uint8_t opcode,
+    const uint8_t *payload,
+    uint8_t payload_length)
+{
+        if (client == NULL || client->socket_id < 0 ||
+            payload_length > 125U ||
+            (payload_length > 0U && payload == NULL))
+        {
+                return false;
+        }
+
+        uint8_t header[2] = {
+            (uint8_t)(FLAG_FIN | opcode),
+            payload_length
+        };
+
+        size_t sent = 0;
+        while (sent < sizeof(header))
+        {
+                int ret;
+#ifdef HTTPD_USE_SSL
+                ret = ssl_write(&client->client_ssl_ctx,
+                                &header[sent],
+                                sizeof(header) - sent,
+                                0);
+#else
+                ret = send(client->socket_id,
+                           &header[sent],
+                           sizeof(header) - sent,
+                           0);
+#endif
+                if (ret <= 0)
+                {
+                        client->connection_destruct_flag = true;
+                        return false;
+                }
+                sent += (size_t)ret;
+        }
+
+        sent = 0;
+        while (sent < payload_length)
+        {
+                int ret;
+#ifdef HTTPD_USE_SSL
+                ret = ssl_write(&client->client_ssl_ctx,
+                                &payload[sent],
+                                payload_length - sent,
+                                0);
+#else
+                ret = send(client->socket_id,
+                           &payload[sent],
+                           payload_length - sent,
+                           0);
+#endif
+                if (ret <= 0)
+                {
+                        client->connection_destruct_flag = true;
+                        return false;
+                }
+                sent += (size_t)ret;
+        }
+
+        return true;
+}
+
+static void HTTPd_Disconnect_Other_WebSockets(
+    HTTPd_WebSocked_Client_Connection *current)
+{
+        if (current == NULL || current->url == NULL)
+        {
+                return;
+        }
+
+        static const uint8_t going_away_code[] = {0x03, 0xE9}; /* 1001 */
+
+        for (uint8_t i = 0; i < HTTPD_MAX_CLIENTS; i++)
+        {
+                HTTPd_WebSocked_Client_Connection *old =
+                    HTTPd_WebSocketd_Client_List[i];
+
+                if (old == NULL || old == current || old->socket_id < 0 ||
+                    old->connection_destruct_flag || !old->websocket_client ||
+                    !old->websocket_auth || old->url == NULL)
+                {
+                        continue;
+                }
+
+                /* The dashboard owns one WebSocket per endpoint and source
+                 * address. A reload therefore replaces the previous socket
+                 * instead of consuming another bounded HTTPD client slot. */
+                if (HTTPd_Is_Same_IP(old, current) &&
+                    strcmp(old->url, current->url) == 0)
+                {
+                        (void)HTTPd_WebSocket_Send_Control_Frame(
+                            old,
+                            OPCODE_CLOSE,
+                            going_away_code,
+                            sizeof(going_away_code));
+                        old->connection_destruct_flag = true;
+                }
+        }
 }
 
 static void HTTPd_WebsocketServer_Send_Message(HTTPd_WebSocked_Client_Connection* ws_client, const char *payload, uint64_t payloadLength, uint8_t flags) 
@@ -477,7 +731,7 @@ int WebSocketServer_ReceiveWsFrame(HTTPd_WebSocked_Client_Connection *conn,
     uint8_t header_buf[2];
     int ret;
     int socket_errno;
-    const uint32_t socket_errno_optlen = sizeof(socket_errno);
+    socklen_t socket_errno_optlen = sizeof(socket_errno);
 
     if (conn == NULL || frame == NULL) return WS_RECV_CLOSE;
     if (conn->connection_destruct_flag) return WS_RECV_CLOSE;
@@ -587,7 +841,8 @@ int HTTPd_Parse_InMsg_Headers(uint8_t *header, uint16_t header_len, HTTPd_WebSoc
         connData->url = url_copy;
 
 	connData->getArgs = (char*)strstr(connData->url, "?");
-	if (connData->getArgs != 0) {
+	if (connData->getArgs != 0)
+        {
 		*connData->getArgs = 0;
 		connData->getArgs++;
 		//UART_Printf("args = %s\n", connData->getArgs);
@@ -601,6 +856,13 @@ int HTTPd_Parse_InMsg_Headers(uint8_t *header, uint16_t header_len, HTTPd_WebSoc
 	{
 		connData->hostName = NULL;
 	}
+
+        /*
+         * Cookie 與 Authorization 分開保存。
+         * Cookie 會由瀏覽器自動附加，但只可在授權政策中供網頁 GET / WS 使用。
+         */
+        memset(connData->auth_cookie_token, 0, sizeof(connData->auth_cookie_token));
+        HTTPd_Parse_Auth_Cookie(second_line, connData->auth_cookie_token, sizeof(connData->auth_cookie_token));
 		
 	uint8_t *conn_str = HTTPd_Get_Header_Value((uint8_t*)second_line, (uint8_t*)HTTP_Connection);
 	if (conn_str != NULL) {
@@ -679,17 +941,38 @@ int HTTPd_Parse_InMsg_Headers(uint8_t *header, uint16_t header_len, HTTPd_WebSoc
                                 }
 			}
 
-                        /* Parse Authorization header */
+                        /* Parse Authorization: <token> */
                         memset(connData->auth_token, 0, sizeof(connData->auth_token));
+
                         uint8_t *auth_str = HTTPd_Get_Header_Value(second_line, (uint8_t*)HTTP_Authorization);
+
                         if (auth_str != NULL)
                         {
                                 uint8_t *auth_end = (uint8_t*)strstr((char*)auth_str, "\r\n");
+
                                 if (auth_end != NULL)
                                 {
-                                        size_t len = auth_end - auth_str;
-                                        if (len >= sizeof(connData->auth_token)) len = sizeof(connData->auth_token) - 1;
-                                        memcpy(connData->auth_token, auth_str, len);
+                                        const char *token_begin = (const char*)auth_str;
+                                        size_t auth_len = (size_t)(auth_end - auth_str);
+
+                                        static const char token_prefix[] = "";
+                                        const size_t token_prefix_len =
+                                        sizeof(token_prefix) - 1;
+
+                                        if (auth_len >= token_prefix_len && strncmp(token_begin, token_prefix, token_prefix_len) == 0)
+                                        {
+                                                token_begin += token_prefix_len;
+                                                auth_len -= token_prefix_len;
+                                        }
+
+                                        if (auth_len >= sizeof(connData->auth_token))
+                                        {
+                                                auth_len = sizeof(connData->auth_token) - 1;
+                                        }
+
+                                        memcpy(connData->auth_token, token_begin, auth_len);
+
+                                        connData->auth_token[auth_len] = '\0';
                                 }
                         }
 
@@ -944,6 +1227,8 @@ int HTTPd_Send_CGI_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_
         }
 
         mem_Free(http_cmd_buf);
+
+        const uint8_t *response_data = (const uint8_t *)rsp_data;
          
         if (rsp_len > 0 )
         {
@@ -954,9 +1239,9 @@ int HTTPd_Send_CGI_Response(HTTPd_WebSocked_Client_Connection *connData, uint16_
                 {
                         int ret;
 #ifdef HTTPD_USE_SSL
-                        ret = ssl_write(&connData->client_ssl_ctx, &rsp_data[sent], len - sent, 0);
+                        ret = ssl_write(&connData->client_ssl_ctx, &response_data[sent], len - sent, 0);
 #else
-                        ret = send(connData->socket_id, &rsp_data[sent], len - sent, 0);
+                        ret = send(connData->socket_id, &response_data[sent], len - sent, 0);
 #endif
 
                         if (ret <= 0)
@@ -1721,6 +2006,7 @@ int HTTPd_Process_GET_Request(HTTPd_WebSocked_Client_Connection *connData)
 		mem_Free(ws_cmd_send_buf);
 
 		connData->websocket_auth = true;
+		HTTPd_Disconnect_Other_WebSockets(connData);
 
                 return HTTPD_CGI_MORE;
 	}
@@ -1739,7 +2025,6 @@ int HTTPd_Process_GET_Request(HTTPd_WebSocked_Client_Connection *connData)
                         {
                               r = HTTPd_NotFound(connData);
                         }
-                        
 		}
 		else
 		{
@@ -1823,7 +2108,7 @@ void HTTP_Server_Task(void *pvParameters)
         server_addr.sin_len = sizeof(server_addr);
         server_addr.sin_port = htons(HTTP_PORT); /* Local port */
         int socket_errno;
-        const u32_t socket_errno_optlen = sizeof(socket_errno);
+        socklen_t socket_errno_optlen = sizeof(socket_errno);
 
         
 #ifdef HTTPD_USE_SSL
@@ -1950,24 +2235,30 @@ void HTTP_Server_Task(void *pvParameters)
                         {
                                 while (j < HTTPD_MAX_CLIENTS)
                                 {
-                                        if(HTTPd_WebSocketd_Client_List[j]==NULL)
+                                        if(HTTPd_WebSocketd_Client_List[j] == NULL ||
+                                           HTTPd_WebSocketd_Client_List[j]->socket_id < 0)
                                         {
-                                                HTTPd_WebSocketd_Client_List[j] = mem_Malloc(sizeof(HTTPd_WebSocked_Client_Connection));
                                                 if (HTTPd_WebSocketd_Client_List[j] == NULL)
                                                 {
-                                                        //UART_Printf("[HTTPD Server] current_http_socketID = %d mem_Malloc failed\n", current_http_socketID);
-                                                        client_index = -1;
-                                                        break;
-                                                }
+                                                        HTTPd_WebSocketd_Client_List[j] =
+                                                            mem_Malloc(sizeof(HTTPd_WebSocked_Client_Connection));
+                                                        if (HTTPd_WebSocketd_Client_List[j] == NULL)
+                                                        {
+                                                                //UART_Printf("[HTTPD Server] current_http_socketID = %d mem_Malloc failed\n", current_http_socketID);
+                                                                client_index = -1;
+                                                                break;
+                                                        }
 
-                                                memset(HTTPd_WebSocketd_Client_List[j], 0, sizeof(HTTPd_WebSocked_Client_Connection));
+                                                        memset(HTTPd_WebSocketd_Client_List[j],
+                                                               0,
+                                                               sizeof(HTTPd_WebSocked_Client_Connection));
+                                                }
                                                 
                                                 HTTPd_Restore_Variables(j);
                                                 
                                                 if(NeonRTOS_TimerCreate(&HTTPd_WebSocketd_Client_List[j]->connection_timeout_timer, "Connection Timeout", HTTP_TIMEOUT_TIMER_MS, 1, j, HTTPd_Connection_Timeout_CB)!=NeonRTOS_OK)
                                                 {
-                                                        mem_Free(HTTPd_WebSocketd_Client_List[j]);
-                                                        HTTPd_WebSocketd_Client_List[j] = NULL;
+                                                        HTTPd_Restore_Variables(j);
                                                         //UART_Printf("[HTTPD Server] current_http_socketID = %d NeonRTOS_TimerCreate failed\n", current_http_socketID);
                                                         client_index = -1;
                                                         break;
@@ -1996,10 +2287,7 @@ void HTTP_Server_Task(void *pvParameters)
                         
                         //UART_Printf("[HTTPD Server] AddHttpClient --> client_index = %d\n", client_index);
 
-                        int socket_errno;
-                        const u32_t socket_errno_optlen = sizeof(socket_errno);
-
-                        int keepAlive = 0; //disable keepalive
+                        int keepAlive = 1;
                         int ret = setsockopt(current_http_socketID, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepAlive, sizeof(keepAlive));
                         if(ret < 0)
                         {
@@ -2041,7 +2329,7 @@ void HTTP_Server_Task(void *pvParameters)
                         }
 #endif
 
-                        int recvBlockTime = HTTPD_RECV_BLOCK_INTERVAL/HTTPD_MAX_CLIENTS;
+                        int recvBlockTime = HTTPD_RECV_BLOCK_INTERVAL;
 
                         ret = setsockopt(current_http_socketID, SOL_SOCKET, SO_RCVTIMEO, &recvBlockTime, sizeof(recvBlockTime));
 
@@ -2050,11 +2338,6 @@ void HTTP_Server_Task(void *pvParameters)
                                 HTTPd_WebSocketd_Client_List[client_index]->connection_destruct_flag = true;
                                 continue;
                         }
-                        
-                        struct linger so_linger;
-                        so_linger.l_onoff = 1;  // 啟用 linger
-                        so_linger.l_linger = 0; // 強制關閉
-                        setsockopt(current_http_socketID, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
                         
                         NeonRTOS_TimerStart(&HTTPd_WebSocketd_Client_List[client_index]->connection_timeout_timer);
                         //UART_Printf("[HTTPD %d] httpserver acpt sockfd %d!\n", client_index, current_http_socketID);
@@ -2076,36 +2359,7 @@ void HTTP_Server_Task(void *pvParameters)
                         if(HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag)
                         {
                                 //UART_Printf("[HTTPD %d] Client socketID %d close\n", i, HTTPd_WebSocketd_Client_List[i]->socket_id);
-                                
-                                if (HTTPd_WebSocketd_Client_List[i]->url) {
-                                        //UART_Printf("[HTTPD %d] HTTPd_WebSocketd_Client_List[i]->url = %s\n", i, HTTPd_WebSocketd_Client_List[i]->url);
-                                
-                                        mem_Free(HTTPd_WebSocketd_Client_List[i]->url);
-                                        HTTPd_WebSocketd_Client_List[i]->url = NULL;
-                                }
-                                
-                                if (HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer != NULL)
-                                {
-                                        //UART_Printf("[HTTPD %d] HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer != NULL\n", i);
-                                        NeonRTOS_TimerStop(&HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer);
-                                        NeonRTOS_TimerDelete(&HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer);
-                                        HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer = NULL;
-                                }
-                                        
-                                if(HTTPd_WebSocketd_Client_List[i]->data_buff != NULL)
-                                {
-                                        mem_Free(HTTPd_WebSocketd_Client_List[i]->data_buff);
-
-                                        HTTPd_WebSocketd_Client_List[i]->data_buff = NULL;
-                                }
-                                        
-                                shutdown(HTTPd_WebSocketd_Client_List[i]->socket_id, SHUT_RDWR);
-                                close(HTTPd_WebSocketd_Client_List[i]->socket_id);
-                                HTTPd_WebSocketd_Client_List[i]->socket_id = -1;
-
-                                mem_Free(HTTPd_WebSocketd_Client_List[i]);
-                                HTTPd_WebSocketd_Client_List[i] = NULL;
-                                
+                                HTTPd_Release_Client(i);
                                 continue;
                         }
 
@@ -2237,7 +2491,7 @@ void HTTP_Server_Task(void *pvParameters)
                                                 uint16_t cgi_recv_len = already_body_len;
                                                 bool cgi_client_close = false;
                                                 bool cgi_client_skip = false;
-
+                                                
                                                 while(cgi_recv_len<HTTPd_WebSocketd_Client_List[i]->data_len)
                                                 {
 #ifdef HTTPD_USE_SSL
@@ -2496,6 +2750,26 @@ void HTTP_Server_Task(void *pvParameters)
 
                                 if (frame.opcode == OPCODE_CLOSE)
                                 {
+                                        if (rec_dat_len == 1U || rec_dat_len > 125U)
+                                        {
+                                                static const uint8_t protocol_error[] = {0x03, 0xEA}; /* 1002 */
+                                                (void)HTTPd_WebSocket_Send_Control_Frame(
+                                                    HTTPd_WebSocketd_Client_List[i],
+                                                    OPCODE_CLOSE,
+                                                    protocol_error,
+                                                    sizeof(protocol_error));
+                                        }
+                                        else
+                                        {
+                                                /* RFC 6455 close handshake: echo a valid
+                                                 * close payload before releasing the slot. */
+                                                (void)HTTPd_WebSocket_Send_Control_Frame(
+                                                    HTTPd_WebSocketd_Client_List[i],
+                                                    OPCODE_CLOSE,
+                                                    WebSocketServerDataBuf,
+                                                    (uint8_t)rec_dat_len);
+                                        }
+
                                         if (WebSocketServerDataBuf != NULL)
                                         {
                                                 mem_Free(WebSocketServerDataBuf);

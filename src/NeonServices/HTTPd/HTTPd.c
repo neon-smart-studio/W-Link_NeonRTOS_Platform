@@ -307,8 +307,7 @@ static void HTTPd_Release_Client(uint8_t client_index)
                 return;
         }
 
-        HTTPd_WebSocked_Client_Connection *client =
-            HTTPd_WebSocketd_Client_List[client_index];
+        HTTPd_WebSocked_Client_Connection *client = HTTPd_WebSocketd_Client_List[client_index];
         if (client == NULL)
         {
                 return;
@@ -333,18 +332,13 @@ static void HTTPd_Release_Client(uint8_t client_index)
                 client->data_buff = NULL;
         }
 
-        int client_socket = client->socket_id;
+        /* Default linger behavior flushes queued data and terminates
+         * with FIN. shutdown(SHUT_RDWR) plus linger=0 caused RST. */
+        close(client->socket_id);
         client->socket_id = -1;
-        if (client_socket >= 0)
-        {
-                /* Default linger behavior flushes queued data and terminates
-                 * with FIN. shutdown(SHUT_RDWR) plus linger=0 caused RST. */
-                close(client_socket);
-        }
 
-        /* Keep the slot object stable. Broadcast and timer code can retain its
-         * address briefly on another RTOS task, so freeing it here is unsafe. */
-        HTTPd_Restore_Variables(client_index);
+        mem_Free(HTTPd_WebSocketd_Client_List[client_index]);
+        HTTPd_WebSocketd_Client_List[client_index] = NULL;
 }
 
 static uint8_t GetNumOfHttpdClient()
@@ -379,24 +373,6 @@ static int FindHttpdClient(int http_client_sockID)
 		}
 	}
 	return -1;
-}
-
-static bool HTTPd_Is_Same_IP(const HTTPd_WebSocked_Client_Connection *left,
-                             const HTTPd_WebSocked_Client_Connection *right)
-{
-        if (left == NULL || right == NULL ||
-            left->client_socket_addr.sa_family != AF_INET ||
-            right->client_socket_addr.sa_family != AF_INET)
-        {
-                return false;
-        }
-
-        const struct sockaddr_in *left_addr =
-            (const struct sockaddr_in *)&left->client_socket_addr;
-        const struct sockaddr_in *right_addr =
-            (const struct sockaddr_in *)&right->client_socket_addr;
-
-        return left_addr->sin_addr.s_addr == right_addr->sin_addr.s_addr;
 }
 
 static bool HTTPd_WebSocket_Send_Control_Frame(
@@ -464,44 +440,6 @@ static bool HTTPd_WebSocket_Send_Control_Frame(
         }
 
         return true;
-}
-
-static void HTTPd_Disconnect_Other_WebSockets(
-    HTTPd_WebSocked_Client_Connection *current)
-{
-        if (current == NULL || current->url == NULL)
-        {
-                return;
-        }
-
-        static const uint8_t going_away_code[] = {0x03, 0xE9}; /* 1001 */
-
-        for (uint8_t i = 0; i < HTTPD_MAX_CLIENTS; i++)
-        {
-                HTTPd_WebSocked_Client_Connection *old =
-                    HTTPd_WebSocketd_Client_List[i];
-
-                if (old == NULL || old == current || old->socket_id < 0 ||
-                    old->connection_destruct_flag || !old->websocket_client ||
-                    !old->websocket_auth || old->url == NULL)
-                {
-                        continue;
-                }
-
-                /* The dashboard owns one WebSocket per endpoint and source
-                 * address. A reload therefore replaces the previous socket
-                 * instead of consuming another bounded HTTPD client slot. */
-                if (HTTPd_Is_Same_IP(old, current) &&
-                    strcmp(old->url, current->url) == 0)
-                {
-                        (void)HTTPd_WebSocket_Send_Control_Frame(
-                            old,
-                            OPCODE_CLOSE,
-                            going_away_code,
-                            sizeof(going_away_code));
-                        old->connection_destruct_flag = true;
-                }
-        }
 }
 
 static void HTTPd_WebsocketServer_Send_Message(HTTPd_WebSocked_Client_Connection* ws_client, const char *payload, uint64_t payloadLength, uint8_t flags) 
@@ -2006,7 +1944,6 @@ int HTTPd_Process_GET_Request(HTTPd_WebSocked_Client_Connection *connData)
 		mem_Free(ws_cmd_send_buf);
 
 		connData->websocket_auth = true;
-		HTTPd_Disconnect_Other_WebSockets(connData);
 
                 return HTTPD_CGI_MORE;
 	}

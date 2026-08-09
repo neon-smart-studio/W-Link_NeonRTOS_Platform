@@ -26,7 +26,7 @@ extern "C" {
 #define HTTP_TIMEOUT_STR                     "3"
 #define HTTP_TIMEOUT_S                       3
 #define HTTP_TIMEOUT_TIMER_MS                3000
-#define WEBSOCKET_TIMEOUT_TIMER_MS           300000
+#define WEBSOCKET_TIMEOUT_TIMER_MS           60000
 
 #define WS_SERVER_CMD_BUF_SIZE               1024
 

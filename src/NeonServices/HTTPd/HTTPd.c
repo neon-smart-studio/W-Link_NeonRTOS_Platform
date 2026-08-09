@@ -50,6 +50,9 @@ typedef struct HTTPd_WebSocked_Client_Connection
 	volatile bool connection_destruct_flag;
 	bool websocket_client;
 	bool websocket_auth;
+        volatile bool websocket_ping_due;
+        volatile bool websocket_waiting_pong;
+        volatile uint8_t websocket_missed_pong;
 	uint8_t* client_key;
 	HTTPd_Method requestType;
 	char *url;
@@ -251,21 +254,74 @@ static void unmaskWsPayload(char *maskedPayload, uint64_t payloadLength, uint32_
 
 static void HTTPd_Connection_Timeout_CB(NeonRTOS_TimerHandle connection_timeout_timer_handle)
 {
-        uint32_t TimerID;//use timer ID to identify client connection
-	NeonRTOS_TimerStop(&connection_timeout_timer_handle);
-        if(NeonRTOS_GetTimerID(&connection_timeout_timer_handle, &TimerID)==NeonRTOS_OK)
+    uint32_t TimerID;
+
+    if (NeonRTOS_GetTimerID(&connection_timeout_timer_handle, &TimerID) != NeonRTOS_OK)
+    {
+        return;
+    }
+
+    if (TimerID >= HTTPD_MAX_CLIENTS)
+    {
+        return;
+    }
+
+    HTTPd_WebSocked_Client_Connection *client = HTTPd_WebSocketd_Client_List[TimerID];
+    if (client == NULL)
+    {
+        return;
+    }
+
+    /*
+     * 普通 HTTP：
+     * 維持原本 timeout 行為。
+     */
+    if (!client->websocket_client)
+    {
+        NeonRTOS_TimerStop(&connection_timeout_timer_handle);
+        client->connection_destruct_flag = true;
+        return;
+    }
+
+    /*
+     * WebSocket heartbeat。
+     */
+    if (!client->websocket_auth ||
+        client->socket_id < 0 ||
+        client->connection_destruct_flag)
+    {
+        return;
+    }
+
+    /*
+     * 上一次 Ping 還沒收到 Pong。
+     */
+    if (client->websocket_waiting_pong)
+    {
+        if (client->websocket_missed_pong < UINT8_MAX)
         {
-                if(TimerID>=HTTPD_MAX_CLIENTS)
-                {
-                        return;
-                }
-                if(HTTPd_WebSocketd_Client_List[TimerID]==NULL)
-                {
-                        return;
-                }
-                //UART_Printf("HTTPD Client Index %d Connection Timeout\n", TimerID);
-                HTTPd_WebSocketd_Client_List[TimerID]->connection_destruct_flag = true;
+            client->websocket_missed_pong++;
         }
+
+        if (client->websocket_missed_pong >=
+            WEBSOCKET_MAX_MISSED_PONG)
+        {
+            /*
+             * 30s × 2 = 60s 沒有 Pong。
+             */
+            client->connection_destruct_flag = true;
+            return;
+        }
+    }
+    else
+    {
+        /*
+         * 要求 HTTP server task 發 Ping。
+         *
+         * 不建議直接在 timer callback 裡 send()。
+         */
+        client->websocket_ping_due = true;
+    }
 }
 
 static void HTTPd_Restore_Variables(uint8_t client_index)
@@ -281,6 +337,11 @@ static void HTTPd_Restore_Variables(uint8_t client_index)
 
     c->websocket_client = false;
     c->websocket_auth = false;
+
+    c->websocket_ping_due = false;
+    c->websocket_waiting_pong = false;
+    c->websocket_missed_pong = 0;
+
     c->client_key = NULL;
 
     c->requestType = HTTPd_Method_UNKNOWN;
@@ -2573,6 +2634,21 @@ void HTTP_Server_Task(void *pvParameters)
                                 uint16_t rec_dat_len = 0;
                                 bool ws_client_close = false;
 
+                                if (HTTPd_WebSocketd_Client_List[i]->websocket_ping_due)
+                                {
+                                        HTTPd_WebSocketd_Client_List[i]->websocket_ping_due = false;
+
+                                        if (HTTPd_WebSocket_Send_Control_Frame(HTTPd_WebSocketd_Client_List[i], OPCODE_PING, NULL, 0))
+                                        {
+                                                HTTPd_WebSocketd_Client_List[i]->websocket_waiting_pong = true;
+                                        }
+                                        else
+                                        {
+                                                HTTPd_WebSocketd_Client_List[i]->connection_destruct_flag = true;
+                                                continue;
+                                        }
+                                }
+
                                 int ws_ret = WebSocketServer_ReceiveWsFrame(HTTPd_WebSocketd_Client_List[i], &frame );
 
                                 if (ws_ret == WS_RECV_NODATA)
@@ -2663,8 +2739,6 @@ void HTTP_Server_Task(void *pvParameters)
                                         }
                                 }
 
-                                NeonRTOS_TimerStop(&HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer);
-
                                 if (frame.opcode == OPCODE_PING)
                                 {
                                         if (WebSocketServerDataBuf != NULL)
@@ -2681,7 +2755,23 @@ void HTTP_Server_Task(void *pvParameters)
                                                 mem_Free(WebSocketServerDataBuf);
                                         }
 
-                                        NeonRTOS_TimerReStart(&HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer);
+                                        continue;
+                                }
+
+                                /*
+                                * 我們主動 Ping，
+                                * Browser 會自動回到這裡。
+                                */
+                                if (frame.opcode == OPCODE_PONG)
+                                {
+                                        HTTPd_WebSocketd_Client_List[i]->websocket_waiting_pong = false;
+                                        HTTPd_WebSocketd_Client_List[i]->websocket_missed_pong = 0;
+
+                                        if (WebSocketServerDataBuf != NULL)
+                                        {
+                                                mem_Free(WebSocketServerDataBuf);
+                                        }
+
                                         continue;
                                 }
 
@@ -2729,8 +2819,6 @@ void HTTP_Server_Task(void *pvParameters)
                                 {
                                         mem_Free(WebSocketServerDataBuf);
                                 }
-
-                                NeonRTOS_TimerReStart(&HTTPd_WebSocketd_Client_List[i]->connection_timeout_timer);
                         }
                 }
         }

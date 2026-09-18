@@ -128,7 +128,7 @@ static const SPI_AF_Map SPI_Pin_AF_Map[] =
 #if defined(SPI2_BASE)
     /* ================= SPI2 (SPI1) ================= */
     { hwSPI_Index_1, hwGPIO_Pin_B15, GPIO_AF5_SPI2 },
-    { hwSPI_Index_1, hwGPIO_Pin_C1,  GPIO_AF5_SPI2 },
+    { hwSPI_Index_1, hwGPIO_Pin_C3,  GPIO_AF5_SPI2 },
     { hwSPI_Index_1, hwGPIO_Pin_B14, GPIO_AF5_SPI2 },
     { hwSPI_Index_1, hwGPIO_Pin_C2,  GPIO_AF5_SPI2 },
     { hwSPI_Index_1, hwGPIO_Pin_B13, GPIO_AF5_SPI2 },

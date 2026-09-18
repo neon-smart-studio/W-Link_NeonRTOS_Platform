@@ -135,17 +135,17 @@ int SPI_Master_Get_Clock_Freq(hwSPI_Index index)
     {
 #if defined(SPI1_BASE)
         case hwSPI_Index_0:   /* SPI1 */
-            return HAL_RCC_GetPCLK2Freq();
+            return HAL_RCC_GetSysClockFreq();
 #endif
 
 #if defined(SPI2_BASE)
         case hwSPI_Index_1:   /* SPI2 */
-            return HAL_RCC_GetPCLK2Freq();
+            return HAL_RCC_GetSysClockFreq();
 #endif
 
 #if defined(SPI3_BASE)
         case hwSPI_Index_2:   /* SPI3 */
-            return HAL_RCC_GetPCLK1Freq();
+            return HAL_RCC_GetSysClockFreq();
 #endif
 
 #if defined(SPI4_BASE)
